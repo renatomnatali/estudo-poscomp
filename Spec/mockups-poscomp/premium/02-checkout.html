@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POSCOMP Visual - Checkout Premium</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+<a class="skip-link" href="#conteudo">Pular para conteúdo</a>
+<div class="page-wrap" id="conteudo">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <h1>POSCOMP Visual</h1>
+      <span class="project-chip">Checkout Stripe</span>
+      <nav>
+        <a class="nav-link" href="../dashboard/01-visao-geral.html">Dashboard <span>📊</span></a>
+        <a class="nav-link" href="../topics/01-lista-topicos.html">Tópicos <span>📚</span></a>
+        <a class="nav-link" href="../simulator/01-simulador.html">Simulador <span>🎮</span></a>
+        <a class="nav-link" href="../flashcards/01-sessao.html">Flashcards <span>🃏</span></a>
+        <a class="nav-link" href="../exercises/01-lista-exercicios.html">Exercícios <span>📝</span></a>
+        <a class="nav-link active" href="01-paywall.html">Premium <span>⭐</span></a>
+      </nav>
+      <div class="sidebar-footer">Ambiente seguro PCI via Stripe</div>
+    </aside>
+
+    <main class="main-area">
+      <header class="page-header">
+        <div class="breadcrumb"><span>Premium</span><span>›</span><span>Checkout</span></div>
+        <h2 class="page-title">Confirmar assinatura</h2>
+        <p class="page-subtitle">Pagamento seguro. Cancelamento disponível a qualquer momento.</p>
+      </header>
+
+      <section class="grid cols-2">
+        <article class="panel">
+          <h3>Resumo do plano</h3>
+          <div class="kv"><strong>Plano</strong><span>Premium mensal</span></div>
+          <div class="kv"><strong>Valor</strong><span>R$ 39,90 / mês</span></div>
+          <div class="kv"><strong>Trial</strong><span>7 dias grátis</span></div>
+          <div class="kv"><strong>Próxima cobrança</strong><span>03/03/2026</span></div>
+          <div class="kv"><strong>Status inicial</strong><span>queued para ativação</span></div>
+          <div class="toolbar" style="margin-top: var(--space-4);">
+            <button class="button primary" type="button">Pagar com Stripe</button>
+            <a class="button secondary" href="01-paywall.html">Voltar</a>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h3>Dados de cobrança</h3>
+          <label for="nome">Nome no cartão</label>
+          <input id="nome" type="text" value="Renato Natali">
+          <label for="email" style="margin-top: var(--space-3);">E-mail</label>
+          <input id="email" type="text" value="renato@email.com">
+          <label for="cupom" style="margin-top: var(--space-3);">Cupom (opcional)</label>
+          <input id="cupom" type="text" placeholder="Digite um cupom">
+          <div class="callout" style="margin-top: var(--space-4);">
+            Seus dados de cartão são processados no Stripe e não ficam armazenados no POSCOMP Visual.
+          </div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h3>Status de ativação</h3>
+        <div class="timeline">
+          <div class="timeline-item"><span class="status-dot queued"></span><div><strong>Checkout iniciado</strong><small>Aguardando confirmação do pagamento</small></div><small>queued</small></div>
+          <div class="timeline-item"><span class="status-dot queued"></span><div><strong>Webhook Stripe</strong><small>Atualizar assinatura do usuário</small></div><small>queued</small></div>
+          <div class="timeline-item"><span class="status-dot queued"></span><div><strong>Plano premium ativo</strong><small>Liberação de funcionalidades</small></div><small>queued</small></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="proto-nav" aria-label="Navegação dos protótipos">
+  <a href="01-paywall.html">← Anterior</a>
+  <a class="is-hub" href="../index.html">Hub</a>
+  <a href="../states/01-loading.html">Próximo →</a>
+</div>
+</body>
+</html>

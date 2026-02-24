@@ -1,0 +1,80 @@
+version: 1
+updated_at: 2026-02-24
+macro_areas:
+  - id: fundamentos
+    name: Fundamentos da Computação
+    topics:
+      - id: linguagens_formais
+        name: Linguagens Formais
+        subtopics:
+          - alfabetos_palavras_operacoes
+          - linguagens_regulares
+      - id: gramaticas
+        name: Gramáticas
+        subtopics:
+          - formalismo_gramatica
+          - derivacao
+          - arvores_sintaticas
+      - id: automatos_finitos
+        name: Autômatos Finitos
+        subtopics:
+          - afd_modelagem_execucao
+          - minimizacao_afd
+          - afn_epsilon
+          - conversao_afn_afd
+      - id: linguagens_livres_contexto
+        name: Linguagens Livres do Contexto
+        subtopics:
+          - glc
+          - derivacao_llc
+      - id: automatos_pilha
+        name: Autômatos com Pilha
+        subtopics:
+          - ap_deterministico
+          - ap_nao_deterministico
+      - id: maquinas_turing
+        name: Máquinas de Turing
+        subtopics:
+          - formalismo_mt
+          - variantes_mt
+      - id: decidibilidade
+        name: Decidibilidade
+        subtopics:
+          - problemas_decidiveis
+          - problemas_indecidiveis
+          - reducoes
+
+  - id: matematica
+    name: Matemática
+    topics:
+      - id: algebra_linear
+      - id: geometria_analitica
+      - id: calculo
+      - id: matematica_discreta
+      - id: logica_matematica
+      - id: analise_combinatoria
+      - id: probabilidade_estatistica
+
+  - id: tecnologia
+    name: Tecnologia da Computação
+    topics:
+      - id: algoritmos_estrutura_dados
+      - id: linguagens_programacao
+      - id: compiladores
+      - id: teoria_grafos
+      - id: bancos_dados
+      - id: sistemas_operacionais
+      - id: redes_computadores
+      - id: engenharia_software
+
+priority_v1:
+  - automatos_finitos
+  - minimizacao_afd
+  - afn_epsilon
+  - conversao_afn_afd
+
+source_map:
+  aulas:
+    automatos_finitos: ["aula_06_AutomatosFinitosDeterministicos.pdf", "aula_08_MinimizacaoDeAFDs.pdf", "aula_09_ExerciciosAFD.pdf", "aula_10_AFN.pdf", "aula_11_AFN_parte2.pdf"]
+  provas:
+    automatos_finitos: ["caderno_2022.pdf", "caderno_2023.pdf", "caderno_2024.pdf", "caderno_2025.pdf"]

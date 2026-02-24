@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POSCOMP Visual - Landing</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para conteúdo</a>
+  <div class="page-wrap" id="conteudo">
+    <header class="hub-header">
+      <div class="brand">
+        <div class="brand-mark">PC</div>
+        <span>POSCOMP Visual Lab</span>
+      </div>
+      <h1 class="hub-title">Aprenda máquinas teóricas vendo cada passo da execução</h1>
+      <p class="hub-subtitle">
+        Simule expressões, acompanhe autômatos em tempo real, estude por tópicos e pratique com exercícios no formato POSCOMP.
+      </p>
+      <div class="toolbar">
+        <a class="button primary" href="../onboarding/01-primeiros-passos.html">Começar agora</a>
+        <a class="button secondary" href="../simulator/01-simulador.html">Ver demo do simulador</a>
+      </div>
+    </header>
+
+    <section class="section-card">
+      <h2 class="section-title">✨ Diferenciais</h2>
+      <div class="grid cols-3">
+        <article class="hub-link">
+          <strong>Execução real</strong>
+          <p>Sem modo simulado: toda simulação reflete processamento de verdade.</p>
+          <span class="badge status-live">● Estado rastreável</span>
+        </article>
+        <article class="hub-link">
+          <strong>Aprendizado visual</strong>
+          <p>Canvas com estados, transições e parsing passo a passo.</p>
+          <span class="badge status-live">● Interativo</span>
+        </article>
+        <article class="hub-link">
+          <strong>Trilha de estudo</strong>
+          <p>Tópicos, flashcards e exercícios com histórico de progresso.</p>
+          <span class="badge status-live">● Orientado a resultado</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2 class="section-title">🧪 Demonstração de simulação</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <span class="status-dot completed" aria-hidden="true"></span>
+          <div>
+            <strong>Validação da expressão</strong>
+            <small>Expressão válida: `(ab|ba)*abb`</small>
+          </div>
+          <small>14:21</small>
+        </div>
+        <div class="timeline-item">
+          <span class="status-dot running" aria-hidden="true"></span>
+          <div>
+            <strong>Execução da palavra de teste</strong>
+            <small>Consumindo símbolo 4 de 6</small>
+          </div>
+          <small>14:22</small>
+        </div>
+        <div class="timeline-item">
+          <span class="status-dot queued" aria-hidden="true"></span>
+          <div>
+            <strong>Geração do relatório visual</strong>
+            <small>Posição na fila: 1</small>
+          </div>
+          <small>14:22</small>
+        </div>
+      </div>
+      <div class="callout" style="margin-top: var(--space-4);">
+        O estado da execução é sempre único por tarefa para evitar mensagens contraditórias.
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2 class="section-title">📚 Trilhas disponíveis</h2>
+      <div class="grid cols-3">
+        <article class="hub-link"><strong>Autômatos Finitos</strong><p>AFD, AFN, minimização e equivalência.</p></article>
+        <article class="hub-link"><strong>Expressões Regulares</strong><p>Conversões e simplificações com exemplos animados.</p></article>
+        <article class="hub-link"><strong>Gramáticas e AP</strong><p>GLC, árvores de derivação e autômatos com pilha.</p></article>
+      </div>
+    </section>
+
+    <p class="footer-note">Fluxo recomendado: Landing → Onboarding → Dashboard</p>
+  </div>
+
+  <div class="proto-nav" aria-label="Navegação dos protótipos">
+    <a href="../index.html">Hub</a>
+    <a class="is-hub" href="../onboarding/01-primeiros-passos.html">Próximo: Onboarding</a>
+  </div>
+</body>
+</html>

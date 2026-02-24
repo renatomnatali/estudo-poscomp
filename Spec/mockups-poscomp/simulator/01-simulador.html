@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POSCOMP Visual - Simulador AFD Didático</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+<a class="skip-link" href="#conteudo">Pular para conteúdo</a>
+<div class="page-wrap" id="conteudo">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <h1>POSCOMP Visual</h1>
+      <span class="project-chip">Simulador AFD didático</span>
+      <nav>
+        <a class="nav-link" href="../dashboard/01-visao-geral.html">Dashboard <span>📊</span></a>
+        <a class="nav-link" href="../topics/01-lista-topicos.html">Tópicos <span>📚</span></a>
+        <a class="nav-link active" href="01-simulador.html">Simulador <span>🎮</span></a>
+        <a class="nav-link" href="../flashcards/01-sessao.html">Flashcards <span>🃏</span></a>
+        <a class="nav-link" href="../exercises/01-lista-exercicios.html">Exercícios <span>📝</span></a>
+        <a class="nav-link" href="../premium/01-paywall.html">Premium <span>⭐</span></a>
+      </nav>
+      <div class="sidebar-footer">AFD de referência: sufixo final específico</div>
+    </aside>
+
+    <main class="main-area">
+      <header class="page-header">
+        <div class="breadcrumb"><span>Simulador</span><span>›</span><span>AFD didático</span></div>
+        <h2 class="page-title">Expressão da máquina + expressão da linguagem</h2>
+        <p class="page-subtitle">
+          Você informa as expressões, escolhe uma palavra e o simulador processa automaticamente.
+          Já existem demos prontas e parametrizadas para teste rápido.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h3>Entrada do modelo</h3>
+        <div class="expression-grid">
+          <div>
+            <label for="machine-expr">Expressão da máquina</label>
+            <textarea id="machine-expr" data-afd-machine-input autocomplete="off" spellcheck="false"></textarea>
+          </div>
+          <div>
+            <label for="language-expr">Expressão da linguagem</label>
+            <input id="language-expr" data-afd-language-input type="text" autocomplete="off" spellcheck="false">
+
+            <label for="afd-word" style="margin-top: var(--space-3);">Palavra de entrada</label>
+            <input id="afd-word" data-afd-word-input type="text" value="c" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+
+        <div class="symbol-pad" aria-label="Teclado de símbolos">
+          <button class="symbol-btn" type="button" data-symbol="a">a</button>
+          <button class="symbol-btn" type="button" data-symbol="b">b</button>
+          <button class="symbol-btn" type="button" data-symbol="c">c</button>
+          <button class="symbol-btn" type="button" data-symbol=",">,</button>
+          <button class="symbol-btn" type="button" data-symbol="*">*</button>
+          <button class="symbol-btn" type="button" data-symbol="=">=</button>
+          <button class="symbol-btn" type="button" data-symbol="{">{</button>
+          <button class="symbol-btn" type="button" data-symbol="}">}</button>
+          <button class="symbol-btn" type="button" data-symbol="(">(</button>
+          <button class="symbol-btn" type="button" data-symbol=")">)</button>
+          <button class="symbol-btn" type="button" data-symbol="δ">δ</button>
+          <button class="symbol-btn" type="button" data-symbol="Σ">Σ</button>
+          <button class="symbol-btn" type="button" data-symbol="→">→</button>
+        </div>
+        <p class="symbol-help">Clique em um símbolo para inserir no campo que estiver com foco.</p>
+      </section>
+
+      <section class="panel">
+        <h3>Demonstrações pré-definidas</h3>
+        <div class="demo-grid">
+          <button type="button" class="demo-card is-active" data-afd-demo="demo-c">
+            <strong>Demo 1 · termina com c</strong>
+            <p>Linguagem com sufixo final <code>c</code>.</p>
+            <code>{a,b}*{c}</code>
+          </button>
+          <button type="button" class="demo-card" data-afd-demo="demo-b">
+            <strong>Demo 2 · termina com b</strong>
+            <p>Mesmo formato, com sufixo final <code>b</code>.</p>
+            <code>{a,c}*{b}</code>
+          </button>
+          <button type="button" class="demo-card" data-afd-demo="demo-a">
+            <strong>Demo 3 · termina com a</strong>
+            <p>Mesmo formato, com sufixo final <code>a</code>.</p>
+            <code>{b,c}*{a}</code>
+          </button>
+        </div>
+      </section>
+
+      <section class="afd-layout">
+        <article class="panel">
+          <h3>Diagrama do AFD</h3>
+          <div class="afd-canvas-wrap">
+            <svg class="afd-canvas" viewBox="0 0 760 350" role="img" aria-label="Autômato finito determinístico com estados e1, e2 e e3">
+              <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#334155"></polygon>
+                </marker>
+              </defs>
+
+              <g data-edge="start" class="edge-group">
+                <line class="edge-line" x1="22" y1="180" x2="118" y2="180" marker-end="url(#arrowhead)"></line>
+              </g>
+
+              <g data-edge="e1-transition" class="edge-group">
+                <line class="edge-line" x1="198" y1="180" x2="352" y2="180" marker-end="url(#arrowhead)"></line>
+                <text class="edge-label" x="272" y="163" data-afd-label-transition>c</text>
+              </g>
+
+              <g data-edge="e1-loop" class="edge-group">
+                <path class="edge-loop" d="M 130 228 C 86 262, 98 314, 145 307 C 192 300, 193 248, 163 232" marker-end="url(#arrowhead)"></path>
+                <text class="edge-label" x="102" y="330" data-afd-label-loop>a,b</text>
+              </g>
+
+              <g data-edge="e2-e3" class="edge-group">
+                <line class="edge-line" x1="430" y1="156" x2="430" y2="66" marker-end="url(#arrowhead)"></line>
+                <text class="edge-label" x="446" y="116" data-afd-label-sink>a,b,c</text>
+              </g>
+
+              <g data-edge="e3-loop" class="edge-group">
+                <path class="edge-loop" d="M 480 30 C 517 -9, 580 5, 560 56 C 551 81, 520 89, 498 70" marker-end="url(#arrowhead)"></path>
+                <text class="edge-label" x="566" y="41" data-afd-label-sink-loop>a,b,c</text>
+              </g>
+
+              <g data-state="e1" class="state-group">
+                <circle class="state-circle" cx="158" cy="180" r="48"></circle>
+                <text class="state-label" x="140" y="194">e1</text>
+              </g>
+
+              <g data-state="e2" class="state-group">
+                <circle class="state-circle" cx="430" cy="180" r="48"></circle>
+                <circle class="state-final-ring" cx="430" cy="180" r="38"></circle>
+                <text class="state-label" x="412" y="194">e2</text>
+              </g>
+
+              <g data-state="e3" class="state-group">
+                <circle class="state-circle" cx="430" cy="40" r="38"></circle>
+                <text class="state-label" x="413" y="50">e3</text>
+              </g>
+            </svg>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h3>Função de transição δ</h3>
+          <p class="delta-title">δ: E × Σ → E</p>
+          <p class="delta-note">A célula ativa mostra a transição aplicada no passo atual.</p>
+
+          <div class="delta-table-wrap">
+            <table class="delta-table" aria-label="Tabela da função de transição">
+              <thead>
+                <tr>
+                  <th>δ</th>
+                  <th>a</th>
+                  <th>b</th>
+                  <th>c</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="state-cell">e1</td>
+                  <td data-cell="e1-a">e1</td>
+                  <td data-cell="e1-b">e1</td>
+                  <td data-cell="e1-c">e2</td>
+                </tr>
+                <tr>
+                  <td class="state-cell">e2</td>
+                  <td data-cell="e2-a">e3</td>
+                  <td data-cell="e2-b">e3</td>
+                  <td data-cell="e2-c">e3</td>
+                </tr>
+                <tr>
+                  <td class="state-cell">e3</td>
+                  <td data-cell="e3-a">e3</td>
+                  <td data-cell="e3-b">e3</td>
+                  <td data-cell="e3-c">e3</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h3>Execução da simulação</h3>
+        <div class="toolbar">
+          <button class="button primary" type="button" data-afd-run>Executar automático</button>
+          <button class="button secondary" type="button" data-afd-step>Próximo passo</button>
+          <button class="button secondary" type="button" data-afd-reset>Reset</button>
+          <button class="button secondary" type="button" data-afd-cancel>Cancelar</button>
+        </div>
+
+        <div class="sim-meta" style="margin-top: var(--space-4);">
+          <article class="sim-box">
+            <div class="sim-box-label">Estado atual</div>
+            <p class="sim-box-value" data-afd-current-state>e1</p>
+          </article>
+          <article class="sim-box">
+            <div class="sim-box-label">Posição da leitura</div>
+            <p class="sim-box-value" data-afd-current-pos>0/1</p>
+          </article>
+          <article class="sim-box">
+            <div class="sim-box-label">Resultado</div>
+            <p class="sim-box-value" data-afd-result>—</p>
+          </article>
+          <article class="sim-box">
+            <div class="sim-box-label">Status</div>
+            <p class="sim-box-value" style="display: flex; align-items: center; gap: 8px;">
+              <span class="status-dot queued" data-afd-run-status-dot></span>
+              <span data-afd-run-status-text>queued</span>
+            </p>
+          </article>
+        </div>
+
+        <div class="tape" data-afd-tape aria-label="Fita de leitura da palavra"></div>
+
+        <div class="run-log" data-afd-log aria-live="polite" aria-label="Registro de passos da simulação"></div>
+      </section>
+
+      <section class="panel">
+        <h3>Perguntas didáticas (roteiro)</h3>
+        <ul class="list">
+          <li>A palavra <code>c</code> é reconhecida por M₁?</li>
+          <li>A palavra <code>abc</code> é reconhecida por M₁?</li>
+          <li>A palavra <code>ababc</code> é reconhecida por M₁?</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="proto-nav" aria-label="Navegação dos protótipos">
+  <a href="../topics/02-topico-afd.html">← Anterior</a>
+  <a class="is-hub" href="../index.html">Hub</a>
+  <a href="03-minimizacao-afd.html">Próximo →</a>
+</div>
+
+<script src="../js/simulator-afd.js"></script>
+</body>
+</html>
