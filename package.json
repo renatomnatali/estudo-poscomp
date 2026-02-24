@@ -1,0 +1,18 @@
+{
+  "name": "estudo-poscomp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node scripts/run-automata-tests.cjs && node --test tests/api/*.test.cjs",
+    "lint": "node scripts/lint.cjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

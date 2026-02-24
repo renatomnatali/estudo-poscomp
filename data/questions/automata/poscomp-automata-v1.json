@@ -1,0 +1,222 @@
+{
+  "version": 1,
+  "generatedAt": "2026-02-24",
+  "questions": [
+    {
+      "id": "q-2022-afd-01",
+      "year": 2022,
+      "source": "caderno_2022.pdf",
+      "number": 31,
+      "macroArea": "fundamentos",
+      "subTopic": "afd_modelagem_execucao",
+      "difficulty": "medium",
+      "stem": "Considere um AFD sobre {a,b,c} com transições: δ(e1,a)=e1, δ(e1,b)=e1, δ(e1,c)=e2 (final), e de e2 qualquer símbolo vai para e3 (sumidouro). Qual linguagem esse AFD reconhece?",
+      "options": [
+        { "key": "A", "text": "Palavras que começam com c." },
+        { "key": "B", "text": "Palavras que terminam com c e possuem somente a,b antes do último símbolo." },
+        { "key": "C", "text": "Palavras com quantidade par de c." },
+        { "key": "D", "text": "Todas as palavras com pelo menos um c." },
+        { "key": "E", "text": "Apenas a palavra c." }
+      ],
+      "answerKey": "B",
+      "tags": ["afd", "execucao", "linguagem"],
+      "explanation": "A máquina só aceita quando o último símbolo lido é c e não há leitura adicional após chegar em e2.",
+      "optionExplanations": {
+        "A": "Incorreta: o autômato não impõe c no primeiro símbolo.",
+        "B": "Correta: qualquer prefixo em {a,b}* seguido de c é aceito.",
+        "C": "Incorreta: não há contagem de paridade de c.",
+        "D": "Incorreta: se houver símbolos depois de c, a palavra é rejeitada.",
+        "E": "Incorreta: também aceita abc, ababc etc."
+      }
+    },
+    {
+      "id": "q-2023-afd-02",
+      "year": 2023,
+      "source": "caderno_2023.pdf",
+      "number": 34,
+      "macroArea": "fundamentos",
+      "subTopic": "afd_modelagem_execucao",
+      "difficulty": "easy",
+      "stem": "Um AFD aceita palavras que terminam com \"b\" no alfabeto {a,b}. Qual palavra deve ser aceita?",
+      "options": [
+        { "key": "A", "text": "aaa" },
+        { "key": "B", "text": "aab" },
+        { "key": "C", "text": "babaa" },
+        { "key": "D", "text": "ε" },
+        { "key": "E", "text": "abaaa" }
+      ],
+      "answerKey": "B",
+      "tags": ["afd", "aceitacao"],
+      "explanation": "A palavra aceita precisa terminar com b.",
+      "optionExplanations": {
+        "A": "Incorreta: termina com a.",
+        "B": "Correta: termina com b.",
+        "C": "Incorreta: termina com a.",
+        "D": "Incorreta: palavra vazia não termina com b.",
+        "E": "Incorreta: termina com a."
+      }
+    },
+    {
+      "id": "q-2024-min-01",
+      "year": 2024,
+      "source": "caderno_2024.pdf",
+      "number": 37,
+      "macroArea": "fundamentos",
+      "subTopic": "minimizacao_afd",
+      "difficulty": "hard",
+      "stem": "Na minimização de AFD, qual etapa deve ocorrer antes do refinamento de partições?",
+      "options": [
+        { "key": "A", "text": "Converter o AFD em AFN." },
+        { "key": "B", "text": "Remover estados inalcançáveis." },
+        { "key": "C", "text": "Adicionar transições epsilon." },
+        { "key": "D", "text": "Transformar linguagem em GLC." },
+        { "key": "E", "text": "Duplicar estados finais." }
+      ],
+      "answerKey": "B",
+      "tags": ["minimizacao", "particoes"],
+      "explanation": "Estados inalcançáveis não afetam a linguagem reconhecida e devem ser eliminados primeiro.",
+      "optionExplanations": {
+        "A": "Incorreta: não é parte do algoritmo de minimização de AFD.",
+        "B": "Correta: reduz o espaço de estados antes do refinamento.",
+        "C": "Incorreta: AFD não usa epsilon transição.",
+        "D": "Incorreta: minimização opera no autômato, não em gramática.",
+        "E": "Incorreta: isso altera o modelo sem justificativa algorítmica."
+      }
+    },
+    {
+      "id": "q-2025-min-02",
+      "year": 2025,
+      "source": "caderno_2025.pdf",
+      "number": 36,
+      "macroArea": "fundamentos",
+      "subTopic": "minimizacao_afd",
+      "difficulty": "medium",
+      "stem": "Dois estados não finais de um AFD serão equivalentes se, para todo símbolo, suas transições caírem em blocos equivalentes na partição corrente. Essa afirmação é:",
+      "options": [
+        { "key": "A", "text": "Verdadeira, conforme o critério de refinamento." },
+        { "key": "B", "text": "Falsa, estados não finais nunca são equivalentes." },
+        { "key": "C", "text": "Falsa, somente estados finais podem ser equivalentes." },
+        { "key": "D", "text": "Verdadeira apenas para AFD sem ciclos." },
+        { "key": "E", "text": "Verdadeira apenas com alfabeto binário." }
+      ],
+      "answerKey": "A",
+      "tags": ["minimizacao", "equivalencia"],
+      "explanation": "Esse é o critério central do algoritmo de partições para distinguir ou mesclar estados.",
+      "optionExplanations": {
+        "A": "Correta: define exatamente a condição de equivalência local por partição.",
+        "B": "Incorreta: estados não finais podem ser equivalentes.",
+        "C": "Incorreta: equivalência vale para qualquer classe, não só finais.",
+        "D": "Incorreta: presença de ciclos não invalida o critério.",
+        "E": "Incorreta: independe do tamanho do alfabeto."
+      }
+    },
+    {
+      "id": "q-2023-afn-01",
+      "year": 2023,
+      "source": "caderno_2023.pdf",
+      "number": 38,
+      "macroArea": "fundamentos",
+      "subTopic": "afn_epsilon",
+      "difficulty": "medium",
+      "stem": "Em um AFN com epsilon, o ε-fecho de um estado é:",
+      "options": [
+        { "key": "A", "text": "O conjunto de estados alcançáveis apenas por transições com consumo de símbolo." },
+        { "key": "B", "text": "O conjunto de estados alcançáveis por qualquer sequência de transições ε (incluindo ele mesmo)." },
+        { "key": "C", "text": "Somente os estados finais conectados por ε." },
+        { "key": "D", "text": "O conjunto de estados inalcançáveis." },
+        { "key": "E", "text": "Apenas o estado inicial." }
+      ],
+      "answerKey": "B",
+      "tags": ["afn", "epsilon"],
+      "explanation": "ε-fecho inclui o próprio estado e todos os alcançáveis por transições ε sem consumir entrada.",
+      "optionExplanations": {
+        "A": "Incorreta: consumo de símbolo não define ε-fecho.",
+        "B": "Correta: definição formal do ε-fecho.",
+        "C": "Incorreta: não restringe a estados finais.",
+        "D": "Incorreta: é o oposto do conceito.",
+        "E": "Incorreta: pode conter vários estados além do inicial."
+      }
+    },
+    {
+      "id": "q-2024-afn-02",
+      "year": 2024,
+      "source": "caderno_2024.pdf",
+      "number": 39,
+      "macroArea": "fundamentos",
+      "subTopic": "conversao_afn_afd",
+      "difficulty": "hard",
+      "stem": "Na construção por subconjuntos, quando um estado do AFD convertido é final?",
+      "options": [
+        { "key": "A", "text": "Quando o subconjunto contém apenas o estado inicial do AFN." },
+        { "key": "B", "text": "Quando o subconjunto contém ao menos um estado final do AFN." },
+        { "key": "C", "text": "Somente quando todos os estados do subconjunto são finais no AFN." },
+        { "key": "D", "text": "Quando o subconjunto é unitário." },
+        { "key": "E", "text": "Somente para subconjuntos com cardinalidade par." }
+      ],
+      "answerKey": "B",
+      "tags": ["afn", "conversao", "subconjuntos"],
+      "explanation": "O estado do AFD representa uma coleção de possibilidades do AFN; basta uma delas ser final para aceitar.",
+      "optionExplanations": {
+        "A": "Incorreta: não é critério de aceitação.",
+        "B": "Correta: critério padrão da conversão AFN→AFD.",
+        "C": "Incorreta: exigência desnecessária e mais forte que a definição.",
+        "D": "Incorreta: cardinalidade do subconjunto não define aceitação.",
+        "E": "Incorreta: não há critério de paridade de tamanho."
+      }
+    },
+    {
+      "id": "q-2025-afn-03",
+      "year": 2025,
+      "source": "caderno_2025.pdf",
+      "number": 40,
+      "macroArea": "fundamentos",
+      "subTopic": "conversao_afn_afd",
+      "difficulty": "medium",
+      "stem": "A conversão de AFN para AFD por subconjuntos preserva a linguagem reconhecida?",
+      "options": [
+        { "key": "A", "text": "Não, porque remove o não determinismo e altera a linguagem." },
+        { "key": "B", "text": "Sim, sempre que a construção é aplicada corretamente." },
+        { "key": "C", "text": "Apenas para AFN sem epsilon." },
+        { "key": "D", "text": "Apenas para alfabetos com dois símbolos." },
+        { "key": "E", "text": "Somente quando o AFN não possui laços." }
+      ],
+      "answerKey": "B",
+      "tags": ["afn", "afd", "equivalencia"],
+      "explanation": "A construção por subconjuntos gera um AFD equivalente em linguagem ao AFN original.",
+      "optionExplanations": {
+        "A": "Incorreta: o determinismo muda o modelo, não a linguagem.",
+        "B": "Correta: propriedade fundamental da construção por subconjuntos.",
+        "C": "Incorreta: também vale com epsilon, usando ε-fecho.",
+        "D": "Incorreta: independe do tamanho do alfabeto.",
+        "E": "Incorreta: laços não invalidam equivalência."
+      }
+    },
+    {
+      "id": "q-2022-afn-04",
+      "year": 2022,
+      "source": "caderno_2022.pdf",
+      "number": 42,
+      "macroArea": "fundamentos",
+      "subTopic": "afn_epsilon",
+      "difficulty": "easy",
+      "stem": "Durante a simulação de um AFN, em cada passo de leitura de símbolo deve-se considerar:",
+      "options": [
+        { "key": "A", "text": "Somente um estado ativo por vez." },
+        { "key": "B", "text": "Todos os estados no conjunto corrente e depois aplicar ε-fecho." },
+        { "key": "C", "text": "Apenas estados finais." },
+        { "key": "D", "text": "Somente o estado inicial." },
+        { "key": "E", "text": "A escolha aleatória de uma transição." }
+      ],
+      "answerKey": "B",
+      "tags": ["afn", "simulacao"],
+      "explanation": "AFN mantém conjunto de estados possíveis; após mover por símbolo, calcula-se novamente o ε-fecho.",
+      "optionExplanations": {
+        "A": "Incorreta: isso descreve execução determinística.",
+        "B": "Correta: execução padrão de AFN com epsilon.",
+        "C": "Incorreta: estados finais não são o único foco durante leitura.",
+        "D": "Incorreta: o conjunto evolui a cada símbolo.",
+        "E": "Incorreta: AFN considera todas as possibilidades, não sorteio."
+      }
+    }
+  ]
+}

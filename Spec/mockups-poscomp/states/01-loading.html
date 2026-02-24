@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POSCOMP Visual - Estado Loading</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+<div class="page-wrap">
+  <header class="page-header">
+    <div class="breadcrumb"><span>Estados</span><span>›</span><span>Loading</span></div>
+    <h1 class="page-title">Carregando dados de estudo</h1>
+    <p class="page-subtitle">Exemplo de feedback transparente durante operações longas.</p>
+  </header>
+
+  <section class="grid cols-2" style="margin-top: var(--space-5);">
+    <article class="panel">
+      <h3>Skeleton de conteúdo</h3>
+      <div class="skeleton line" style="width: 70%;"></div>
+      <div class="skeleton line" style="width: 92%;"></div>
+      <div class="skeleton line" style="width: 85%;"></div>
+      <div class="skeleton block" style="margin-top: var(--space-4);"></div>
+    </article>
+
+    <article class="panel">
+      <h3>Pipeline de carregamento</h3>
+      <div class="timeline">
+        <div class="timeline-item"><span class="status-dot completed"></span><div><strong>Autenticação</strong><small>Sessão validada</small></div><small>completed</small></div>
+        <div class="timeline-item"><span class="status-dot running"></span><div><strong>Leitura de progresso</strong><small>Sincronizando dados</small></div><small>running</small></div>
+        <div class="timeline-item"><span class="status-dot queued"></span><div><strong>Montagem da dashboard</strong><small>Aguardando dados finais</small></div><small>queued</small></div>
+      </div>
+      <div class="callout" style="margin-top: var(--space-4);">
+        Tempo estimado: 2-4 segundos. Última atualização: 14:41.
+      </div>
+    </article>
+  </section>
+</div>
+
+<div class="proto-nav" aria-label="Navegação dos protótipos">
+  <a href="../premium/02-checkout.html">← Anterior</a>
+  <a class="is-hub" href="../index.html">Hub</a>
+  <a href="02-empty.html">Próximo →</a>
+</div>
+</body>
+</html>

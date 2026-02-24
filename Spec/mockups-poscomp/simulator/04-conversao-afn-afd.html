@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POSCOMP Visual - Conversão AFN para AFD</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+<a class="skip-link" href="#conteudo">Pular para conteúdo</a>
+<div class="page-wrap" id="conteudo">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <h1>POSCOMP Visual</h1>
+      <span class="project-chip">Módulo V1 · AFN → AFD</span>
+      <nav>
+        <a class="nav-link" href="../dashboard/01-visao-geral.html">Dashboard <span>📊</span></a>
+        <a class="nav-link" href="../topics/01-lista-topicos.html">Tópicos <span>📚</span></a>
+        <a class="nav-link active" href="01-simulador.html">Simulador <span>🎮</span></a>
+        <a class="nav-link" href="../flashcards/01-sessao.html">Flashcards <span>🃏</span></a>
+        <a class="nav-link" href="../exercises/01-lista-exercicios.html">Exercícios <span>📝</span></a>
+        <a class="nav-link" href="../premium/01-paywall.html">Premium <span>⭐</span></a>
+      </nav>
+      <div class="sidebar-footer">Construção por subconjuntos com ε-fecho</div>
+    </aside>
+
+    <main class="main-area">
+      <header class="page-header">
+        <div class="breadcrumb"><span>Simulador</span><span>›</span><span>Conversão AFN→AFD</span></div>
+        <h2 class="page-title">Conversão AFN com ε para AFD equivalente</h2>
+        <p class="page-subtitle">
+          Veja o ε-fecho, a geração de subconjuntos e a tabela final do AFD convertido.
+        </p>
+      </header>
+
+      <section class="panel">
+        <h3>Entrada do AFN</h3>
+        <label for="nfa-automaton">Definição do autômato</label>
+        <textarea id="nfa-automaton" data-conv-automaton-input spellcheck="false"></textarea>
+        <div class="toolbar">
+          <button class="button secondary" type="button" data-conv-demo="demo-a-b">Carregar demo 1 (a*b)</button>
+          <button class="button secondary" type="button" data-conv-demo="demo-final-ab">Carregar demo 2 (termina com ab)</button>
+          <button class="button primary" type="button" data-conv-run>Converter AFN→AFD</button>
+          <button class="button secondary" type="button" data-conv-reset>Reset</button>
+        </div>
+      </section>
+
+      <section class="grid cols-2">
+        <article class="panel">
+          <h3>Tabela do AFN</h3>
+          <div class="delta-table-wrap">
+            <table class="delta-table" aria-label="Tabela de transições do AFN" data-conv-nfa-table>
+              <thead>
+                <tr><th>δ</th><th>a</th><th>b</th><th>ε</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <h4 style="margin-top: var(--space-4);">ε-fechos</h4>
+          <div class="partition-track" data-conv-closures></div>
+        </article>
+
+        <article class="panel">
+          <h3>AFD convertido</h3>
+          <div class="compare-kpis">
+            <div><strong>Estado inicial:</strong> <span data-conv-dfa-initial>—</span></div>
+            <div><strong>Estados finais:</strong> <span data-conv-dfa-finals>—</span></div>
+          </div>
+          <div class="delta-table-wrap">
+            <table class="delta-table" aria-label="Tabela de transições do AFD convertido" data-conv-dfa-table>
+              <thead>
+                <tr><th>δ</th><th>a</th><th>b</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <h4 style="margin-top: var(--space-4);">Mapa subconjunto → estado</h4>
+          <div class="subset-map" data-conv-subset-map></div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h3>Validação de palavras</h3>
+        <p class="page-subtitle" style="margin-top: 0;">Comparação entre AFN e AFD convertido.</p>
+        <div class="toolbar">
+          <button class="button secondary" type="button" data-conv-word="ab">Testar ab</button>
+          <button class="button secondary" type="button" data-conv-word="aab">Testar aab</button>
+          <button class="button secondary" type="button" data-conv-word="bbb">Testar bbb</button>
+        </div>
+        <div class="delta-table-wrap" style="margin-top: var(--space-3);">
+          <table class="delta-table" aria-label="Resultados de validação de palavras">
+            <thead>
+              <tr><th>Palavra</th><th>AFN</th><th>AFD</th><th>Status</th></tr>
+            </thead>
+            <tbody data-conv-word-results></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>Status da execução</h3>
+        <p class="sim-box-value" style="display: flex; align-items: center; gap: 8px; margin-top: 0;">
+          <span class="status-dot queued" data-conv-status-dot></span>
+          <span data-conv-status-text>queued</span>
+        </p>
+        <div class="run-log" data-conv-log aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="proto-nav" aria-label="Navegação dos protótipos">
+  <a href="03-minimizacao-afd.html">← Anterior</a>
+  <a class="is-hub" href="../index.html">Hub</a>
+  <a href="../exercises/03-questoes-poscomp-automatos.html">Próximo →</a>
+</div>
+
+<script src="../js/automata-core.js"></script>
+<script src="../js/afn-conversion-demo.js"></script>
+</body>
+</html>

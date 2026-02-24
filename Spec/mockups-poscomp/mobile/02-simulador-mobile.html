@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POSCOMP Visual - Simulador Mobile</title>
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+<div class="page-wrap">
+  <div class="mobile-shell" role="region" aria-label="Protótipo mobile simulador">
+    <header class="mobile-header">
+      <strong>Simulador</strong>
+      <span><span class="status-dot running"></span> running</span>
+    </header>
+
+    <main class="mobile-content">
+      <label for="expr-mobile">Expressão</label>
+      <input id="expr-mobile" type="text" value="(ab|ba)*abb">
+
+      <label for="word-mobile" style="margin-top: var(--space-3);">Palavra</label>
+      <input id="word-mobile" type="text" value="ababb">
+
+      <div class="toolbar" style="margin-top: var(--space-4);">
+        <button class="button primary" type="button" data-run-simulation>Executar</button>
+      </div>
+
+      <section class="panel" style="padding: var(--space-4); margin-top: var(--space-4);">
+        <h3 style="margin-top: 0;">Status da execução</h3>
+        <div class="kv"><strong>Status</strong><span><span class="status-dot queued" data-current-status></span> <code data-current-status-label>queued</code></span></div>
+        <div class="kv"><strong>Última atualização</strong><span data-last-update>14:49</span></div>
+        <div class="kv"><strong>Término</strong><span>—</span></div>
+      </section>
+    </main>
+
+    <nav class="bottom-tabs" aria-label="Navegação principal mobile">
+      <a href="01-dashboard-mobile.html">Dashboard</a>
+      <a href="../topics/01-lista-topicos.html">Tópicos</a>
+      <a class="active" href="02-simulador-mobile.html">Simulador</a>
+      <a href="../flashcards/01-sessao.html">Cartões</a>
+      <a href="../exercises/01-lista-exercicios.html">Questões</a>
+    </nav>
+  </div>
+</div>
+
+<div class="proto-nav" aria-label="Navegação dos protótipos">
+  <a href="01-dashboard-mobile.html">← Anterior</a>
+  <a class="is-hub" href="../index.html">Hub</a>
+  <a href="../landing/01-home.html">Voltar ao início</a>
+</div>
+
+<script src="../js/demo.js"></script>
+</body>
+</html>
