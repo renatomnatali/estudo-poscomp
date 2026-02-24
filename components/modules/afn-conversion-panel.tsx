@@ -39,6 +39,11 @@ interface ConvertPayload {
   dfa: DfaDefinition;
 }
 
+interface ConversionResult {
+  parsed: NfaDefinition;
+  converted: ConvertPayload;
+}
+
 export function AfnConversionPanel() {
   const [activeDemo, setActiveDemo] = useState<ConvDemoId>('a-b');
   const [input, setInput] = useState<string>(JSON.stringify(DEMOS['a-b'], null, 2));
@@ -67,14 +72,14 @@ export function AfnConversionPanel() {
     appendLog(`Demo carregada: ${demoId}.`);
   }
 
-  async function runConversion() {
+  async function runConversion(): Promise<ConversionResult | null> {
     let parsed: NfaDefinition;
     try {
       parsed = JSON.parse(input) as NfaDefinition;
     } catch (error) {
       setStatus('failed');
       appendLog(`JSON inválido: ${(error as Error).message}.`);
-      return;
+      return null;
     }
 
     setStatus('running');
@@ -90,7 +95,7 @@ export function AfnConversionPanel() {
     if (!response.ok) {
       setStatus('failed');
       appendLog(payload.error || 'Falha na conversão.');
-      return;
+      return null;
     }
 
     setNfa(parsed);
@@ -98,16 +103,25 @@ export function AfnConversionPanel() {
     setWordResults([]);
     setStatus('completed');
     appendLog(`Conversão concluída com ${payload.dfa.states.length} estados.`);
+    return {
+      parsed,
+      converted: payload,
+    };
   }
 
   async function testWord(word: string) {
-    if (!nfa || !converted) {
-      await runConversion();
-      if (!nfa || !converted) return;
+    let activeNfa = nfa;
+    let activeConverted = converted;
+
+    if (!activeNfa || !activeConverted) {
+      const conversion = await runConversion();
+      if (!conversion) return;
+      activeNfa = conversion.parsed;
+      activeConverted = conversion.converted;
     }
 
-    const nfaResult = simulateNfa(nfa, word);
-    const dfaResult = simulateDfa(converted.dfa, word);
+    const nfaResult = simulateNfa(activeNfa, word);
+    const dfaResult = simulateDfa(activeConverted.dfa, word);
     const nfaLabel = nfaResult.accepted ? 'ACEITA' : 'REJEITA';
     const dfaLabel = dfaResult.result;
 

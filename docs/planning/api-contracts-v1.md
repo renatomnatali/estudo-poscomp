@@ -65,7 +65,21 @@ Executa simulação de AFD.
 ## POST /api/simulator/afd/minimize
 
 ### Body
-`AutomatonDefinition` (DFA)
+```json
+{
+  "automaton": {
+    "alphabet": ["a", "b", "c"],
+    "states": ["e1", "e2", "e3"],
+    "initialState": "e1",
+    "acceptStates": ["e2"],
+    "transitions": {
+      "e1": {"a": "e1", "b": "e1", "c": "e2"},
+      "e2": {"a": "e3", "b": "e3", "c": "e3"},
+      "e3": {"a": "e3", "b": "e3", "c": "e3"}
+    }
+  }
+}
+```
 
 ### Response 200
 - `original`
@@ -78,7 +92,21 @@ Executa simulação de AFD.
 Converte AFN (com epsilon) para AFD.
 
 ### Body
-`AutomatonDefinition` (NFA)
+```json
+{
+  "automaton": {
+    "alphabet": ["a", "b"],
+    "states": ["q0", "q1", "q2"],
+    "initialState": "q0",
+    "acceptStates": ["q2"],
+    "transitions": {
+      "q0": {"a": [], "b": [], "ε": ["q1"]},
+      "q1": {"a": ["q1"], "b": ["q2"], "ε": []},
+      "q2": {"a": [], "b": [], "ε": []}
+    }
+  }
+}
+```
 
 ### Response 200
 - `subsetMap`
@@ -102,3 +130,4 @@ Submete respostas e atualiza métricas.
 - `score`
 - `byTopic`
 - `recommendedNextTopics`
+- `recommendedActivities`

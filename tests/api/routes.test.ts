@@ -85,6 +85,40 @@ describe('api routes', () => {
     expect(minPayload.minimized.states.length).toBeGreaterThan(0);
   });
 
+  it('retorna 400 para payload inválido ou malformado nas APIs de simulador', async () => {
+    const invalidRun = await runAfd(
+      new Request('http://localhost/api/simulator/afd/run', {
+        method: 'POST',
+        body: JSON.stringify({ automaton: {}, inputWord: 'ab' }),
+      })
+    );
+    expect(invalidRun.status).toBe(400);
+
+    const invalidRunJson = await runAfd(
+      new Request('http://localhost/api/simulator/afd/run', {
+        method: 'POST',
+        body: '{',
+      })
+    );
+    expect(invalidRunJson.status).toBe(400);
+
+    const invalidMinimize = await minimizeAfd(
+      new Request('http://localhost/api/simulator/afd/minimize', {
+        method: 'POST',
+        body: JSON.stringify({ automaton: {} }),
+      })
+    );
+    expect(invalidMinimize.status).toBe(400);
+
+    const invalidConvert = await convertAfn(
+      new Request('http://localhost/api/simulator/afn/convert', {
+        method: 'POST',
+        body: JSON.stringify({ automaton: {} }),
+      })
+    );
+    expect(invalidConvert.status).toBe(400);
+  });
+
   it('converte AFN e corrige assessment', async () => {
     const convResponse = await convertAfn(
       new Request('http://localhost/api/simulator/afn/convert', {
@@ -110,5 +144,23 @@ describe('api routes', () => {
     const assessmentPayload = await assessmentResponse.json();
     expect(assessmentResponse.status).toBe(200);
     expect(assessmentPayload.score.correct).toBe(1);
+  });
+
+  it('retorna status em português e atividades de reforço na avaliação', async () => {
+    const assessmentResponse = await submitAssessment(
+      new Request('http://localhost/api/assessment/submit', {
+        method: 'POST',
+        body: JSON.stringify({
+          attemptId: 'test',
+          answers: [{ questionId: 'q-2022-afd-01', choice: 'A' }],
+        }),
+      })
+    );
+
+    const assessmentPayload = await assessmentResponse.json();
+    expect(assessmentResponse.status).toBe(200);
+    expect(assessmentPayload.byTopic.afd_modelagem_execucao.status).toBe('reforçar');
+    expect(Array.isArray(assessmentPayload.recommendedActivities)).toBe(true);
+    expect(assessmentPayload.recommendedActivities.length).toBeGreaterThan(0);
   });
 });

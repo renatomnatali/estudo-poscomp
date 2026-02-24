@@ -21,6 +21,7 @@ interface AssessmentPayload {
   score: { total: number; correct: number; accuracy: number };
   byTopic: Record<string, { answered: number; correct: number; accuracy: number; status: string }>;
   recommendedNextTopics: string[];
+  recommendedActivities: Array<{ subTopic: string; activities: string[] }>;
   gradedAnswers: Array<{
     questionId: string;
     status?: 'not_found';
@@ -223,6 +224,23 @@ export function QuestionsPanel() {
         <article className="section-card">
           <h3 className="font-semibold">Feedback</h3>
           <div className="callout mt-3">{feedback}</div>
+          <h4 className="mt-4 font-semibold">Atividades de reforço recomendadas</h4>
+          {!assessment || assessment.recommendedActivities.length === 0 ? (
+            <p className="mt-2 text-sm text-slate-500">Sem recomendações adicionais no momento.</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {assessment.recommendedActivities.map((item) => (
+                <article key={item.subTopic} className="partition-step">
+                  <strong>{TOPIC_LABELS[item.subTopic] || item.subTopic}</strong>
+                  <ul className="mt-2 list-disc pl-5 text-sm text-slate-700">
+                    {item.activities.map((activity) => (
+                      <li key={activity}>{activity}</li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          )}
         </article>
 
         <article className="section-card">

@@ -34,3 +34,8 @@ Funcionalidade: Minimização de AFD
     Quando eu aciono "Próxima partição"
     Então a interface deve avançar para o próximo passo do refinamento
     E ao atingir o último passo deve exibir "partições estabilizadas"
+
+  Cenário: Rejeitar payload inválido na API de minimização
+    Quando eu envio um payload sem "automaton" para "POST /api/simulator/afd/minimize"
+    Então a API deve responder com status "400"
+    E a mensagem deve indicar que "automaton" é obrigatório

@@ -1,19 +1,28 @@
 import { NextResponse } from 'next/server';
 
 import { convertNfaToDfa } from '@/lib/automata-core';
+import { validateNfaDefinition } from '@/lib/automata-validation';
 import type { NfaDefinition } from '@/lib/types';
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const automaton = body?.automaton as NfaDefinition | undefined;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Payload inválido: JSON malformado.' }, { status: 400 });
+  }
 
-  if (!automaton) {
+  const record = body as { automaton?: unknown };
+  const validation = validateNfaDefinition(record?.automaton);
+
+  if (!validation.valid) {
     return NextResponse.json(
-      { error: 'Payload inválido. Envie automaton.' },
+      { error: validation.error ?? 'Payload inválido. Envie automaton.' },
       { status: 400 }
     );
   }
 
+  const automaton = validation.value as NfaDefinition;
   try {
     const converted = convertNfaToDfa(automaton);
     return NextResponse.json(converted);

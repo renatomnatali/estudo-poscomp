@@ -60,3 +60,8 @@ Funcionalidade: Simulação didática de AFD
     Então devo visualizar os estados "e1", "e2" e "e3" no diagrama
     E devo visualizar as arestas "e1-loop", "e1-transition", "e2-e3" e "e3-loop"
     E os labels do diagrama devem refletir a demo selecionada
+
+  Cenário: Rejeitar payload inválido na API de simulação
+    Quando eu envio um payload sem "automaton" para "POST /api/simulator/afd/run"
+    Então a API deve responder com status "400"
+    E a mensagem deve indicar que "automaton" e "inputWord" são obrigatórios

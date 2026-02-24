@@ -32,3 +32,8 @@ Funcionalidade: Avaliação com questões estilo prova
     Quando o resultado do bloco é exibido
     Então o sistema deve recomendar revisão desse subtópico
     E sugerir uma lista de atividades de reforço
+
+  Cenário: Expor status em português brasileiro no payload
+    Quando eu corrijo respostas com desempenho abaixo da meta
+    Então o campo de status por subtópico deve usar "reforçar"
+    E não deve usar variação sem acento
