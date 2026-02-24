@@ -38,6 +38,16 @@ Regras mínimas:
 4. Merge rápido via `squash`.
 5. Evitar branches longas, `develop`, release branch e hotfix branch paralela.
 
+### Proteção local contra push direto na trunk
+
+Este repositório inclui hook em `.githooks/pre-push` para bloquear push direto em `main`, `master` e `trunk`.
+
+Ative no clone local:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ## Regras de qualidade
 
 1. Não aplicar sugestão de review cegamente; validar contra Gherkin e intenção do usuário.
