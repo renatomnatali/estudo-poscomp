@@ -27,6 +27,7 @@ Funcionalidade: Simulação didática de AFD
     Então o status final deve ser "completed"
     E o resultado deve ser "ACEITA"
     E a tabela delta deve destacar a transição ativa em cada passo
+    E o diagrama do AFD deve destacar estado e aresta ativos em cada passo
 
   Cenário: Trocar rapidamente entre demonstrações pré-definidas
     Dado que a demo ativa é "demo-c"
@@ -52,3 +53,10 @@ Funcionalidade: Simulação didática de AFD
     Quando eu clico no símbolo "Σ"
     E eu clico no símbolo "→"
     Então os símbolos devem ser inseridos no campo ativo na posição do cursor
+
+  Cenário: Exibir diagrama do AFD com labels sincronizados
+    Dado que a demo ativa é "demo-c"
+    Quando eu abro o simulador AFD
+    Então devo visualizar os estados "e1", "e2" e "e3" no diagrama
+    E devo visualizar as arestas "e1-loop", "e1-transition", "e2-e3" e "e3-loop"
+    E os labels do diagrama devem refletir a demo selecionada

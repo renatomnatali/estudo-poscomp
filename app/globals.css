@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-slate-100 text-slate-900;
+}
+
+.section-card {
+  @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-sm;
+}
+
+.panel {
+  @apply rounded-xl border border-slate-200 bg-white p-4;
+}
+
+.button {
+  @apply rounded-full px-4 py-2 text-sm font-semibold;
+}
+
+.button.primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.button.secondary {
+  @apply border border-slate-300 bg-white text-slate-800 hover:border-blue-400 hover:text-blue-700;
+}
+
+.status-dot {
+  @apply inline-block h-2.5 w-2.5 rounded-full;
+}
+
+.status-dot.queued {
+  @apply bg-amber-500;
+}
+
+.status-dot.running {
+  @apply bg-blue-500;
+}
+
+.status-dot.completed {
+  @apply bg-emerald-500;
+}
+
+.status-dot.failed {
+  @apply bg-red-500;
+}
+
+.status-dot.canceled {
+  @apply bg-slate-500;
+}
+
+.sim-box {
+  @apply rounded-xl border border-slate-200 bg-white p-3;
+}
+
+.sim-box-label {
+  @apply text-xs uppercase tracking-wide text-slate-500;
+}
+
+.sim-box-value {
+  @apply mt-1 text-lg font-semibold;
+}
+
+.tape-char {
+  @apply rounded-md border border-slate-300 bg-white px-2 py-1 font-mono text-sm;
+}
+
+.tape-char.is-read {
+  @apply border-blue-300 bg-blue-100;
+}
+
+.tape-char.is-current {
+  @apply border-amber-400 bg-amber-100;
+}
+
+.delta-table {
+  @apply w-full border-collapse overflow-hidden rounded-lg border border-slate-200;
+}
+
+.delta-table th,
+.delta-table td {
+  @apply border border-slate-200 px-2 py-2 text-center font-mono text-sm;
+}
+
+.delta-table th {
+  @apply bg-blue-50 text-blue-800;
+}
+
+.delta-table td.state-cell {
+  @apply bg-slate-50 font-semibold text-slate-700;
+}
+
+.delta-table td.is-active {
+  @apply bg-blue-100 font-bold text-blue-800;
+}
+
+.run-log {
+  @apply max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white p-3;
+}
+
+.run-log-item {
+  @apply grid grid-cols-[auto_1fr] gap-2 border-b border-dashed border-slate-200 py-2 text-sm;
+}
+
+.run-log-item:last-child {
+  @apply border-b-0;
+}
+
+.afd-canvas {
+  @apply h-auto w-full;
+}
+
+.afd-canvas .state-circle {
+  fill: #dbeafe;
+  stroke: #0f172a;
+  stroke-width: 3px;
+}
+
+.afd-canvas .state-final-ring {
+  fill: none;
+  stroke: #0f172a;
+  stroke-width: 3px;
+}
+
+.afd-canvas .state-label {
+  fill: #0f172a;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.afd-canvas .edge-line,
+.afd-canvas .edge-loop {
+  fill: none;
+  stroke: #334155;
+  stroke-width: 2.8px;
+}
+
+.afd-canvas .edge-label {
+  fill: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.afd-canvas .state-group.is-active .state-circle {
+  fill: #bfdbfe;
+  stroke: #1d4ed8;
+}
+
+.afd-canvas .edge-group.is-active .edge-line,
+.afd-canvas .edge-group.is-active .edge-loop {
+  stroke: #1d4ed8;
+}
+
+.afd-canvas .edge-group.is-active .edge-label {
+  fill: #1d4ed8;
+}
+
+.partition-step {
+  @apply rounded-xl border border-slate-200 bg-white p-3;
+}
+
+.partition-step strong {
+  @apply block text-xs text-slate-500;
+}
+
+.partition-step code {
+  @apply text-sm text-blue-700;
+}
+
+.question-item {
+  @apply w-full rounded-xl border border-slate-200 bg-white p-3 text-left;
+}
+
+.question-item.is-active {
+  @apply border-blue-400 ring-2 ring-blue-100;
+}
+
+.option-btn {
+  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-left text-sm;
+}
+
+.option-btn.is-selected {
+  @apply border-blue-400 bg-blue-50;
+}
+
+.callout {
+  @apply rounded-xl border-l-4 border-teal-600 bg-teal-50 p-3 text-sm text-teal-900;
+}

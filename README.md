@@ -11,9 +11,9 @@ Aplicação V1 de estudo para POSCOMP com foco em autômatos.
 
 ## Arquitetura atual
 
-1. Frontend: HTML/CSS/JS em `src/web`.
-2. BFF/API: Express em `src/server.js`.
-3. Núcleo de algoritmos: `src/lib/automata-core.js`.
+1. Frontend: Next.js 15 (App Router) em `app/` e `components/`.
+2. BFF/API: Route Handlers em `app/api/*`.
+3. Núcleo de algoritmos: TypeScript em `lib/automata-core.ts`.
 4. Base de questões: `data/questions/automata/poscomp-automata-v1.json`.
 
 Observação: esta versão não usa banco de dados; dados de conteúdo/questões estão em arquivo e métricas de sessão ficam em memória.
@@ -25,7 +25,7 @@ npm install
 npm run dev
 ```
 
-Abra: `http://localhost:4173`
+Abra: `http://localhost:3000`
 
 ## Testes e lint
 
