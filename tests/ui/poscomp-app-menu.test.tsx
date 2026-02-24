@@ -71,4 +71,17 @@ describe('menu principal da aplicação', () => {
     expect(within(mobileMenu).getByRole('button', { name: /^exercícios$/i })).toBeInTheDocument();
     expect(within(mobileMenu).getByRole('button', { name: /^premium$/i })).toBeInTheDocument();
   });
+
+  it('exibe botões do simulador no primeiro bloco e sem breadcrumb', () => {
+    const { container } = render(<PoscompApp />);
+
+    const header = container.querySelector('.page-header');
+    expect(header).not.toBeNull();
+    expect(header?.querySelector('.breadcrumb')).not.toBeInTheDocument();
+
+    const scoped = within(header as HTMLElement);
+    expect(scoped.getByRole('button', { name: /^simulador afd$/i })).toBeInTheDocument();
+    expect(scoped.getByRole('button', { name: /^minimização$/i })).toBeInTheDocument();
+    expect(scoped.getByRole('button', { name: /^afn→afd$/i })).toBeInTheDocument();
+  });
 });

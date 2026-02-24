@@ -33,6 +33,12 @@ describe('AfdSimulator', () => {
     expect(languageInput).toHaveValue('L=Σ');
   });
 
+  it('não exibe bloco de registro de execução', () => {
+    render(<AfdSimulator />);
+
+    expect(screen.queryByRole('heading', { name: /registro de execução/i })).not.toBeInTheDocument();
+  });
+
   it('troca demos e volta status para queued', async () => {
     render(<AfdSimulator />);
 

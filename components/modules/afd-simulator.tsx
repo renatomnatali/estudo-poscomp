@@ -117,8 +117,6 @@ export function AfdSimulator() {
   const [currentPos, setCurrentPos] = useState(0);
   const [activeTransition, setActiveTransition] = useState<{ fromState: string; symbol: string } | null>(null);
 
-  const [logs, setLogs] = useState<string[]>([]);
-
   const [focusedField, setFocusedField] = useState<FocusField>('language');
   const machineRef = useRef<HTMLTextAreaElement | null>(null);
   const languageRef = useRef<HTMLInputElement | null>(null);
@@ -131,13 +129,8 @@ export function AfdSimulator() {
   const statusRef = useRef<SimulationStatus>('queued');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  function appendLog(message: string) {
-    const stamp = new Date().toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-    setLogs((previous) => [`${stamp} · ${message}`, ...previous]);
+  function appendLog(_message: string) {
+    // Mantido como no-op para preservar trilha de chamadas sem expor painel de log.
   }
 
   function stopTimer() {
@@ -547,21 +540,6 @@ export function AfdSimulator() {
         </article>
       </section>
 
-      <section className="section-card">
-        <h3 className="font-semibold">Registro de execução</h3>
-        <div className="run-log mt-3">
-          {logs.length === 0 ? (
-            <div className="text-sm text-slate-500">Sem eventos ainda.</div>
-          ) : (
-            logs.map((row, index) => (
-              <div key={`${row}-${index}`} className="run-log-item">
-                <strong>{row.split(' · ')[0]}</strong>
-                <span>{row.slice(row.indexOf(' · ') + 3)}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
     </div>
   );
 }

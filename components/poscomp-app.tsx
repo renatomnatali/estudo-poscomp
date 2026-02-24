@@ -27,34 +27,28 @@ const MOBILE_MENU_ITEMS: Array<{ id: MenuId; label: string }> = [
   { id: 'premium', label: 'Premium' },
 ];
 
-const MODULE_HEADER: Record<MenuId, { breadcrumb: string; title: string; subtitle: string }> = {
+const MODULE_HEADER: Record<MenuId, { title: string; subtitle: string }> = {
   dashboard: {
-    breadcrumb: 'Visão geral',
     title: 'Rota de estudo da semana',
     subtitle: 'Continue de onde parou: Autômatos e Linguagens Formais.',
   },
   topics: {
-    breadcrumb: 'Trilha',
     title: 'Tópicos do POSCOMP',
     subtitle: 'Selecione um tópico para estudar com teoria, exemplos e prática guiada.',
   },
   simulator: {
-    breadcrumb: 'Laboratório',
     title: 'Simulador de Autômatos',
-    subtitle: 'Monte e execute AFD/AFN com feedback passo a passo.',
+    subtitle: '',
   },
   flashcards: {
-    breadcrumb: 'Revisão',
     title: 'Sessão de flashcards',
     subtitle: 'Reforce conceitos críticos com repetição espaçada.',
   },
   exercises: {
-    breadcrumb: 'Treino',
     title: 'Questões estilo POSCOMP',
     subtitle: 'Resolva questões por subtópico e acompanhe desempenho.',
   },
   premium: {
-    breadcrumb: 'Plano',
     title: 'Recursos Premium',
     subtitle: 'Simulados completos, trilhas adaptativas e revisão guiada.',
   },
@@ -93,36 +87,6 @@ export function PoscompApp() {
     if (activeMenu === 'simulator') {
       return (
         <div className="space-y-5">
-          <section className="section-card">
-            <h2 className="text-xl font-bold">Laboratório de simulação</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Escolha o modo para executar simulações, minimizar AFD ou converter AFN para AFD.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                className={`button ${activeSimulatorTab === 'afd' ? 'primary' : 'secondary'}`}
-                onClick={() => setActiveSimulatorTab('afd')}
-              >
-                Simulador AFD
-              </button>
-              <button
-                type="button"
-                className={`button ${activeSimulatorTab === 'min' ? 'primary' : 'secondary'}`}
-                onClick={() => setActiveSimulatorTab('min')}
-              >
-                Minimização
-              </button>
-              <button
-                type="button"
-                className={`button ${activeSimulatorTab === 'conv' ? 'primary' : 'secondary'}`}
-                onClick={() => setActiveSimulatorTab('conv')}
-              >
-                AFN→AFD
-              </button>
-            </div>
-          </section>
-
           <section hidden={activeSimulatorTab !== 'afd'}>
             <AfdSimulator />
           </section>
@@ -208,13 +172,34 @@ export function PoscompApp() {
 
         <section className="main-area">
           <header className="page-header">
-            <div className="breadcrumb">
-              <span>{MENU_ITEMS.find((item) => item.id === activeMenu)?.label}</span>
-              <span>›</span>
-              <span>{currentHeader.breadcrumb}</span>
-            </div>
             <h1 className="page-title">{currentHeader.title}</h1>
-            <p className="page-subtitle">{currentHeader.subtitle}</p>
+            {currentHeader.subtitle ? <p className="page-subtitle">{currentHeader.subtitle}</p> : null}
+
+            {activeMenu === 'simulator' ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className={`button ${activeSimulatorTab === 'afd' ? 'primary' : 'secondary'}`}
+                  onClick={() => setActiveSimulatorTab('afd')}
+                >
+                  Simulador AFD
+                </button>
+                <button
+                  type="button"
+                  className={`button ${activeSimulatorTab === 'min' ? 'primary' : 'secondary'}`}
+                  onClick={() => setActiveSimulatorTab('min')}
+                >
+                  Minimização
+                </button>
+                <button
+                  type="button"
+                  className={`button ${activeSimulatorTab === 'conv' ? 'primary' : 'secondary'}`}
+                  onClick={() => setActiveSimulatorTab('conv')}
+                >
+                  AFN→AFD
+                </button>
+              </div>
+            ) : null}
           </header>
 
           {renderActiveModule()}

@@ -24,3 +24,9 @@ Funcionalidade: Navegação principal por menu lateral
   Cenário: Exibir navegação de atalhos no mobile
     Quando eu abro a aplicação em viewport pequena
     Então devo visualizar atalhos inferiores para "Dashboard", "Tópicos", "Simulador", "Exercícios" e "Premium"
+
+  Cenário: Exibir controles do simulador no primeiro bloco sem breadcrumb
+    Dado que estou no módulo "Simulador"
+    Quando a tela é renderizada
+    Então não devo visualizar breadcrumb no primeiro bloco
+    E devo visualizar os botões "Simulador AFD", "Minimização" e "AFN→AFD" no primeiro bloco

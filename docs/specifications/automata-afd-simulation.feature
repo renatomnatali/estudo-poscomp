@@ -61,6 +61,10 @@ Funcionalidade: Simulação didática de AFD
     E devo visualizar as arestas "e1-loop", "e1-transition", "e2-e3" e "e3-loop"
     E os labels do diagrama devem refletir a demo selecionada
 
+  Cenário: Não exibir bloco de registro de execução
+    Quando eu abro o simulador AFD
+    Então não devo visualizar o bloco "Registro de execução"
+
   Cenário: Rejeitar payload inválido na API de simulação
     Quando eu envio um payload sem "automaton" para "POST /api/simulator/afd/run"
     Então a API deve responder com status "400"
