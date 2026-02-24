@@ -71,7 +71,25 @@ export function validateDfaDefinition(input: unknown): ValidationResult<DfaDefin
     }
   }
 
-  return { valid: true, value: input as DfaDefinition };
+  const normalizedTransitions: DfaDefinition['transitions'] = {};
+  for (const state of states) {
+    const byState = transitions[state] as Record<string, unknown>;
+    normalizedTransitions[state] = {};
+    for (const symbol of alphabet) {
+      normalizedTransitions[state][symbol] = byState[symbol] as string;
+    }
+  }
+
+  return {
+    valid: true,
+    value: {
+      alphabet: alphabet.slice(),
+      states: states.slice(),
+      initialState,
+      acceptStates: acceptStates.slice(),
+      transitions: normalizedTransitions,
+    },
+  };
 }
 
 export function validateNfaDefinition(input: unknown): ValidationResult<NfaDefinition> {
@@ -136,5 +154,25 @@ export function validateNfaDefinition(input: unknown): ValidationResult<NfaDefin
     }
   }
 
-  return { valid: true, value: input as NfaDefinition };
+  const normalizedTransitions: NfaDefinition['transitions'] = {};
+  for (const state of states) {
+    const byState = transitions[state] as Record<string, unknown>;
+    normalizedTransitions[state] = {};
+    for (const symbol of [...alphabet, 'ε']) {
+      const targetStates = byState[symbol];
+      normalizedTransitions[state][symbol] =
+        Array.isArray(targetStates) ? (targetStates as string[]).slice() : [];
+    }
+  }
+
+  return {
+    valid: true,
+    value: {
+      alphabet: alphabet.slice(),
+      states: states.slice(),
+      initialState,
+      acceptStates: acceptStates.slice(),
+      transitions: normalizedTransitions,
+    },
+  };
 }
