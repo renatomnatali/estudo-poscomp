@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Bloqueia push direto para branches protegidas por padrão.
+# Para bypass explícito (em exceções), use:
+# ALLOW_PROTECTED_PUSH=1 git push origin main
+protected_refs_regex='^refs/heads/(main|master|trunk)$'
+
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [[ "${remote_ref}" =~ ${protected_refs_regex} ]]; then
+    if [[ "${ALLOW_PROTECTED_PUSH:-0}" != "1" ]]; then
+      branch_name="${remote_ref#refs/heads/}"
+      echo "Push direto para '${branch_name}' bloqueado pelo pre-push hook." >&2
+      echo "Fluxo obrigatório: branch curta + PR + squash merge." >&2
+      echo "Bypass consciente (exceção): ALLOW_PROTECTED_PUSH=1 git push origin ${branch_name}" >&2
+      exit 1
+    fi
+  fi
+done
+
+exit 0
