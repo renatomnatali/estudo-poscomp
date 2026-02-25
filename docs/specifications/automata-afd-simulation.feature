@@ -50,9 +50,26 @@ Funcionalidade: Simulação didática de AFD
 
   Cenário: Inserir símbolos via teclado clicável
     Dado que o foco está no campo de expressão da linguagem
+    E o teclado contextual de símbolos está visível
     Quando eu clico no símbolo "Σ"
     E eu clico no símbolo "→"
     Então os símbolos devem ser inseridos no campo ativo na posição do cursor
+
+  Cenário: Exibir teclado contextual apenas com campo em foco
+    Quando eu abro o simulador AFD
+    Então não devo visualizar o teclado de símbolos
+    Quando eu foco o campo "Expressão da linguagem"
+    Então devo visualizar o teclado de símbolos
+
+  Cenário: Exibir demos como presets secundários compactos
+    Quando eu abro o simulador AFD
+    Então devo visualizar os presets "demo-c", "demo-b" e "demo-a"
+    E os presets devem ter estilo visual secundário
+
+  Cenário: Destacar ação principal de execução automática
+    Quando eu abro o simulador AFD
+    Então devo visualizar "Executar automático" como ação primária
+    E as ações "Próximo passo", "Reset" e "Cancelar" devem ser secundárias
 
   Cenário: Exibir diagrama do AFD com labels sincronizados
     Dado que a demo ativa é "demo-c"
@@ -61,9 +78,19 @@ Funcionalidade: Simulação didática de AFD
     E devo visualizar as arestas "e1-loop", "e1-transition", "e2-e3" e "e3-loop"
     E os labels do diagrama devem refletir a demo selecionada
 
-  Cenário: Não exibir bloco de registro de execução
+  Cenário: Exibir detalhes técnicos da execução sob demanda
     Quando eu abro o simulador AFD
-    Então não devo visualizar o bloco "Registro de execução"
+    Então devo visualizar "Detalhes técnicos da execução" recolhido por padrão
+
+  Cenário: Exibir perguntas didáticas recolhidas por padrão
+    Quando eu abro o simulador AFD
+    Então devo visualizar "Perguntas didáticas" recolhido por padrão
+
+  Cenário: Exibir stepper mobile de etapas do simulador
+    Quando eu abro o simulador AFD em viewport pequena
+    Então devo visualizar os passos "1 Configurar", "2 Executar" e "3 Observar"
+    Quando eu seleciono o passo "3 Observar"
+    Então devo visualizar o bloco "Observar transições" como etapa ativa
 
   Cenário: Rejeitar payload inválido na API de simulação
     Quando eu envio um payload sem "automaton" para "POST /api/simulator/afd/run"

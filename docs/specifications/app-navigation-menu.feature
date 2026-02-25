@@ -30,3 +30,9 @@ Funcionalidade: Navegação principal por menu lateral
     Quando a tela é renderizada
     Então não devo visualizar breadcrumb no primeiro bloco
     E devo visualizar os botões "Simulador AFD", "Minimização" e "AFN→AFD" no primeiro bloco
+
+  Cenário: Exibir seletor de módulo no padrão segmented control
+    Dado que estou no módulo "Simulador"
+    Quando a tela é renderizada
+    Então devo visualizar o seletor de módulo com estilo segmented control
+    E o item "Simulador AFD" deve aparecer como ativo

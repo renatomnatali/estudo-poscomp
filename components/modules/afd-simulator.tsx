@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type FocusEvent } from 'react';
 
 import type { DfaDefinition, DfaSimulationResult, DfaTraceStep, SimulationStatus } from '@/lib/types';
 
 type DemoId = 'demo-c' | 'demo-b' | 'demo-a';
-type FocusField = 'machine' | 'language' | 'word';
+type FocusField = 'machine' | 'language' | 'word' | null;
+type MobileStep = 1 | 2 | 3;
 
 interface MachineConfig {
   loopSymbols: string[];
@@ -21,6 +22,7 @@ interface SessionData {
 }
 
 const ALPHABET = ['a', 'b', 'c'] as const;
+const SYMBOL_KEYS = ['a', 'b', 'c', ',', '*', '=', '{', '}', '(', ')', 'δ', 'Σ', '→'] as const;
 
 const DEMOS: Record<DemoId, { loopSymbols: string[]; transitionSymbol: string; word: string }> = {
   'demo-c': { loopSymbols: ['a', 'b'], transitionSymbol: 'c', word: 'ababc' },
@@ -105,6 +107,13 @@ function edgeFor(fromState: string, symbol: string, transitionSymbol: string): s
   return 'e3-loop';
 }
 
+function describeDemo(demoId: DemoId): string {
+  const demo = DEMOS[demoId];
+  const config = buildMachineConfig(demo.loopSymbols, demo.transitionSymbol);
+  if (!config) return demoId;
+  return `${demoId} ${languageExpressionFor(config)}`;
+}
+
 export function AfdSimulator() {
   const [activeDemo, setActiveDemo] = useState<DemoId>('demo-c');
   const [machineExpr, setMachineExpr] = useState('');
@@ -117,10 +126,14 @@ export function AfdSimulator() {
   const [currentPos, setCurrentPos] = useState(0);
   const [activeTransition, setActiveTransition] = useState<{ fromState: string; symbol: string } | null>(null);
 
-  const [focusedField, setFocusedField] = useState<FocusField>('language');
+  const [focusedField, setFocusedField] = useState<FocusField>(null);
+  const [mobileStep, setMobileStep] = useState<MobileStep>(1);
+  const [runLog, setRunLog] = useState<string[]>([]);
+
   const machineRef = useRef<HTMLTextAreaElement | null>(null);
   const languageRef = useRef<HTMLInputElement | null>(null);
   const wordRef = useRef<HTMLInputElement | null>(null);
+  const configSectionRef = useRef<HTMLDivElement | null>(null);
 
   const [machineConfig, setMachineConfig] = useState<MachineConfig | null>(null);
 
@@ -129,8 +142,8 @@ export function AfdSimulator() {
   const statusRef = useRef<SimulationStatus>('queued');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  function appendLog(_message: string) {
-    // Mantido como no-op para preservar trilha de chamadas sem expor painel de log.
+  function appendLog(message: string) {
+    setRunLog((previous) => [...previous, message]);
   }
 
   function stopTimer() {
@@ -242,6 +255,7 @@ export function AfdSimulator() {
 
   async function onRunAll() {
     stopTimer();
+    setMobileStep(2);
     const ok = await prepareSession();
     if (!ok) return;
 
@@ -253,6 +267,7 @@ export function AfdSimulator() {
 
   async function onRunStep() {
     stopTimer();
+    setMobileStep(2);
 
     if (statusRef.current === 'queued' || !sessionRef.current) {
       const ok = await prepareSession();
@@ -271,6 +286,7 @@ export function AfdSimulator() {
     setCurrentState('e1');
     setCurrentPos(0);
     setActiveTransition(null);
+    setRunLog([]);
     appendLog('Execução resetada.');
   }
 
@@ -282,15 +298,16 @@ export function AfdSimulator() {
     appendLog('Execução cancelada pelo usuário.');
   }
 
-  function insertSymbol(symbol: string) {
-    const field =
-      focusedField === 'machine'
-        ? machineRef.current
-        : focusedField === 'word'
-          ? wordRef.current
-          : languageRef.current;
+  function targetFieldRef() {
+    if (focusedField === 'machine') return machineRef.current;
+    if (focusedField === 'word') return wordRef.current;
+    if (focusedField === 'language') return languageRef.current;
+    return null;
+  }
 
-    if (!field) return;
+  function insertSymbol(symbol: string) {
+    const field = targetFieldRef();
+    if (!field || !focusedField) return;
 
     const start = field.selectionStart ?? field.value.length;
     const end = field.selectionEnd ?? field.value.length;
@@ -317,9 +334,16 @@ export function AfdSimulator() {
     setMachineExpr(machineExpressionFor(config));
     setLanguageExpr(languageExpressionFor(config));
     setWord(demo.word);
+    setMobileStep(1);
 
     onReset();
     appendLog(`Demo carregada: ${demoId}.`);
+  }
+
+  function onFieldBlur(event: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    const nextTarget = event.relatedTarget as Node | null;
+    if (nextTarget && configSectionRef.current?.contains(nextTarget)) return;
+    setFocusedField(null);
   }
 
   useEffect(() => {
@@ -330,7 +354,7 @@ export function AfdSimulator() {
       setMachineExpr(machineExpressionFor(config));
       setLanguageExpr(languageExpressionFor(config));
       setWord(demo.word);
-      appendLog('Demo carregada: demo-c.');
+      setRunLog(['Demo carregada: demo-c.']);
     }
 
     return () => {
@@ -353,14 +377,41 @@ export function AfdSimulator() {
   const sinkLabel = ALPHABET.join(',');
 
   return (
-    <div className="space-y-5">
-      <section className="section-card">
-        <h2 className="text-xl font-bold">Simulador AFD</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Entrada por expressão da máquina + expressão da linguagem + palavra, com demonstrações prontas.
-        </p>
+    <div className="space-y-4">
+      <nav className="sim-stepper" aria-label="Etapas do simulador">
+        <button
+          type="button"
+          className={`sim-stepper-btn ${mobileStep === 1 ? 'is-active' : ''}`}
+          onClick={() => setMobileStep(1)}
+        >
+          1 Configurar
+        </button>
+        <button
+          type="button"
+          className={`sim-stepper-btn ${mobileStep === 2 ? 'is-active' : ''}`}
+          onClick={() => setMobileStep(2)}
+        >
+          2 Executar
+        </button>
+        <button
+          type="button"
+          className={`sim-stepper-btn ${mobileStep === 3 ? 'is-active' : ''}`}
+          onClick={() => setMobileStep(3)}
+        >
+          3 Observar
+        </button>
+      </nav>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
+      <section className={`section-card sim-stage ${mobileStep === 1 ? 'is-active' : 'sim-mobile-hidden'}`}>
+        <header className="sim-stage-header">
+          <span className="sim-stage-number">1</span>
+          <div>
+            <h2 className="text-xl font-bold">Configurar entrada</h2>
+            <p className="text-sm text-slate-600">Defina máquina, linguagem e palavra com presets e atalhos de símbolo.</p>
+          </div>
+        </header>
+
+        <div ref={configSectionRef} className="mt-4 grid gap-3 md:grid-cols-2">
           <div>
             <label className="text-xs uppercase tracking-wide text-slate-500" htmlFor="machine-expr">
               Expressão da máquina
@@ -370,10 +421,15 @@ export function AfdSimulator() {
               ref={machineRef}
               value={machineExpr}
               onChange={(event) => setMachineExpr(event.target.value)}
-              onFocus={() => setFocusedField('machine')}
+              onFocus={() => {
+                setFocusedField('machine');
+                setMobileStep(1);
+              }}
+              onBlur={onFieldBlur}
               className="mt-1 min-h-[140px] w-full rounded-xl border border-slate-300 p-2 font-mono text-sm"
             />
           </div>
+
           <div>
             <label className="text-xs uppercase tracking-wide text-slate-500" htmlFor="language-expr">
               Expressão da linguagem
@@ -383,7 +439,11 @@ export function AfdSimulator() {
               ref={languageRef}
               value={languageExpr}
               onChange={(event) => setLanguageExpr(event.target.value)}
-              onFocus={() => setFocusedField('language')}
+              onFocus={() => {
+                setFocusedField('language');
+                setMobileStep(1);
+              }}
+              onBlur={onFieldBlur}
               className="mt-1 w-full rounded-xl border border-slate-300 p-2"
             />
 
@@ -395,53 +455,94 @@ export function AfdSimulator() {
               ref={wordRef}
               value={word}
               onChange={(event) => setWord(event.target.value)}
-              onFocus={() => setFocusedField('word')}
+              onFocus={() => {
+                setFocusedField('word');
+                setMobileStep(1);
+              }}
+              onBlur={onFieldBlur}
               className="mt-1 w-full rounded-xl border border-slate-300 p-2 font-mono"
             />
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          {['a', 'b', 'c', ',', '*', '=', '{', '}', '(', ')', 'δ', 'Σ', '→'].map((symbol) => (
-            <button
-              key={symbol}
-              type="button"
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-mono text-sm hover:border-blue-400"
-              onClick={() => insertSymbol(symbol)}
-            >
-              {symbol}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-4 grid gap-2 md:grid-cols-3">
-          {(
-            Object.keys(DEMOS) as DemoId[]
-          ).map((demoId) => (
+        <div className="sim-demo-row" aria-label="Presets de demonstração">
+          {(Object.keys(DEMOS) as DemoId[]).map((demoId) => (
             <button
               key={demoId}
               type="button"
               onClick={() => applyDemo(demoId)}
-              className={`rounded-xl border p-3 text-left ${activeDemo === demoId ? 'border-blue-400 bg-blue-50' : 'border-slate-200 bg-white'}`}
+              className={`sim-demo-chip ${activeDemo === demoId ? 'is-active' : ''}`}
+              aria-label={describeDemo(demoId)}
             >
-              <strong className="block text-sm">{demoId}</strong>
-              <span className="text-xs text-slate-600">{languageExpressionFor(buildMachineConfig(DEMOS[demoId].loopSymbols, DEMOS[demoId].transitionSymbol)!)}</span>
+              <strong>{demoId}</strong>
+              <span>{languageExpressionFor(buildMachineConfig(DEMOS[demoId].loopSymbols, DEMOS[demoId].transitionSymbol)!)}</span>
             </button>
           ))}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button type="button" className="button primary" onClick={onRunAll}>Executar automático</button>
-          <button type="button" className="button secondary" onClick={onRunStep}>Próximo passo</button>
-          <button type="button" className="button secondary" onClick={onReset}>Reset</button>
-          <button type="button" className="button secondary" onClick={onCancel}>Cancelar</button>
+        {focusedField ? (
+          <div className="sim-keyboard-contextual" aria-label="Teclado de símbolos">
+            {SYMBOL_KEYS.map((symbol) => (
+              <button
+                key={symbol}
+                type="button"
+                className="sim-symbol-key"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => insertSymbol(symbol)}
+              >
+                {symbol}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </section>
+
+      <section className={`section-card sim-stage ${mobileStep === 2 ? 'is-active' : 'sim-mobile-hidden'}`}>
+        <header className="sim-stage-header">
+          <span className="sim-stage-number">2</span>
+          <div>
+            <h3 className="text-lg font-semibold">Executar e acompanhar</h3>
+            <p className="text-sm text-slate-600">Ação principal automática com suporte de execução passo a passo.</p>
+          </div>
+        </header>
+
+        <div className="sim-action-bar">
+          <button type="button" className="sim-action-btn sim-action-btn-primary" onClick={onRunAll}>
+            Executar automático
+          </button>
+          <button type="button" className="sim-action-btn sim-action-btn-secondary" onClick={onRunStep}>
+            Próximo passo
+          </button>
+          <button type="button" className="sim-action-btn sim-action-btn-tertiary" onClick={onReset}>
+            Reset
+          </button>
+          <button type="button" className="sim-action-btn sim-action-btn-tertiary" onClick={onCancel}>
+            Cancelar
+          </button>
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <article className="sim-box"><div className="sim-box-label">Estado atual</div><p className="sim-box-value">{currentState}</p></article>
-          <article className="sim-box"><div className="sim-box-label">Posição</div><p className="sim-box-value">{currentPos}/{sessionRef.current?.word.length ?? word.trim().length}</p></article>
-          <article className="sim-box"><div className="sim-box-label">Resultado</div><p className="sim-box-value">{result}</p></article>
-          <article className="sim-box"><div className="sim-box-label">Status</div><p className="sim-box-value flex items-center gap-2 text-base"><span className={`status-dot ${status}`}></span>{status}</p></article>
+          <article className="sim-box">
+            <div className="sim-box-label">Estado atual</div>
+            <p className="sim-box-value">{currentState}</p>
+          </article>
+          <article className="sim-box">
+            <div className="sim-box-label">Posição</div>
+            <p className="sim-box-value">
+              {currentPos}/{sessionRef.current?.word.length ?? word.trim().length}
+            </p>
+          </article>
+          <article className="sim-box">
+            <div className="sim-box-label">Resultado</div>
+            <p className="sim-box-value">{result}</p>
+          </article>
+          <article className="sim-box">
+            <div className="sim-box-label">Status</div>
+            <p className="sim-box-value flex items-center gap-2 text-base">
+              <span className={`status-dot ${status}`}></span>
+              {status}
+            </p>
+          </article>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -456,90 +557,157 @@ export function AfdSimulator() {
             );
           })}
         </div>
+
+        <details className="sim-details mt-4">
+          <summary>Detalhes técnicos da execução</summary>
+          <div className="run-log" aria-live="polite">
+            {runLog.length > 0 ? (
+              runLog.map((entry, index) => (
+                <div className="run-log-item" key={`${entry}-${index}`}>
+                  <span className="text-slate-500">{index + 1}</span>
+                  <span>{entry}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-slate-500">Sem execução registrada.</p>
+            )}
+          </div>
+        </details>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <article className="section-card">
-          <h3 className="font-semibold">Diagrama do AFD</h3>
-          <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-2">
-            <svg className="afd-canvas" viewBox="0 0 760 350" role="img" aria-label="Autômato finito determinístico com estados e1, e2 e e3">
-              <defs>
-                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                  <polygon points="0 0, 10 3.5, 0 7" fill="#334155"></polygon>
-                </marker>
-              </defs>
-
-              <g className="edge-group" data-afd-edge="start">
-                <line className="edge-line" x1="22" y1="180" x2="118" y2="180" markerEnd="url(#arrowhead)"></line>
-              </g>
-
-              <g className={`edge-group ${activeEdge === 'e1-transition' ? 'is-active' : ''}`} data-afd-edge="e1-transition">
-                <line className="edge-line" x1="198" y1="180" x2="352" y2="180" markerEnd="url(#arrowhead)"></line>
-                <text className="edge-label" x="272" y="163" data-afd-label-transition>{transitionLabel}</text>
-              </g>
-
-              <g className={`edge-group ${activeEdge === 'e1-loop' ? 'is-active' : ''}`} data-afd-edge="e1-loop">
-                <path className="edge-loop" d="M 130 228 C 86 262, 98 314, 145 307 C 192 300, 193 248, 163 232" markerEnd="url(#arrowhead)"></path>
-                <text className="edge-label" x="102" y="330" data-afd-label-loop>{loopLabel}</text>
-              </g>
-
-              <g className={`edge-group ${activeEdge === 'e2-e3' ? 'is-active' : ''}`} data-afd-edge="e2-e3">
-                <line className="edge-line" x1="430" y1="156" x2="430" y2="66" markerEnd="url(#arrowhead)"></line>
-                <text className="edge-label" x="446" y="116" data-afd-label-sink>{sinkLabel}</text>
-              </g>
-
-              <g className={`edge-group ${activeEdge === 'e3-loop' ? 'is-active' : ''}`} data-afd-edge="e3-loop">
-                <path className="edge-loop" d="M 480 30 C 517 -9, 580 5, 560 56 C 551 81, 520 89, 498 70" markerEnd="url(#arrowhead)"></path>
-                <text className="edge-label" x="566" y="41" data-afd-label-sink-loop>{sinkLabel}</text>
-              </g>
-
-              <g data-afd-state="e1" className={`state-group ${currentState === 'e1' ? 'is-active' : ''}`}>
-                <circle className="state-circle" cx="158" cy="180" r="48"></circle>
-                <text className="state-label" x="140" y="194">e1</text>
-              </g>
-
-              <g data-afd-state="e2" className={`state-group ${currentState === 'e2' ? 'is-active' : ''}`}>
-                <circle className="state-circle" cx="430" cy="180" r="48"></circle>
-                <circle className="state-final-ring" cx="430" cy="180" r="38"></circle>
-                <text className="state-label" x="412" y="194">e2</text>
-              </g>
-
-              <g data-afd-state="e3" className={`state-group ${currentState === 'e3' ? 'is-active' : ''}`}>
-                <circle className="state-circle" cx="430" cy="40" r="38"></circle>
-                <text className="state-label" x="413" y="50">e3</text>
-              </g>
-            </svg>
+      <section className={`section-card sim-stage ${mobileStep === 3 ? 'is-active' : 'sim-mobile-hidden'}`}>
+        <header className="sim-stage-header">
+          <span className="sim-stage-number">3</span>
+          <div>
+            <h3 className="text-lg font-semibold">Observar transições</h3>
+            <p className="text-sm text-slate-600">Diagrama e matriz δ sincronizados com o passo atual.</p>
           </div>
-        </article>
+        </header>
 
-        <article className="section-card">
-          <h3 className="font-semibold">Função de transição δ</h3>
-          <div className="mt-3 overflow-x-auto">
-            <table className="delta-table">
-              <thead>
-                <tr><th>δ</th><th>a</th><th>b</th><th>c</th></tr>
-              </thead>
-              <tbody>
-                {['e1', 'e2', 'e3'].map((stateName) => (
-                  <tr key={stateName}>
-                    <td className="state-cell">{stateName}</td>
-                    {ALPHABET.map((symbol) => (
-                      <td
-                        key={`${stateName}-${symbol}`}
-                        data-afd-cell={`${stateName}-${symbol}`}
-                        className={activeTransition?.fromState === stateName && activeTransition.symbol === symbol ? 'is-active' : ''}
-                      >
-                        {machineConfig?.transitions[stateName]?.[symbol] || '—'}
-                      </td>
-                    ))}
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <article className="panel">
+            <h4 className="font-semibold">Diagrama do AFD</h4>
+            <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-2">
+              <svg className="afd-canvas" viewBox="0 0 760 350" role="img" aria-label="Autômato finito determinístico com estados e1, e2 e e3">
+                <defs>
+                  <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#334155"></polygon>
+                  </marker>
+                </defs>
+
+                <g className="edge-group" data-afd-edge="start">
+                  <line className="edge-line" x1="22" y1="180" x2="118" y2="180" markerEnd="url(#arrowhead)"></line>
+                </g>
+
+                <g className={`edge-group ${activeEdge === 'e1-transition' ? 'is-active' : ''}`} data-afd-edge="e1-transition">
+                  <line className="edge-line" x1="198" y1="180" x2="352" y2="180" markerEnd="url(#arrowhead)"></line>
+                  <text className="edge-label" x="272" y="163" data-afd-label-transition>
+                    {transitionLabel}
+                  </text>
+                </g>
+
+                <g className={`edge-group ${activeEdge === 'e1-loop' ? 'is-active' : ''}`} data-afd-edge="e1-loop">
+                  <path
+                    className="edge-loop"
+                    d="M 130 228 C 86 262, 98 314, 145 307 C 192 300, 193 248, 163 232"
+                    markerEnd="url(#arrowhead)"
+                  ></path>
+                  <text className="edge-label" x="102" y="330" data-afd-label-loop>
+                    {loopLabel}
+                  </text>
+                </g>
+
+                <g className={`edge-group ${activeEdge === 'e2-e3' ? 'is-active' : ''}`} data-afd-edge="e2-e3">
+                  <line className="edge-line" x1="430" y1="156" x2="430" y2="66" markerEnd="url(#arrowhead)"></line>
+                  <text className="edge-label" x="446" y="116" data-afd-label-sink>
+                    {sinkLabel}
+                  </text>
+                </g>
+
+                <g className={`edge-group ${activeEdge === 'e3-loop' ? 'is-active' : ''}`} data-afd-edge="e3-loop">
+                  <path
+                    className="edge-loop"
+                    d="M 480 30 C 517 -9, 580 5, 560 56 C 551 81, 520 89, 498 70"
+                    markerEnd="url(#arrowhead)"
+                  ></path>
+                  <text className="edge-label" x="566" y="41" data-afd-label-sink-loop>
+                    {sinkLabel}
+                  </text>
+                </g>
+
+                <g data-afd-state="e1" className={`state-group ${currentState === 'e1' ? 'is-active' : ''}`}>
+                  <circle className="state-circle" cx="158" cy="180" r="48"></circle>
+                  <text className="state-label" x="140" y="194">
+                    e1
+                  </text>
+                </g>
+
+                <g data-afd-state="e2" className={`state-group ${currentState === 'e2' ? 'is-active' : ''}`}>
+                  <circle className="state-circle" cx="430" cy="180" r="48"></circle>
+                  <circle className="state-final-ring" cx="430" cy="180" r="38"></circle>
+                  <text className="state-label" x="412" y="194">
+                    e2
+                  </text>
+                </g>
+
+                <g data-afd-state="e3" className={`state-group ${currentState === 'e3' ? 'is-active' : ''}`}>
+                  <circle className="state-circle" cx="430" cy="40" r="38"></circle>
+                  <text className="state-label" x="413" y="50">
+                    e3
+                  </text>
+                </g>
+              </svg>
+            </div>
+          </article>
+
+          <article className="panel">
+            <h4 className="font-semibold">Função de transição δ</h4>
+            <div className="mt-3 overflow-x-auto">
+              <table className="delta-table">
+                <thead>
+                  <tr>
+                    <th>δ</th>
+                    <th>a</th>
+                    <th>b</th>
+                    <th>c</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </article>
-      </section>
+                </thead>
+                <tbody>
+                  {['e1', 'e2', 'e3'].map((stateName) => (
+                    <tr key={stateName}>
+                      <td className="state-cell">{stateName}</td>
+                      {ALPHABET.map((symbol) => (
+                        <td
+                          key={`${stateName}-${symbol}`}
+                          data-afd-cell={`${stateName}-${symbol}`}
+                          className={activeTransition?.fromState === stateName && activeTransition.symbol === symbol ? 'is-active' : ''}
+                        >
+                          {machineConfig?.transitions[stateName]?.[symbol] || '—'}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
 
+        <details className="sim-details mt-4">
+          <summary>Perguntas didáticas</summary>
+          <ul className="list mt-2">
+            <li>
+              A palavra <code>c</code> é reconhecida por M₁?
+            </li>
+            <li>
+              A palavra <code>abc</code> é reconhecida por M₁?
+            </li>
+            <li>
+              A palavra <code>ababc</code> é reconhecida por M₁?
+            </li>
+          </ul>
+        </details>
+      </section>
     </div>
   );
 }

@@ -2,12 +2,32 @@
   const yearSelect = document.querySelector('[data-qa-year]');
   const subtopicSelect = document.querySelector('[data-qa-subtopic]');
   const difficultySelect = document.querySelector('[data-qa-difficulty]');
-  const questionListEl = document.querySelector('[data-qa-list]');
-  const detailEl = document.querySelector('[data-qa-detail]');
-  const feedbackEl = document.querySelector('[data-qa-feedback]');
-  const metricsEl = document.querySelector('[data-qa-metrics]');
 
-  if (!yearSelect || !subtopicSelect || !difficultySelect || !questionListEl || !detailEl || !feedbackEl || !metricsEl) {
+  const detailEl = document.querySelector('[data-qa-detail]');
+  const metricsEl = document.querySelector('[data-qa-metrics]');
+  const activitiesEl = document.querySelector('[data-qa-activities]');
+  const progressLabelEl = document.querySelector('[data-qa-progress]');
+  const progressMetaEl = document.querySelector('[data-qa-progress-meta]');
+  const progressFillEl = document.querySelector('[data-qa-progress-fill]');
+
+  const prevButton = document.querySelector('[data-qa-prev]');
+  const nextButton = document.querySelector('[data-qa-next]');
+  const correctButton = document.querySelector('[data-qa-correct]');
+
+  if (
+    !yearSelect ||
+    !subtopicSelect ||
+    !difficultySelect ||
+    !detailEl ||
+    !metricsEl ||
+    !activitiesEl ||
+    !progressLabelEl ||
+    !progressMetaEl ||
+    !progressFillEl ||
+    !prevButton ||
+    !nextButton ||
+    !correctButton
+  ) {
     return;
   }
 
@@ -55,12 +75,35 @@
     hard: 'Difícil',
   };
 
+  const reinforcement = {
+    afd_modelagem_execucao: [
+      'Reexecutar 3 simulações passo a passo no módulo de AFD.',
+      'Resolver 5 questões focadas em linguagem reconhecida por AFD.'
+    ],
+    minimizacao_afd: [
+      'Refazer o algoritmo de partições em dois exemplos com estados inalcançáveis.',
+      'Comparar AFD original e mínimo com palavras de teste.'
+    ],
+    afn_epsilon: [
+      'Calcular ε-fecho de todos os estados em dois AFNs distintos.',
+      'Simular manualmente a evolução do conjunto de estados para 3 palavras.'
+    ],
+    conversao_afn_afd: [
+      'Converter um AFN com ε para AFD por construção de subconjuntos.',
+      'Validar equivalência AFN/AFD em ao menos 4 palavras.'
+    ]
+  };
+
   const state = {
     questions: [],
     filtered: [],
-    selectedQuestionId: null,
+    currentIndex: 0,
     selectedChoice: null,
+    answers: {},
     metrics: {},
+    evaluations: {},
+    feedbackByQuestion: {},
+    weakTopics: []
   };
 
   function sanitizeHtml(value) {
@@ -76,9 +119,7 @@
     const path = '../../data/questions/automata/poscomp-automata-v1.json';
     return fetch(path)
       .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.json();
       })
       .catch(() => fallbackDataset);
@@ -88,8 +129,124 @@
     return subtopicLabels[subTopic] || subTopic;
   }
 
-  function getSelectedQuestion() {
-    return state.questions.find((question) => question.id === state.selectedQuestionId) || null;
+  function getCurrentQuestion() {
+    return state.filtered[state.currentIndex] || null;
+  }
+
+  function recalculateWeakTopics() {
+    state.weakTopics = Object.entries(state.metrics)
+      .filter(([, metric]) => metric.answered > 0 && (metric.correct / metric.answered) < 0.7)
+      .map(([topic]) => topic);
+  }
+
+  function renderProgress() {
+    const total = state.filtered.length;
+    const current = total > 0 ? state.currentIndex + 1 : 0;
+
+    const filteredIds = new Set(state.filtered.map((question) => question.id));
+    const answered = Object.keys(state.answers).filter((id) => filteredIds.has(id)).length;
+    const correct = Object.entries(state.evaluations)
+      .filter(([id, evaluation]) => filteredIds.has(id) && evaluation.correct)
+      .length;
+
+    progressLabelEl.textContent = total > 0 ? `Questão ${current} de ${total}` : 'Sem questões para os filtros';
+    progressMetaEl.textContent = `Respondidas: ${answered} · Corretas: ${correct}`;
+
+    const percentage = total > 0 ? Math.round((answered / total) * 100) : 0;
+    progressFillEl.style.width = `${percentage}%`;
+  }
+
+  function renderMetrics() {
+    const topicKeys = Array.from(new Set(state.questions.map((question) => question.subTopic)));
+    metricsEl.innerHTML = '';
+
+    topicKeys.forEach((topic) => {
+      const metric = state.metrics[topic] || { answered: 0, correct: 0 };
+      const accuracy = metric.answered > 0 ? Math.round((metric.correct / metric.answered) * 100) : null;
+
+      let status = 'sem dados';
+      if (accuracy !== null) status = accuracy >= 70 ? 'ok' : 'reforçar';
+
+      const row = document.createElement('tr');
+      row.innerHTML = [
+        `<td>${sanitizeHtml(getSubtopicLabel(topic))}</td>`,
+        `<td>${metric.answered}</td>`,
+        `<td>${accuracy === null ? '—' : `${accuracy}%`}</td>`,
+        `<td>${status}</td>`
+      ].join('');
+
+      metricsEl.appendChild(row);
+    });
+  }
+
+  function renderActivities() {
+    if (state.weakTopics.length === 0) {
+      activitiesEl.innerHTML = '<p class="page-subtitle" style="margin-top: 0; color: var(--color-ink-500);">Sem lacunas críticas detectadas até o momento.</p>';
+      return;
+    }
+
+    const blocks = state.weakTopics.map((topic) => {
+      const activities = reinforcement[topic] || ['Revisar teoria do subtópico.', 'Resolver questões adicionais do subtópico.'];
+      const list = activities.map((item) => `<li>${sanitizeHtml(item)}</li>`).join('');
+
+      return [
+        '<article class="partition-step">',
+        `<strong>${sanitizeHtml(getSubtopicLabel(topic))}</strong>`,
+        `<ul class="list">${list}</ul>`,
+        '</article>'
+      ].join('');
+    }).join('');
+
+    activitiesEl.innerHTML = blocks;
+  }
+
+  function renderQuestion() {
+    const question = getCurrentQuestion();
+
+    if (!question) {
+      detailEl.innerHTML = '<p class="page-subtitle" style="margin-top: 0; color: var(--color-ink-500);">Nenhuma questão encontrada para os filtros atuais.</p>';
+      prevButton.disabled = true;
+      nextButton.disabled = true;
+      correctButton.disabled = true;
+      return;
+    }
+
+    prevButton.disabled = state.currentIndex === 0;
+    nextButton.disabled = state.currentIndex >= state.filtered.length - 1;
+    correctButton.disabled = false;
+
+    const selected = state.selectedChoice;
+    const feedback = state.feedbackByQuestion[question.id];
+
+    const options = question.options.map((option) => {
+      const selectedClass = selected === option.key ? ' is-selected' : '';
+      return `<button type="button" class="option-btn${selectedClass}" data-option-key="${option.key}"><strong>${option.key})</strong> ${sanitizeHtml(option.text)}</button>`;
+    }).join('');
+
+    detailEl.innerHTML = [
+      '<div class="exercise-question-heading">',
+      `<strong>${question.year} · Questão ${question.number}</strong>`,
+      `<span>${sanitizeHtml(getSubtopicLabel(question.subTopic))} · ${sanitizeHtml(difficultyLabels[question.difficulty] || question.difficulty)}</span>`,
+      '</div>',
+      `<p>${sanitizeHtml(question.stem)}</p>`,
+      `<div class="option-list">${options}</div>`,
+      feedback ? [
+        '<div class="exercise-feedback">',
+        `<p><strong>${feedback.correct ? 'Resposta correta.' : 'Resposta incorreta.'}</strong></p>`,
+        `<p>Gabarito oficial: <strong>${feedback.answerKey}</strong>.</p>`,
+        `<p>${sanitizeHtml(feedback.explanation)}</p>`,
+        '</div>'
+      ].join('') : ''
+    ].join('');
+
+    detailEl.querySelectorAll('[data-option-key]').forEach((button) => {
+      button.addEventListener('click', () => {
+        state.selectedChoice = button.getAttribute('data-option-key');
+        state.answers[question.id] = state.selectedChoice;
+        renderQuestion();
+        renderProgress();
+      });
+    });
   }
 
   function applyFilters() {
@@ -104,174 +261,85 @@
       return true;
     });
 
-    if (!state.filtered.some((question) => question.id === state.selectedQuestionId)) {
-      state.selectedQuestionId = state.filtered.length > 0 ? state.filtered[0].id : null;
-      state.selectedChoice = null;
-    }
+    state.currentIndex = 0;
+    const first = getCurrentQuestion();
+    state.selectedChoice = first ? (state.answers[first.id] || null) : null;
 
-    renderQuestionList();
-    renderQuestionDetail();
-  }
-
-  function renderQuestionList() {
-    questionListEl.innerHTML = '';
-
-    if (state.filtered.length === 0) {
-      questionListEl.innerHTML = '<p class="page-subtitle" style="margin-top: 0; color: var(--color-ink-500);">Nenhuma questão encontrada para os filtros atuais.</p>';
-      return;
-    }
-
-    state.filtered.forEach((question) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'question-item';
-      if (question.id === state.selectedQuestionId) button.classList.add('is-active');
-
-      button.innerHTML = [
-        `<strong>${question.year} · Questão ${question.number}</strong>`,
-        `<p>${sanitizeHtml(getSubtopicLabel(question.subTopic))}</p>`,
-        '<div class="question-meta">',
-        `<span class="question-chip">${sanitizeHtml(difficultyLabels[question.difficulty] || question.difficulty)}</span>`,
-        `<span class="question-chip">${sanitizeHtml(question.source)}</span>`,
-        '</div>',
-      ].join('');
-
-      button.addEventListener('click', () => {
-        state.selectedQuestionId = question.id;
-        state.selectedChoice = null;
-        renderQuestionList();
-        renderQuestionDetail();
-      });
-
-      questionListEl.appendChild(button);
-    });
-  }
-
-  function renderQuestionDetail() {
-    const question = getSelectedQuestion();
-    if (!question) {
-      detailEl.innerHTML = '<p class="page-subtitle" style="margin-top: 0; color: var(--color-ink-500);">Selecione uma questão para responder.</p>';
-      return;
-    }
-
-    const wrapper = document.createElement('div');
-
-    const heading = document.createElement('p');
-    heading.style.marginTop = '0';
-    heading.style.marginBottom = '12px';
-    heading.innerHTML = `<strong>${question.year} · Questão ${question.number}</strong>`;
-    wrapper.appendChild(heading);
-
-    const stem = document.createElement('p');
-    stem.style.marginTop = '0';
-    stem.style.color = 'var(--color-ink-700)';
-    stem.textContent = question.stem;
-    wrapper.appendChild(stem);
-
-    const optionList = document.createElement('div');
-    optionList.className = 'option-list';
-
-    question.options.forEach((option) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'option-btn';
-      if (state.selectedChoice === option.key) btn.classList.add('is-selected');
-      btn.innerHTML = `<strong>${option.key})</strong> ${sanitizeHtml(option.text)}`;
-      btn.addEventListener('click', () => {
-        state.selectedChoice = option.key;
-        renderQuestionDetail();
-      });
-      optionList.appendChild(btn);
-    });
-
-    wrapper.appendChild(optionList);
-
-    const toolbar = document.createElement('div');
-    toolbar.className = 'toolbar';
-
-    const evaluateButton = document.createElement('button');
-    evaluateButton.type = 'button';
-    evaluateButton.className = 'button primary';
-    evaluateButton.textContent = 'Corrigir questão';
-    evaluateButton.addEventListener('click', () => evaluateQuestion(question));
-
-    toolbar.appendChild(evaluateButton);
-    wrapper.appendChild(toolbar);
-
-    detailEl.innerHTML = '';
-    detailEl.appendChild(wrapper);
+    renderQuestion();
+    renderProgress();
   }
 
   function updateMetrics(question, isCorrect) {
-    const key = question.subTopic;
-    if (!state.metrics[key]) {
-      state.metrics[key] = { answered: 0, correct: 0 };
+    const previous = state.evaluations[question.id];
+
+    if (!state.metrics[question.subTopic]) {
+      state.metrics[question.subTopic] = { answered: 0, correct: 0 };
     }
 
-    state.metrics[key].answered += 1;
-    if (isCorrect) state.metrics[key].correct += 1;
+    if (!previous) {
+      state.metrics[question.subTopic].answered += 1;
+      if (isCorrect) state.metrics[question.subTopic].correct += 1;
+    } else if (previous.correct !== isCorrect) {
+      state.metrics[question.subTopic].correct += isCorrect ? 1 : -1;
+    }
 
+    state.evaluations[question.id] = {
+      subTopic: question.subTopic,
+      correct: isCorrect
+    };
+
+    recalculateWeakTopics();
     renderMetrics();
+    renderActivities();
   }
 
-  function renderMetrics() {
-    const topicKeys = Array.from(
-      new Set(state.questions.map((question) => question.subTopic))
-    );
+  function evaluateCurrentQuestion() {
+    const question = getCurrentQuestion();
+    if (!question) return;
 
-    metricsEl.innerHTML = '';
-
-    topicKeys.forEach((key) => {
-      const metric = state.metrics[key] || { answered: 0, correct: 0 };
-      const accuracy = metric.answered > 0
-        ? Math.round((metric.correct / metric.answered) * 100)
-        : null;
-
-      let status = 'sem dados';
-      if (accuracy !== null) {
-        status = accuracy >= 70 ? 'ok' : 'reforçar';
-      }
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = [
-        `<td>${sanitizeHtml(getSubtopicLabel(key))}</td>`,
-        `<td>${metric.answered}</td>`,
-        `<td>${accuracy === null ? '—' : `${accuracy}%`}</td>`,
-        `<td>${status}</td>`,
-      ].join('');
-
-      metricsEl.appendChild(tr);
-    });
-  }
-
-  function evaluateQuestion(question) {
     if (!state.selectedChoice) {
-      feedbackEl.innerHTML = 'Selecione uma alternativa antes de corrigir.';
+      state.feedbackByQuestion[question.id] = {
+        correct: false,
+        answerKey: question.answerKey,
+        explanation: 'Selecione uma alternativa antes de corrigir.'
+      };
+      renderQuestion();
       return;
     }
 
     const isCorrect = state.selectedChoice === question.answerKey;
+    const explanation =
+      (question.optionExplanations && question.optionExplanations[state.selectedChoice]) ||
+      question.explanation ||
+      'Sem explicação cadastrada.';
+
     updateMetrics(question, isCorrect);
 
-    const choiceExplanation =
-      (question.optionExplanations && question.optionExplanations[state.selectedChoice])
-      || 'Sem explicação cadastrada para esta alternativa.';
+    state.feedbackByQuestion[question.id] = {
+      correct: isCorrect,
+      answerKey: question.answerKey,
+      explanation
+    };
 
-    const weakTopics = Object.entries(state.metrics)
-      .filter(([, metric]) => metric.answered > 0 && (metric.correct / metric.answered) < 0.7)
-      .map(([key]) => getSubtopicLabel(key));
+    renderQuestion();
+  }
 
-    const recommendation = weakTopics.length > 0
-      ? `Recomendação de revisão: ${weakTopics.join(', ')}.`
-      : 'Nenhuma lacuna crítica detectada até o momento.';
+  function goNext() {
+    if (state.currentIndex >= state.filtered.length - 1) return;
+    state.currentIndex += 1;
+    const current = getCurrentQuestion();
+    state.selectedChoice = current ? (state.answers[current.id] || null) : null;
+    renderQuestion();
+    renderProgress();
+  }
 
-    feedbackEl.innerHTML = [
-      `<strong>${isCorrect ? 'Resposta correta.' : 'Resposta incorreta.'}</strong>`,
-      `<p style="margin-top: 8px; margin-bottom: 8px;">Gabarito: <strong>${question.answerKey}</strong>.</p>`,
-      `<p style="margin-top: 0; margin-bottom: 8px;">${sanitizeHtml(choiceExplanation)}</p>`,
-      `<p style="margin-top: 0; margin-bottom: 8px;">${sanitizeHtml(question.explanation || 'Sem explicação geral cadastrada.')}</p>`,
-      `<p style="margin: 0;"><strong>${sanitizeHtml(recommendation)}</strong></p>`,
-    ].join('');
+  function goPrevious() {
+    if (state.currentIndex <= 0) return;
+    state.currentIndex -= 1;
+    const current = getCurrentQuestion();
+    state.selectedChoice = current ? (state.answers[current.id] || null) : null;
+    renderQuestion();
+    renderProgress();
   }
 
   function initializeQuestions(questions) {
@@ -281,17 +349,24 @@
     });
 
     state.filtered = state.questions.slice();
-    state.selectedQuestionId = state.filtered.length > 0 ? state.filtered[0].id : null;
-    state.selectedChoice = null;
+    state.currentIndex = 0;
 
-    renderQuestionList();
-    renderQuestionDetail();
+    const first = getCurrentQuestion();
+    state.selectedChoice = first ? (state.answers[first.id] || null) : null;
+
+    renderQuestion();
+    renderProgress();
     renderMetrics();
+    renderActivities();
   }
 
   yearSelect.addEventListener('change', applyFilters);
   subtopicSelect.addEventListener('change', applyFilters);
   difficultySelect.addEventListener('change', applyFilters);
+
+  prevButton.addEventListener('click', goPrevious);
+  nextButton.addEventListener('click', goNext);
+  correctButton.addEventListener('click', evaluateCurrentQuestion);
 
   loadDataset().then((dataset) => {
     initializeQuestions(dataset.questions || []);

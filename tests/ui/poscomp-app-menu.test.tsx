@@ -80,8 +80,12 @@ describe('menu principal da aplicação', () => {
     expect(header?.querySelector('.breadcrumb')).not.toBeInTheDocument();
 
     const scoped = within(header as HTMLElement);
+    const modeSwitch = header?.querySelector('.sim-mode-switch');
+
+    expect(modeSwitch).toBeInTheDocument();
     expect(scoped.getByRole('button', { name: /^simulador afd$/i })).toBeInTheDocument();
     expect(scoped.getByRole('button', { name: /^minimização$/i })).toBeInTheDocument();
     expect(scoped.getByRole('button', { name: /^afn→afd$/i })).toBeInTheDocument();
+    expect(scoped.getByRole('button', { name: /^simulador afd$/i })).toHaveClass('sim-mode-pill', 'is-active');
   });
 });

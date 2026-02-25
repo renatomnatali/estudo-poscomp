@@ -25,22 +25,32 @@
       <div class="sidebar-footer">AFD de referência: sufixo final específico</div>
     </aside>
 
-    <main class="main-area">
-      <header class="page-header">
-        <h2 class="page-title">Expressão da máquina + expressão da linguagem</h2>
+    <main class="main-area simulator-main">
+      <header class="page-header simulator-header">
+        <h2 class="page-title">Simulador AFD</h2>
         <p class="page-subtitle">
-          Você informa as expressões, escolhe uma palavra e o simulador processa automaticamente.
-          Já existem demos prontas e parametrizadas para teste rápido.
+          Fluxo guiado para estudar reconhecimento de cadeias: configurar, executar e observar.
         </p>
-        <div class="toolbar" style="margin-top: var(--space-4);">
-          <button class="button primary" type="button">Simulador AFD</button>
-          <button class="button secondary" type="button">Minimização</button>
-          <button class="button secondary" type="button">AFN→AFD</button>
+        <div class="mode-switch" role="tablist" aria-label="Módulos do simulador">
+          <button class="mode-pill is-active" type="button">Simulador AFD</button>
+          <button class="mode-pill" type="button">Minimização</button>
+          <button class="mode-pill" type="button">AFN→AFD</button>
         </div>
       </header>
 
-      <section class="panel">
-        <h3>Entrada do modelo</h3>
+      <nav class="sim-stepper" aria-label="Etapas do simulador">
+        <button type="button" class="sim-stepper-btn is-active">1 Configurar</button>
+        <button type="button" class="sim-stepper-btn">2 Executar</button>
+        <button type="button" class="sim-stepper-btn">3 Observar</button>
+      </nav>
+
+      <section class="panel step-panel setup-panel">
+        <div class="step-heading">
+          <span class="step-number">1</span>
+          <h3>Configurar entrada</h3>
+        </div>
+        <p class="step-note">Defina máquina, linguagem e palavra. Use demos e teclado como atalho.</p>
+
         <div class="expression-grid">
           <div>
             <label for="machine-expr">Expressão da máquina</label>
@@ -55,182 +65,207 @@
           </div>
         </div>
 
-        <div class="symbol-pad" aria-label="Teclado de símbolos">
-          <button class="symbol-btn" type="button" data-symbol="a">a</button>
-          <button class="symbol-btn" type="button" data-symbol="b">b</button>
-          <button class="symbol-btn" type="button" data-symbol="c">c</button>
-          <button class="symbol-btn" type="button" data-symbol=",">,</button>
-          <button class="symbol-btn" type="button" data-symbol="*">*</button>
-          <button class="symbol-btn" type="button" data-symbol="=">=</button>
-          <button class="symbol-btn" type="button" data-symbol="{">{</button>
-          <button class="symbol-btn" type="button" data-symbol="}">}</button>
-          <button class="symbol-btn" type="button" data-symbol="(">(</button>
-          <button class="symbol-btn" type="button" data-symbol=")">)</button>
-          <button class="symbol-btn" type="button" data-symbol="δ">δ</button>
-          <button class="symbol-btn" type="button" data-symbol="Σ">Σ</button>
-          <button class="symbol-btn" type="button" data-symbol="→">→</button>
-        </div>
-        <p class="symbol-help">Clique em um símbolo para inserir no campo que estiver com foco.</p>
-      </section>
-
-      <section class="panel">
-        <h3>Demonstrações pré-definidas</h3>
-        <div class="demo-grid">
-          <button type="button" class="demo-card is-active" data-afd-demo="demo-c">
-            <strong>Demo 1 · termina com c</strong>
-            <p>Linguagem com sufixo final <code>c</code>.</p>
-            <code>{a,b}*{c}</code>
-          </button>
-          <button type="button" class="demo-card" data-afd-demo="demo-b">
-            <strong>Demo 2 · termina com b</strong>
-            <p>Mesmo formato, com sufixo final <code>b</code>.</p>
-            <code>{a,c}*{b}</code>
-          </button>
-          <button type="button" class="demo-card" data-afd-demo="demo-a">
-            <strong>Demo 3 · termina com a</strong>
-            <p>Mesmo formato, com sufixo final <code>a</code>.</p>
-            <code>{b,c}*{a}</code>
-          </button>
-        </div>
-      </section>
-
-      <section class="afd-layout">
-        <article class="panel">
-          <h3>Diagrama do AFD</h3>
-          <div class="afd-canvas-wrap">
-            <svg class="afd-canvas" viewBox="0 0 760 350" role="img" aria-label="Autômato finito determinístico com estados e1, e2 e e3">
-              <defs>
-                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                  <polygon points="0 0, 10 3.5, 0 7" fill="#334155"></polygon>
-                </marker>
-              </defs>
-
-              <g data-edge="start" class="edge-group">
-                <line class="edge-line" x1="22" y1="180" x2="118" y2="180" marker-end="url(#arrowhead)"></line>
-              </g>
-
-              <g data-edge="e1-transition" class="edge-group">
-                <line class="edge-line" x1="198" y1="180" x2="352" y2="180" marker-end="url(#arrowhead)"></line>
-                <text class="edge-label" x="272" y="163" data-afd-label-transition>c</text>
-              </g>
-
-              <g data-edge="e1-loop" class="edge-group">
-                <path class="edge-loop" d="M 130 228 C 86 262, 98 314, 145 307 C 192 300, 193 248, 163 232" marker-end="url(#arrowhead)"></path>
-                <text class="edge-label" x="102" y="330" data-afd-label-loop>a,b</text>
-              </g>
-
-              <g data-edge="e2-e3" class="edge-group">
-                <line class="edge-line" x1="430" y1="156" x2="430" y2="66" marker-end="url(#arrowhead)"></line>
-                <text class="edge-label" x="446" y="116" data-afd-label-sink>a,b,c</text>
-              </g>
-
-              <g data-edge="e3-loop" class="edge-group">
-                <path class="edge-loop" d="M 480 30 C 517 -9, 580 5, 560 56 C 551 81, 520 89, 498 70" marker-end="url(#arrowhead)"></path>
-                <text class="edge-label" x="566" y="41" data-afd-label-sink-loop>a,b,c</text>
-              </g>
-
-              <g data-state="e1" class="state-group">
-                <circle class="state-circle" cx="158" cy="180" r="48"></circle>
-                <text class="state-label" x="140" y="194">e1</text>
-              </g>
-
-              <g data-state="e2" class="state-group">
-                <circle class="state-circle" cx="430" cy="180" r="48"></circle>
-                <circle class="state-final-ring" cx="430" cy="180" r="38"></circle>
-                <text class="state-label" x="412" y="194">e2</text>
-              </g>
-
-              <g data-state="e3" class="state-group">
-                <circle class="state-circle" cx="430" cy="40" r="38"></circle>
-                <text class="state-label" x="413" y="50">e3</text>
-              </g>
-            </svg>
-          </div>
-        </article>
-
-        <article class="panel">
-          <h3>Função de transição δ</h3>
-          <p class="delta-title">δ: E × Σ → E</p>
-          <p class="delta-note">A célula ativa mostra a transição aplicada no passo atual.</p>
-
-          <div class="delta-table-wrap">
-            <table class="delta-table" aria-label="Tabela da função de transição">
-              <thead>
-                <tr>
-                  <th>δ</th>
-                  <th>a</th>
-                  <th>b</th>
-                  <th>c</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="state-cell">e1</td>
-                  <td data-cell="e1-a">e1</td>
-                  <td data-cell="e1-b">e1</td>
-                  <td data-cell="e1-c">e2</td>
-                </tr>
-                <tr>
-                  <td class="state-cell">e2</td>
-                  <td data-cell="e2-a">e3</td>
-                  <td data-cell="e2-b">e3</td>
-                  <td data-cell="e2-c">e3</td>
-                </tr>
-                <tr>
-                  <td class="state-cell">e3</td>
-                  <td data-cell="e3-a">e3</td>
-                  <td data-cell="e3-b">e3</td>
-                  <td data-cell="e3-c">e3</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </article>
-      </section>
-
-      <section class="panel">
-        <h3>Execução da simulação</h3>
-        <div class="toolbar">
-          <button class="button primary" type="button" data-afd-run>Executar automático</button>
-          <button class="button secondary" type="button" data-afd-step>Próximo passo</button>
-          <button class="button secondary" type="button" data-afd-reset>Reset</button>
-          <button class="button secondary" type="button" data-afd-cancel>Cancelar</button>
-        </div>
-
-        <div class="sim-meta" style="margin-top: var(--space-4);">
-          <article class="sim-box">
-            <div class="sim-box-label">Estado atual</div>
-            <p class="sim-box-value" data-afd-current-state>e1</p>
+        <div class="setup-support">
+          <article class="support-card">
+            <p class="support-title">Demos rápidas</p>
+            <div class="demo-inline">
+              <button type="button" class="demo-chip is-active" data-afd-demo="demo-c">
+                <strong>demo-c</strong><span>{a,b}*{c}</span>
+              </button>
+              <button type="button" class="demo-chip" data-afd-demo="demo-b">
+                <strong>demo-b</strong><span>{a,c}*{b}</span>
+              </button>
+              <button type="button" class="demo-chip" data-afd-demo="demo-a">
+                <strong>demo-a</strong><span>{b,c}*{a}</span>
+              </button>
+            </div>
           </article>
-          <article class="sim-box">
-            <div class="sim-box-label">Posição da leitura</div>
-            <p class="sim-box-value" data-afd-current-pos>0/1</p>
-          </article>
-          <article class="sim-box">
-            <div class="sim-box-label">Resultado</div>
-            <p class="sim-box-value" data-afd-result>—</p>
-          </article>
-          <article class="sim-box">
-            <div class="sim-box-label">Status</div>
-            <p class="sim-box-value" style="display: flex; align-items: center; gap: 8px;">
-              <span class="status-dot queued" data-afd-run-status-dot></span>
-              <span data-afd-run-status-text>queued</span>
-            </p>
+
+          <article class="support-card">
+            <details class="keyboard-details">
+              <summary>Teclado de símbolos (contextual)</summary>
+              <div class="symbol-pad compact sim-keyboard-contextual" aria-label="Teclado de símbolos">
+                <button class="symbol-btn" type="button" data-symbol="a">a</button>
+                <button class="symbol-btn" type="button" data-symbol="b">b</button>
+                <button class="symbol-btn" type="button" data-symbol="c">c</button>
+                <button class="symbol-btn" type="button" data-symbol=",">,</button>
+                <button class="symbol-btn" type="button" data-symbol="*">*</button>
+                <button class="symbol-btn" type="button" data-symbol="=">=</button>
+                <button class="symbol-btn" type="button" data-symbol="{">{</button>
+                <button class="symbol-btn" type="button" data-symbol="}">}</button>
+                <button class="symbol-btn" type="button" data-symbol="(">(</button>
+                <button class="symbol-btn" type="button" data-symbol=")">)</button>
+                <button class="symbol-btn" type="button" data-symbol="δ">δ</button>
+                <button class="symbol-btn" type="button" data-symbol="Σ">Σ</button>
+                <button class="symbol-btn" type="button" data-symbol="→">→</button>
+              </div>
+              <p class="symbol-help">No app real abre ao focar um campo de entrada.</p>
+            </details>
           </article>
         </div>
-
-        <div class="tape" data-afd-tape aria-label="Fita de leitura da palavra"></div>
-
-        <div class="run-log" data-afd-log aria-live="polite" aria-label="Registro de passos da simulação"></div>
       </section>
 
-      <section class="panel">
-        <h3>Perguntas didáticas (roteiro)</h3>
-        <ul class="list">
-          <li>A palavra <code>c</code> é reconhecida por M₁?</li>
-          <li>A palavra <code>abc</code> é reconhecida por M₁?</li>
-          <li>A palavra <code>ababc</code> é reconhecida por M₁?</li>
-        </ul>
+      <section class="panel step-panel run-panel">
+        <div class="step-heading">
+          <span class="step-number">2</span>
+          <h3>Executar e acompanhar</h3>
+        </div>
+        <p class="step-note">Controles e feedback no mesmo bloco para reduzir troca de contexto.</p>
+
+        <div class="execution-grid">
+          <article class="execution-card">
+            <div class="toolbar execution-toolbar">
+              <button class="sim-action-btn sim-action-btn-primary" type="button" data-afd-run>Executar automático</button>
+              <button class="sim-action-btn sim-action-btn-secondary" type="button" data-afd-step>Próximo passo</button>
+              <button class="sim-action-btn sim-action-btn-tertiary" type="button" data-afd-reset>Reset</button>
+              <button class="sim-action-btn sim-action-btn-tertiary" type="button" data-afd-cancel>Cancelar</button>
+            </div>
+
+            <details class="execution-details">
+              <summary>Detalhes técnicos da execução (opcional)</summary>
+              <div class="run-log" data-afd-log aria-live="polite" aria-label="Registro de passos da simulação"></div>
+            </details>
+          </article>
+
+          <article class="execution-card">
+            <div class="sim-meta">
+              <article class="sim-box">
+                <div class="sim-box-label">Estado atual</div>
+                <p class="sim-box-value" data-afd-current-state>e1</p>
+              </article>
+              <article class="sim-box">
+                <div class="sim-box-label">Posição da leitura</div>
+                <p class="sim-box-value" data-afd-current-pos>0/1</p>
+              </article>
+              <article class="sim-box">
+                <div class="sim-box-label">Resultado</div>
+                <p class="sim-box-value" data-afd-result>—</p>
+              </article>
+              <article class="sim-box">
+                <div class="sim-box-label">Status</div>
+                <p class="sim-box-value" style="display: flex; align-items: center; gap: 8px;">
+                  <span class="status-dot queued" data-afd-run-status-dot></span>
+                  <span data-afd-run-status-text>queued</span>
+                </p>
+              </article>
+            </div>
+
+            <div class="tape" data-afd-tape aria-label="Fita de leitura da palavra"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel step-panel observe-panel">
+        <div class="step-heading">
+          <span class="step-number">3</span>
+          <h3>Observar transições</h3>
+        </div>
+        <p class="step-note">Diagrama em destaque com matriz δ de apoio.</p>
+
+        <div class="observe-layout">
+          <article class="observe-card observe-card-major">
+            <h4>Diagrama do AFD</h4>
+            <p class="observe-caption">Estados e arestas ativos devem sincronizar com a execução.</p>
+            <div class="afd-canvas-wrap">
+              <svg class="afd-canvas" viewBox="0 0 760 350" role="img" aria-label="Autômato finito determinístico com estados e1, e2 e e3">
+                <defs>
+                  <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#334155"></polygon>
+                  </marker>
+                </defs>
+
+                <g data-edge="start" class="edge-group">
+                  <line class="edge-line" x1="22" y1="180" x2="118" y2="180" marker-end="url(#arrowhead)"></line>
+                </g>
+
+                <g data-edge="e1-transition" class="edge-group">
+                  <line class="edge-line" x1="198" y1="180" x2="352" y2="180" marker-end="url(#arrowhead)"></line>
+                  <text class="edge-label" x="272" y="163" data-afd-label-transition>c</text>
+                </g>
+
+                <g data-edge="e1-loop" class="edge-group">
+                  <path class="edge-loop" d="M 130 228 C 86 262, 98 314, 145 307 C 192 300, 193 248, 163 232" marker-end="url(#arrowhead)"></path>
+                  <text class="edge-label" x="102" y="330" data-afd-label-loop>a,b</text>
+                </g>
+
+                <g data-edge="e2-e3" class="edge-group">
+                  <line class="edge-line" x1="430" y1="156" x2="430" y2="66" marker-end="url(#arrowhead)"></line>
+                  <text class="edge-label" x="446" y="116" data-afd-label-sink>a,b,c</text>
+                </g>
+
+                <g data-edge="e3-loop" class="edge-group">
+                  <path class="edge-loop" d="M 480 30 C 517 -9, 580 5, 560 56 C 551 81, 520 89, 498 70" marker-end="url(#arrowhead)"></path>
+                  <text class="edge-label" x="566" y="41" data-afd-label-sink-loop>a,b,c</text>
+                </g>
+
+                <g data-state="e1" class="state-group">
+                  <circle class="state-circle" cx="158" cy="180" r="48"></circle>
+                  <text class="state-label" x="140" y="194">e1</text>
+                </g>
+
+                <g data-state="e2" class="state-group">
+                  <circle class="state-circle" cx="430" cy="180" r="48"></circle>
+                  <circle class="state-final-ring" cx="430" cy="180" r="38"></circle>
+                  <text class="state-label" x="412" y="194">e2</text>
+                </g>
+
+                <g data-state="e3" class="state-group">
+                  <circle class="state-circle" cx="430" cy="40" r="38"></circle>
+                  <text class="state-label" x="413" y="50">e3</text>
+                </g>
+              </svg>
+            </div>
+          </article>
+
+          <article class="observe-card">
+            <h4>Função de transição δ</h4>
+            <p class="delta-note">A célula ativa mostra a transição aplicada no passo atual.</p>
+
+            <div class="delta-table-wrap">
+              <table class="delta-table" aria-label="Tabela da função de transição">
+                <thead>
+                  <tr>
+                    <th>δ</th>
+                    <th>a</th>
+                    <th>b</th>
+                    <th>c</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="state-cell">e1</td>
+                    <td data-cell="e1-a">e1</td>
+                    <td data-cell="e1-b">e1</td>
+                    <td data-cell="e1-c">e2</td>
+                  </tr>
+                  <tr>
+                    <td class="state-cell">e2</td>
+                    <td data-cell="e2-a">e3</td>
+                    <td data-cell="e2-b">e3</td>
+                    <td data-cell="e2-c">e3</td>
+                  </tr>
+                  <tr>
+                    <td class="state-cell">e3</td>
+                    <td data-cell="e3-a">e3</td>
+                    <td data-cell="e3-b">e3</td>
+                    <td data-cell="e3-c">e3</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel study-questions">
+        <details>
+          <summary>Perguntas didáticas</summary>
+          <ul class="list">
+            <li>A palavra <code>c</code> é reconhecida por M₁?</li>
+            <li>A palavra <code>abc</code> é reconhecida por M₁?</li>
+            <li>A palavra <code>ababc</code> é reconhecida por M₁?</li>
+          </ul>
+        </details>
       </section>
     </main>
   </div>

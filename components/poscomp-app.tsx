@@ -176,24 +176,24 @@ export function PoscompApp() {
             {currentHeader.subtitle ? <p className="page-subtitle">{currentHeader.subtitle}</p> : null}
 
             {activeMenu === 'simulator' ? (
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="sim-mode-switch mt-4" role="tablist" aria-label="Módulos do simulador">
                 <button
                   type="button"
-                  className={`button ${activeSimulatorTab === 'afd' ? 'primary' : 'secondary'}`}
+                  className={`sim-mode-pill ${activeSimulatorTab === 'afd' ? 'is-active' : ''}`}
                   onClick={() => setActiveSimulatorTab('afd')}
                 >
                   Simulador AFD
                 </button>
                 <button
                   type="button"
-                  className={`button ${activeSimulatorTab === 'min' ? 'primary' : 'secondary'}`}
+                  className={`sim-mode-pill ${activeSimulatorTab === 'min' ? 'is-active' : ''}`}
                   onClick={() => setActiveSimulatorTab('min')}
                 >
                   Minimização
                 </button>
                 <button
                   type="button"
-                  className={`button ${activeSimulatorTab === 'conv' ? 'primary' : 'secondary'}`}
+                  className={`sim-mode-pill ${activeSimulatorTab === 'conv' ? 'is-active' : ''}`}
                   onClick={() => setActiveSimulatorTab('conv')}
                 >
                   AFN→AFD
