@@ -88,4 +88,25 @@ describe('menu principal da aplicação', () => {
     expect(scoped.getByRole('button', { name: /^afn→afd$/i })).toBeInTheDocument();
     expect(scoped.getByRole('button', { name: /^simulador afd$/i })).toHaveClass('sim-mode-pill', 'is-active');
   });
+
+  it('exibe menu de perfil com ações de configurações e sair', async () => {
+    const onSignOut = vi.fn();
+    render(
+      <PoscompApp
+        auth={{
+          mode: 'authenticated',
+          displayName: 'Renato',
+          email: 'renato@example.com',
+          onSignOut,
+        }}
+      />
+    );
+
+    const profileButton = screen.getByRole('button', { name: /menu do usuário/i });
+    await userEvent.click(profileButton);
+
+    expect(screen.getByRole('menuitem', { name: /configurações/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('menuitem', { name: /sair/i }));
+    expect(onSignOut).toHaveBeenCalledTimes(1);
+  });
 });

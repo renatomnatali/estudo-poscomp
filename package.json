@@ -20,6 +20,7 @@
     "questions:ingest:dry": "tsx scripts/ingest-question-bank.ts --dry-run"
   },
   "dependencies": {
+    "@clerk/nextjs": "6.18.0",
     "@prisma/client": "^6.19.2",
     "next": "15.5.12",
     "pdf-parse": "^2.4.5",

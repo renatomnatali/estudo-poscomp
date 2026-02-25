@@ -36,3 +36,8 @@ Funcionalidade: Navegação principal por menu lateral
     Quando a tela é renderizada
     Então devo visualizar o seletor de módulo com estilo segmented control
     E o item "Simulador AFD" deve aparecer como ativo
+
+  Cenário: Exibir menu de perfil no shell autenticado
+    Dado que estou autenticado
+    Quando abro o menu de perfil do usuário
+    Então devo visualizar as ações "Configurações" e "Sair"

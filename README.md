@@ -8,6 +8,7 @@ Aplicação V1 de estudo para POSCOMP com foco em autômatos.
 2. Minimização de AFD com histórico de partições.
 3. Conversão AFN (com ε) para AFD por subconjuntos.
 4. Questões estilo POSCOMP com filtros, correção e métricas por subtópico.
+5. Autenticação com Clerk (login/cadastro + sessão persistente) com demo pública sem login.
 
 ## Arquitetura atual
 
@@ -32,6 +33,21 @@ npm run dev
 ```
 
 Abra: `http://localhost:3000`
+
+Rotas principais:
+
+1. `/` landing pública.
+2. `/entrar` login.
+3. `/cadastro` criação de conta.
+4. `/estudo` aplicação completa (protegida quando Clerk está configurado).
+5. `/demo` simulador em modo visitante.
+
+Variáveis para Clerk (opcional em desenvolvimento local):
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
+CLERK_SECRET_KEY=...
+```
 
 ## Testes e lint
 
