@@ -34,6 +34,20 @@ const nfa = {
 };
 
 describe('api routes', () => {
+  async function pickQuestionForAssessment() {
+    const response = await getQuestions(new NextRequest('http://localhost/api/questions?limit=20'));
+    const payload = await response.json();
+    const item = (payload.items || []).find((question: { answerKey?: string }) => question.answerKey && question.answerKey !== '*')
+      || payload.items?.[0];
+
+    if (!item) throw new Error('Nenhuma questão disponível para teste de avaliação.');
+    return item as {
+      id: string;
+      answerKey: 'A' | 'B' | 'C' | 'D' | 'E' | '*';
+      subTopic: string;
+    };
+  }
+
   it('lista tópicos de conteúdo', async () => {
     const response = await getTopics(new NextRequest('http://localhost/api/content/topics?macroArea=fundamentos'));
     const payload = await response.json();
@@ -131,12 +145,14 @@ describe('api routes', () => {
     expect(convResponse.status).toBe(200);
     expect(convPayload.dfa.states.length).toBeGreaterThanOrEqual(2);
 
+    const question = await pickQuestionForAssessment();
+
     const assessmentResponse = await submitAssessment(
       new Request('http://localhost/api/assessment/submit', {
         method: 'POST',
         body: JSON.stringify({
           attemptId: 'test',
-          answers: [{ questionId: 'q-2022-afd-01', choice: 'B' }],
+          answers: [{ questionId: question.id, choice: question.answerKey === '*' ? 'A' : question.answerKey }],
         }),
       })
     );
@@ -147,19 +163,22 @@ describe('api routes', () => {
   });
 
   it('retorna status em português e atividades de reforço na avaliação', async () => {
+    const question = await pickQuestionForAssessment();
+    const wrongChoice = (['A', 'B', 'C', 'D', 'E'] as const).find((choice) => choice !== question.answerKey) ?? 'A';
+
     const assessmentResponse = await submitAssessment(
       new Request('http://localhost/api/assessment/submit', {
         method: 'POST',
         body: JSON.stringify({
           attemptId: 'test',
-          answers: [{ questionId: 'q-2022-afd-01', choice: 'A' }],
+          answers: [{ questionId: question.id, choice: wrongChoice }],
         }),
       })
     );
 
     const assessmentPayload = await assessmentResponse.json();
     expect(assessmentResponse.status).toBe(200);
-    expect(assessmentPayload.byTopic.afd_modelagem_execucao.status).toBe('reforçar');
+    expect(assessmentPayload.byTopic[question.subTopic].status).toBe('reforçar');
     expect(Array.isArray(assessmentPayload.recommendedActivities)).toBe(true);
     expect(assessmentPayload.recommendedActivities.length).toBeGreaterThan(0);
   });

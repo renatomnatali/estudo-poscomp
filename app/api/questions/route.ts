@@ -4,7 +4,7 @@ import { listQuestions } from '@/lib/questions-repo';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const items = listQuestions({
+  const items = await listQuestions({
     year: searchParams.get('year') || undefined,
     macroArea: searchParams.get('macroArea') || undefined,
     subTopic: searchParams.get('subTopic') || undefined,

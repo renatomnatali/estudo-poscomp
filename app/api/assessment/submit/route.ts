@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const questionMap = getQuestionMap();
+  const questionMap = await getQuestionMap();
   const result = gradeAssessment(answers, questionMap);
 
   return NextResponse.json({

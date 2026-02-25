@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MacroArea {
+  fundamentos
+  matematica
+  tecnologia
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+model Question {
+  id                 String           @id
+  year               Int
+  source             String
+  number             Int
+  macroArea          MacroArea
+  subTopic           String
+  difficulty         Difficulty
+  stem               String
+  answerKey          String           @db.VarChar(1)
+  tags               String[]
+  explanation        String?
+  optionExplanations Json?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  options            QuestionOption[]
+
+  @@unique([year, number])
+  @@index([year])
+  @@index([macroArea, subTopic])
+}
+
+model QuestionOption {
+  id         String   @id @default(cuid())
+  questionId String
+  key        String   @db.VarChar(1)
+  text       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, key])
+  @@index([questionId])
+}
+
+model IngestionReport {
+  id               String   @id @default(cuid())
+  source           String
+  version          String
+  generatedAt      DateTime @default(now())
+  totalQuestions   Int
+  missingAnswerKey Int
+  parseWarnings    Int
+  metadata         Json?
+}

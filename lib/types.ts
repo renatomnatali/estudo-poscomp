@@ -31,7 +31,7 @@ export interface Question {
   difficulty: Difficulty;
   stem: string;
   options: QuestionOption[];
-  answerKey: 'A' | 'B' | 'C' | 'D' | 'E';
+  answerKey: 'A' | 'B' | 'C' | 'D' | 'E' | '*';
   tags: string[];
   explanation?: string;
   optionExplanations?: Record<string, string>;

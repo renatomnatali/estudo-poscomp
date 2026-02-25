@@ -9,6 +9,12 @@ Funcionalidade: Avaliação com questões estilo prova
     Então devo visualizar filtros e questão atual no mesmo bloco principal
     E não devo visualizar lista lateral de questões como fluxo primário
 
+  Cenário: Carregar questões persistidas no banco
+    Dado que existe banco de questões populado para 2022-2025
+    Quando eu abro o módulo de exercícios
+    Então as questões devem ser lidas da API conectada ao banco
+    E a sessão deve permitir navegar por todas as questões retornadas
+
   Cenário: Filtrar questões por ano e subtópico
     Dado um banco de questões com metadados de ano e subtópico
     Quando eu filtro por ano "2022" e subtópico "afd_modelagem_execucao"
