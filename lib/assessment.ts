@@ -59,7 +59,8 @@ export function gradeAssessment(
     }
 
     total += 1;
-    const isCorrect = attempt.choice === question.answerKey;
+    const isAnnulled = question.answerKey === '*';
+    const isCorrect = isAnnulled || attempt.choice === question.answerKey;
     if (isCorrect) correct += 1;
 
     if (!byTopic[question.subTopic]) {
@@ -75,7 +76,9 @@ export function gradeAssessment(
       choice: attempt.choice,
       answerKey: question.answerKey,
       correct: isCorrect,
-      explanation: question.optionExplanations?.[attempt.choice] || question.explanation,
+      explanation: isAnnulled
+        ? 'Questão anulada; pontuação revertida para todos os candidatos.'
+        : (question.optionExplanations?.[attempt.choice] || question.explanation),
     };
   });
 

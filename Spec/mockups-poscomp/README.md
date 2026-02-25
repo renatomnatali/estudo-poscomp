@@ -49,3 +49,14 @@ python3 -m http.server 8080
 
 - Início recomendado: `landing/01-home.html`
 - Fluxo completo: `landing -> onboarding -> dashboard -> topics -> simulator (AFD, minimização, AFN→AFD) -> flashcards -> exercises -> premium -> states -> mobile`
+
+## Menu canônico (desktop)
+
+A barra lateral segue esta ordem em todas as telas desktop:
+
+1. Dashboard (`📊`)
+2. Tópicos (`📚`)
+3. Simulador (`🎮`)
+4. Flashcards (`🃏`)
+5. Exercícios (`📝`)
+6. Premium (`⭐`)
