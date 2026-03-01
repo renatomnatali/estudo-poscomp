@@ -1,6 +1,5 @@
 import {
   type Difficulty,
-  type FlashcardRating as PrismaFlashcardRating,
   type MacroArea,
   Prisma,
 } from '@prisma/client';
@@ -45,7 +44,7 @@ interface ProgressState {
   lapses: number;
   dueAt: Date;
   lastReviewedAt: Date | null;
-  lastRating: PrismaFlashcardRating | null;
+  lastRating: FlashcardRating | null;
 }
 
 interface FlashcardCandidate extends Flashcard {
@@ -171,7 +170,7 @@ function mapProgressFromRow(row: {
   lapses: number;
   dueAt: Date;
   lastReviewedAt: Date | null;
-  lastRating: PrismaFlashcardRating | null;
+  lastRating: FlashcardRating | null;
 }): ProgressState {
   return {
     easeFactor: row.easeFactor,
@@ -298,10 +297,6 @@ function applyQueueFilters(candidates: FlashcardCandidate[], input: FlashcardQue
   const limit = parseLimit(input.limit);
   if (limit > 0) return filtered.slice(0, limit);
   return filtered;
-}
-
-function toPrismaRating(value: FlashcardRating): PrismaFlashcardRating {
-  return value;
 }
 
 export async function listFlashcardDecks(filters: FlashcardDeckFilters = {}): Promise<FlashcardDeck[]> {
@@ -445,7 +440,7 @@ export async function reviewFlashcard(input: FlashcardReviewInput): Promise<Flas
         data: {
           userId: input.userId,
           flashcardId: input.flashcardId,
-          rating: toPrismaRating(input.rating),
+          rating: input.rating,
           sessionId: input.sessionId || null,
         },
       });
