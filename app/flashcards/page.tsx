@@ -1,10 +1,14 @@
+import { auth } from '@clerk/nextjs/server';
+
 import { isClerkEnabledServer } from '@/lib/auth-config';
 import { StudyRouteGuard } from '@/components/auth/study-route-guard';
 import { FlashcardsPanel } from '@/components/modules/flashcards-panel';
 import { StudyShell } from '@/components/study/study-shell';
 
-export default function FlashcardsRoutePage() {
-  const userId = isClerkEnabledServer() ? undefined : 'local-dev-user';
+export default async function FlashcardsRoutePage() {
+  const userId = isClerkEnabledServer()
+    ? (await auth()).userId ?? undefined
+    : 'local-dev-user';
 
   return (
     <StudyRouteGuard>

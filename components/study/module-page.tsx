@@ -258,6 +258,7 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
     if (!root) {
       return;
     }
+    const rootEl = root;
 
     function setQuizResult(resultEl: HTMLElement, message: string, isCorrect: boolean) {
       resultEl.classList.add('show');
@@ -275,7 +276,7 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
     function handleVerifyClick(event: Event) {
       const target = event.target as HTMLElement | null;
       const button = target?.closest('button.quiz-btn') as HTMLButtonElement | null;
-      if (!button || !root.contains(button)) {
+      if (!button || !rootEl.contains(button)) {
         return;
       }
 
@@ -285,8 +286,8 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
         return;
       }
 
-      const optionsRoot = root.querySelector<HTMLElement>(`#${questionId}`);
-      const resultEl = root.querySelector<HTMLElement>(`#${questionId}-res`);
+      const optionsRoot = rootEl.querySelector<HTMLElement>(`#${questionId}`);
+      const resultEl = rootEl.querySelector<HTMLElement>(`#${questionId}-res`);
       if (!optionsRoot || !resultEl) {
         return;
       }
@@ -327,9 +328,9 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
       );
     }
 
-    root.addEventListener('click', handleVerifyClick);
+    rootEl.addEventListener('click', handleVerifyClick);
     return () => {
-      root.removeEventListener('click', handleVerifyClick);
+      rootEl.removeEventListener('click', handleVerifyClick);
     };
   }, [source?.html]);
 
@@ -347,30 +348,40 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
     if (!simulatorEl) {
       return;
     }
+    const simulatorRoot = simulatorEl;
 
-    const presetButtons = Array.from(simulatorEl.querySelectorAll<HTMLButtonElement>('button.preset-btn'));
-    const actionButtons = Array.from(simulatorEl.querySelectorAll<HTMLButtonElement>('button.sim-btn'));
-    const presetDescEl = simulatorEl.querySelector<HTMLElement>('#preset-desc');
-    const inputEl = simulatorEl.querySelector<HTMLInputElement>('#sim-string');
-    const tableBodyEl = simulatorEl.querySelector<HTMLTableSectionElement>('#sim-table-body');
-    const stateCircleEl = simulatorEl.querySelector<HTMLElement>('#sim-state-circle');
-    const tapeEl = simulatorEl.querySelector<HTMLElement>('#sim-tape');
-    const logEl = simulatorEl.querySelector<HTMLElement>('#sim-log');
-    const resultEl = simulatorEl.querySelector<HTMLElement>('#sim-result');
-    const canvasEl = simulatorEl.querySelector<HTMLCanvasElement>('#afd-canvas');
+    const presetButtons = Array.from(simulatorRoot.querySelectorAll<HTMLButtonElement>('button.preset-btn'));
+    const actionButtons = Array.from(simulatorRoot.querySelectorAll<HTMLButtonElement>('button.sim-btn'));
+    const presetDescElRaw = simulatorRoot.querySelector<HTMLElement>('#preset-desc');
+    const inputElRaw = simulatorRoot.querySelector<HTMLInputElement>('#sim-string');
+    const tableBodyElRaw = simulatorRoot.querySelector<HTMLTableSectionElement>('#sim-table-body');
+    const stateCircleElRaw = simulatorRoot.querySelector<HTMLElement>('#sim-state-circle');
+    const tapeElRaw = simulatorRoot.querySelector<HTMLElement>('#sim-tape');
+    const logElRaw = simulatorRoot.querySelector<HTMLElement>('#sim-log');
+    const resultElRaw = simulatorRoot.querySelector<HTMLElement>('#sim-result');
+    const canvasElRaw = simulatorRoot.querySelector<HTMLCanvasElement>('#afd-canvas');
 
     if (
-      !presetDescEl ||
-      !inputEl ||
-      !tableBodyEl ||
-      !stateCircleEl ||
-      !tapeEl ||
-      !logEl ||
-      !resultEl ||
-      !canvasEl
+      !presetDescElRaw ||
+      !inputElRaw ||
+      !tableBodyElRaw ||
+      !stateCircleElRaw ||
+      !tapeElRaw ||
+      !logElRaw ||
+      !resultElRaw ||
+      !canvasElRaw
     ) {
       return;
     }
+
+    const presetDescEl = presetDescElRaw;
+    const inputEl = inputElRaw;
+    const tableBodyEl = tableBodyElRaw;
+    const stateCircleEl = stateCircleElRaw;
+    const tapeEl = tapeElRaw;
+    const logEl = logElRaw;
+    const resultEl = resultElRaw;
+    const canvasEl = canvasElRaw;
 
     interface InlineSimulatorSession {
       input: string;
@@ -427,6 +438,9 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
     }
 
     function appendLog(message: string, tone: 'step' | 'accept' | 'reject' = 'step') {
+      if (!logEl) {
+        return;
+      }
       const line = document.createElement('div');
       line.className = `log-line ${tone === 'accept' ? 'log-accept' : tone === 'reject' ? 'log-reject' : 'log-step'}`;
       line.textContent = message;
@@ -780,14 +794,14 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
       if (!target) return;
 
       const presetButton = target.closest('button.preset-btn') as HTMLButtonElement | null;
-      if (presetButton && simulatorEl.contains(presetButton)) {
+      if (presetButton && simulatorRoot.contains(presetButton)) {
         const presetId = resolvePresetIdFromButton(presetButton);
         applyPreset(presetId);
         return;
       }
 
       const actionButton = target.closest('button.sim-btn') as HTMLButtonElement | null;
-      if (!actionButton || !simulatorEl.contains(actionButton)) {
+      if (!actionButton || !simulatorRoot.contains(actionButton)) {
         return;
       }
 
@@ -813,7 +827,7 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
       }
     }
 
-    simulatorEl.addEventListener('click', handleSimulatorClick);
+    simulatorRoot.addEventListener('click', handleSimulatorClick);
 
     const initiallyActive =
       presetButtons.find((button) => button.classList.contains('active')) || presetButtons[0];
@@ -821,7 +835,7 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
     applyPreset(initialPresetId || 'par1s');
 
     return () => {
-      simulatorEl.removeEventListener('click', handleSimulatorClick);
+      simulatorRoot.removeEventListener('click', handleSimulatorClick);
     };
   }, [moduleData.slug, source?.html]);
 
@@ -850,18 +864,19 @@ function ModuleImportedLessonView({ moduleData }: { moduleData: StudyModule }) {
     if (!root || navLinks.length === 0) {
       return;
     }
+    const rootEl = root;
 
-    const scrollContainer = root.closest('.study-content') as HTMLElement | null;
+    const scrollContainer = rootEl.closest('.study-content') as HTMLElement | null;
     const listenerTarget: HTMLElement | Window = scrollContainer || window;
     const navHeight = sectionNavRef.current?.getBoundingClientRect().height ?? 48;
     const thresholdOffset = navHeight + 12;
 
     function sectionById(sectionId: string) {
-      const localSection = root.querySelector<HTMLElement>(`section[id="${sectionId}"]`);
+      const localSection = rootEl.querySelector<HTMLElement>(`section[id="${sectionId}"]`);
       if (localSection) return localSection;
 
       const globalSection = document.getElementById(sectionId);
-      if (globalSection && root.contains(globalSection)) {
+      if (globalSection && rootEl.contains(globalSection)) {
         return globalSection as HTMLElement;
       }
 

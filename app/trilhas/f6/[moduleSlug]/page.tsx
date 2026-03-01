@@ -7,7 +7,7 @@ import { ModulePage } from '@/components/study/module-page';
 import { StudyShell } from '@/components/study/study-shell';
 
 interface ModuleRouteProps {
-  params: Promise<{ moduleSlug: string }> | { moduleSlug: string };
+  params: Promise<{ moduleSlug: string }>;
 }
 
 const LESSON_MODULE_SLUGS = new Set([

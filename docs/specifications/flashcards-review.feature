@@ -22,6 +22,18 @@ Funcionalidade: Sessão de flashcards no fluxo do mockup
     Então o sistema deve registrar revisão em "POST /api/flashcards/review"
     E deve avançar para a próxima carta da fila
 
+  Cenário: Persistir revisão com id do usuário autenticado
+    Dado que Clerk está habilitado e existe sessão ativa
+    Quando eu acesso "/flashcards"
+    Então o painel de flashcards deve receber o id do usuário autenticado
+    E avaliações devem ser persistidas no histórico do mesmo usuário
+
+  Cenário: Encerrar sessão ao avaliar a última carta
+    Dado que existe apenas uma carta na fila de revisão
+    Quando eu revejo a resposta e avalio a carta
+    Então devo visualizar a mensagem "Sessão concluída. Volte amanhã para novas revisões."
+    E não devo conseguir avaliar a mesma carta novamente
+
   Cenário: Exibir decks com estado free e premium
     Quando eu acesso "/flashcards"
     Então devo visualizar decks disponíveis

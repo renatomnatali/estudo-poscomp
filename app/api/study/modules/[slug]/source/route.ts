@@ -3,6 +3,8 @@ import path from 'node:path';
 
 import { NextResponse } from 'next/server';
 
+import { getStudyModule } from '@/lib/study-data';
+
 interface ModuleSourcePayload {
   header: {
     badge: string;
@@ -20,6 +22,9 @@ export async function GET(
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
+  if (!getStudyModule(slug)) {
+    return NextResponse.json({ error: 'Modulo nao encontrado.' }, { status: 404 });
+  }
 
   const sourcePath = path.join(
     process.cwd(),

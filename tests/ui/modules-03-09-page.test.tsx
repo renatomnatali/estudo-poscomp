@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ModulePage } from '@/components/study/module-page';
@@ -124,9 +124,11 @@ describe('módulos 03 a 09 importados da trilha F6', () => {
         expect(screen.getByRole('button', { name: /próximo módulo/i })).toBeDisabled();
       }
 
-      expect((fetch as ReturnType<typeof vi.fn>).mock.calls.some((call) => String(call[0]).endsWith(`/${slug}/source`))).toBe(
-        true
-      );
+      await waitFor(() => {
+        expect((fetch as ReturnType<typeof vi.fn>).mock.calls.some((call) => String(call[0]).endsWith(`/${slug}/source`))).toBe(
+          true
+        );
+      });
     }
   );
 });

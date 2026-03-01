@@ -20,6 +20,7 @@ export function FlashcardsPanel({ userId }: FlashcardsPanelProps) {
   const [queue, setQueue] = useState<FlashcardQueuePayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [sessionDone, setSessionDone] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -51,6 +52,7 @@ export function FlashcardsPanel({ userId }: FlashcardsPanelProps) {
       }
 
       setCurrentIndex(0);
+      setSessionDone(false);
       setRevealed(false);
       setLoading(false);
     }
@@ -59,12 +61,12 @@ export function FlashcardsPanel({ userId }: FlashcardsPanelProps) {
   }, [userId]);
 
   function revealAnswer() {
-    if (!currentCard) return;
+    if (!currentCard || sessionDone) return;
     setRevealed(true);
   }
 
   async function rateCard(rating: FlashcardRating) {
-    if (!currentCard) return;
+    if (!currentCard || sessionDone) return;
 
     if (userId) {
       const response = await fetch('/api/flashcards/review', {
@@ -88,6 +90,8 @@ export function FlashcardsPanel({ userId }: FlashcardsPanelProps) {
     if (nextIndex >= cards.length) {
       setFeedback('Sessão concluída. Volte amanhã para novas revisões.');
       setRevealed(false);
+      setSessionDone(true);
+      setCurrentIndex(cards.length);
       return;
     }
 
@@ -110,7 +114,7 @@ export function FlashcardsPanel({ userId }: FlashcardsPanelProps) {
       ) : (
         <div className="mt-4 space-y-4">
           <article className="rounded-2xl border border-slate-200 bg-slate-900 p-5 text-white">
-            {!currentCard ? (
+            {!currentCard || sessionDone ? (
               <p className="text-sm text-white/80">Sem cartões para revisar neste momento.</p>
             ) : (
               <>

@@ -55,7 +55,7 @@ const QUEUE_PAYLOAD = {
   ],
 };
 
-function setupFetch() {
+function setupFetch(queuePayload: typeof QUEUE_PAYLOAD = QUEUE_PAYLOAD) {
   const fetchSpy = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
 
@@ -69,7 +69,7 @@ function setupFetch() {
       if (url.includes('/api/flashcards/queue')) {
         return {
           ok: true,
-          json: async () => QUEUE_PAYLOAD,
+          json: async () => queuePayload,
         } as Response;
       }
 
@@ -145,5 +145,34 @@ describe('módulo de flashcards no fluxo do mockup', () => {
     });
 
     expect(await screen.findByText('Frente card 2')).toBeInTheDocument();
+  });
+
+  it('encerra sessão ao avaliar a última carta e impede avaliação duplicada', async () => {
+    const singleCardQueue = {
+      ...QUEUE_PAYLOAD,
+      total: 1,
+      items: [QUEUE_PAYLOAD.items[0]],
+    };
+    const fetchSpy = setupFetch(singleCardQueue);
+    render(<FlashcardsPanel userId="user-1" />);
+
+    await screen.findByText('Frente card 1');
+    await userEvent.click(screen.getByRole('button', { name: /ver resposta/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^bom$/i }));
+
+    expect(
+      await screen.findByText(/sessão concluída\. volte amanhã para novas revisões\./i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/sem cartões para revisar neste momento\./i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /ver resposta/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^bom$/i })).not.toBeInTheDocument();
+
+    const reviewCalls = fetchSpy.mock.calls.filter(([url, init]) => {
+      return (
+        String(url).includes('/api/flashcards/review') &&
+        (init as RequestInit | undefined)?.method === 'POST'
+      );
+    });
+    expect(reviewCalls).toHaveLength(1);
   });
 });

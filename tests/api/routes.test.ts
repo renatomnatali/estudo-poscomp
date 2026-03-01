@@ -71,6 +71,18 @@ describe('api routes de estudo', () => {
     expect(payload.html.length).toBeGreaterThan(50);
   });
 
+  it('retorna 404 para slug de módulo inválido', async () => {
+    const moduleResponse = await getModuleBySlug(new Request('http://localhost') as Request, {
+      params: Promise.resolve({ slug: 'modulo-10' }),
+    });
+    expect(moduleResponse.status).toBe(404);
+
+    const sourceResponse = await getModuleSource(new Request('http://localhost') as Request, {
+      params: Promise.resolve({ slug: 'modulo-10' }),
+    });
+    expect(sourceResponse.status).toBe(404);
+  });
+
   it('corrige quiz embutido do módulo', async () => {
     const moduleResponse = await getModuleBySlug(new Request('http://localhost') as Request, {
       params: Promise.resolve({ slug: 'modulo-02' }),

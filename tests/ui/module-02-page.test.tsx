@@ -149,7 +149,7 @@ describe('módulo 2 importado no padrão do mockup', () => {
 
     await screen.findByRole('heading', { level: 1, name: /autômato finito determinístico/i });
 
-    const input = screen.getByLabelText(/string de entrada/i);
+    const input = await screen.findByLabelText(/string de entrada/i);
     await user.clear(input);
     await user.type(input, '11');
 
