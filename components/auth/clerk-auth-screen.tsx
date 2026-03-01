@@ -19,7 +19,7 @@ export function ClerkAuthScreen({ mode }: ClerkAuthScreenProps) {
             Configure as variáveis do Clerk para habilitar login social e persistência de sessão.
           </p>
           <div className="auth-landing-actions">
-            <Link href="/estudo" className="sim-action-btn sim-action-btn-primary">Abrir aplicação</Link>
+            <Link href="/dashboard" className="sim-action-btn sim-action-btn-primary">Abrir aplicação</Link>
             <Link href="/demo" className="sim-action-btn sim-action-btn-secondary">Ver demo</Link>
           </div>
         </section>
@@ -34,9 +34,9 @@ export function ClerkAuthScreen({ mode }: ClerkAuthScreenProps) {
         <p className="page-subtitle">Use Google ou outro provedor habilitado no Clerk.</p>
         <div className="auth-clerk-slot">
           {mode === 'sign-in' ? (
-            <SignIn path="/entrar" routing="path" signUpUrl="/cadastro" forceRedirectUrl="/estudo" />
+            <SignIn path="/entrar" routing="path" signUpUrl="/cadastro" forceRedirectUrl="/dashboard" />
           ) : (
-            <SignUp path="/cadastro" routing="path" signInUrl="/entrar" forceRedirectUrl="/estudo" />
+            <SignUp path="/cadastro" routing="path" signInUrl="/entrar" forceRedirectUrl="/dashboard" />
           )}
         </div>
       </section>

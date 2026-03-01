@@ -28,7 +28,7 @@ const QUESTIONS_FIXTURE = [
     tags: ['afd'],
     explanation: 'Explicação geral Q1',
     optionExplanations: {
-      A: 'Q1 alternativa A',
+      A: 'Resposta incorreta.\n\nGabarito oficial: B.\n\nIncorreta: termina com a.',
       B: 'Q1 alternativa B',
       C: 'Q1 alternativa C',
       D: 'Q1 alternativa D',
@@ -218,20 +218,53 @@ describe('QuestionsPanel UX V2', () => {
     expect(screen.getByText('Questão 1: linguagem reconhecida por AFD.')).toBeInTheDocument();
   });
 
-  it('exibe correção e gabarito no mesmo bloco da questão atual', async () => {
+  it('exibe feedback único abaixo dos botões com texto direto', async () => {
     render(<QuestionsPanel />);
 
     await screen.findByText('Questão 1: linguagem reconhecida por AFD.');
 
+    expect(screen.queryByTestId('exercise-feedback')).not.toBeInTheDocument();
+
     await userEvent.click(screen.getByRole('button', { name: /B\) Opção B1/i }));
     await userEvent.click(screen.getByRole('button', { name: 'Corrigir resposta' }));
-
-    const runner = screen.getByTestId('exercise-question-runner');
+    const sessionCard = screen.getByTestId('questions-session-card');
+    const feedback = await screen.findByTestId('exercise-feedback');
 
     await waitFor(() => {
-      expect(within(runner).getByText(/Resposta correta\./i)).toBeInTheDocument();
-      expect(within(runner).getByText(/Gabarito oficial:/i)).toHaveTextContent('Gabarito oficial: B.');
+      expect(feedback).toBeInTheDocument();
+      expect(within(feedback).getByText('Q1 alternativa B')).toBeInTheDocument();
+      expect(within(feedback).queryByText(/Gabarito oficial:/i)).not.toBeInTheDocument();
+      expect(within(feedback).queryByText(/Resposta correta\./i)).not.toBeInTheDocument();
+      expect(within(sessionCard).queryAllByTestId('exercise-feedback')).toHaveLength(1);
     });
+  });
+
+  it('oculta feedback da questão anterior ao navegar para próxima', async () => {
+    render(<QuestionsPanel />);
+
+    await screen.findByText('Questão 1: linguagem reconhecida por AFD.');
+
+    await userEvent.click(screen.getByRole('button', { name: /A\) Opção A1/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Corrigir resposta' }));
+    await screen.findByTestId('exercise-feedback');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Próxima' }));
+    expect(screen.queryByTestId('exercise-feedback')).not.toBeInTheDocument();
+  });
+
+  it('remove redundância de status e gabarito no feedback exibido', async () => {
+    render(<QuestionsPanel />);
+
+    await screen.findByText('Questão 1: linguagem reconhecida por AFD.');
+
+    await userEvent.click(screen.getByRole('button', { name: /A\) Opção A1/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Corrigir resposta' }));
+
+    const feedback = await screen.findByTestId('exercise-feedback');
+
+    expect(within(feedback).getByText('Incorreta: termina com a.')).toBeInTheDocument();
+    expect(within(feedback).queryByText(/Resposta incorreta\./i)).not.toBeInTheDocument();
+    expect(within(feedback).queryByText(/Gabarito oficial:/i)).not.toBeInTheDocument();
   });
 
   it('atualiza progresso da sessão após correções', async () => {

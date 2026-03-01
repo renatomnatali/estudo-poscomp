@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "generatedAt": "2026-02-25T00:00:00.000Z",
+  "decks": [
+    {
+      "id": "deck-fund-afd",
+      "slug": "fundamentos-afd",
+      "title": "AFD: modelagem e execução",
+      "macroArea": "fundamentos",
+      "subTopic": "afd_modelagem_execucao",
+      "difficulty": "medium",
+      "description": "Conceitos centrais de autômatos finitos determinísticos com foco em execução.",
+      "estimatedMinutes": 15,
+      "cards": [
+        {
+          "id": "fc-afd-001",
+          "front": "O que define um AFD do ponto de vista formal?",
+          "back": "Um AFD é M = (E, Σ, δ, i, F), com δ: E × Σ → E.",
+          "explanation": "A função de transição determinística retorna exatamente um estado para cada par (estado, símbolo).",
+          "tags": ["definição", "formalismo"],
+          "sourceTopicSlug": "automatos-finitos-afd",
+          "order": 1
+        },
+        {
+          "id": "fc-afd-002",
+          "front": "Quando uma palavra é aceita por um AFD?",
+          "back": "Quando, após consumir toda a palavra, a máquina termina em estado final.",
+          "explanation": "Aceitação depende apenas do estado final alcançado depois da leitura completa.",
+          "tags": ["aceitação", "execução"],
+          "sourceTopicSlug": "automatos-finitos-afd",
+          "order": 2
+        },
+        {
+          "id": "fc-afd-003",
+          "front": "No AFD do padrão {a,b}*c, a palavra 'ababc' é aceita?",
+          "back": "Sim, porque termina em 'c' e o último símbolo leva ao estado final.",
+          "explanation": "A máquina pode permanecer no estado inicial com a e b e transitar ao final ao ler c.",
+          "tags": ["linguagem", "exemplo"],
+          "sourceTopicSlug": "automatos-finitos-afd",
+          "order": 3
+        },
+        {
+          "id": "fc-afd-004",
+          "front": "Por que modelar um estado de erro (sumidouro) ajuda no AFD?",
+          "back": "Porque torna δ total e explícita para entradas inválidas.",
+          "explanation": "Em provas, o estado sumidouro evita lacunas na função de transição.",
+          "tags": ["estado de erro", "delta total"],
+          "sourceTopicSlug": "automatos-finitos-afd",
+          "order": 4
+        }
+      ]
+    },
+    {
+      "id": "deck-fund-afn-conv",
+      "slug": "fundamentos-afn-conversao",
+      "title": "AFN com ε e conversão para AFD",
+      "macroArea": "fundamentos",
+      "subTopic": "conversao_afn_afd",
+      "difficulty": "hard",
+      "description": "Revisão de ε-fecho e construção por subconjuntos.",
+      "estimatedMinutes": 18,
+      "cards": [
+        {
+          "id": "fc-afn-001",
+          "front": "O que é ε-fecho de um estado no AFN?",
+          "back": "É o conjunto de estados alcançáveis usando apenas transições ε.",
+          "explanation": "O ε-fecho deve ser considerado antes e depois de consumir símbolos na simulação.",
+          "tags": ["afn", "epsilon"],
+          "sourceTopicSlug": "afn-com-epsilon",
+          "order": 1
+        },
+        {
+          "id": "fc-afn-002",
+          "front": "Qual a ideia central da conversão AFN → AFD?",
+          "back": "Cada estado do AFD representa um subconjunto de estados do AFN.",
+          "explanation": "É a construção por subconjuntos; preserva a linguagem reconhecida.",
+          "tags": ["conversão", "subconjuntos"],
+          "sourceTopicSlug": "conversao-afn-para-afd",
+          "order": 2
+        },
+        {
+          "id": "fc-afn-003",
+          "front": "Quando um estado-subconjunto do AFD convertido é final?",
+          "back": "Quando contém ao menos um estado final do AFN original.",
+          "explanation": "A aceitação no AFD equivalente herda os estados finais presentes no subconjunto.",
+          "tags": ["estado final", "equivalência"],
+          "sourceTopicSlug": "conversao-afn-para-afd",
+          "order": 3
+        },
+        {
+          "id": "fc-afn-004",
+          "front": "Por que AFN e AFD têm o mesmo poder de reconhecimento?",
+          "back": "Porque todo AFN pode ser convertido em um AFD equivalente.",
+          "explanation": "Mudam a forma de execução, mas não a classe de linguagens regulares reconhecidas.",
+          "tags": ["poder computacional", "linguagens regulares"],
+          "sourceTopicSlug": "conversao-afn-para-afd",
+          "order": 4
+        }
+      ]
+    }
+  ]
+}

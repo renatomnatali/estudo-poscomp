@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 7 — Gramáticas Livres de Contexto · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  /* original module vars */
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item::before{display:none}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}.sidebar.collapsed .sb-sep{margin:.4rem .8rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:77%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500)}.topbar-icon-btn:hover{background:var(--n100)}
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#1a6bcc 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+/* SECTION NAV */
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover{background:rgba(255,255,255,.15);color:white}.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+/* CONTENT */
+.lesson-content{max-width:900px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.75}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0;font-size:.92rem;line-height:1.7}
+.callout{border-left:4px solid var(--accent);background:#e8f0fe;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem}.callout.warning{border-color:var(--accent2);background:#fff3e0}.callout.success{border-color:var(--green);background:#e8f5ee}.callout strong{color:var(--primary)}
+.formula-box{background:var(--primary);color:white;border-radius:12px;padding:1.4rem 2rem;text-align:center;margin:1.5rem 0;font-size:1.3rem;font-family:Georgia,serif}
+.formula-box .label{font-size:.75rem;opacity:.7;display:block;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;font-family:var(--fb)}.formula-box .sub{font-size:.85rem;opacity:.85;display:block;margin-top:.5rem;font-family:var(--fb)}
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.analogy .side{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.analogy .side h4{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}.analogy .side .val{font-size:1rem;font-weight:600;color:var(--primary)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--primary);color:white;padding:.65rem 1rem;text-align:left}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+tr:nth-child(even) td{background:#f5f8ff}tr:hover td{background:#e8f0fe}
+.highlight-row td{background:#fff3cd!important;font-weight:600}
+.automaton-viz{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.8rem;margin:1.5rem 0;text-align:center}
+.states{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.state{width:70px;height:70px;border-radius:50%;border:3px solid var(--accent);background:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--primary);position:relative}
+.state.initial::before{content:'▶';position:absolute;left:-22px;color:var(--accent2);font-size:1rem}
+.state.final{box-shadow:0 0 0 5px white,0 0 0 8px var(--accent)}
+.arrow{font-size:1.5rem;color:var(--accent2);position:relative}.arrow span{position:absolute;top:-1.2rem;left:50%;transform:translateX(-50%);font-size:.8rem;color:var(--muted);white-space:nowrap;font-family:monospace;background:var(--bg);padding:0 4px}
+.step-trace{margin:1rem 0}.step{display:flex;align-items:flex-start;gap:1rem;margin:.5rem 0;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.9rem}
+.step .badge{background:var(--accent);color:white;border-radius:6px;padding:2px 10px;font-size:.78rem;white-space:nowrap;flex-shrink:0;font-family:monospace}.step .badge.ok{background:var(--green)}.step .badge.fail{background:var(--red)}
+.step .body{font-size:.9rem;line-height:1.6}.step .body code,.step code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.comparison .col{border-radius:10px;padding:1.2rem;font-size:.9rem}.comparison .col.dfa{background:#e8f5ee;border:1px solid #a8d8b8}.comparison .col.nfa{background:#fff3e0;border:1px solid #f0c070}.comparison h4{margin-bottom:.5rem;font-size:.92rem}
+.applications{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin:1rem 0}.app-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.app-card .icon{font-size:1.8rem;margin-bottom:.5rem}.app-card h4{color:var(--primary);font-size:.9rem;margin-bottom:.3rem}.app-card p{font-size:.82rem;color:var(--muted);margin:0}
+.summary-box{background:var(--primary);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}.summary-box h3{color:white;margin-bottom:1rem;font-size:1.1rem}.summary-box .row{display:flex;gap:.5rem;margin:.4rem 0;align-items:flex-start;font-size:.9rem}.summary-box .row::before{content:'✓';color:#7ef0a0;flex-shrink:0;font-weight:700}
+/* quiz / interactive */
+.quiz-option{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f8faff;margin:.4rem 0;font-size:.9rem}.quiz-option:hover{background:#e8f0fe;border-color:var(--accent)}
+.quiz-option.selected{background:#e8f0fe;border-color:var(--accent)}.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05);position:sticky;bottom:0}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:77%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap)}.btn-nav.next:hover{background:var(--sap-d)}
+/* EXTRAS from original */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .breadcrumb { font-size: 0.8rem; opacity: 0.65; margin-bottom: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+  .module-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; display: inline-block; padding: 4px 16px; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1rem; }
+  header h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem; }
+  header .subtitle { opacity: 0.85; font-size: 1.05rem; max-width: 640px; margin: 0 auto 1.5rem; }
+  .header-meta { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+  .header-meta span { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 6px; margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .progress-fill { background: white; border-radius: 4px; height: 100%; width: 87.5%; }
+  .progress-label { font-size: 0.78rem; opacity: 0.7; text-align: center; margin-top: 0.3rem; }
+  nav a { color: rgba(255,255,255,0.75); text-decoration: none; padding: 5px 11px; font-size: 0.82rem; border-radius: 4px; }
+  nav a:hover { background: rgba(255,255,255,0.15); color: white; }
+  section { margin-bottom: 3.5rem; scroll-margin-top: 60px; }
+  h2 { color: var(--primary); font-size: 1.55rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--sky); }
+  h2 .num { background: var(--sky); color: white; min-width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.88rem; font-weight: 700; flex-shrink: 0; }
+  h3 { color: var(--sky); font-size: 1.08rem; margin: 1.6rem 0 0.6rem; }
+  p { margin-bottom: 0.9rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.6rem; margin: 1rem 0; }
+  .callout { border-left: 4px solid var(--accent); background: var(--code-bg); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1.1rem 0; }
+  .callout.warn { border-color: var(--orange); background: #fff3e0; }
+  .callout.ok { border-color: var(--green); background: #e4f4ec; }
+  .callout.tip { border-color: var(--sky); background: #e0f0ff; }
+  .callout.key { border-color: var(--indigo); background: #eef2ff; border-width: 4px; }
+  .callout strong { color: var(--primary); }
+  .callout.tip strong { color: var(--sky); }
+
+  .fbox { background: var(--primary); color: white; border-radius: 12px; padding: 1.4rem 2rem; text-align: center; margin: 1.5rem 0; font-family: 'Georgia', serif; }
+  .fbox.sky { background: linear-gradient(135deg, #0d2d6b, #0369a1); }
+  .fbox.teal { background: linear-gradient(135deg, #0369a1, #0e7a72); }
+  .fbox .flabel { font-size: 0.75rem; opacity: 0.65; display: block; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.4rem; font-family: 'Segoe UI', sans-serif; }
+  .fbox .fsub { font-size: 0.88rem; opacity: 0.8; display: block; margin-top: 0.5rem; font-family: 'Segoe UI', sans-serif; }
+
+  code { background: var(--code-bg); color: var(--indigo); padding: 2px 7px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.9rem; }
+
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.93rem; }
+  th { background: var(--primary); color: white; padding: 0.7rem 1rem; text-align: left; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #f0f5ff; }
+  tr:hover td { background: #e0ecff; }
+  .hl td { background: #dbeafe !important; font-weight: 600; color: var(--indigo); }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .split .pane { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; }
+  .split .pane h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.6rem; }
+
+  /* ── GRAMÁTICA VISUAL ── */
+  .grammar { background: #0d1a3a; color: #c8e0ff; border-radius: 12px; padding: 1.4rem 1.8rem; font-family: 'Consolas', monospace; font-size: 1.05rem; line-height: 2.2; margin: 1rem 0; }
+  .grammar .nt { color: #93c5fd; font-style: italic; } /* não-terminal */
+  .grammar .t { color: #86efac; } /* terminal */
+  .grammar .arr { color: #fb923c; } /* → */
+  .grammar .bar { color: #f59e0b; } /* | */
+  .grammar .eps { color: #e879f9; } /* ε */
+  .grammar .comment { color: #6b7280; font-size: 0.85rem; }
+
+  /* ── DERIVAÇÃO ── */
+  .deriv { display: flex; flex-direction: column; gap: 0.3rem; margin: 1rem 0; }
+  .deriv-step { display: flex; align-items: center; gap: 0.8rem; padding: 0.5rem 0.9rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.92rem; }
+  .deriv-step .rule { color: var(--muted); font-size: 0.75rem; flex-shrink: 0; min-width: 90px; text-align: right; font-family: 'Segoe UI', sans-serif; }
+  .deriv-step .form { color: var(--indigo); flex: 1; }
+  .deriv-step .form .expand { color: var(--sky); font-weight: 700; }
+  .darrow { text-align: center; color: var(--muted); font-size: 0.9rem; }
+
+  /* ── ÁRVORE DE DERIVAÇÃO ── */
+  canvas.tree-canvas { width: 100%; border: 1px solid var(--border); border-radius: 10px; background: #f5f8ff; display: block; }
+
+  /* ── PDA ── */
+  .pda-display { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .pda-panel { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+  .pda-panel h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.6rem; }
+
+  /* Pilha visual */
+  .stack-visual { display: flex; flex-direction: column-reverse; gap: 2px; min-height: 120px; align-items: center; }
+  .stack-cell { width: 80px; height: 32px; border: 2px solid var(--sky); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'Consolas', monospace; font-size: 1rem; background: #e0f0ff; color: var(--indigo); font-weight: 700; }
+  .stack-cell.top { border-color: var(--orange); background: #fff3e0; color: var(--orange); }
+  .stack-cell.bottom { border-color: var(--muted); background: #f5f5f5; color: var(--muted); }
+  .stack-empty { color: var(--muted); font-size: 0.85rem; text-align: center; padding: 1rem; }
+
+  /* Fita */
+  .tape-visual { display: flex; gap: 2px; flex-wrap: wrap; }
+  .tape-cell { width: 34px; height: 34px; border: 2px solid var(--border); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: 'Consolas', monospace; font-size: 1.05rem; font-weight: 700; background: var(--card); }
+  .tape-cell.reading { border-color: var(--sky); background: #dbeafe; }
+  .tape-cell.done { border-color: var(--green); background: #e4f4ec; opacity: 0.6; }
+  .tape-cell.pending { opacity: 0.3; }
+
+  /* ── SIMULADOR PDA ── */
+  #pda-sim { background: var(--card); border: 2px solid var(--border); border-radius: 16px; overflow: hidden; margin: 1.5rem 0; box-shadow: 0 4px 20px rgba(3,105,161,0.08); }
+  .pda-header { background: linear-gradient(90deg, #0d2d6b, #0369a1); color: white; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+  .pda-header h3 { font-size: 1rem; margin: 0; }
+  .pda-badge { background: rgba(255,255,255,0.2); border-radius: 6px; padding: 3px 10px; font-size: 0.78rem; }
+  .pda-body { padding: 1.4rem 1.5rem; }
+
+  .preset-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .preset-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; color: var(--primary); font-weight: 500; }
+  .preset-btn.active, .preset-btn:hover { background: var(--sky); color: white; border-color: var(--sky); }
+
+  .sim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .sim-panel { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem; }
+  .sim-panel-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.5rem; font-weight: 600; }
+
+  .sim-input-row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+  .sim-input-row label { font-size: 0.88rem; font-weight: 600; color: var(--primary); }
+  #pda-str { font-family: 'Consolas', monospace; font-size: 1.05rem; padding: 6px 12px; border: 2px solid var(--border); border-radius: 7px; width: 160px; }
+  #pda-str:focus { outline: none; border-color: var(--sky); }
+
+  .sim-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .sim-btn { padding: 7px 16px; border: none; border-radius: 7px; cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+  .btn-sky { background: var(--sky); color: white; }
+  .btn-sky:hover { background: var(--indigo); }
+  .btn-sec { background: var(--bg); border: 1px solid var(--border); color: var(--primary); }
+  .btn-sec:hover { background: var(--code-bg); }
+  .btn-green { background: var(--green); color: white; }
+
+  #pda-log { background: #f0f5ff; border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; max-height: 180px; overflow-y: auto; font-size: 0.84rem; font-family: monospace; margin-top: 0.8rem; }
+  .pda-log-line { padding: 2px 0; border-bottom: 1px solid #d0dff0; }
+  .pda-log-line:last-child { border-bottom: none; }
+  .log-push { color: var(--sky); }
+  .log-pop { color: var(--orange); }
+  .log-accept { color: var(--green); font-weight: 700; }
+  .log-reject { color: var(--red); font-weight: 700; }
+
+  #pda-result { padding: 0.9rem 1.2rem; border-radius: 10px; font-size: 1rem; font-weight: 600; margin-top: 0.8rem; display: none; }
+  #pda-result.accept { background: #e4f4ec; border: 2px solid var(--green); color: #0e6e3a; }
+  #pda-result.reject { background: #fdecea; border: 2px solid var(--red); color: var(--red); }
+
+  /* ── DERIVAÇÃO INTERATIVA ── */
+  #deriv-sim { background: var(--card); border: 2px solid var(--border); border-radius: 14px; overflow: hidden; margin: 1.5rem 0; }
+  .deriv-header { background: linear-gradient(90deg, #0d2d6b, #0369a1); color: white; padding: 0.9rem 1.4rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+  .deriv-body { padding: 1.2rem 1.4rem; }
+  #deriv-word { font-family: 'Consolas', monospace; font-size: 1.1rem; padding: 6px 12px; border: 2px solid var(--border); border-radius: 7px; width: 180px; }
+  #deriv-word:focus { outline: none; border-color: var(--sky); }
+  #deriv-steps-list { margin-top: 0.8rem; }
+  #deriv-tree-canvas { width: 100%; height: 200px; border: 1px solid var(--border); border-radius: 8px; background: #f5f8ff; display: block; margin-top: 0.8rem; }
+
+  /* QUIZ */
+  .quiz { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .quiz h3 { color: var(--primary); font-size: 1rem; margin-bottom: 1rem; }
+  .quiz h3::before { content: '🧠 '; }
+  .options { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+  .opt { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 0.9rem; background: var(--bg); }
+  .opt:hover { background: #dbeafe; border-color: var(--sky); }
+  .opt input { accent-color: var(--sky); margin-top: 3px; flex-shrink: 0; }
+  .quiz-btn { margin-top: 1rem; background: var(--sky); color: white; border: none; padding: 8px 22px; border-radius: 7px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+  .quiz-btn:hover { background: var(--indigo); }
+  .quiz-result { margin-top: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; display: none; }
+  .quiz-result.show { display: block; }
+  .quiz-result.correct { background: #e4f4ec; border: 1px solid #90c8a0; color: #0e6e3a; }
+  .quiz-result.wrong { background: #fdecea; border: 1px solid #f0a8a0; color: var(--red); }
+
+  .summary { background: linear-gradient(135deg, #0d2d6b, #0369a1, #0e7a72); color: white; border-radius: 14px; padding: 2rem; margin: 2rem 0; }
+  .summary h3 { color: white; margin-bottom: 1rem; }
+  .summary .row { display: flex; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  .summary .row::before { content: '✓'; color: #7dd3fc; font-weight: 700; flex-shrink: 0; }
+
+  .mod-nav { display: flex; justify-content: space-between; align-items: center; margin: 3rem 0 1rem; gap: 1rem; flex-wrap: wrap; }
+  .mod-btn { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 1rem 1.4rem; text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; flex: 1; min-width: 160px; }
+  .mod-btn:hover { border-color: var(--sky); background: #dbeafe; }
+  .mod-btn.next { background: var(--sky); color: white; border-color: var(--sky); text-align: right; }
+  .mod-btn.next:hover { background: var(--indigo); border-color: var(--indigo); }
+  .mod-btn .dir { display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7; margin-bottom: 2px; }
+
+  @media (max-width: 640px) {
+    .split, .pda-display, .sim-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.8rem; }
+  }
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .analogy,.comparison{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">1 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div>
+        <a class="sb-item " href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas</span></a>
+        <a class="sb-item " href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div>
+        <a class="sb-item " href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Linguagens Formais</a><span class="sep">›</span>
+        <span class="current">Módulo 7 — Gramáticas Livres de Contexto</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header"><div class="breadcrumb">POSCOMP Visual Lab › Autômatos</div>
+  <div class="module-badge">Módulo 7 de 8</div>
+  <h1>GLC e Autômatos de Pilha</h1>
+  <p class="subtitle">O segundo nível da Hierarquia de Chomsky — linguagens que autômatos finitos não conseguem reconhecer, mas gramáticas livres de contexto e pilhas conseguem.</p>
+  <div class="header-meta">
+    <span>⏱ ~65 min</span>
+    <span>📐 Nível: Intermediário-Avançado</span>
+    <span>⚙️ Simulador PDA + Derivação visual interativa</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div class="progress-label">Módulo 7 de 8 — GLC e PDA</div></div>
+      <nav class="section-nav" id="sectionNav"><a href="#motivacao">Motivação</a>
+  <a href="#glc">GLC</a>
+  <a href="#derivacao">Derivação</a>
+  <a href="#arvore">Árvore</a>
+  <a href="#ambiguidade">Ambiguidade</a>
+  <a href="#pda">PDA</a>
+  <a href="#simulador">Simulador</a>
+  <a href="#equivalencia">Equiv.</a>
+  <a href="#propriedades">Propriedades</a>
+  <a href="#quiz">Exercícios</a></nav>
+      <div class="lesson-content"><!-- ══════════════ 1 — MOTIVAÇÃO ══════════════ -->
+<section id="motivacao">
+  <h2><span class="num">1</span> O que os autômatos finitos não conseguem?</h2>
+
+  <p>Os módulos anteriores mostraram que AFDs, AFNs e expressões regulares têm o mesmo poder: as <strong>linguagens regulares</strong>. Mas há linguagens simples que escapam completamente desse modelo.</p>
+
+  <div class="callout key">
+    <strong>O problema do contador:</strong> a linguagem L = {aⁿbⁿ | n ≥ 0} — strings com n letras 'a' seguidas de n letras 'b' — exige que a máquina "lembre" quantos a's leu para verificar que há o mesmo número de b's. Um AFD tem memória finita (apenas seu estado atual) e não pode fazer isso para n arbitrário.
+  </div>
+
+  <p>Para reconhecer essas linguagens, precisamos de um modelo com <strong>memória ilimitada de acesso restrito</strong>: a <em>pilha</em> (stack). O modelo resultante é o <strong>Autômato de Pilha</strong> (PDA — Pushdown Automaton), e a linguagem para especificá-los é a <strong>Gramática Livre de Contexto</strong> (GLC).</p>
+
+  <div class="split">
+    <div class="pane">
+      <h4>Linguagens regulares (Módulos 2–6)</h4>
+      <p>AFD / AFN / ER</p>
+      <p>✓ <code>a*b*</code>, strings com número par de a's</p>
+      <p>✗ <code>aⁿbⁿ</code>, palíndromos, parênteses balanceados</p>
+    </div>
+    <div class="pane">
+      <h4>Linguagens livres de contexto (este módulo)</h4>
+      <p>GLC / PDA</p>
+      <p>✓ <code>aⁿbⁿ</code>, parênteses balanceados, gramáticas de linguagens de programação</p>
+      <p>✗ <code>aⁿbⁿcⁿ</code>, <code>ww</code> (repetição)</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 2 — GLC ══════════════ -->
+<section id="glc">
+  <h2><span class="num">2</span> Gramáticas Livres de Contexto</h2>
+
+  <p>Uma <strong>GLC</strong> é um conjunto de regras de substituição (produções) que descrevem como gerar as strings de uma linguagem. O nome "livre de contexto" significa que uma variável pode ser substituída independentemente do contexto onde aparece.</p>
+
+  <div class="fbox sky">
+    <span class="flabel">Definição formal de GLC</span>
+    G = (V, Σ, R, S)
+    <span class="fsub" style="text-align:left; display:block; max-width:440px; margin:0.6rem auto 0;">
+      V = conjunto de variáveis (não-terminais)<br>
+      Σ = alfabeto de terminais (V ∩ Σ = ∅)<br>
+      R ⊆ V × (V ∪ Σ)* = conjunto de produções/regras<br>
+      S ∈ V = variável inicial (símbolo de início)
+    </span>
+  </div>
+
+  <h3>Exemplo 1 — Parênteses balanceados</h3>
+  <div class="grammar">
+    <span class="nt">S</span> <span class="arr">→</span> <span class="t">(</span><span class="nt">S</span><span class="t">)</span> <span class="bar">|</span> <span class="nt">SS</span> <span class="bar">|</span> <span class="eps">ε</span>
+    <span class="comment">// S pode ser vazio, par de parênteses envolvendo S, ou concatenação de duas sequências</span>
+  </div>
+  <p>Gera: ε, (), (()), ()(), (()()) — qualquer sequência de parênteses balanceados.</p>
+
+  <h3>Exemplo 2 — L = {aⁿbⁿ | n ≥ 0}</h3>
+  <div class="grammar">
+    <span class="nt">S</span> <span class="arr">→</span> <span class="t">a</span><span class="nt">S</span><span class="t">b</span> <span class="bar">|</span> <span class="eps">ε</span>
+    <span class="comment">// Ou gera "a ... b" envolvendo uma recursão, ou termina com ε</span>
+  </div>
+  <p>Gera: ε, ab, aabb, aaabbb — sempre igual número de a's e b's.</p>
+
+  <h3>Exemplo 3 — Expressões aritméticas</h3>
+  <div class="grammar">
+    <span class="nt">E</span> <span class="arr">→</span> <span class="nt">E</span> <span class="t">+</span> <span class="nt">T</span> <span class="bar">|</span> <span class="nt">T</span><br>
+    <span class="nt">T</span> <span class="arr">→</span> <span class="nt">T</span> <span class="t">×</span> <span class="nt">F</span> <span class="bar">|</span> <span class="nt">F</span><br>
+    <span class="nt">F</span> <span class="arr">→</span> <span class="t">(</span><span class="nt">E</span><span class="t">)</span> <span class="bar">|</span> <span class="t">id</span>
+    <span class="comment">// Encode precedência: × tem maior prioridade que +</span>
+  </div>
+  <p>Esta gramática descreve expressões como <code>id + id × id</code> respeitando a precedência padrão de operadores — a base de qualquer compilador.</p>
+
+  <h3>Terminologia</h3>
+  <table>
+    <tr><th>Termo</th><th>Definição</th><th>Exemplo (G₂ acima)</th></tr>
+    <tr><td>Variável / Não-terminal</td><td>Símbolo que pode ser expandido por produções</td><td>S</td></tr>
+    <tr><td>Terminal</td><td>Símbolo do alfabeto — aparece na string final</td><td>a, b</td></tr>
+    <tr><td>Produção / Regra</td><td>Par (V, w) escrito como V → w</td><td>S → aSb | ε</td></tr>
+    <tr><td>Forma sentencial</td><td>Sequência de variáveis e terminais alcançável a partir de S</td><td>aSb, aaSbb, ab</td></tr>
+    <tr><td>Sentença</td><td>Forma sentencial sem variáveis (apenas terminais)</td><td>ab, aabb</td></tr>
+    <tr class="hl"><td>Linguagem da gramática</td><td>L(G) = conjunto de todas as sentenças</td><td>{aⁿbⁿ | n ≥ 0}</td></tr>
+  </table>
+</section>
+
+<!-- ══════════════ 3 — DERIVAÇÃO ══════════════ -->
+<section id="derivacao">
+  <h2><span class="num">3</span> Derivação — como a gramática gera strings</h2>
+
+  <p>Uma <strong>derivação</strong> é uma sequência de substituições, começando em S e aplicando produções até obter uma sentença (sem variáveis).</p>
+
+  <div class="fbox sky" style="font-size:0.95rem;">
+    <span class="flabel">Notação</span>
+    α <strong>⇒</strong> β &nbsp;("α deriva β em um passo") &nbsp;|&nbsp; α <strong>⇒*</strong> β ("deriva em zero ou mais passos")
+    <span class="fsub">w ∈ L(G) ⟺ S ⇒* w</span>
+  </div>
+
+  <h3>Exemplo — derivação de "aabb" na gramática S → aSb | ε</h3>
+
+  <div class="deriv">
+    <div class="deriv-step">
+      <span class="rule">início</span>
+      <span class="form"><span class="expand">S</span></span>
+    </div>
+    <div class="darrow">⇒ (aplica S → aSb)</div>
+    <div class="deriv-step">
+      <span class="rule">S → aSb</span>
+      <span class="form">a<span class="expand">S</span>b</span>
+    </div>
+    <div class="darrow">⇒ (aplica S → aSb)</div>
+    <div class="deriv-step">
+      <span class="rule">S → aSb</span>
+      <span class="form">aa<span class="expand">S</span>bb</span>
+    </div>
+    <div class="darrow">⇒ (aplica S → ε)</div>
+    <div class="deriv-step">
+      <span class="rule">S → ε</span>
+      <span class="form">aabb &nbsp;<span style="color:var(--green); font-size:0.85rem;">✓ sentença</span></span>
+    </div>
+  </div>
+
+  <h3>Derivações mais à esquerda e mais à direita</h3>
+  <div class="split">
+    <div class="pane">
+      <h4>Derivação mais à esquerda (leftmost)</h4>
+      <p>Sempre expande a variável mais à esquerda da forma sentencial. É o modo padrão para parsers descendentes (top-down).</p>
+    </div>
+    <div class="pane">
+      <h4>Derivação mais à direita (rightmost)</h4>
+      <p>Sempre expande a variável mais à direita. É o modo usado por parsers LR (bottom-up), que são mais poderosos na prática.</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <strong>Ponto POSCOMP:</strong> para gramáticas não-ambíguas, toda string tem exatamente uma derivação mais à esquerda e uma mais à direita. As duas são estruturalmente equivalentes mas expressas em ordens diferentes.
+  </div>
+</section>
+
+<!-- ══════════════ 4 — ÁRVORE DE DERIVAÇÃO ══════════════ -->
+<section id="arvore">
+  <h2><span class="num">4</span> Árvore de derivação (Parse Tree)</h2>
+
+  <p>A <strong>árvore de derivação</strong> (ou parse tree) representa graficamente a estrutura de uma derivação. Ela captura qual produção foi aplicada em cada passo sem impor uma ordem (mais à esquerda ou direita).</p>
+
+  <div class="card">
+    <strong>Propriedades da árvore de derivação:</strong><br>
+    • Raiz = símbolo inicial S<br>
+    • Nós internos = variáveis (não-terminais)<br>
+    • Folhas = terminais ou ε (da esquerda para a direita, formam a sentença)<br>
+    • Filhos de um nó V correspondem ao lado direito de uma produção V → w₁w₂…wₖ
+  </div>
+
+  <h3>Árvore de derivação de "aabb" — S → aSb | ε</h3>
+  <canvas id="tree-aabb" class="tree-canvas" style="height:200px;"></canvas>
+
+  <h3>Árvore de derivação de "id + id × id" — gramática aritmética</h3>
+  <canvas id="tree-arith" class="tree-canvas" style="height:220px;"></canvas>
+  <p style="font-size:0.82rem; color:var(--muted); text-align:center;">Note que × fica mais fundo na árvore que +, codificando a maior precedência da multiplicação.</p>
+</section>
+
+<!-- ══════════════ 5 — AMBIGUIDADE ══════════════ -->
+<section id="ambiguidade">
+  <h2><span class="num">5</span> Ambiguidade</h2>
+
+  <p>Uma gramática é <strong>ambígua</strong> se existe alguma string com duas ou mais árvores de derivação distintas (equivalentemente, duas derivações mais à esquerda distintas).</p>
+
+  <div class="fbox sky" style="font-size:0.95rem;">
+    <span class="flabel">Definição</span>
+    G é ambígua ⟺ ∃w ∈ L(G) com duas árvores de derivação distintas
+  </div>
+
+  <h3>Exemplo — gramática ambígua para expressões</h3>
+  <div class="grammar">
+    <span class="nt">E</span> <span class="arr">→</span> <span class="nt">E</span> <span class="t">+</span> <span class="nt">E</span> <span class="bar">|</span> <span class="nt">E</span> <span class="t">×</span> <span class="nt">E</span> <span class="bar">|</span> <span class="t">id</span>
+    <span class="comment">// Sem estratificação — ambígua!</span>
+  </div>
+  <p>A string <code>id + id × id</code> tem <strong>duas</strong> árvores de derivação: uma que agrupa <code>(id + id) × id</code> e outra que agrupa <code>id + (id × id)</code>. O parser não sabe qual usar.</p>
+
+  <canvas id="tree-ambig" class="tree-canvas" style="height:230px;"></canvas>
+  <p style="font-size:0.82rem; color:var(--muted); text-align:center;">Duas árvores distintas para "id + id × id" na gramática E → E+E | E×E | id.</p>
+
+  <h3>Estratégias para eliminar ambiguidade</h3>
+  <div class="split">
+    <div class="pane">
+      <h4>Estratificação (layering)</h4>
+      <p>Cria múltiplos níveis de variáveis (E, T, F) onde cada nível codifica uma precedência. É a técnica usada na gramática aritmética completa.</p>
+    </div>
+    <div class="pane">
+      <h4>Linguagem inerentemente ambígua</h4>
+      <p>Algumas linguagens são <em>inerentemente ambíguas</em>: toda GLC que as descreve é ambígua. Exemplo: {aⁿbᵐcᵐ | n ≥ 1} ∪ {aⁿbⁿcᵐ | m ≥ 1}.</p>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Ambiguidade vs. não-determinismo:</strong> gramáticas ambíguas não são "erradas" matematicamente — ainda geram a mesma linguagem. O problema é para compiladores: sem uma única árvore de derivação, o significado do programa seria indefinido. Por isso, gramáticas de linguagens de programação devem ser não-ambíguas.
+  </div>
+</section>
+
+<!-- ══════════════ 6 — PDA ══════════════ -->
+<section id="pda">
+  <h2><span class="num">6</span> Autômatos de Pilha (PDA)</h2>
+
+  <p>Um <strong>PDA</strong> é um AFN acrescido de uma <em>pilha</em> (stack) de capacidade ilimitada. A pilha é o mecanismo que permite contar e lembrar informação arbitrária — desde que o acesso seja LIFO (Last In, First Out).</p>
+
+  <div class="fbox sky">
+    <span class="flabel">Definição formal de PDA</span>
+    P = (Q, Σ, Γ, δ, q₀, Z₀, F)
+    <span class="fsub" style="text-align:left; display:block; max-width:480px; margin:0.6rem auto 0;">
+      Q = estados | Σ = alfabeto de entrada | Γ = alfabeto da pilha<br>
+      δ: Q × (Σ∪{ε}) × Γ → 2^(Q×Γ*) = função de transição<br>
+      q₀ ∈ Q = estado inicial | Z₀ ∈ Γ = símbolo inicial da pilha<br>
+      F ⊆ Q = estados de aceitação
+    </span>
+  </div>
+
+  <h3>A transição do PDA</h3>
+  <div class="card">
+    <code>δ(q, a, Z) = {(p, γ), ...}</code><br><br>
+    <strong>Leitura:</strong> no estado q, ao ler símbolo a da entrada (ou ε) e tendo Z no topo da pilha:<br>
+    → vá para o estado p<br>
+    → substitua Z no topo por γ (string de símbolos da pilha, possivelmente ε = pop)<br><br>
+    <strong>Casos especiais:</strong><br>
+    • γ = ε → pop (remove Z da pilha)<br>
+    • γ = Z → push nada (mantém Z — equivalente a ignorar a pilha)<br>
+    • γ = AZ → push A acima de Z<br>
+    • a = ε → ε-transição (não consome símbolo)
+  </div>
+
+  <h3>Dois modos de aceitação</h3>
+  <div class="split">
+    <div class="pane">
+      <h4>Aceitação por estado final</h4>
+      <p>Aceita se ao consumir toda a entrada a máquina está em um estado f ∈ F. O conteúdo da pilha é irrelevante. (Mais comum na teoria.)</p>
+    </div>
+    <div class="pane">
+      <h4>Aceitação por pilha vazia</h4>
+      <p>Aceita se ao consumir toda a entrada a pilha está completamente vazia. Não precisa de estados finais. Os dois modos são equivalentes.</p>
+    </div>
+  </div>
+
+  <h3>PDA para aⁿbⁿ</h3>
+  <div class="card">
+    Estados: q₀, q₁, q₂ (final) | Γ = {A, Z₀}<br><br>
+    <strong>Funcionamento:</strong><br>
+    1. Em q₀: ao ler 'a', empilha 'A'. Permanece em q₀.<br>
+    2. Ao ler 'b' (ainda em q₀), vai para q₁ e desempilha 'A'.<br>
+    3. Em q₁: ao ler 'b', desempilha 'A'. Permanece em q₁.<br>
+    4. Ao ver Z₀ (pilha quase vazia) e sem mais entrada, vai para q₂ (final).<br><br>
+    <strong>Transições:</strong><br>
+    δ(q₀, a, Z₀) = {(q₀, AZ₀)} &nbsp; δ(q₀, a, A) = {(q₀, AA)}<br>
+    δ(q₀, b, A) = {(q₁, ε)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; δ(q₁, b, A) = {(q₁, ε)}<br>
+    δ(q₁, ε, Z₀) = {(q₂, Z₀)}
+  </div>
+</section>
+
+<!-- ══════════════ 7 — SIMULADOR PDA ══════════════ -->
+<section id="simulador">
+  <h2><span class="num">7</span> Simulador de PDA</h2>
+
+  <div id="pda-sim">
+    <div class="pda-header">
+      <h3>⚡ Simulador de PDA — Pilha Interativa</h3>
+      <span class="pda-badge">Execução passo a passo</span>
+    </div>
+    <div class="pda-body">
+
+      <div class="preset-row">
+        <button class="preset-btn active" onclick="pdaLoad('anbn')">aⁿbⁿ</button>
+        <button class="preset-btn" onclick="pdaLoad('parens')">Parênteses</button>
+        <button class="preset-btn" onclick="pdaLoad('palindrome')">Palíndromo par</button>
+      </div>
+
+      <div id="pda-desc" class="callout tip" style="font-size:0.88rem; margin-bottom:0.8rem;">
+        <strong>aⁿbⁿ:</strong> empilha 'A' para cada 'a', desempilha um 'A' para cada 'b'. Aceita se a pilha chega a Z₀ exatamente quando a entrada termina.
+      </div>
+
+      <div class="sim-grid">
+        <div class="sim-panel">
+          <div class="sim-panel-label">Fita de entrada</div>
+          <div id="pda-tape" class="tape-visual"></div>
+        </div>
+        <div class="sim-panel">
+          <div class="sim-panel-label">Pilha (topo → base)</div>
+          <div id="pda-stack" class="stack-visual"><div class="stack-empty">Pilha vazia</div></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:0.8rem;">
+        <span style="font-size:0.85rem; color:var(--muted);">Estado atual: </span>
+        <strong id="pda-state" style="color:var(--sky); font-family:monospace;">—</strong>
+      </div>
+
+      <div class="sim-input-row">
+        <label>String:</label>
+        <input type="text" id="pda-str" placeholder="ex: aaabbb" maxlength="20">
+        <div class="sim-controls">
+          <button class="sim-btn btn-sky" onclick="pdaInit()">▶ Iniciar</button>
+          <button class="sim-btn btn-sec" onclick="pdaStep()">⏭ Passo</button>
+          <button class="sim-btn btn-green" onclick="pdaRun()">⚡ Executar</button>
+          <button class="sim-btn btn-sec" onclick="pdaReset()">↺</button>
+        </div>
+      </div>
+
+      <div id="pda-log"><span style="color:var(--muted);">Selecione um PDA, digite uma string e clique em Iniciar.</span></div>
+      <div id="pda-result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 8 — EQUIVALÊNCIA ══════════════ -->
+<section id="equivalencia">
+  <h2><span class="num">8</span> GLC ≡ PDA — Equivalência</h2>
+
+  <div class="fbox teal">
+    <span class="flabel">Teorema fundamental</span>
+    Uma linguagem é livre de contexto ⟺ é reconhecida por algum PDA
+    <span class="fsub">GLC e PDA têm exatamente o mesmo poder expressivo</span>
+  </div>
+
+  <h3>GLC → PDA (construção)</h3>
+  <div class="card">
+    Dado G = (V, Σ, R, S), construa um PDA P de 3 estados {q₀, q_loop, q_acc}:<br><br>
+    1. δ(q₀, ε, Z₀) = {(q_loop, SZ₀)} &nbsp;&nbsp;— empilha o símbolo inicial S<br>
+    2. Para cada produção A → w em R:<br>
+    &nbsp;&nbsp;&nbsp;δ(q_loop, ε, A) = {(q_loop, w)} &nbsp;— expande não-terminais no topo<br>
+    3. Para cada terminal a ∈ Σ:<br>
+    &nbsp;&nbsp;&nbsp;δ(q_loop, a, a) = {(q_loop, ε)} &nbsp;— consome terminais da entrada e pilha<br>
+    4. δ(q_loop, ε, Z₀) = {(q_acc, Z₀)} &nbsp;&nbsp;— aceita quando pilha volta a Z₀<br><br>
+    Este PDA simula uma <em>derivação mais à esquerda</em> da gramática.
+  </div>
+
+  <h3>PDA → GLC (construção)</h3>
+  <div class="card">
+    A conversão inversa é mais complexa. Para cada par de estados (p, q) do PDA, cria-se uma variável [p,q] que representa "ir de p a q consumindo alguma parte da entrada e esvaziando a pilha de volta ao nível inicial". As produções são derivadas das transições do PDA. O resultado é uma GLC equivalente.
+  </div>
+
+  <div class="callout ok">
+    <strong>Consequência prática:</strong> compiladores usam esse resultado. A gramática de uma linguagem de programação (GLC) é transformada em um parser (equivalente a um PDA) automaticamente por ferramentas como yacc, bison e ANTLR.
+  </div>
+</section>
+
+<!-- ══════════════ 9 — PROPRIEDADES ══════════════ -->
+<section id="propriedades">
+  <h2><span class="num">9</span> Propriedades das linguagens livres de contexto</h2>
+
+  <h3>Fechamento — comparação com regulares</h3>
+  <table>
+    <tr><th>Operação</th><th>Regulares</th><th>LLCs</th></tr>
+    <tr><td>União (∪)</td><td class="yes" style="color:var(--green);font-weight:700;">✓ Sim</td><td class="yes" style="color:var(--green);font-weight:700;">✓ Sim</td></tr>
+    <tr><td>Concatenação (∘)</td><td class="yes" style="color:var(--green);font-weight:700;">✓ Sim</td><td class="yes" style="color:var(--green);font-weight:700;">✓ Sim</td></tr>
+    <tr><td>Kleene Star (*)</td><td class="yes" style="color:var(--green);font-weight:700;">✓ Sim</td><td class="yes" style="color:var(--green);font-weight:700;">✓ Sim</td></tr>
+    <tr class="hl"><td>Interseção (∩)</td><td class="yes" style="color:var(--green);font-weight:700;">✓ Sim</td><td style="color:var(--red);font-weight:700;">✗ Não (em geral)</td></tr>
+    <tr class="hl"><td>Complemento (¬)</td><td class="yes" style="color:var(--green);font-weight:700;">✓ Sim</td><td style="color:var(--red);font-weight:700;">✗ Não (em geral)</td></tr>
+    <tr><td>Interseção com regular</td><td>—</td><td class="yes" style="color:var(--green);font-weight:700;">✓ Sim (LLC ∩ Regular = LLC)</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <strong>Contraexemplo para interseção:</strong> L₁ = {aⁿbⁿcᵐ} e L₂ = {aᵐbⁿcⁿ} são LLCs, mas L₁ ∩ L₂ = {aⁿbⁿcⁿ} não é LLC — é sensível ao contexto. Isso é frequentemente cobrado no POSCOMP.
+  </div>
+
+  <h3>Hierarquia de Chomsky — preview do Módulo 8</h3>
+  <div class="card">
+    <table style="font-size:0.88rem;">
+      <tr><th>Tipo</th><th>Gramática</th><th>Autômato</th><th>Linguagem</th></tr>
+      <tr><td>Tipo 3</td><td>Regular</td><td>AFD / AFN</td><td>Regular</td></tr>
+      <tr class="hl"><td>Tipo 2</td><td>Livre de contexto</td><td>PDA</td><td>Livre de contexto</td></tr>
+      <tr><td>Tipo 1</td><td>Sensível ao contexto</td><td>Máquina de Turing limitada</td><td>Sensível ao contexto</td></tr>
+      <tr><td>Tipo 0</td><td>Irrestrita</td><td>Máquina de Turing</td><td>Recursivamente enumerável</td></tr>
+    </table>
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:0.5rem;">Cada tipo é um subconjunto estrito do próximo: Regular ⊊ LLC ⊊ Sensível ⊊ Recursiv. Enumerável.</p>
+  </div>
+
+  <h3>Lema do Bombeamento para LLCs</h3>
+  <div class="card">
+    <strong>Enunciado:</strong> se L é LLC, existe p (comprimento de bombeamento) tal que toda string w ∈ L com |w| ≥ p pode ser escrita como w = uvxyz onde:<br><br>
+    1. |vy| ≥ 1 (pelo menos um de v ou y é não-vazio)<br>
+    2. |vxy| ≤ p<br>
+    3. Para todo i ≥ 0: uvⁱxyⁱz ∈ L<br><br>
+    <strong>Uso:</strong> para provar que L <em>não</em> é LLC, assume-se que L é LLC, escolhe-se uma string longa e mostra-se que nenhuma decomposição satisfaz as condições — contradição.
+  </div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section id="quiz">
+  <h2><span class="num">10</span> Exercícios — estilo POSCOMP</h2>
+
+  <div class="quiz">
+    <h3>Questão 1</h3>
+    <p>Qual GLC gera a linguagem L = {aⁿb²ⁿ | n ≥ 0} (n letras 'a' seguidas de 2n letras 'b')?</p>
+    <div class="options" id="q1">
+      <label class="opt"><input type="radio" name="q1" value="A"> A) S → aSb | ε</label>
+      <label class="opt"><input type="radio" name="q1" value="B"> B) S → aSbb | ε</label>
+      <label class="opt"><input type="radio" name="q1" value="C"> C) S → aaSb | ε</label>
+      <label class="opt"><input type="radio" name="q1" value="D"> D) S → aSb | aSbb | ε</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q1','B','e1')">Verificar</button>
+    <div class="quiz-result" id="q1-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 2</h3>
+    <p>Uma gramática G é ambígua se:</p>
+    <div class="options" id="q2">
+      <label class="opt"><input type="radio" name="q2" value="A"> A) Tem mais produções do que variáveis</label>
+      <label class="opt"><input type="radio" name="q2" value="B"> B) Gera a mesma string por dois caminhos com a mesma árvore</label>
+      <label class="opt"><input type="radio" name="q2" value="C"> C) Existe string com duas árvores de derivação distintas</label>
+      <label class="opt"><input type="radio" name="q2" value="D"> D) Não é possível convertê-la para um PDA determinístico</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q2','C','e2')">Verificar</button>
+    <div class="quiz-result" id="q2-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 3</h3>
+    <p>Na definição de PDA, a função de transição δ tem a assinatura:</p>
+    <div class="options" id="q3">
+      <label class="opt"><input type="radio" name="q3" value="A"> A) δ: Q × Σ → Q</label>
+      <label class="opt"><input type="radio" name="q3" value="B"> B) δ: Q × (Σ∪{ε}) × Γ → 2^(Q×Γ*)</label>
+      <label class="opt"><input type="radio" name="q3" value="C"> C) δ: Q × Σ × Γ → Q × Γ</label>
+      <label class="opt"><input type="radio" name="q3" value="D"> D) δ: Q × Σ* × Γ* → Q</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q3','B','e3')">Verificar</button>
+    <div class="quiz-result" id="q3-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 4 — POSCOMP nível difícil</h3>
+    <p>Sejam L₁ = {aⁿbⁿ | n ≥ 0} e L₂ = {bⁿcⁿ | n ≥ 0}, ambas LLCs. Qual afirmação é correta sobre L₁ ∩ L₂?</p>
+    <div class="options" id="q4">
+      <label class="opt"><input type="radio" name="q4" value="A"> A) L₁ ∩ L₂ = ∅, pois L₁ e L₂ têm alfabetos diferentes</label>
+      <label class="opt"><input type="radio" name="q4" value="B"> B) L₁ ∩ L₂ é LLC, pois LLCs são fechadas sob interseção</label>
+      <label class="opt"><input type="radio" name="q4" value="C"> C) L₁ ∩ L₂ = {ε}, pois a única string em ambas é a vazia</label>
+      <label class="opt"><input type="radio" name="q4" value="D"> D) L₁ ∩ L₂ pode ser provada regular pelo fato de que interseção de duas LLCs com regular gera LLC</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q4','C','e4')">Verificar</button>
+    <div class="quiz-result" id="q4-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 5</h3>
+    <p>O Lema do Bombeamento para LLCs decompõe w = uvxyz. A condição |vy| ≥ 1 garante que:</p>
+    <div class="options" id="q5">
+      <label class="opt"><input type="radio" name="q5" value="A"> A) A string bombeada uv²xy²z tem comprimento máximo p</label>
+      <label class="opt"><input type="radio" name="q5" value="B"> B) O bombeamento é não-trivial — pelo menos uma parte v ou y é não-vazia</label>
+      <label class="opt"><input type="radio" name="q5" value="C"> C) A string x é necessariamente vazia</label>
+      <label class="opt"><input type="radio" name="q5" value="D"> D) v e y têm o mesmo comprimento</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q5','B','e5')">Verificar</button>
+    <div class="quiz-result" id="q5-res"></div>
+  </div>
+</section>
+
+<!-- ══════════════ RESUMO ══════════════ -->
+<section id="resumo">
+  <h2><span class="num">11</span> Resumo do módulo</h2>
+
+  <div class="summary">
+    <h3>O que você agora domina:</h3>
+    <div class="row">GLC = (V, Σ, R, S): variáveis, terminais, produções e símbolo inicial.</div>
+    <div class="row">Derivação ⇒*: aplicar produções até obter uma sentença (só terminais).</div>
+    <div class="row">Árvore de derivação: representa a estrutura hierárquica de uma derivação.</div>
+    <div class="row">Ambiguidade: gramática ambígua ↔ alguma string tem duas árvores distintas.</div>
+    <div class="row">PDA = AFN + pilha. Transição lê entrada, consome topo da pilha e empilha nova string.</div>
+    <div class="row">GLC ≡ PDA: toda LLC é reconhecida por PDA e vice-versa.</div>
+    <div class="row">LLCs: fechadas sob ∪, ∘, *; NÃO sob ∩ e ¬ em geral; mas LLC ∩ Regular = LLC.</div>
+    <div class="row">Hierarquia de Chomsky: Regular ⊊ LLC ⊊ Sensível ⊊ Recursiv. Enumerável.</div>
+  </div>
+
+  <h3>O que vem no próximo (e último) módulo</h3>
+  <div class="card">
+    O Módulo 8 fecha o ciclo com o <strong>Lema do Bombeamento para linguagens regulares</strong> (prova de não-regularidade), uma revisão completa da <strong>Hierarquia de Chomsky</strong> e introdução à teoria da <strong>computabilidade</strong> — Máquinas de Turing, decidibilidade e o problema da parada.
+  </div>
+</section>
+
+<div class="mod-nav">
+  <a href="modulo-06-er.html" class="mod-btn">
+    <span class="dir">← Anterior</span>
+    Módulo 6: Expressões Regulares
+  </a>
+  <a href="#" class="mod-btn next">
+    <span class="dir">Próximo →</span>
+    Módulo 8: Bombeamento e Hierarquia
+  </a>
+</div></div>
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="modulo-06.html">← Módulo anterior</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 7 de 9</div>
+        </div>
+        <a class="btn-nav next" href="modulo-08.html">Próximo módulo →</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);localStorage.setItem('sb-state',c?'collapsed':'expanded')}
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+</script>
+</body>
+</html>

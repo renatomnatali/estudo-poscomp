@@ -34,9 +34,23 @@ interface AssessmentPayload {
 }
 
 interface QuestionFeedback {
-  correct: boolean;
-  answerKey: string;
-  explanation: string;
+  tone: 'success' | 'error' | 'info';
+  message: string;
+  suggestion?: string;
+}
+
+function normalizeFeedbackMessage(rawMessage: string | undefined): string {
+  const source = (rawMessage || '').trim();
+  if (!source) return 'Sem explicação adicional cadastrada.';
+
+  const compact = source
+    .replace(/\bResposta\s+(?:correta|incorreta)\.?\s*/gi, '')
+    .replace(/\bGabarito\s+oficial:\s*[A-E*]\.?\s*/gi, '')
+    .replace(/\n{2,}/g, '\n')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
+  return compact || 'Sem explicação adicional cadastrada.';
 }
 
 export function QuestionsPanel() {
@@ -52,7 +66,6 @@ export function QuestionsPanel() {
   const [feedbackByQuestion, setFeedbackByQuestion] = useState<Record<string, QuestionFeedback>>({});
 
   const [assessment, setAssessment] = useState<AssessmentPayload | null>(null);
-  const [globalFeedback, setGlobalFeedback] = useState('Selecione uma alternativa e clique em "Corrigir resposta".');
 
   const currentQuestion = useMemo(() => questions[currentIndex] || null, [questions, currentIndex]);
 
@@ -101,15 +114,13 @@ export function QuestionsPanel() {
   }
 
   async function submitAnswer() {
-    if (!currentQuestion || !selectedChoice) {
-      setGlobalFeedback('Selecione uma alternativa antes de corrigir.');
-      if (currentQuestion) {
-        setQuestionFeedback(currentQuestion.id, {
-          correct: false,
-          answerKey: currentQuestion.answerKey,
-          explanation: 'Selecione uma alternativa antes de corrigir.',
-        });
-      }
+    if (!currentQuestion) return;
+
+    if (!selectedChoice) {
+      setQuestionFeedback(currentQuestion.id, {
+        tone: 'info',
+        message: 'Selecione uma alternativa antes de corrigir.',
+      });
       return;
     }
 
@@ -130,7 +141,10 @@ export function QuestionsPanel() {
 
     const payload = (await response.json()) as AssessmentPayload & { error?: string };
     if (!response.ok) {
-      setGlobalFeedback(payload.error || 'Falha ao corrigir.');
+      setQuestionFeedback(currentQuestion.id, {
+        tone: 'error',
+        message: payload.error || 'Falha ao corrigir.',
+      });
       return;
     }
 
@@ -138,24 +152,24 @@ export function QuestionsPanel() {
 
     const graded = payload.gradedAnswers.find((entry) => entry.questionId === currentQuestion.id);
 
-    if (!graded || graded.status === 'not_found' || !graded.answerKey) {
-      setGlobalFeedback('Não foi possível corrigir esta questão.');
+    if (!graded || graded.status === 'not_found') {
+      setQuestionFeedback(currentQuestion.id, {
+        tone: 'error',
+        message: 'Não foi possível corrigir esta questão.',
+      });
       return;
     }
 
-    const recommendation = payload.recommendedNextTopics.length > 0
-      ? `Revisar: ${payload.recommendedNextTopics.map((topic) => TOPIC_LABELS[topic] || topic).join(', ')}.`
-      : 'Sem lacunas críticas no momento.';
-
-    setGlobalFeedback(
-      `${graded.correct ? 'Resposta correta.' : 'Resposta incorreta.'} ` +
-      `Gabarito: ${graded.answerKey}. ${recommendation}`
-    );
+    const recommendedTopic = payload.recommendedNextTopics.find(
+      (topic) => topic === graded.subTopic
+    ) || payload.recommendedNextTopics[0];
 
     setQuestionFeedback(currentQuestion.id, {
-      correct: Boolean(graded.correct),
-      answerKey: graded.answerKey,
-      explanation: graded.explanation || 'Sem explicação adicional cadastrada.',
+      tone: graded.correct ? 'success' : 'error',
+      message: normalizeFeedbackMessage(graded.explanation),
+      suggestion: recommendedTopic
+        ? `Revisão sugerida: ${TOPIC_LABELS[recommendedTopic] || recommendedTopic}. Abra Flashcards no menu para reforço.`
+        : undefined,
     });
   }
 
@@ -170,6 +184,13 @@ export function QuestionsPanel() {
   }
 
   const currentFeedback = currentQuestion ? feedbackByQuestion[currentQuestion.id] : null;
+  const feedbackToneClass = currentFeedback
+    ? (currentFeedback.tone === 'success'
+      ? 'is-success'
+      : currentFeedback.tone === 'error'
+        ? 'is-error'
+        : 'is-info')
+    : '';
 
   return (
     <div className="space-y-5">
@@ -267,15 +288,6 @@ export function QuestionsPanel() {
                 ))}
               </div>
 
-              {currentFeedback ? (
-                <div className="exercise-inline-feedback mt-3">
-                  <p className="font-semibold">
-                    {currentFeedback.correct ? 'Resposta correta.' : 'Resposta incorreta.'}
-                  </p>
-                  <p className="mt-1">Gabarito oficial: <strong>{currentFeedback.answerKey}</strong>.</p>
-                  <p className="mt-1">{currentFeedback.explanation}</p>
-                </div>
-              ) : null}
             </>
           )}
         </article>
@@ -307,7 +319,17 @@ export function QuestionsPanel() {
           </button>
         </div>
 
-        <div className="callout mt-4">{globalFeedback}</div>
+        {currentFeedback ? (
+          <div
+            className={`exercise-inline-feedback mt-3 ${feedbackToneClass}`}
+            data-testid="exercise-feedback"
+          >
+            <p>{currentFeedback.message}</p>
+            {currentFeedback.suggestion ? (
+              <p className="mt-1 text-xs font-medium">{currentFeedback.suggestion}</p>
+            ) : null}
+          </div>
+        ) : null}
       </section>
 
       <section className="section-card">

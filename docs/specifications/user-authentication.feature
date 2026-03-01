@@ -1,41 +1,40 @@
 # language: pt
-Funcionalidade: Autenticação de usuário com sessão persistente
+Funcionalidade: Autenticação de usuário com acesso às rotas de estudo
   Como estudante do POSCOMP
   Quero entrar com provedores externos e manter sessão ativa
   Para continuar meus estudos e métricas entre sessões
 
-  Cenário: Exibir landing com entrada, cadastro e demo pública
-    Quando eu acesso a página inicial
-    Então devo visualizar as ações "Criar conta", "Entrar" e "Ver demo do simulador"
-    E devo visualizar que a demo pode ser usada sem login
+  Cenário: Exibir landing pública fiel ao mockup com CTA para dashboard
+    Quando eu acesso "/"
+    Então devo visualizar os blocos "hero", "logos strip", "estatísticas", "como funciona", "currículo", "passo a passo", "depoimentos", "planos", "cta final" e "footer"
+    E devo visualizar CTA primário para iniciar a jornada
 
   Cenário: Mostrar tela de autenticação com provedores
     Dado que o Clerk está configurado
-    Quando eu acesso a rota de autenticação
+    Quando eu acesso "/entrar"
     Então devo visualizar opções para login e cadastro
     E devo visualizar instrução para usar Google ou outro provedor habilitado
 
-  Cenário: Restringir trilha completa para usuário não autenticado
+  Cenário: Restringir rotas de estudo para usuário não autenticado
     Dado que o Clerk está configurado
     E eu não estou autenticado
-    Quando eu acesso a rota "/estudo"
+    Quando eu acesso "/dashboard"
     Então devo visualizar aviso de acesso restrito
-    E devo visualizar ação para "Entrar" e "Criar conta"
+    E devo visualizar ações para "Entrar" e "Criar conta"
 
-  Cenário: Exibir menu de perfil para usuário autenticado
-    Dado que estou autenticado
-    Quando eu abro a aplicação de estudo
-    Então devo visualizar o botão de perfil do usuário
-    E ao abrir o menu devo visualizar "Configurações" e "Sair"
+  Cenário: Permitir demo pública sem autenticação
+    Quando eu acesso "/demo"
+    Então devo conseguir usar o simulador em modo visitante
 
-  Cenário: Encerrar sessão pelo menu de perfil
-    Dado que estou autenticado
-    Quando eu clico em "Sair"
-    Então devo encerrar a sessão
-    E devo ser redirecionado para a landing
-
-  Cenário: Manter sessão entre recargas
+  Cenário: Manter sessão entre recargas nas rotas de estudo
     Dado que estou autenticado com Clerk
-    Quando eu recarrego a aplicação
+    Quando eu recarrego "/trilhas"
     Então devo permanecer autenticado
-    E devo manter acesso à rota "/estudo" sem novo login manual
+    E devo manter acesso à rota sem novo login manual
+
+  Cenário: Encerrar sessão pelo menu do usuário na sidebar
+    Dado que estou autenticado com Clerk
+    Quando eu abro o menu de usuário no rodapé da sidebar
+    E clico na ação "Sair"
+    Então minha sessão deve ser encerrada
+    E devo ser redirecionado para a página inicial

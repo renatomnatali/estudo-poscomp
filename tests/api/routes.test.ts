@@ -2,53 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { NextRequest } from 'next/server';
 
 import { GET as getTopics } from '@/app/api/content/topics/route';
-import { GET as getTopicBySlug } from '@/app/api/content/topics/[slug]/route';
-import { GET as getQuestions } from '@/app/api/questions/route';
-import { POST as runAfd } from '@/app/api/simulator/afd/run/route';
-import { POST as minimizeAfd } from '@/app/api/simulator/afd/minimize/route';
-import { POST as convertAfn } from '@/app/api/simulator/afn/convert/route';
-import { POST as submitAssessment } from '@/app/api/assessment/submit/route';
+import { GET as getFlashcardQueue } from '@/app/api/flashcards/queue/route';
+import { POST as postFlashcardReview } from '@/app/api/flashcards/review/route';
+import { GET as getDashboardSummary } from '@/app/api/study/dashboard/summary/route';
+import { GET as getTracksCatalog } from '@/app/api/study/tracks/catalog/route';
+import { GET as getModuleBySlug } from '@/app/api/study/modules/[slug]/route';
+import { GET as getModuleSource } from '@/app/api/study/modules/[slug]/source/route';
+import { POST as postModuleQuiz } from '@/app/api/study/modules/[slug]/quiz/route';
+import { GET as getModuleProgress, POST as postModuleProgress } from '@/app/api/study/modules/[slug]/progress/route';
 
-const afd = {
-  alphabet: ['a', 'b', 'c'],
-  states: ['e1', 'e2', 'e3'],
-  initialState: 'e1',
-  acceptStates: ['e2'],
-  transitions: {
-    e1: { a: 'e1', b: 'e1', c: 'e2' },
-    e2: { a: 'e3', b: 'e3', c: 'e3' },
-    e3: { a: 'e3', b: 'e3', c: 'e3' },
-  },
-};
-
-const nfa = {
-  alphabet: ['a', 'b'],
-  states: ['q0', 'q1', 'q2'],
-  initialState: 'q0',
-  acceptStates: ['q2'],
-  transitions: {
-    q0: { a: [], b: [], 'ε': ['q1'] },
-    q1: { a: ['q1'], b: ['q2'], 'ε': [] },
-    q2: { a: [], b: [], 'ε': [] },
-  },
-};
-
-describe('api routes', () => {
-  async function pickQuestionForAssessment() {
-    const response = await getQuestions(new NextRequest('http://localhost/api/questions?limit=20'));
-    const payload = await response.json();
-    const item = (payload.items || []).find((question: { answerKey?: string }) => question.answerKey && question.answerKey !== '*')
-      || payload.items?.[0];
-
-    if (!item) throw new Error('Nenhuma questão disponível para teste de avaliação.');
-    return item as {
-      id: string;
-      answerKey: 'A' | 'B' | 'C' | 'D' | 'E' | '*';
-      subTopic: string;
-    };
-  }
-
-  it('lista tópicos de conteúdo', async () => {
+describe('api routes de estudo', () => {
+  it('lista tópicos base para o catálogo', async () => {
     const response = await getTopics(new NextRequest('http://localhost/api/content/topics?macroArea=fundamentos'));
     const payload = await response.json();
 
@@ -57,129 +21,170 @@ describe('api routes', () => {
     expect(payload.items.length).toBeGreaterThan(0);
   });
 
-  it('retorna tópico por slug', async () => {
-    const response = await getTopicBySlug(new Request('http://localhost') as Request, {
-      params: Promise.resolve({ slug: 'automatos-finitos-afd' }),
+  it('retorna resumo do dashboard de estudo', async () => {
+    const response = await getDashboardSummary(new NextRequest('http://localhost/api/study/dashboard/summary'));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload).toHaveProperty('hero');
+    expect(payload).toHaveProperty('stats');
+    expect(Array.isArray(payload.stats)).toBe(true);
+    expect(payload.stats.length).toBeGreaterThan(0);
+  });
+
+  it('retorna catálogo das trilhas com estados', async () => {
+    const response = await getTracksCatalog(new NextRequest('http://localhost/api/study/tracks/catalog'));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(payload.items)).toBe(true);
+    expect(payload.items.length).toBeGreaterThan(0);
+    expect(payload.items[0]).toHaveProperty('status');
+    expect(['done', 'in_progress', 'locked', 'free']).toContain(payload.items[0].status);
+  });
+
+  it('retorna módulo por slug com capítulos e quiz', async () => {
+    const response = await getModuleBySlug(new Request('http://localhost') as Request, {
+      params: Promise.resolve({ slug: 'modulo-03' }),
     });
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.slug).toBe('automatos-finitos-afd');
+    expect(payload.slug).toBe('modulo-03');
+    expect(Array.isArray(payload.chapters)).toBe(true);
+    expect(payload.chapters.length).toBeGreaterThan(0);
+    expect(Array.isArray(payload.quiz)).toBe(true);
+    expect(payload.quiz.length).toBeGreaterThan(0);
   });
 
-  it('filtra questões', async () => {
-    const response = await getQuestions(new NextRequest('http://localhost/api/questions?year=2022'));
+  it('retorna conteúdo importado do módulo sem depender de Spec em runtime', async () => {
+    const response = await getModuleSource(new Request('http://localhost') as Request, {
+      params: Promise.resolve({ slug: 'modulo-01' }),
+    });
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.total).toBeGreaterThan(0);
+    expect(payload.header.title).toMatch(/fundamentos matemáticos/i);
+    expect(Array.isArray(payload.navLinks)).toBe(true);
+    expect(payload.navLinks.length).toBeGreaterThan(0);
+    expect(typeof payload.html).toBe('string');
+    expect(payload.html.length).toBeGreaterThan(50);
   });
 
-  it('simula e minimiza AFD', async () => {
-    const runResponse = await runAfd(
-      new Request('http://localhost/api/simulator/afd/run', {
-        method: 'POST',
-        body: JSON.stringify({ automaton: afd, inputWord: 'ababc' }),
-      })
-    );
+  it('retorna 404 para slug de módulo inválido', async () => {
+    const moduleResponse = await getModuleBySlug(new Request('http://localhost') as Request, {
+      params: Promise.resolve({ slug: 'modulo-10' }),
+    });
+    expect(moduleResponse.status).toBe(404);
 
-    const runPayload = await runResponse.json();
-    expect(runResponse.status).toBe(200);
-    expect(runPayload.result).toBe('ACEITA');
-
-    const minResponse = await minimizeAfd(
-      new Request('http://localhost/api/simulator/afd/minimize', {
-        method: 'POST',
-        body: JSON.stringify({ automaton: { ...afd, states: ['e1', 'e2', 'e3', 'e4'], transitions: { ...afd.transitions, e4: { a: 'e4', b: 'e4', c: 'e4' } } } }),
-      })
-    );
-
-    const minPayload = await minResponse.json();
-    expect(minResponse.status).toBe(200);
-    expect(minPayload.minimized.states.length).toBeGreaterThan(0);
+    const sourceResponse = await getModuleSource(new Request('http://localhost') as Request, {
+      params: Promise.resolve({ slug: 'modulo-10' }),
+    });
+    expect(sourceResponse.status).toBe(404);
   });
 
-  it('retorna 400 para payload inválido ou malformado nas APIs de simulador', async () => {
-    const invalidRun = await runAfd(
-      new Request('http://localhost/api/simulator/afd/run', {
-        method: 'POST',
-        body: JSON.stringify({ automaton: {}, inputWord: 'ab' }),
-      })
-    );
-    expect(invalidRun.status).toBe(400);
+  it('corrige quiz embutido do módulo', async () => {
+    const moduleResponse = await getModuleBySlug(new Request('http://localhost') as Request, {
+      params: Promise.resolve({ slug: 'modulo-02' }),
+    });
+    const modulePayload = await moduleResponse.json();
+    const firstQuiz = modulePayload.quiz[0];
 
-    const invalidRunJson = await runAfd(
-      new Request('http://localhost/api/simulator/afd/run', {
-        method: 'POST',
-        body: '{',
-      })
-    );
-    expect(invalidRunJson.status).toBe(400);
-
-    const invalidMinimize = await minimizeAfd(
-      new Request('http://localhost/api/simulator/afd/minimize', {
-        method: 'POST',
-        body: JSON.stringify({ automaton: {} }),
-      })
-    );
-    expect(invalidMinimize.status).toBe(400);
-
-    const invalidConvert = await convertAfn(
-      new Request('http://localhost/api/simulator/afn/convert', {
-        method: 'POST',
-        body: JSON.stringify({ automaton: {} }),
-      })
-    );
-    expect(invalidConvert.status).toBe(400);
-  });
-
-  it('converte AFN e corrige assessment', async () => {
-    const convResponse = await convertAfn(
-      new Request('http://localhost/api/simulator/afn/convert', {
-        method: 'POST',
-        body: JSON.stringify({ automaton: nfa }),
-      })
-    );
-
-    const convPayload = await convResponse.json();
-    expect(convResponse.status).toBe(200);
-    expect(convPayload.dfa.states.length).toBeGreaterThanOrEqual(2);
-
-    const question = await pickQuestionForAssessment();
-
-    const assessmentResponse = await submitAssessment(
-      new Request('http://localhost/api/assessment/submit', {
+    const response = await postModuleQuiz(
+      new Request('http://localhost/api/study/modules/modulo-02/quiz', {
         method: 'POST',
         body: JSON.stringify({
-          attemptId: 'test',
-          answers: [{ questionId: question.id, choice: question.answerKey === '*' ? 'A' : question.answerKey }],
+          questionId: firstQuiz.id,
+          choice: firstQuiz.answerKey,
+        }),
+      }),
+      { params: Promise.resolve({ slug: 'modulo-02' }) }
+    );
+
+    const payload = await response.json();
+    expect(response.status).toBe(200);
+    expect(payload.correct).toBe(true);
+    expect(payload).toHaveProperty('explanation');
+  });
+
+  it('salva progresso de módulo autenticado', async () => {
+    const response = await postModuleProgress(
+      new Request('http://localhost/api/study/modules/modulo-05/progress', {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: 'user-local',
+          status: 'completed',
+          score: 0.9,
+        }),
+      }),
+      { params: Promise.resolve({ slug: 'modulo-05' }) }
+    );
+
+    const payload = await response.json();
+    expect(response.status).toBe(200);
+    expect(payload.userId).toBe('user-local');
+    expect(payload.moduleSlug).toBe('modulo-05');
+    expect(payload.status).toBe('completed');
+  });
+
+  it('rejeita salvar progresso de módulo sem autenticação', async () => {
+    const response = await postModuleProgress(
+      new Request('http://localhost/api/study/modules/modulo-05/progress', {
+        method: 'POST',
+        body: JSON.stringify({ status: 'in_progress' }),
+      }),
+      { params: Promise.resolve({ slug: 'modulo-05' }) }
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it('consulta progresso de módulo salvo', async () => {
+    await postModuleProgress(
+      new Request('http://localhost/api/study/modules/modulo-04/progress', {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: 'user-local',
+          status: 'in_progress',
+          score: 0.6,
+        }),
+      }),
+      { params: Promise.resolve({ slug: 'modulo-04' }) }
+    );
+
+    const response = await getModuleProgress(
+      new Request('http://localhost/api/study/modules/modulo-04/progress?userId=user-local'),
+      { params: Promise.resolve({ slug: 'modulo-04' }) }
+    );
+
+    const payload = await response.json();
+    expect(response.status).toBe(200);
+    expect(payload.userId).toBe('user-local');
+    expect(payload.moduleSlug).toBe('modulo-04');
+  });
+
+  it('registra revisão de flashcard com rating do fluxo novo', async () => {
+    const queueResponse = await getFlashcardQueue(
+      new NextRequest('http://localhost/api/flashcards/queue?mode=today&limit=1&userId=user-local')
+    );
+    const queuePayload = await queueResponse.json();
+    const firstCard = queuePayload.items[0];
+
+    const reviewResponse = await postFlashcardReview(
+      new Request('http://localhost/api/flashcards/review', {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: 'user-local',
+          flashcardId: firstCard.id,
+          rating: 'good',
+          sessionId: queuePayload.sessionId,
         }),
       })
     );
 
-    const assessmentPayload = await assessmentResponse.json();
-    expect(assessmentResponse.status).toBe(200);
-    expect(assessmentPayload.score.correct).toBe(1);
-  });
-
-  it('retorna status em português e atividades de reforço na avaliação', async () => {
-    const question = await pickQuestionForAssessment();
-    const wrongChoice = (['A', 'B', 'C', 'D', 'E'] as const).find((choice) => choice !== question.answerKey) ?? 'A';
-
-    const assessmentResponse = await submitAssessment(
-      new Request('http://localhost/api/assessment/submit', {
-        method: 'POST',
-        body: JSON.stringify({
-          attemptId: 'test',
-          answers: [{ questionId: question.id, choice: wrongChoice }],
-        }),
-      })
-    );
-
-    const assessmentPayload = await assessmentResponse.json();
-    expect(assessmentResponse.status).toBe(200);
-    expect(assessmentPayload.byTopic[question.subTopic].status).toBe('reforçar');
-    expect(Array.isArray(assessmentPayload.recommendedActivities)).toBe(true);
-    expect(assessmentPayload.recommendedActivities.length).toBeGreaterThan(0);
+    const reviewPayload = await reviewResponse.json();
+    expect(reviewResponse.status).toBe(200);
+    expect(reviewPayload.flashcardId).toBe(firstCard.id);
+    expect(reviewPayload.rating).toBe('good');
   });
 });

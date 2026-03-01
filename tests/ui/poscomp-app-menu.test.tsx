@@ -5,108 +5,123 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { PoscompApp } from '@/components/poscomp-app';
+import { StudyShell } from '@/components/study/study-shell';
 
-describe('menu principal da aplicação', () => {
+describe('shell de estudo com navegação por rotas', () => {
   beforeEach(() => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ items: [] }),
-      })
-    );
+    window.localStorage.clear();
   });
 
   afterEach(() => {
     cleanup();
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
+    window.localStorage.clear();
   });
 
-  it('exibe menu lateral com ordem canônica do mockup', () => {
-    render(<PoscompApp />);
-
-    const desktopMenu = screen.getByRole('navigation', { name: /menu principal/i });
-    const dashboard = within(desktopMenu).getByRole('button', { name: /^dashboard$/i });
-    const topics = within(desktopMenu).getByRole('button', { name: /^tópicos$/i });
-    const simulator = within(desktopMenu).getByRole('button', { name: /^simulador$/i });
-    const flashcards = within(desktopMenu).getByRole('button', { name: /^flashcards$/i });
-    const exercises = within(desktopMenu).getByRole('button', { name: /^exercícios$/i });
-    const premium = within(desktopMenu).getByRole('button', { name: /^premium$/i });
-
-    const order = [dashboard, topics, simulator, flashcards, exercises, premium].map((item) =>
-      item.textContent?.trim()
-    );
-
-    expect(order).toEqual(['Dashboard', 'Tópicos', 'Simulador', 'Flashcards', 'Exercícios', 'Premium']);
-  });
-
-  it('marca somente um item ativo por vez e troca para exercícios no clique', async () => {
-    render(<PoscompApp />);
-
-    const desktopMenu = screen.getByRole('navigation', { name: /menu principal/i });
-    const simulator = within(desktopMenu).getByRole('button', { name: /^simulador$/i });
-    const exercises = within(desktopMenu).getByRole('button', { name: /^exercícios$/i });
-
-    expect(simulator).toHaveClass('active');
-    expect(exercises).not.toHaveClass('active');
-
-    await userEvent.click(exercises);
-
-    expect(exercises).toHaveClass('active');
-    expect(simulator).not.toHaveClass('active');
-    expect(screen.getByLabelText('Ano')).toBeInTheDocument();
-  });
-
-  it('exibe atalhos de menu no mobile', () => {
-    render(<PoscompApp />);
-
-    const mobileMenu = screen.getByRole('navigation', { name: /menu mobile/i });
-
-    expect(mobileMenu).toBeInTheDocument();
-    expect(within(mobileMenu).getByRole('button', { name: /^dashboard$/i })).toBeInTheDocument();
-    expect(within(mobileMenu).getByRole('button', { name: /^tópicos$/i })).toBeInTheDocument();
-    expect(within(mobileMenu).getByRole('button', { name: /^simulador$/i })).toBeInTheDocument();
-    expect(within(mobileMenu).getByRole('button', { name: /^exercícios$/i })).toBeInTheDocument();
-    expect(within(mobileMenu).getByRole('button', { name: /^premium$/i })).toBeInTheDocument();
-  });
-
-  it('exibe botões do simulador no primeiro bloco e sem breadcrumb', () => {
-    const { container } = render(<PoscompApp />);
-
-    const header = container.querySelector('.page-header');
-    expect(header).not.toBeNull();
-    expect(header?.querySelector('.breadcrumb')).not.toBeInTheDocument();
-
-    const scoped = within(header as HTMLElement);
-    const modeSwitch = header?.querySelector('.sim-mode-switch');
-
-    expect(modeSwitch).toBeInTheDocument();
-    expect(scoped.getByRole('button', { name: /^simulador afd$/i })).toBeInTheDocument();
-    expect(scoped.getByRole('button', { name: /^minimização$/i })).toBeInTheDocument();
-    expect(scoped.getByRole('button', { name: /^afn→afd$/i })).toBeInTheDocument();
-    expect(scoped.getByRole('button', { name: /^simulador afd$/i })).toHaveClass('sim-mode-pill', 'is-active');
-  });
-
-  it('exibe menu de perfil com ações de configurações e sair', async () => {
-    const onSignOut = vi.fn();
+  it('exibe menu lateral na ordem canônica do mockup', () => {
     render(
-      <PoscompApp
-        auth={{
-          mode: 'authenticated',
-          displayName: 'Renato',
-          email: 'renato@example.com',
-          onSignOut,
-        }}
-      />
+      <StudyShell
+        activeNav="dashboard"
+        pageTitle="Dashboard"
+        pageSubtitle="Resumo"
+        breadcrumb={['App', 'Dashboard']}
+      >
+        <div>conteudo</div>
+      </StudyShell>
     );
 
-    const profileButton = screen.getByRole('button', { name: /menu do usuário/i });
-    await userEvent.click(profileButton);
+    const desktopMenu = screen.getByRole('navigation', { name: /menu principal/i });
+    const links = within(desktopMenu).getAllByRole('link');
+    const labels = links.map((link) => {
+      const mainLabel = link.querySelector('.sb-item-text')?.textContent?.trim();
+      return mainLabel || link.textContent?.trim();
+    });
 
-    expect(screen.getByRole('menuitem', { name: /configurações/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('menuitem', { name: /sair/i }));
+    expect(labels).toEqual([
+      'Dashboard',
+      'Trilhas de Estudo',
+      'Flashcards',
+      'Exercícios',
+      'Simulado POSCOMP',
+      'Meu Progresso',
+      'Seja Premium',
+    ]);
+  });
+
+  it('destaca item ativo e renderiza breadcrumb clicável com nome completo de trilha e módulo', () => {
+    render(
+      <StudyShell
+        activeNav="trilhas"
+        pageTitle="Trilhas"
+        pageSubtitle="25 tópicos"
+        breadcrumb={[
+          { label: 'Trilhas de Estudo', href: '/trilhas' },
+          { label: 'Linguagens Formais e Autômatos', href: '/trilhas' },
+          { label: 'Módulo 03 — AFN e epsilon-Transicoes' },
+        ]}
+      >
+        <div>conteudo</div>
+      </StudyShell>
+    );
+
+    const desktopMenu = screen.getByRole('navigation', { name: /menu principal/i });
+    const active = within(desktopMenu).getByRole('link', { name: /trilhas de estudo/i });
+    const breadcrumb = screen.getByLabelText(/breadcrumb/i);
+
+    expect(active).toHaveClass('active');
+    expect(within(breadcrumb).getByRole('link', { name: /trilhas de estudo/i })).toHaveAttribute(
+      'href',
+      '/trilhas'
+    );
+    expect(within(breadcrumb).getByRole('link', { name: /linguagens formais e autômatos/i })).toHaveAttribute(
+      'href',
+      '/trilhas'
+    );
+    expect(within(breadcrumb).getByText(/módulo 03 — afn e epsilon-transicoes/i)).toBeInTheDocument();
+  });
+
+  it('colapsa sidebar no desktop e persiste preferência', async () => {
+    render(
+      <StudyShell
+        activeNav="dashboard"
+        pageTitle="Dashboard"
+        pageSubtitle="Resumo"
+        breadcrumb={['App', 'Dashboard']}
+      >
+        <div>conteudo</div>
+      </StudyShell>
+    );
+
+    const sidebar = screen.getByTestId('study-sidebar');
+    const toggle = screen.getByRole('button', { name: /alternar menu lateral/i });
+
+    expect(sidebar).not.toHaveClass('collapsed');
+    await userEvent.click(toggle);
+    expect(sidebar).toHaveClass('collapsed');
+    expect(window.localStorage.getItem('study:sidebar')).toBe('collapsed');
+  });
+
+  it('abre menu do usuário e aciona sair (logoff)', async () => {
+    const onSignOut = vi.fn();
+
+    render(
+      <StudyShell
+        activeNav="dashboard"
+        pageTitle="Dashboard"
+        pageSubtitle="Resumo"
+        breadcrumb={['App', 'Dashboard']}
+        onSignOut={onSignOut}
+      >
+        <div>conteudo</div>
+      </StudyShell>
+    );
+
+    const userTrigger = screen.getByRole('button', { name: /menu do usuário/i });
+    await userEvent.click(userTrigger);
+
+    expect(screen.getByRole('menuitem', { name: /^perfil$/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /^opções$/i })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('menuitem', { name: /^sair$/i }));
     expect(onSignOut).toHaveBeenCalledTimes(1);
   });
 });

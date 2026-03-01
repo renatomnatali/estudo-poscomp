@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 1 — Linguagens Formais · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-l:#4B6BF5;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  /* original aula vars mapped */
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0;box-shadow:0 2px 8px rgba(27,63,216,.25)}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;transition:background var(--transition);color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item::before{display:none}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}.sidebar.collapsed .sb-sep{margin:.4rem .8rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200;box-shadow:var(--sh-md)}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem .5rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition)}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15;backdrop-filter:blur(2px)}.sb-overlay.visible{display:block}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:4%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0;box-shadow:var(--sh-xs)}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500);transition:background var(--transition);position:relative}.topbar-icon-btn:hover{background:var(--n100)}
+.notif-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:var(--coral);border-radius:50%;border:2px solid white}
+
+/* ── LESSON AREA ── */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+
+/* ── HERO HEADER (preserved from aula-automatos) ── */
+.lesson-header {
+  background: linear-gradient(135deg, #0d2d6b 0%, #1a6bcc 100%);
+  color: white; padding: 2.5rem 2rem 2rem; text-align: center;
+  position: relative;
+}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.lh-tag { background: rgba(255,255,255,0.12); border-radius: 4px; padding: 4px 12px; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; display: inline-block; margin-bottom: 1rem; font-family: var(--fm); position:relative;z-index:1 }
+.lh-title { font-family: var(--fd); font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; position:relative;z-index:1 }
+.lh-formula { font-size: 1.6rem; background: rgba(255,255,255,0.1); border-radius: 8px; display: inline-block; padding: 0.4rem 1.8rem; margin: 0.8rem 0; font-family: Georgia, serif; position:relative;z-index:1 }
+.lh-sub { opacity: 0.8; font-size: 0.95rem; max-width: 580px; margin: 0 auto; line-height:1.6; position:relative;z-index:1 }
+
+/* ── SECTION NAV (preserved from aula-automatos, sticky inside lesson-area) ── */
+.section-nav {
+  background: var(--primary);
+  color: white;
+  display: flex; flex-wrap: wrap; gap: 4px; padding: 0.45rem 1.5rem;
+  position: sticky; top: 0; z-index: 10;
+}
+.section-nav a { color: rgba(255,255,255,0.75); text-decoration: none; padding: 4px 10px; font-size: 0.82rem; border-radius: 4px; transition: background .15s,color .15s; }
+.section-nav a:hover { background: rgba(255,255,255,0.15); color: white; }
+.section-nav a.active { background: rgba(255,255,255,0.15); color: white; font-weight: 600; }
+
+/* ── CONTENT (original aula-automatos styles) ── */
+.lesson-content { max-width: 900px; margin: 0 auto; padding: 2rem 2rem 3rem; }
+
+section { margin-bottom: 3rem; scroll-margin-top: 48px; }
+h2 { color: var(--primary); font-size: 1.4rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.4rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+h2 .num { background: var(--accent); color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; font-family: var(--fm); }
+h3 { color: var(--accent); font-size: 1rem; margin: 1.4rem 0 0.5rem; }
+p { margin-bottom: 0.9rem; font-size: 0.92rem; line-height: 1.75; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; margin: 1rem 0; font-size:0.92rem; line-height:1.7; }
+.callout { border-left: 4px solid var(--accent); background: #e8f0fe; padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size:0.9rem; }
+.callout.warning { border-color: var(--accent2); background: #fff3e0; }
+.callout.success { border-color: var(--green); background: #e8f5ee; }
+.callout strong { color: var(--primary); }
+
+.formula-box { background: var(--primary); color: white; border-radius: 12px; padding: 1.4rem 2rem; text-align: center; margin: 1.5rem 0; font-size: 1.3rem; font-family: Georgia, serif; }
+.formula-box .label { font-size: 0.75rem; opacity: 0.7; display: block; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-family: var(--fb); }
+.formula-box .sub { font-size: 0.85rem; opacity: 0.85; display: block; margin-top: 0.5rem; font-family: var(--fb); }
+
+.analogy { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+.analogy .side { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; }
+.analogy .side h4 { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+.analogy .side .val { font-size: 1rem; font-weight: 600; color: var(--primary); }
+
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+th { background: var(--primary); color: white; padding: 0.65rem 1rem; text-align: left; }
+td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); }
+tr:nth-child(even) td { background: #f5f8ff; }
+tr:hover td { background: #e8f0fe; }
+.highlight-row td { background: #fff3cd !important; font-weight: 600; }
+
+.automaton-viz { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.8rem; margin: 1.5rem 0; text-align: center; }
+.states { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.state { width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--accent); background: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: var(--primary); position: relative; }
+.state.initial::before { content: '▶'; position: absolute; left: -22px; color: var(--accent2); font-size: 1rem; }
+.state.final { box-shadow: 0 0 0 5px white, 0 0 0 8px var(--accent); }
+.arrow { font-size: 1.5rem; color: var(--accent2); position: relative; }
+.arrow span { position: absolute; top: -1.2rem; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: var(--muted); white-space: nowrap; font-family: monospace; background: var(--bg); padding: 0 4px; }
+
+.step-trace { margin: 1rem 0; }
+.step { display: flex; align-items: flex-start; gap: 1rem; margin: 0.5rem 0; padding: 0.75rem 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; font-size:0.9rem; }
+.step .badge { background: var(--accent); color: white; border-radius: 6px; padding: 2px 10px; font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; font-family: monospace; }
+.step .badge.ok { background: var(--green); }
+.step .badge.fail { background: var(--red); }
+.step .body { font-size: 0.9rem; line-height:1.6; }
+.step .body code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 0.88rem; }
+
+code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.88rem; }
+
+.comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+.comparison .col { border-radius: 10px; padding: 1.2rem; font-size:0.9rem; }
+.comparison .col.dfa { background: #e8f5ee; border: 1px solid #a8d8b8; }
+.comparison .col.nfa { background: #fff3e0; border: 1px solid #f0c070; }
+.comparison h4 { margin-bottom: 0.5rem; font-size: 0.92rem; }
+
+.applications { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.app-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; }
+.app-card .icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.app-card h4 { color: var(--primary); font-size: 0.9rem; margin-bottom: 0.3rem; }
+.app-card p { font-size: 0.82rem; color: var(--muted); margin: 0; }
+
+.summary-box { background: var(--primary); color: white; border-radius: 12px; padding: 1.8rem; margin: 2rem 0; }
+.summary-box h3 { color: white; margin-bottom: 1rem; font-size: 1.1rem; }
+.summary-box .row { display: flex; gap: 0.5rem; margin: 0.4rem 0; align-items: flex-start; font-size:0.9rem; }
+.summary-box .row::before { content: '✓'; color: #7ef0a0; flex-shrink: 0; font-weight: 700; }
+
+/* Bottom nav */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05);position:sticky;bottom:0;flex-shrink:0}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}
+.lnp-label{font-size:.7rem;color:var(--n400)}
+.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}
+.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:11%;transition:width .4s}
+.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500)}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap);box-shadow:0 2px 8px rgba(27,63,216,.2)}.btn-nav.next:hover{background:var(--sap-d);transform:translateX(2px)}
+.btn-nav.prev:hover{transform:translateX(-2px)}
+
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .analogy,.comparison{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+  .lesson-header{padding:1.5rem 1rem 1.8rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">1 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div><a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div><a class="sb-item" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas</span></a><a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div><a class="sb-item" href="flashcards.html"><div class="sb-item-icon">📝</div><span class="sb-item-text">Exercícios</span><span class="sb-tooltip">Exercícios</span></a><a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado</span></a></div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section"><a class="sb-item" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Premium</span></a></div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <span>Trilhas</span><span class="sep">›</span>
+        <span>Linguagens Formais</span><span class="sep">›</span>
+        <span class="current">Módulo 1 — Fundamentos</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-icon-btn" title="Flashcards deste módulo">🃏</button>
+        <button class="topbar-icon-btn">🔔<div class="notif-dot"></div></button>
+      </div>
+    </header>
+
+    <div class="lesson-area" id="lessonArea">
+
+      <!-- HERO HEADER -->
+      <header class="lesson-header">
+        <div class="lh-tag">Teoria dos Autômatos — Zero to Hero</div>
+        <h1 class="lh-title">Entendendo a Função de Transição</h1>
+        <div class="lh-formula">δ: E × Σ → E</div>
+        <p class="lh-sub">Do zero absoluto até dominar autômatos finitos determinísticos — com exemplos práticos e aplicações reais.</p>
+      </header>
+
+      <!-- SECTION NAV (sticky) -->
+      <nav class="section-nav" id="sectionNav">
+        <a href="#fundamentos">1. Fundamentos</a>
+        <a href="#componentes">2. Componentes do AFD</a>
+        <a href="#funcao">3. A Função δ</a>
+        <a href="#exemplo">4. Exemplo Completo</a>
+        <a href="#executando">5. Executando</a>
+        <a href="#dfa-vs-nfa">6. DFA vs NFA</a>
+        <a href="#aplicacoes">7. Aplicações</a>
+        <a href="#resumo">8. Resumo</a>
+      </nav>
+
+      <!-- CONTENT -->
+      <div class="lesson-content">
+
+
+<!-- SEÇÃO 1: FUNDAMENTOS -->
+<section id="fundamentos">
+  <h2><span class="num">1</span> Fundamentos matemáticos necessários</h2>
+
+  <p>Antes de entender a expressão, precisamos de três conceitos básicos. Se já sabe, pode pular.</p>
+
+  <h3>O que é um Conjunto?</h3>
+  <p>Um conjunto é uma coleção de elementos distintos. Exemplos:</p>
+  <div class="card">
+    <code>E = { q0, q1, q2 }</code> → conjunto com três estados<br><br>
+    <code>Σ = { 0, 1 }</code> → conjunto com dois símbolos (o alfabeto binário)<br><br>
+    <code>Σ = { a, b, c, ..., z }</code> → alfabeto com letras
+  </div>
+
+  <h3>O que é Produto Cartesiano (×)?</h3>
+  <p>O produto cartesiano de dois conjuntos A × B é <strong>o conjunto de todos os pares ordenados (a, b)</strong> onde a ∈ A e b ∈ B.</p>
+  <div class="card">
+    <p>Exemplo com conjuntos pequenos:</p>
+    <code>A = {1, 2}</code> e <code>B = {x, y}</code><br><br>
+    <code>A × B = { (1,x), (1,y), (2,x), (2,y) }</code>
+    <div class="callout" style="margin-top:1rem;">
+      <strong>Analogia prática:</strong> pense numa tabela de horários de metrô. As linhas são estações (conjunto E), as colunas são horários (conjunto H). Cada célula é um par (estação, horário) — isso é o produto cartesiano E × H.
+    </div>
+  </div>
+
+  <h3>O que é uma Função?</h3>
+  <p>Uma função <code>f: A → B</code> é uma regra que associa <strong>cada elemento de A a exatamente um elemento de B</strong>.</p>
+  <div class="analogy">
+    <div class="side">
+      <h4>Domínio (entrada)</h4>
+      <div class="val">A</div>
+      <p style="font-size:0.9rem; margin-top:0.5rem;">De onde vêm os inputs</p>
+    </div>
+    <div class="side">
+      <h4>Codomínio (saída)</h4>
+      <div class="val">B</div>
+      <p style="font-size:0.9rem; margin-top:0.5rem;">Para onde vão os outputs</p>
+    </div>
+  </div>
+  <div class="callout warning">
+    <strong>Chave do "determinístico":</strong> uma função retorna <em>exatamente um</em> resultado para cada entrada — nunca zero, nunca dois. Isso define o "D" de DFA (Deterministic Finite Automaton).
+  </div>
+</section>
+
+<!-- SEÇÃO 2: COMPONENTES DO AFD -->
+<section id="componentes">
+  <h2><span class="num">2</span> O que é um Autômato Finito Determinístico (AFD)?</h2>
+
+  <p>Um AFD é uma máquina abstrata com memória limitada que lê uma sequência de símbolos e decide: <strong>aceitar</strong> ou <strong>rejeitar</strong>.</p>
+
+  <p>Formalmente, um AFD é uma 5-tupla:</p>
+  <div class="formula-box">
+    <span class="label">Definição formal</span>
+    M = (Q, Σ, δ, q₀, F)
+    <span class="sub">Cinco componentes que definem completamente o autômato</span>
+  </div>
+
+  <table>
+    <tr>
+      <th>Símbolo</th><th>Nome</th><th>O que é</th><th>Exemplo</th>
+    </tr>
+    <tr>
+      <td><strong>Q</strong></td>
+      <td>Conjunto de estados</td>
+      <td>Todos os "modos" possíveis da máquina</td>
+      <td><code>Q = {q0, q1, q2}</code></td>
+    </tr>
+    <tr>
+      <td><strong>Σ</strong></td>
+      <td>Alfabeto</td>
+      <td>Conjunto de símbolos que a máquina lê</td>
+      <td><code>Σ = {0, 1}</code></td>
+    </tr>
+    <tr class="highlight-row">
+      <td><strong>δ</strong></td>
+      <td>Função de transição</td>
+      <td>A "regra de movimento" — <em>é o coração do AFD</em></td>
+      <td><code>δ: Q × Σ → Q</code></td>
+    </tr>
+    <tr>
+      <td><strong>q₀</strong></td>
+      <td>Estado inicial</td>
+      <td>Onde a máquina começa</td>
+      <td><code>q₀ = q0</code></td>
+    </tr>
+    <tr>
+      <td><strong>F</strong></td>
+      <td>Estados finais (de aceitação)</td>
+      <td>Estados que representam "sucesso"</td>
+      <td><code>F = {q2}</code></td>
+    </tr>
+  </table>
+
+  <div class="callout success">
+    <strong>Analogia:</strong> pense num semáforo. Os estados são as cores (verde, amarelo, vermelho). O alfabeto são os eventos possíveis (timer expirou, sensor detectou carro). A função δ é a tabela que diz: <em>"se estou no vermelho e o timer expirou → vá para verde"</em>. O estado inicial é vermelho. Os estados "finais" dependeriam do que queremos reconhecer.
+  </div>
+</section>
+
+<!-- SEÇÃO 3: A FUNÇÃO δ -->
+<section id="funcao">
+  <h2><span class="num">3</span> Destrinchando δ: E × Σ → E</h2>
+
+  <p>Agora que temos os fundamentos, a expressão se torna direta:</p>
+
+  <div class="formula-box">
+    <span class="label">Leitura completa</span>
+    δ : E × Σ → E
+    <span class="sub">"delta é uma função que recebe um estado e um símbolo, e retorna um estado"</span>
+  </div>
+
+  <h3>Parte por parte</h3>
+  <div class="card">
+    <table>
+      <tr><th>Fragmento</th><th>Leitura</th><th>Significado prático</th></tr>
+      <tr>
+        <td><code>δ</code></td>
+        <td>"delta"</td>
+        <td>Nome da função de transição</td>
+      </tr>
+      <tr>
+        <td><code>:</code></td>
+        <td>"é do tipo" / "mapeia"</td>
+        <td>Separa o nome da função da sua assinatura</td>
+      </tr>
+      <tr>
+        <td><code>E</code></td>
+        <td>"E" (ou "Q" na notação clássica)</td>
+        <td>Primeiro input: o estado atual</td>
+      </tr>
+      <tr>
+        <td><code>×</code></td>
+        <td>"cartesiano" / "e"</td>
+        <td>A função precisa dos dois juntos</td>
+      </tr>
+      <tr>
+        <td><code>Σ</code></td>
+        <td>"sigma"</td>
+        <td>Segundo input: o símbolo lido</td>
+      </tr>
+      <tr>
+        <td><code>→</code></td>
+        <td>"para" / "resulta em"</td>
+        <td>Separa entrada de saída</td>
+      </tr>
+      <tr>
+        <td><code>E</code></td>
+        <td>"E"</td>
+        <td>Output: o próximo estado</td>
+      </tr>
+    </table>
+  </div>
+
+  <h3>Como chamar a função</h3>
+  <p>Na prática, aplicamos δ assim:</p>
+  <div class="card">
+    <code>δ(estado_atual, símbolo_lido) = próximo_estado</code><br><br>
+    Exemplos:<br><br>
+    <code>δ(q0, '0') = q1</code> → "estando em q0, lendo '0', vá para q1"<br>
+    <code>δ(q1, '1') = q2</code> → "estando em q1, lendo '1', vá para q2"<br>
+    <code>δ(q2, '0') = q2</code> → "estando em q2, lendo '0', fique em q2"
+  </div>
+
+  <h3>Por que E × Σ e não apenas (estado, símbolo)?</h3>
+  <div class="callout">
+    <strong>São a mesma coisa.</strong> Escrever <code>E × Σ</code> como domínio de δ é a forma matemática de dizer que δ aceita dois argumentos: um estado e um símbolo. O produto cartesiano gera todos os pares possíveis, e δ precisa ser definida para cada um deles — sem exceção. Se algum par ficar sem definição, o autômato seria incompleto (e deixaria de ser determinístico naquele ponto).
+  </div>
+</section>
+
+<!-- SEÇÃO 4: EXEMPLO COMPLETO -->
+<section id="exemplo">
+  <h2><span class="num">4</span> Exemplo completo — do zero</h2>
+
+  <h3>Problema: reconhecer strings binárias que terminam em "01"</h3>
+  <p>Queremos um AFD que aceite <code>01</code>, <code>001</code>, <code>1101</code>, <code>00101</code>, e rejeite <code>10</code>, <code>100</code>, <code>11</code>, etc.</p>
+
+  <h3>Definindo os 5 componentes</h3>
+  <div class="card">
+    <p><strong>Q = {q0, q1, q2}</strong></p>
+    <ul style="margin-left:1.5rem; margin-top:0.5rem; list-style: disc;">
+      <li><code>q0</code> — estado inicial / não vimos nada relevante ainda</li>
+      <li><code>q1</code> — acabamos de ler um '0' (candidato à parte "0" do "01")</li>
+      <li><code>q2</code> — acabamos de ler "01" (ACEITO!)</li>
+    </ul>
+    <br>
+    <p><strong>Σ = {0, 1}</strong></p>
+    <br>
+    <p><strong>q₀ = q0</strong> (começamos em q0)</p>
+    <br>
+    <p><strong>F = {q2}</strong> (q2 é o único estado de aceitação)</p>
+  </div>
+
+  <h3>A tabela de δ (tabela de transição)</h3>
+  <p>Esta tabela <em>é</em> a função δ — cada célula é uma chamada <code>δ(estado, símbolo) = resultado</code>:</p>
+
+  <table>
+    <tr>
+      <th>δ (estado atual)</th>
+      <th>Lê '0'</th>
+      <th>Lê '1'</th>
+    </tr>
+    <tr>
+      <td><strong>→ q0</strong> (inicial)</td>
+      <td>q1</td>
+      <td>q0</td>
+    </tr>
+    <tr>
+      <td><strong>q1</strong></td>
+      <td>q1</td>
+      <td>q2</td>
+    </tr>
+    <tr class="highlight-row">
+      <td><strong>q2 ★</strong> (aceitação)</td>
+      <td>q1</td>
+      <td>q0</td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <strong>Observe:</strong> cada linha tem exatamente uma saída por símbolo. Isso é o "determinístico" em ação — não existe ambiguidade, não existe "talvez vá para q1 ou q2". Sempre um único próximo estado.
+  </div>
+
+  <h3>Diagrama de estados</h3>
+  <div class="automaton-viz">
+    <div class="states">
+      <div>
+        <div class="state initial">q0</div>
+        <div class="trans-label">inicial</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem;">
+        <div style="font-size:0.8rem; color:var(--muted);">lê '0'</div>
+        <div style="font-size:1.8rem; color:var(--accent2);">→</div>
+        <div style="font-size:0.8rem; color:var(--muted);">lê '1' ↩</div>
+      </div>
+      <div>
+        <div class="state">q1</div>
+        <div class="trans-label">viu '0'</div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem;">
+        <div style="font-size:0.8rem; color:var(--muted);">lê '1'</div>
+        <div style="font-size:1.8rem; color:var(--accent2);">→</div>
+        <div style="font-size:0.8rem; color:var(--muted);">lê '0' ↩</div>
+      </div>
+      <div>
+        <div class="state final">q2</div>
+        <div class="trans-label">aceitação ★</div>
+      </div>
+    </div>
+    <p style="margin-top:1.5rem; font-size:0.85rem; color:var(--muted);">→ seta simples indica início · círculo duplo indica aceitação</p>
+  </div>
+</section>
+
+<!-- SEÇÃO 5: EXECUTANDO -->
+<section id="executando">
+  <h2><span class="num">5</span> Executando o autômato — passo a passo</h2>
+
+  <h3>Teste 1: string "1101" → deve ACEITAR</h3>
+  <div class="step-trace">
+    <div class="step">
+      <span class="badge">início</span>
+      <div class="body">Estado atual: <code>q0</code> | String restante: <code>1101</code></div>
+    </div>
+    <div class="step">
+      <span class="badge">lê '1'</span>
+      <div class="body"><code>δ(q0, '1') = q0</code> | Próximo estado: <code>q0</code> | Restante: <code>101</code></div>
+    </div>
+    <div class="step">
+      <span class="badge">lê '1'</span>
+      <div class="body"><code>δ(q0, '1') = q0</code> | Próximo estado: <code>q0</code> | Restante: <code>01</code></div>
+    </div>
+    <div class="step">
+      <span class="badge">lê '0'</span>
+      <div class="body"><code>δ(q0, '0') = q1</code> | Próximo estado: <code>q1</code> | Restante: <code>1</code></div>
+    </div>
+    <div class="step">
+      <span class="badge">lê '1'</span>
+      <div class="body"><code>δ(q1, '1') = q2</code> | Próximo estado: <code>q2</code> | Restante: <code>(fim)</code></div>
+    </div>
+    <div class="step">
+      <span class="badge ok">ACEITA</span>
+      <div class="body">String terminou. Estado final = <code>q2</code> ∈ F. ✓ A string "1101" termina em "01".</div>
+    </div>
+  </div>
+
+  <h3>Teste 2: string "100" → deve REJEITAR</h3>
+  <div class="step-trace">
+    <div class="step">
+      <span class="badge">início</span>
+      <div class="body">Estado atual: <code>q0</code> | String restante: <code>100</code></div>
+    </div>
+    <div class="step">
+      <span class="badge">lê '1'</span>
+      <div class="body"><code>δ(q0, '1') = q0</code> | Próximo estado: <code>q0</code> | Restante: <code>00</code></div>
+    </div>
+    <div class="step">
+      <span class="badge">lê '0'</span>
+      <div class="body"><code>δ(q0, '0') = q1</code> | Próximo estado: <code>q1</code> | Restante: <code>0</code></div>
+    </div>
+    <div class="step">
+      <span class="badge">lê '0'</span>
+      <div class="body"><code>δ(q1, '0') = q1</code> | Próximo estado: <code>q1</code> | Restante: <code>(fim)</code></div>
+    </div>
+    <div class="step">
+      <span class="badge fail">REJEITA</span>
+      <div class="body">String terminou. Estado final = <code>q1</code> ∉ F. ✗ A string "100" não termina em "01".</div>
+    </div>
+  </div>
+
+  <h3>Aplicando δ* (delta estendida)</h3>
+  <p>Existe também a notação <code>δ*</code> (delta estrela / delta estendida), que generaliza δ para processar uma string inteira de uma vez em vez de símbolo por símbolo:</p>
+  <div class="card">
+    <code>δ*(q0, "1101") = q2</code><br><br>
+    É apenas um atalho recursivo: δ* aplica δ repetidamente, propagando o estado. A definição formal é:<br><br>
+    <code>δ*(q, ε) = q</code> &nbsp;&nbsp;&nbsp;&nbsp;(string vazia: permanece no estado)<br>
+    <code>δ*(q, wa) = δ(δ*(q, w), a)</code> &nbsp;&nbsp;&nbsp;&nbsp;(processa w, depois aplica δ com o símbolo a)
+  </div>
+</section>
+
+<!-- SEÇÃO 6: DFA VS NFA -->
+<section id="dfa-vs-nfa">
+  <h2><span class="num">6</span> Por que "determinístico"? DFA vs NFA</h2>
+
+  <p>O fato de δ ser uma <em>função</em> (e não uma relação) é o que torna o autômato determinístico.</p>
+
+  <div class="comparison">
+    <div class="col dfa">
+      <h4>✅ AFD — Determinístico</h4>
+      <p><code>δ: Q × Σ → Q</code></p>
+      <p>Para cada par (estado, símbolo), existe <strong>exatamente um</strong> próximo estado.</p>
+      <p>Resultado: comportamento previsível, implementação direta.</p>
+    </div>
+    <div class="col nfa">
+      <h4>⚡ AFN — Não-Determinístico</h4>
+      <p><code>δ: Q × Σ → 2^Q</code> (conjunto de estados)</p>
+      <p>Para cada par, pode existir <strong>zero, um ou vários</strong> próximos estados possíveis.</p>
+      <p>Resultado: mais compacto de descrever, mas requer simulação paralela.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Fato importante:</strong> todo AFN pode ser convertido em um AFD equivalente (Teorema da Determinização). São equivalentes em poder expressivo — ambos reconhecem exatamente as linguagens regulares. O AFD pode ter exponencialmente mais estados, mas funciona de forma mais eficiente em execução.
+  </div>
+</section>
+
+<!-- SEÇÃO 7: APLICAÇÕES -->
+<section id="aplicacoes">
+  <h2><span class="num">7</span> Aplicações reais</h2>
+
+  <p>AFDs e a função δ não são apenas teoria. Estão na base de ferramentas que você usa todo dia:</p>
+
+  <div class="applications">
+    <div class="app-card">
+      <div class="icon">🔍</div>
+      <h4>Regex / grep / sed</h4>
+      <p>Expressões regulares são compiladas em AFDs. Cada vez que você faz <code>/^\d{3}-\d{4}$/</code>, um AFD é construído e executado internamente.</p>
+    </div>
+    <div class="app-card">
+      <div class="icon">🧩</div>
+      <h4>Lexers / Tokenizers</h4>
+      <p>Compiladores (Java, C, Python) usam AFDs para identificar tokens: palavras-chave, identificadores, números, operadores.</p>
+    </div>
+    <div class="app-card">
+      <div class="icon">🌐</div>
+      <h4>Parsers HTTP</h4>
+      <p>Servidores web como nginx usam autômatos para validar e parsear headers HTTP de forma ultraeficiente.</p>
+    </div>
+    <div class="app-card">
+      <div class="icon">🎮</div>
+      <h4>Game AI (FSM)</h4>
+      <p>IA de jogos (inimigos com estados: patrulha → alerta → ataque) é implementada como autômatos de estados finitos.</p>
+    </div>
+    <div class="app-card">
+      <div class="icon">🔐</div>
+      <h4>Validação de protocolos</h4>
+      <p>Handshakes TCP/IP, SSL, Bluetooth — as sequências válidas de mensagens são linguagens regulares monitoradas por AFDs.</p>
+    </div>
+    <div class="app-card">
+      <div class="icon">📱</div>
+      <h4>UI / Formulários</h4>
+      <p>Validação de campos (CPF, CEP, email, telefone) em tempo real é implementada com autômatos ou regex compilados para AFD.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SEÇÃO 8: RESUMO -->
+<section id="resumo">
+  <h2><span class="num">8</span> Resumo e mapa mental</h2>
+
+  <div class="formula-box">
+    <span class="label">A expressão, destrinchada</span>
+    δ(estado_atual, símbolo_lido) = próximo_estado
+    <span class="sub">δ: E × Σ → E — "dado onde estou e o que leio, diz onde vou"</span>
+  </div>
+
+  <div class="summary-box">
+    <h3>O que você agora sabe:</h3>
+    <div class="row">E é o conjunto de estados — todos os "modos" possíveis da máquina.</div>
+    <div class="row">Σ (sigma maiúsculo) é o alfabeto — o conjunto de símbolos que a máquina lê.</div>
+    <div class="row">E × Σ é o produto cartesiano — todos os pares possíveis (estado, símbolo).</div>
+    <div class="row">δ (delta minúsculo) é uma função total — definida para todo par, retorna exatamente um estado.</div>
+    <div class="row">A seta → E indica que a saída é sempre um estado (a máquina nunca "sai" do conjunto E).</div>
+    <div class="row">"Determinístico" vem do fato de δ ser uma função: sem ambiguidade, sem paralelismo.</div>
+    <div class="row">O AFD completo é a 5-tupla M = (Q, Σ, δ, q₀, F) — δ é o coração da máquina.</div>
+    <div class="row">Aplicações reais: regex, compiladores, validação de protocolos, game AI, formulários web.</div>
+  </div>
+
+  <h3>Checklist de próximos passos</h3>
+  <div class="card">
+    <p>□ <strong>Praticar:</strong> construa um AFD que reconheça strings com número par de zeros.</p>
+    <p>□ <strong>Aprofundar:</strong> estude AFN (autômatos não-determinísticos) e o Teorema da Determinização.</p>
+    <p>□ <strong>Conectar:</strong> veja como expressões regulares se relacionam com AFDs (Teorema de Kleene).</p>
+    <p>□ <strong>Avançar:</strong> após AFD/AFN, o próximo passo natural são Autômatos de Pilha (AP) e Máquinas de Turing.</p>
+    <p>□ <strong>Ferramenta:</strong> experimente <a href="https://www.jflap.org/" target="_blank">JFLAP</a> — simulador visual de autômatos, gratuito.</p>
+  </div>
+</section>
+
+
+      </div>
+
+      <!-- BOTTOM NAV -->
+      <div class="lesson-nav">
+        <button class="btn-nav prev" disabled style="opacity:.4;cursor:default">← Módulo anterior</button>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">1 / 9 módulos</div>
+        </div>
+        <a class="btn-nav next" href="modulo-02.html">Próximo módulo →</a>
+      </div>
+
+    </div><!-- /lesson-area -->
+  </div><!-- /main -->
+</div>
+
+<script>
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);localStorage.setItem('sb-state',c?'collapsed':'expanded')}
+
+// Section nav: smooth scroll + active state
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const id=a.getAttribute('href').slice(1);
+    const el=document.getElementById(id);
+    if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'});
+  });
+});
+// Scroll spy
+const secIds=['fundamentos','componentes','funcao','exemplo','executando','dfa-vs-nfa','aplicacoes','resumo'];
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;
+  let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{
+    a.classList.toggle('active',a.getAttribute('href')=='#'+cur);
+  });
+});
+</script>
+</body>
+</html>

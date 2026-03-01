@@ -20,13 +20,26 @@ describe('estrutura Next App Router', () => {
     expect(exists('tsconfig.json')).toBe(true);
   });
 
-  it('possui rotas API da especificação', () => {
-    expect(exists('app/api/content/topics/route.ts')).toBe(true);
-    expect(exists('app/api/content/topics/[slug]/route.ts')).toBe(true);
-    expect(exists('app/api/questions/route.ts')).toBe(true);
-    expect(exists('app/api/simulator/afd/run/route.ts')).toBe(true);
-    expect(exists('app/api/simulator/afd/minimize/route.ts')).toBe(true);
-    expect(exists('app/api/simulator/afn/convert/route.ts')).toBe(true);
-    expect(exists('app/api/assessment/submit/route.ts')).toBe(true);
+  it('possui rotas web públicas e de estudo previstas no mockup', () => {
+    expect(exists('app/page.tsx')).toBe(true);
+    expect(exists('app/entrar/[[...sign-in]]/page.tsx')).toBe(true);
+    expect(exists('app/cadastro/[[...sign-up]]/page.tsx')).toBe(true);
+    expect(exists('app/demo/page.tsx')).toBe(true);
+
+    expect(exists('app/dashboard/page.tsx')).toBe(true);
+    expect(exists('app/trilhas/page.tsx')).toBe(true);
+    expect(exists('app/trilhas/f6/[moduleSlug]/page.tsx')).toBe(true);
+    expect(exists('app/flashcards/page.tsx')).toBe(true);
+    expect(exists('app/simulado/page.tsx')).toBe(true);
+    expect(exists('app/premium/page.tsx')).toBe(true);
+  });
+
+  it('possui rotas API da especificação de estudo', () => {
+    expect(exists('app/api/study/dashboard/summary/route.ts')).toBe(true);
+    expect(exists('app/api/study/tracks/catalog/route.ts')).toBe(true);
+    expect(exists('app/api/study/modules/[slug]/route.ts')).toBe(true);
+    expect(exists('app/api/study/modules/[slug]/source/route.ts')).toBe(true);
+    expect(exists('app/api/study/modules/[slug]/quiz/route.ts')).toBe(true);
+    expect(exists('app/api/study/modules/[slug]/progress/route.ts')).toBe(true);
   });
 });

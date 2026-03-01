@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trilhas — POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-l:#4B6BF5;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08),0 1px 2px rgba(10,15,30,.04);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--ink);font-size:14px;line-height:1.6;overflow:hidden}
+.shell{display:flex;height:100vh}
+
+/* ── SIDEBAR (identical to dashboard) ── */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;position:relative;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0;box-shadow:0 2px 8px rgba(27,63,216,.25)}
+.sb-logo-text{flex:1;min-width:0}
+.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}
+.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;transition:background var(--transition);color:var(--n500)}
+.sb-toggle:hover{background:var(--n100);color:var(--ink)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}
+.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}
+.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}
+.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}
+.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}
+.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center}
+.sb-nav-section{width:100%;padding:0 .6rem}
+.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}
+.sb-item:hover{background:var(--n100);color:var(--ink)}
+.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}
+.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}
+.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}
+.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}
+.badge-green{background:var(--em-bg);color:#006B50}
+.badge-amber{background:var(--amb-bg);color:#92400E}
+.sidebar.collapsed .sb-nav-section{padding:0}
+.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}
+.sidebar.collapsed .sb-item::before{display:none}
+.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sidebar.collapsed .sb-sep{margin:.4rem .8rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200;box-shadow:var(--sh-md)}
+.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem .5rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition)}
+.sb-user:hover{background:var(--n50)}
+.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}
+.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}
+.sb-user-plan{font-size:.65rem;color:var(--n400)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--n50)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}
+.topbar-progress-line.visible{display:block}
+.topbar-progress-fill{height:100%;width:4%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0;box-shadow:var(--sh-xs)}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}
+.topbar-breadcrumb .sep{color:var(--n300)}
+.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-search{display:flex;align-items:center;gap:.4rem;background:var(--n100);border:1px solid var(--n200);border-radius:var(--r-md);padding:.35rem .7rem;font-size:.78rem;color:var(--n400);cursor:text;max-width:240px;width:100%;margin-left:.6rem}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500);transition:background var(--transition);position:relative}
+.topbar-icon-btn:hover{background:var(--n100)}
+.notif-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:var(--coral);border-radius:50%;border:2px solid white}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:1.6rem;display:flex;flex-direction:column;gap:1.2rem}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+
+/* Page header */
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.page-title{font-family:var(--fd);font-size:1.35rem;font-weight:700;color:var(--ink)}
+.page-sub{font-size:.8rem;color:var(--n400);margin-top:.25rem}
+
+/* Filter bar */
+.filter-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.filter-btn{
+  font-size:.78rem;font-weight:500;padding:.35rem .75rem;
+  border-radius:var(--r-pill);border:1px solid var(--n200);
+  background:var(--white);color:var(--n500);cursor:pointer;
+  transition:all var(--transition);font-family:var(--fb);
+}
+.filter-btn:hover{background:var(--n100);border-color:var(--n300);color:var(--ink)}
+.filter-btn.active{background:var(--sap-bg);border-color:var(--sap);color:var(--sap);font-weight:600}
+.filter-sep{width:1px;height:20px;background:var(--n200);margin:0 .2rem}
+
+/* Summary strip */
+.summary-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;
+}
+.sum-card{
+  background:var(--white);border:1px solid var(--n200);
+  border-radius:var(--r-lg);padding:.8rem 1rem;
+  box-shadow:var(--sh-xs);display:flex;align-items:center;gap:.7rem;
+}
+.sum-icon{width:36px;height:36px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.sum-val{font-family:var(--fb);font-size:1.3rem;font-weight:700;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.sum-label{font-size:.72rem;color:var(--n500);margin-top:1px}
+
+/* Area sections */
+.area-section{display:flex;flex-direction:column;gap:.6rem}
+.area-header{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.5rem 0 .2rem;
+}
+.area-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.area-name{font-family:var(--fd);font-size:.92rem;font-weight:700;color:var(--ink)}
+.area-meta{font-size:.74rem;color:var(--n400);margin-left:.2rem}
+.area-prog-wrap{flex:1;display:flex;align-items:center;gap:.5rem}
+.area-prog-bar{flex:1;height:4px;background:var(--n100);border-radius:2px;overflow:hidden;max-width:120px}
+.area-prog-fill{height:100%;border-radius:2px}
+.area-pct{font-size:.72rem;font-weight:700;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* Topic grid */
+.topic-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:.7rem;
+}
+.topic-card{
+  background:var(--white);border:1px solid var(--n200);
+  border-radius:var(--r-lg);padding:1rem 1.1rem;
+  box-shadow:var(--sh-xs);cursor:pointer;
+  transition:box-shadow var(--transition),transform var(--transition),border-color var(--transition);
+  position:relative;overflow:hidden;
+}
+.topic-card:hover{box-shadow:var(--sh-md);transform:translateY(-1px);border-color:var(--n300)}
+.topic-card.locked{opacity:.7;cursor:default}
+.topic-card.locked:hover{box-shadow:var(--sh-xs);transform:none;border-color:var(--n200)}
+.topic-card.completed{border-left:3px solid var(--em)}
+.topic-card.active-next{border-left:3px solid var(--sap)}
+
+.topic-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.6rem}
+.topic-id-badge{
+  width:36px;height:36px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:.78rem;font-weight:800;color:white;flex-shrink:0;
+}
+.topic-status{font-size:.66rem;font-weight:600;padding:2px 8px;border-radius:var(--r-pill)}
+.ts-done{background:var(--em-bg);color:#006B50}
+.ts-next{background:var(--sap-bg);color:var(--sap)}
+.ts-lock{background:var(--n100);color:var(--n400)}
+.ts-free{background:var(--em-bg);color:#006B50}
+
+.topic-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.25rem;line-height:1.2}
+.topic-sub{font-size:.76rem;color:var(--n500);margin-bottom:.7rem;line-height:1.5}
+
+.topic-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem}
+.meta-pill{
+  font-size:.67rem;color:var(--n500);
+  background:var(--n100);border-radius:var(--r-pill);
+  padding:2px 7px;display:flex;align-items:center;gap:.2rem;
+}
+
+.topic-prog{height:4px;background:var(--n100);border-radius:2px;overflow:hidden}
+.topic-prog-fill{height:100%;border-radius:2px}
+
+.lock-overlay{
+  position:absolute;top:.8rem;right:.8rem;
+  background:var(--n100);border-radius:50%;
+  width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;
+}
+
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15;backdrop-filter:blur(2px)}
+.sb-overlay.visible{display:block}
+
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);transition:transform var(--transition),width var(--transition);width:var(--sidebar-w)!important}
+  .sidebar.open{transform:translateX(0)}
+  .summary-strip{grid-template-columns:1fr 1fr}
+  .topic-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text">
+        <span class="sb-logo-name">POSCOMP</span>
+        <span class="sb-logo-sub">Visual Lab</span>
+      </div>
+      <button class="sb-toggle" onclick="toggleSidebar()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/>
+        </svg>
+      </button>
+    </div>
+    <div class="sb-progress-strip">
+      <div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div>
+      <div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div>
+      <div class="sb-ps-caption">1 de 25 tópicos concluídos</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section">
+        <div class="sb-nav-label">Início</div>
+        <a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section">
+        <div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas</span></a>
+        <a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section">
+        <div class="sb-nav-label">Praticar</div>
+        <a class="sb-item" href="premium.html"><div class="sb-item-icon">📝</div><span class="sb-item-text">Exercícios</span><span class="sb-tooltip">Exercícios</span></a>
+        <a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item" href="premium.html"><div class="sb-item-icon">📊</div><span class="sb-item-text">Meu Progresso</span><span class="sb-item-badge badge-amber">PRO</span><span class="sb-tooltip">Progresso</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar">RN</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name">Renato Natali</div>
+          <div class="sb-user-plan">Plano Free</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb"><span>App</span><span class="sep">›</span><span class="current">Trilhas de Estudo</span></div>
+      <div class="topbar-search">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+        Buscar tópico...
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-icon-btn">🔔<div class="notif-dot"></div></button>
+        <button class="topbar-icon-btn">⚙️</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <div>
+          <div class="page-title">Trilhas de Estudo</div>
+          <div class="page-sub">25 tópicos do edital SBC organizados em trilhas sequenciais</div>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterTopics('all',this)">Todos</button>
+          <button class="filter-btn" onclick="filterTopics('free',this)">Free</button>
+          <button class="filter-btn" onclick="filterTopics('done',this)">Concluídos</button>
+          <div class="filter-sep"></div>
+          <button class="filter-btn" onclick="filterTopics('fund',this)">Fundamentos</button>
+          <button class="filter-btn" onclick="filterTopics('mat',this)">Matemática</button>
+          <button class="filter-btn" onclick="filterTopics('tec',this)">Tecnologia</button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-strip">
+        <div class="sum-card">
+          <div class="sum-icon" style="background:var(--em-bg)">✅</div>
+          <div><div class="sum-val" style="color:var(--em)">1</div><div class="sum-label">Tópico concluído</div></div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-icon" style="background:var(--sap-bg)">📖</div>
+          <div><div class="sum-val" style="color:var(--sap)">0</div><div class="sum-label">Em progresso</div></div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-icon" style="background:var(--n100)">🔒</div>
+          <div><div class="sum-val" style="color:var(--n400)">24</div><div class="sum-label">Bloqueados</div></div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-icon" style="background:var(--amb-bg)">🎯</div>
+          <div><div class="sum-val" style="color:var(--amb)">4%</div><div class="sum-label">Currículo coberto</div></div>
+        </div>
+      </div>
+
+      <!-- FUNDAMENTOS -->
+      <div class="area-section" data-area="fund">
+        <div class="area-header">
+          <div class="area-dot" style="background:var(--sap)"></div>
+          <div class="area-name">Fundamentos da Computação</div>
+          <div class="area-meta">· 10 tópicos · 1 concluído</div>
+          <div class="area-prog-wrap">
+            <div class="area-prog-bar"><div class="area-prog-fill" style="width:10%;background:var(--sap)"></div></div>
+            <span class="area-pct" style="color:var(--sap)">10%</span>
+          </div>
+        </div>
+        <div class="topic-grid">
+          <!-- F1 -->
+          <div class="topic-card locked" data-area="fund" data-status="lock">
+            <div class="topic-card-head">
+              <div class="topic-id-badge" style="background:var(--n300)">F1</div>
+              <span class="topic-status ts-lock">Premium</span>
+            </div>
+            <div class="topic-name">Análise de Algoritmos</div>
+            <div class="topic-sub">Big-O, Theta, Omega · recorrências · cotas inferiores · algoritmos ótimos</div>
+            <div class="topic-meta">
+              <span class="meta-pill">~3 módulos</span>
+              <span class="meta-pill">~2h</span>
+              <span class="meta-pill">Nível médio</span>
+            </div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:0%;background:var(--sap)"></div></div>
+            <div class="lock-overlay">🔒</div>
+          </div>
+          <!-- F2 -->
+          <div class="topic-card locked" data-area="fund" data-status="lock">
+            <div class="topic-card-head">
+              <div class="topic-id-badge" style="background:var(--n300)">F2</div>
+              <span class="topic-status ts-lock">Premium</span>
+            </div>
+            <div class="topic-name">Algoritmos e Est. de Dados</div>
+            <div class="topic-sub">Árvores, grafos, hash · ordenação · busca · estruturas avançadas</div>
+            <div class="topic-meta">
+              <span class="meta-pill">~4 módulos</span>
+              <span class="meta-pill">~3h</span>
+              <span class="meta-pill">Nível médio</span>
+            </div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:0%;background:var(--sap)"></div></div>
+            <div class="lock-overlay">🔒</div>
+          </div>
+          <!-- F3 -->
+          <div class="topic-card locked" data-area="fund" data-status="lock">
+            <div class="topic-card-head">
+              <div class="topic-id-badge" style="background:var(--n300)">F3</div>
+              <span class="topic-status ts-lock">Premium</span>
+            </div>
+            <div class="topic-name">Arquitetura de Computadores</div>
+            <div class="topic-sub">Pipeline, cache, hierarquia de memória · RISC vs CISC · paralelismo</div>
+            <div class="topic-meta">
+              <span class="meta-pill">~3 módulos</span>
+              <span class="meta-pill">~2.5h</span>
+              <span class="meta-pill">Nível médio</span>
+            </div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:0%"></div></div>
+            <div class="lock-overlay">🔒</div>
+          </div>
+          <!-- F4 -->
+          <div class="topic-card locked" data-area="fund" data-status="lock">
+            <div class="topic-card-head">
+              <div class="topic-id-badge" style="background:var(--n300)">F4</div>
+              <span class="topic-status ts-lock">Premium</span>
+            </div>
+            <div class="topic-name">Circuitos Digitais</div>
+            <div class="topic-sub">Álgebra booleana, Karnaugh, flip-flops · combinacional vs sequencial</div>
+            <div class="topic-meta">
+              <span class="meta-pill">~3 módulos</span>
+              <span class="meta-pill">~2h</span>
+              <span class="meta-pill">Iniciante</span>
+            </div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:0%"></div></div>
+            <div class="lock-overlay">🔒</div>
+          </div>
+          <!-- F5 -->
+          <div class="topic-card locked" data-area="fund" data-status="lock">
+            <div class="topic-card-head">
+              <div class="topic-id-badge" style="background:var(--n300)">F5</div>
+              <span class="topic-status ts-lock">Premium</span>
+            </div>
+            <div class="topic-name">Sistemas Operacionais</div>
+            <div class="topic-sub">Processos, threads, escalonamento · memória virtual · sistemas de arquivos</div>
+            <div class="topic-meta">
+              <span class="meta-pill">~4 módulos</span>
+              <span class="meta-pill">~3h</span>
+              <span class="meta-pill">Nível médio</span>
+            </div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:0%"></div></div>
+            <div class="lock-overlay">🔒</div>
+          </div>
+          <!-- F6 — FREE + DONE -->
+          <a href="modulo-01.html" style="text-decoration:none;color:inherit"><div class="topic-card completed" data-area="fund" data-status="done" data-free="true">
+            <div class="topic-card-head">
+              <div class="topic-id-badge" style="background:var(--em)">F6</div>
+              <span class="topic-status ts-done">✓ Concluído</span>
+            </div>
+            <div class="topic-name">Linguagens Formais e Autômatos</div>
+            <div class="topic-sub">AFD, AFN, Gramáticas, PDA, MT · Hierarquia de Chomsky · P vs NP · Gödel</div>
+            <div class="topic-meta">
+              <span class="meta-pill">9 módulos</span>
+              <span class="meta-pill">~6h</span>
+              <span class="meta-pill" style="background:var(--em-bg);color:#006B50">Free ✓</span>
+            </div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:100%;background:var(--em)"></div></div>
+          </div></a>
+          <!-- F7 -->
+          <div class="topic-card active-next" data-area="fund" data-status="next">
+            <div class="topic-card-head">
+              <div class="topic-id-badge" style="background:var(--sap)">F7</div>
+              <span class="topic-status ts-next">→ Próximo</span>
+            </div>
+            <div class="topic-name">Compiladores</div>
+            <div class="topic-sub">Análise léxica, sintática, semântica · geração de código · otimização</div>
+            <div class="topic-meta">
+              <span class="meta-pill">~3 módulos</span>
+              <span class="meta-pill">~2.5h</span>
+              <span class="meta-pill">Avançado</span>
+            </div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:0%;background:var(--sap)"></div></div>
+            <div class="lock-overlay">🔒</div>
+          </div>
+          <!-- F8–F10 -->
+          <div class="topic-card locked" data-area="fund" data-status="lock">
+            <div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">F8</div><span class="topic-status ts-lock">Premium</span></div>
+            <div class="topic-name">Concorrência e Paralelismo</div>
+            <div class="topic-sub">Semáforos, monitores, deadlock · modelos de memória · MPI, OpenMP</div>
+            <div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:0%"></div></div>
+            <div class="lock-overlay">🔒</div>
+          </div>
+          <div class="topic-card locked" data-area="fund" data-status="lock">
+            <div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">F9</div><span class="topic-status ts-lock">Premium</span></div>
+            <div class="topic-name">Segurança Computacional</div>
+            <div class="topic-sub">Criptografia, protocolos, autenticação · vulnerabilidades · PKI</div>
+            <div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:0%"></div></div>
+            <div class="lock-overlay">🔒</div>
+          </div>
+          <div class="topic-card locked" data-area="fund" data-status="lock">
+            <div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">F10</div><span class="topic-status ts-lock">Premium</span></div>
+            <div class="topic-name">Teoria dos Grafos</div>
+            <div class="topic-sub">Grafos, árvores geradoras, fluxo máximo · coloração · planaridade</div>
+            <div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div>
+            <div class="topic-prog"><div class="topic-prog-fill" style="width:0%"></div></div>
+            <div class="lock-overlay">🔒</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MATEMÁTICA -->
+      <div class="area-section" data-area="mat">
+        <div class="area-header">
+          <div class="area-dot" style="background:var(--amb)"></div>
+          <div class="area-name">Matemática para Computação</div>
+          <div class="area-meta">· 7 tópicos · 0 concluídos</div>
+          <div class="area-prog-wrap">
+            <div class="area-prog-bar"><div class="area-prog-fill" style="width:0%;background:var(--amb)"></div></div>
+            <span class="area-pct" style="color:var(--n400)">0%</span>
+          </div>
+        </div>
+        <div class="topic-grid">
+          <div class="topic-card locked" data-area="mat" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">M1</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Análise Combinatória</div><div class="topic-sub">Permutações, combinações, arranjos · princípio da inclusão-exclusão · pigeonhole</div><div class="topic-meta"><span class="meta-pill">~2 módulos</span><span class="meta-pill">~1.5h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="mat" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">M2</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Álgebra Linear</div><div class="topic-sub">Vetores, matrizes, determinantes · autovalores · transformações lineares</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2.5h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="mat" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">M3</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Cálculo Diferencial e Integral</div><div class="topic-sub">Limites, derivadas, integrais · séries de Taylor · equações diferenciais</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="mat" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">M4</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Lógica Matemática</div><div class="topic-sub">Proposições, predicados, dedução natural · lógica de primeira ordem · resolução</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="mat" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">M5</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Matemática Discreta</div><div class="topic-sub">Indução, relações, funções · teoria dos números · posets · reticulados</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="mat" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">M6</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Probabilidade e Estatística</div><div class="topic-sub">Probabilidade, distribuições, inferência · testes de hipótese · regressão</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="mat" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">M7</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Geometria Analítica</div><div class="topic-sub">Vetores no espaço, cônicas, quádricas · transformações geométricas · produto vetorial</div><div class="topic-meta"><span class="meta-pill">~2 módulos</span><span class="meta-pill">~1.5h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+        </div>
+      </div>
+
+      <!-- TECNOLOGIA -->
+      <div class="area-section" data-area="tec">
+        <div class="area-header">
+          <div class="area-dot" style="background:var(--coral)"></div>
+          <div class="area-name">Tecnologia da Computação</div>
+          <div class="area-meta">· 8 tópicos · 0 concluídos</div>
+          <div class="area-prog-wrap">
+            <div class="area-prog-bar"><div class="area-prog-fill" style="width:0%;background:var(--coral)"></div></div>
+            <span class="area-pct" style="color:var(--n400)">0%</span>
+          </div>
+        </div>
+        <div class="topic-grid">
+          <div class="topic-card locked" data-area="tec" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">T1</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Banco de Dados</div><div class="topic-sub">Modelo relacional, SQL, normalização · transações, ACID · NoSQL</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2.5h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="tec" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">T2</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Computação Gráfica</div><div class="topic-sub">Pipeline gráfico, transformações 3D, rasterização · ray tracing · shaders</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="tec" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">T3</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Engenharia de Software</div><div class="topic-sub">Processos ágeis, UML, padrões de projeto · testes · arquitetura de software</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="tec" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">T4</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Inteligência Artificial</div><div class="topic-sub">Busca, lógica, planejamento · aprendizado de máquina · redes neurais</div><div class="topic-meta"><span class="meta-pill">~4 módulos</span><span class="meta-pill">~3h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="tec" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">T5</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Linguagens de Programação</div><div class="topic-sub">Paradigmas, tipos, escopo · semântica operacional · cálculo lambda</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="tec" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">T6</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Redes de Computadores</div><div class="topic-sub">Modelo OSI/TCP-IP, protocolos, roteamento · DNS, HTTP, TLS · redes sem fio</div><div class="topic-meta"><span class="meta-pill">~4 módulos</span><span class="meta-pill">~3h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="tec" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">T7</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Sistemas Distribuídos</div><div class="topic-sub">Consistência, disponibilidade, partição · Paxos, Raft · clock lógico</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+          <div class="topic-card locked" data-area="tec" data-status="lock"><div class="topic-card-head"><div class="topic-id-badge" style="background:var(--n300)">T8</div><span class="topic-status ts-lock">Premium</span></div><div class="topic-name">Programação</div><div class="topic-sub">Técnicas de programação · programação dinâmica · algoritmos gulosos · backtracking</div><div class="topic-meta"><span class="meta-pill">~3 módulos</span><span class="meta-pill">~2h</span></div><div class="topic-prog"></div><div class="lock-overlay">🔒</div></div>
+        </div>
+      </div>
+
+      <!-- Premium upsell banner -->
+      <div style="background:linear-gradient(130deg,var(--ink2),var(--sap));border-radius:var(--r-xl);padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;color:white;">
+        <div>
+          <div style="font-family:var(--fm);font-size:.63rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:.3rem">Premium</div>
+          <div style="font-family:var(--fd);font-size:1rem;font-weight:700;margin-bottom:.2rem">Desbloqueie os 24 tópicos restantes</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.65)">Acesso completo a todas as trilhas, simulado completo e flashcards por R$39/mês</div>
+        </div>
+        <button style="background:white;color:var(--sap);border:none;border-radius:var(--r-pill);padding:.55rem 1.2rem;font-size:.84rem;font-weight:700;cursor:pointer;font-family:var(--fb);white-space:nowrap;flex-shrink:0">Assinar Premium →</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const progressLine = document.getElementById('progressLine');
+const overlay = document.getElementById('sbOverlay');
+const isMobile = () => window.innerWidth < 768;
+const saved = localStorage.getItem('sb-state');
+if (saved === 'collapsed' && !isMobile()) { sidebar.classList.add('collapsed'); progressLine.classList.add('visible'); }
+function toggleSidebar() {
+  if (isMobile()) { const o = sidebar.classList.toggle('open'); overlay.classList.toggle('visible', o); return; }
+  const c = sidebar.classList.toggle('collapsed');
+  progressLine.classList.toggle('visible', c);
+  localStorage.setItem('sb-state', c ? 'collapsed' : 'expanded');
+}
+function filterTopics(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('.topic-card');
+  const sections = document.querySelectorAll('.area-section');
+  cards.forEach(c => {
+    const area = c.dataset.area;
+    const status = c.dataset.status;
+    const free = c.dataset.free;
+    let show = true;
+    if (filter === 'free') show = free === 'true';
+    else if (filter === 'done') show = status === 'done';
+    else if (filter === 'fund') show = area === 'fund';
+    else if (filter === 'mat') show = area === 'mat';
+    else if (filter === 'tec') show = area === 'tec';
+    c.style.display = show ? '' : 'none';
+  });
+  sections.forEach(s => {
+    const area = s.dataset.area;
+    const visible = filter === 'all' || filter === area ||
+      Array.from(s.querySelectorAll('.topic-card')).some(c => c.style.display !== 'none');
+    s.style.display = visible ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

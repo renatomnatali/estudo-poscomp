@@ -56,6 +56,12 @@ git config core.hooksPath .githooks
 4. Uma tarefa por vez, evitando troca de contexto desnecessária.
 5. Não trocar de branch no meio da tarefa atual.
 
+## Padrão de design obrigatório
+
+1. Seguir `docs/design/ui-standards.md` para qualquer alteração visual nova.
+2. Botões de ação devem usar formato semi-retangular (padrão do simulador), nunca pill.
+3. Chips e botões devem ter semântica visual distinta.
+
 ## Validação antes de finalizar
 
 Quando houver ambiente Node configurado (`package.json` presente), executar:
