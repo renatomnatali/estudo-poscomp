@@ -1,0 +1,46 @@
+version: 2
+updated_at: 2026-02-25
+macro_areas:
+  - id: fundamentos
+    name: Fundamentos da Computação
+    topics:
+      - id: linguagens_formais
+        slug: linguagens-formais-e-operacoes
+        subtopics:
+          - alfabetos_palavras_operacoes
+      - id: expressoes_regulares
+        slug: expressoes-regulares
+        subtopics:
+          - linguagens_regulares
+      - id: gramaticas
+        slug: gramaticas-e-derivacao
+        subtopics:
+          - derivacao
+      - id: automatos_afd
+        slug: automatos-finitos-afd
+        subtopics:
+          - afd_modelagem_execucao
+      - id: minimizacao_afd
+        slug: minimizacao-de-afd
+        subtopics:
+          - minimizacao_afd
+      - id: afn_epsilon
+        slug: afn-com-epsilon
+        subtopics:
+          - afn_epsilon
+      - id: conversao_afn_afd
+        slug: conversao-afn-para-afd
+        subtopics:
+          - conversao_afn_afd
+      - id: glc_ap
+        slug: glc-e-automatos-com-pilha
+        subtopics:
+          - ap_nao_deterministico
+      - id: mt_decidibilidade
+        slug: maquinas-de-turing-e-decidibilidade
+        subtopics:
+          - problemas_indecidiveis
+  - id: matematica
+    name: Matemática
+  - id: tecnologia
+    name: Tecnologia da Computação

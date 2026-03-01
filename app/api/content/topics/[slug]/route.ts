@@ -7,7 +7,7 @@ export async function GET(
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
-  const topic = getTopicBySlug(slug);
+  const topic = await getTopicBySlug(slug);
 
   if (!topic) {
     return NextResponse.json({ error: 'Tópico não encontrado.' }, { status: 404 });

@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 3 — Autômatos Finitos Não-Determinísticos · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  /* original module vars */
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item::before{display:none}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}.sidebar.collapsed .sb-sep{margin:.4rem .8rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:33%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500)}.topbar-icon-btn:hover{background:var(--n100)}
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#1a6bcc 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+/* SECTION NAV */
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover{background:rgba(255,255,255,.15);color:white}.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+/* CONTENT */
+.lesson-content{max-width:900px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.75}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0;font-size:.92rem;line-height:1.7}
+.callout{border-left:4px solid var(--accent);background:#e8f0fe;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem}.callout.warning{border-color:var(--accent2);background:#fff3e0}.callout.success{border-color:var(--green);background:#e8f5ee}.callout strong{color:var(--primary)}
+.formula-box{background:var(--primary);color:white;border-radius:12px;padding:1.4rem 2rem;text-align:center;margin:1.5rem 0;font-size:1.3rem;font-family:Georgia,serif}
+.formula-box .label{font-size:.75rem;opacity:.7;display:block;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;font-family:var(--fb)}.formula-box .sub{font-size:.85rem;opacity:.85;display:block;margin-top:.5rem;font-family:var(--fb)}
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.analogy .side{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.analogy .side h4{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}.analogy .side .val{font-size:1rem;font-weight:600;color:var(--primary)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--primary);color:white;padding:.65rem 1rem;text-align:left}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+tr:nth-child(even) td{background:#f5f8ff}tr:hover td{background:#e8f0fe}
+.highlight-row td{background:#fff3cd!important;font-weight:600}
+.automaton-viz{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.8rem;margin:1.5rem 0;text-align:center}
+.states{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.state{width:70px;height:70px;border-radius:50%;border:3px solid var(--accent);background:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--primary);position:relative}
+.state.initial::before{content:'▶';position:absolute;left:-22px;color:var(--accent2);font-size:1rem}
+.state.final{box-shadow:0 0 0 5px white,0 0 0 8px var(--accent)}
+.arrow{font-size:1.5rem;color:var(--accent2);position:relative}.arrow span{position:absolute;top:-1.2rem;left:50%;transform:translateX(-50%);font-size:.8rem;color:var(--muted);white-space:nowrap;font-family:monospace;background:var(--bg);padding:0 4px}
+.step-trace{margin:1rem 0}.step{display:flex;align-items:flex-start;gap:1rem;margin:.5rem 0;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.9rem}
+.step .badge{background:var(--accent);color:white;border-radius:6px;padding:2px 10px;font-size:.78rem;white-space:nowrap;flex-shrink:0;font-family:monospace}.step .badge.ok{background:var(--green)}.step .badge.fail{background:var(--red)}
+.step .body{font-size:.9rem;line-height:1.6}.step .body code,.step code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.comparison .col{border-radius:10px;padding:1.2rem;font-size:.9rem}.comparison .col.dfa{background:#e8f5ee;border:1px solid #a8d8b8}.comparison .col.nfa{background:#fff3e0;border:1px solid #f0c070}.comparison h4{margin-bottom:.5rem;font-size:.92rem}
+.applications{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin:1rem 0}.app-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.app-card .icon{font-size:1.8rem;margin-bottom:.5rem}.app-card h4{color:var(--primary);font-size:.9rem;margin-bottom:.3rem}.app-card p{font-size:.82rem;color:var(--muted);margin:0}
+.summary-box{background:var(--primary);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}.summary-box h3{color:white;margin-bottom:1rem;font-size:1.1rem}.summary-box .row{display:flex;gap:.5rem;margin:.4rem 0;align-items:flex-start;font-size:.9rem}.summary-box .row::before{content:'✓';color:#7ef0a0;flex-shrink:0;font-weight:700}
+/* quiz / interactive */
+.quiz-option{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f8faff;margin:.4rem 0;font-size:.9rem}.quiz-option:hover{background:#e8f0fe;border-color:var(--accent)}
+.quiz-option.selected{background:#e8f0fe;border-color:var(--accent)}.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05);position:sticky;bottom:0}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:33%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap)}.btn-nav.next:hover{background:var(--sap-d)}
+/* EXTRAS from original */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .breadcrumb { font-size: 0.8rem; opacity: 0.65; margin-bottom: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+  .module-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; display: inline-block; padding: 4px 16px; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1rem; }
+  header h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem; }
+  header .subtitle { opacity: 0.85; font-size: 1.05rem; max-width: 600px; margin: 0 auto 1.5rem; }
+  .header-meta { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+  .header-meta span { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 6px; margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .progress-fill { background: white; border-radius: 4px; height: 100%; width: 37.5%; }
+  .progress-label { font-size: 0.78rem; opacity: 0.7; text-align: center; margin-top: 0.3rem; }
+  nav a { color: rgba(255,255,255,0.75); text-decoration: none; padding: 5px 11px; font-size: 0.82rem; border-radius: 4px; }
+  nav a:hover { background: rgba(255,255,255,0.15); color: white; }
+  section { margin-bottom: 3.5rem; scroll-margin-top: 60px; }
+  h2 { color: var(--primary); font-size: 1.55rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--purple); }
+  h2 .num { background: var(--purple); color: white; min-width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.88rem; font-weight: 700; flex-shrink: 0; }
+  h3 { color: var(--purple); font-size: 1.08rem; margin: 1.6rem 0 0.6rem; }
+  p { margin-bottom: 0.9rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.6rem; margin: 1rem 0; }
+  .callout { border-left: 4px solid var(--accent); background: #e8f0fe; padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1.1rem 0; }
+  .callout.warn { border-color: var(--accent2); background: #fff3e0; }
+  .callout.ok { border-color: var(--green); background: #e8f5ee; }
+  .callout.tip { border-color: var(--purple); background: #f3eeff; }
+  .callout.key { border-color: var(--primary); background: #e8f0fe; border-width: 4px; }
+  .callout strong { color: var(--primary); }
+  .callout.tip strong { color: var(--purple); }
+  .callout.ok strong { color: var(--green); }
+
+  .fbox { background: var(--primary); color: white; border-radius: 12px; padding: 1.4rem 2rem; text-align: center; margin: 1.5rem 0; font-size: 1.2rem; font-family: 'Georgia', serif; }
+  .fbox.purple { background: linear-gradient(135deg, #0d2d6b, #6c3faa); }
+  .fbox .flabel { font-size: 0.75rem; opacity: 0.65; display: block; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.4rem; font-family: 'Segoe UI', sans-serif; }
+  .fbox .fsub { font-size: 0.88rem; opacity: 0.8; display: block; margin-top: 0.5rem; font-family: 'Segoe UI', sans-serif; }
+
+  code { background: var(--code-bg); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.9rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.93rem; }
+  th { background: var(--primary); color: white; padding: 0.7rem 1rem; text-align: left; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #f5f8ff; }
+  tr:hover td { background: #e8f0fe; }
+  td code { background: var(--code-bg); }
+  .hl td { background: #f3eeff !important; font-weight: 600; color: var(--purple); }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .split .pane { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; }
+  .split .pane h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.6rem; }
+
+  /* Comparação AFD vs AFN */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 1rem 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .compare .col { padding: 1.3rem; }
+  .compare .col.dfa { background: #e8f0fe; border-right: 1px solid var(--border); }
+  .compare .col.nfa { background: #f3eeff; }
+  .compare .col h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.7rem; }
+  .compare .col.dfa h4 { color: var(--accent); }
+  .compare .col.nfa h4 { color: var(--purple); }
+  .compare .col p, .compare .col li { font-size: 0.88rem; margin-bottom: 0.4rem; }
+  .compare .col ul { margin-left: 1rem; }
+
+  /* Trace paralelo */
+  .trace-step { display: flex; gap: 0.8rem; align-items: flex-start; padding: 0.7rem 0.9rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 0.4rem 0; font-size: 0.92rem; }
+  .badge { border-radius: 5px; padding: 2px 9px; font-size: 0.78rem; white-space: nowrap; font-family: monospace; flex-shrink: 0; margin-top: 2px; color: white; }
+  .b-blue { background: var(--accent); }
+  .b-purple { background: var(--purple); }
+  .b-green { background: var(--green); }
+  .b-red { background: var(--red); }
+  .b-orange { background: var(--accent2); }
+  .b-gray { background: var(--muted); }
+
+  /* Conjunto de estados ativo */
+  .state-set { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+  .state-bubble { background: var(--purple); color: white; border-radius: 20px; padding: 3px 10px; font-family: monospace; font-size: 0.85rem; }
+  .state-bubble.final { background: var(--green); }
+  .state-bubble.dead { background: var(--muted); }
+  .state-bubble.initial { background: var(--accent); }
+
+  /* Construção de subconjuntos */
+  .subset-table { font-size: 0.85rem; }
+  .subset-table th { padding: 0.55rem 0.8rem; }
+  .subset-table td { padding: 0.55rem 0.8rem; font-family: monospace; }
+  .subset-new { background: #fff3cd !important; }
+  .subset-final { background: #e8f5ee !important; }
+  .subset-initial { background: #e8f0fe !important; }
+
+  /* Fecho epsilon visual */
+  .eclosure { display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0; }
+  .eclosure-row { display: flex; align-items: center; gap: 0.8rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.9rem; }
+  .eclosure-row .arrow { color: var(--purple); font-size: 1.1rem; }
+
+  /* ══════════════════ SIMULADOR AFN ══════════════════ */
+  #sim-afn {
+    background: var(--card); border: 2px solid var(--border); border-radius: 16px;
+    overflow: hidden; margin: 1.5rem 0;
+    box-shadow: 0 4px 20px rgba(108,63,170,0.1);
+  }
+  .sim-header {
+    background: linear-gradient(90deg, #0d2d6b, #6c3faa);
+    color: white; padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .sim-header h3 { font-size: 1rem; margin: 0; }
+  .sim-header .sbadge { background: rgba(255,255,255,0.2); border-radius: 6px; padding: 3px 10px; font-size: 0.78rem; }
+  .sim-body { padding: 1.4rem 1.5rem; }
+
+  .preset-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .preset-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; color: var(--primary); font-weight: 500; }
+  .preset-btn.active, .preset-btn:hover { background: var(--purple); color: white; border-color: var(--purple); }
+
+  #afn-canvas { width: 100%; height: 210px; border: 1px solid var(--border); border-radius: 10px; background: #f8f4ff; display: block; margin-bottom: 1rem; }
+
+  /* Conjuntos ativos */
+  .active-sets { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .active-set { flex: 1; min-width: 180px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; }
+  .active-set .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.4rem; }
+  .active-set .states { display: flex; gap: 0.4rem; flex-wrap: wrap; min-height: 28px; }
+
+  .sim-input-row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+  .sim-input-row label { font-size: 0.88rem; font-weight: 600; color: var(--primary); }
+  #afn-string { font-family: monospace; font-size: 1.1rem; padding: 6px 12px; border: 2px solid var(--border); border-radius: 7px; width: 180px; }
+  #afn-string:focus { outline: none; border-color: var(--purple); }
+
+  .sim-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .sim-btn { padding: 7px 16px; border: none; border-radius: 7px; cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+  .btn-purple { background: var(--purple); color: white; }
+  .btn-purple:hover { background: #4d2b88; }
+  .btn-secondary { background: var(--bg); border: 1px solid var(--border); color: var(--primary); }
+  .btn-secondary:hover { background: #e8f0fe; }
+  .btn-green { background: var(--green); color: white; }
+
+  /* Tape */
+  .sim-tape { display: flex; gap: 2px; flex-wrap: wrap; }
+  .tcell { width: 36px; height: 36px; border: 2px solid var(--border); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 1.05rem; font-weight: 700; background: var(--card); }
+  .tcell.reading { border-color: var(--purple); background: #f3eeff; }
+  .tcell.done { border-color: var(--green); background: #e8f5ee; opacity: 0.7; }
+  .tcell.pending { opacity: 0.35; }
+
+  #afn-log { background: #f8f4ff; border: 1px solid #d8c8f0; border-radius: 8px; padding: 0.8rem; max-height: 200px; overflow-y: auto; font-size: 0.84rem; font-family: monospace; margin-top: 0.8rem; }
+  .log-line { padding: 2px 0; border-bottom: 1px solid #ede8f8; }
+  .log-line:last-child { border-bottom: none; }
+  .log-accept { color: var(--green); font-weight: 700; }
+  .log-reject { color: var(--red); font-weight: 700; }
+  .log-eps { color: var(--purple); font-style: italic; }
+  .log-branch { color: var(--accent2); }
+
+  #afn-result { padding: 0.9rem 1.2rem; border-radius: 10px; font-size: 1.05rem; font-weight: 600; margin-top: 0.8rem; display: none; }
+  #afn-result.accept { background: #e8f5ee; border: 2px solid var(--green); color: var(--green); }
+  #afn-result.reject { background: #fdecea; border: 2px solid var(--red); color: var(--red); }
+
+  /* ══════════════════ CONSTRUÇÃO SUBCONJUNTOS ══════════════════ */
+  .subset-builder { background: var(--card); border: 2px solid var(--border); border-radius: 16px; overflow: hidden; margin: 1.5rem 0; }
+  .subset-builder .sb-header { background: linear-gradient(90deg, #0d2d6b, #6c3faa); color: white; padding: 1rem 1.5rem; font-weight: 700; font-size: 0.95rem; }
+  .subset-builder .sb-body { padding: 1.4rem; }
+  .sb-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  #subset-table-container { overflow-x: auto; }
+  #subset-steps { font-size: 0.85rem; }
+  .sb-step { background: #f8f4ff; border: 1px solid #d8c8f0; border-radius: 8px; padding: 0.8rem 1rem; margin: 0.5rem 0; font-family: monospace; font-size: 0.84rem; }
+
+  /* QUIZ */
+  .quiz { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .quiz h3 { color: var(--primary); font-size: 1rem; margin-bottom: 1rem; }
+  .quiz h3::before { content: '🧠 '; }
+  .options { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+  .opt { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 0.9rem; background: var(--bg); }
+  .opt:hover { background: #f3eeff; border-color: var(--purple); }
+  .opt input { accent-color: var(--purple); margin-top: 3px; flex-shrink: 0; }
+  .quiz-btn { margin-top: 1rem; background: var(--purple); color: white; border: none; padding: 8px 22px; border-radius: 7px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+  .quiz-btn:hover { background: var(--primary); }
+  .quiz-result { margin-top: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; display: none; }
+  .quiz-result.show { display: block; }
+  .quiz-result.correct { background: #e8f5ee; border: 1px solid #a8d8b8; color: var(--green); }
+  .quiz-result.wrong { background: #fdecea; border: 1px solid #f0a8a0; color: var(--red); }
+
+  .summary { background: linear-gradient(135deg, #0d2d6b, #6c3faa); color: white; border-radius: 14px; padding: 2rem; margin: 2rem 0; }
+  .summary h3 { color: white; margin-bottom: 1rem; font-size: 1.15rem; }
+  .summary .row { display: flex; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  .summary .row::before { content: '✓'; color: #c8a0ff; font-weight: 700; flex-shrink: 0; }
+
+  .mod-nav { display: flex; justify-content: space-between; align-items: center; margin: 3rem 0 1rem; gap: 1rem; flex-wrap: wrap; }
+  .mod-btn { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 1rem 1.4rem; text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; flex: 1; min-width: 160px; }
+  .mod-btn:hover { border-color: var(--accent); background: #e8f0fe; }
+  .mod-btn.next { background: var(--purple); color: white; border-color: var(--purple); text-align: right; }
+  .mod-btn.next:hover { background: var(--primary); border-color: var(--primary); }
+  .mod-btn .dir { display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7; margin-bottom: 2px; }
+
+  @media (max-width: 620px) {
+    .split, .compare { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.8rem; }
+  }
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .analogy,.comparison{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">1 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div>
+        <a class="sb-item " href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas</span></a>
+        <a class="sb-item " href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div>
+        <a class="sb-item " href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Linguagens Formais</a><span class="sep">›</span>
+        <span class="current">Módulo 3 — Autômatos Finitos Não-Determinísticos</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header"><div class="breadcrumb">POSCOMP Visual Lab › Autômatos</div>
+  <div class="module-badge">Módulo 3 de 8</div>
+  <h1>AFN e ε-Transições</h1>
+  <p class="subtitle">Não-determinismo, caminhos paralelos, fecho epsilon e a prova de que AFN = AFD em poder expressivo.</p>
+  <div class="header-meta">
+    <span>⏱ ~60 min</span>
+    <span>📐 Nível: Intermediário</span>
+    <span>⚙️ Simulador paralelo + Construção de subconjuntos</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div class="progress-label">Módulo 3 de 8 — AFN</div></div>
+      <nav class="section-nav" id="sectionNav"><a href="#intuicao">Intuição</a>
+  <a href="#definicao">Definição</a>
+  <a href="#epsilon">ε-Transições</a>
+  <a href="#execucao">Execução</a>
+  <a href="#simulador">Simulador</a>
+  <a href="#subconjuntos">Subconjuntos</a>
+  <a href="#builder">Construção</a>
+  <a href="#equivalencia">Equivalência</a>
+  <a href="#quiz">Exercícios</a>
+  <a href="#resumo">Resumo</a></nav>
+      <div class="lesson-content"><!-- ══════════════ 1 — INTUIÇÃO ══════════════ -->
+<section id="intuicao">
+  <h2><span class="num">1</span> O que muda no AFN?</h2>
+
+  <p>No AFD, cada par (estado, símbolo) leva a exatamente <strong>um</strong> próximo estado. O AFN relaxa essa restrição: um par pode levar a <strong>zero, um ou vários</strong> próximos estados simultaneamente.</p>
+
+  <p>Isso soa impossível de executar numa máquina real — e de fato é. Mas como modelo matemático, o AFN é extremamente útil: é mais fácil de projetar, mais compacto de descrever, e — como veremos — tem exatamente o mesmo poder expressivo que o AFD.</p>
+
+  <div class="callout tip">
+    <strong>A metáfora do oráculo:</strong> imagine que, sempre que o AFN encontra múltiplas opções, ele "adivinhe" corretamente qual caminho levará à aceitação. Uma string é aceita se <em>existir ao menos um</em> caminho que termina num estado de aceitação. Na prática, simulamos todos os caminhos em paralelo.
+  </div>
+
+  <div class="compare">
+    <div class="col dfa">
+      <h4>🔵 AFD — Determinístico</h4>
+      <ul>
+        <li>δ(q, a) = exatamente 1 estado</li>
+        <li>Execução: único caminho</li>
+        <li>Sem ambiguidade</li>
+        <li>Mais estados (às vezes exponencialmente mais)</li>
+        <li>Mais fácil de implementar</li>
+      </ul>
+    </div>
+    <div class="col nfa">
+      <h4>🟣 AFN — Não-Determinístico</h4>
+      <ul>
+        <li>δ(q, a) = conjunto de estados (pode ser ∅)</li>
+        <li>Execução: múltiplos caminhos em paralelo</li>
+        <li>Aceita se qualquer caminho aceita</li>
+        <li>Mais compacto — menos estados</li>
+        <li>Mais fácil de projetar para certas linguagens</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 2 — DEFINIÇÃO ══════════════ -->
+<section id="definicao">
+  <h2><span class="num">2</span> Definição formal do AFN</h2>
+
+  <p>Um AFN também é uma 5-tupla. A diferença crítica está na assinatura de δ:</p>
+
+  <div class="split">
+    <div class="pane">
+      <h4>AFD — função de transição</h4>
+      <div class="fbox" style="font-size:1rem; padding:1rem;">
+        δ<sub>AFD</sub>: Q × Σ → Q
+      </div>
+      <p style="font-size:0.88rem;">Retorna um único estado.</p>
+    </div>
+    <div class="pane">
+      <h4>AFN — função de transição</h4>
+      <div class="fbox purple" style="font-size:1rem; padding:1rem;">
+        δ<sub>AFN</sub>: Q × (Σ ∪ {ε}) → 2<sup>Q</sup>
+      </div>
+      <p style="font-size:0.88rem;">Retorna um <em>conjunto</em> de estados — possivelmente vazio.</p>
+    </div>
+  </div>
+
+  <div class="fbox purple">
+    <span class="flabel">Definição formal de AFN</span>
+    N = (Q, Σ, δ, q₀, F)
+    <span class="fsub">Mesmos 5 componentes, mas δ: Q × (Σ ∪ {ε}) → 2<sup>Q</sup></span>
+  </div>
+
+  <h3>As três diferenças-chave em relação ao AFD</h3>
+  <table>
+    <tr><th>Característica</th><th>AFD</th><th>AFN</th></tr>
+    <tr>
+      <td>Tipo de retorno de δ</td>
+      <td>Um estado <code>q ∈ Q</code></td>
+      <td>Um conjunto <code>S ⊆ Q</code> (pode ser ∅)</td>
+    </tr>
+    <tr>
+      <td>Transição com ε</td>
+      <td>Não existe</td>
+      <td>δ(q, ε) permitido — muda estado sem ler símbolo</td>
+    </tr>
+    <tr class="hl">
+      <td>Critério de aceitação</td>
+      <td>Estado único ∈ F ao fim</td>
+      <td>Ao menos um estado ∈ F entre todos os caminhos paralelos</td>
+    </tr>
+    <tr>
+      <td>δ precisa ser total?</td>
+      <td>Sim (AFD completo)</td>
+      <td>Não — δ(q, a) = ∅ é válido (caminho morre)</td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <strong>Por que 2<sup>Q</sup>?</strong> Como vimos no Módulo 1, 2<sup>Q</sup> é o conjunto de todos os subconjuntos de Q. Se Q tem n estados, há 2<sup>n</sup> possíveis conjuntos de retorno. δ precisa mapear cada par para um desses subconjuntos — incluindo o conjunto vazio ∅ (caminho sem saída).
+  </div>
+</section>
+
+<!-- ══════════════ 3 — EPSILON ══════════════ -->
+<section id="epsilon">
+  <h2><span class="num">3</span> ε-Transições e o Fecho Epsilon</h2>
+
+  <p>Uma <strong>ε-transição</strong> (ou transição vazia) permite que o autômato mude de estado <em>sem consumir nenhum símbolo da entrada</em>. É como um "salto livre".</p>
+
+  <div class="card">
+    <p>Exemplo: <code>δ(q1, ε) = {q2, q3}</code></p>
+    <p>Estando em q1, o AFN pode espontaneamente ir para q2 ou q3 — sem ler nada. Isso é útil para "conectar" subautômatos.</p>
+  </div>
+
+  <h3>Fecho Epsilon — ε-closure(q)</h3>
+
+  <p>O <strong>fecho epsilon</strong> de um estado q é o conjunto de todos os estados alcançáveis a partir de q usando apenas ε-transições (incluindo o próprio q).</p>
+
+  <div class="fbox purple" style="font-size:1rem;">
+    <span class="flabel">Definição</span>
+    ε-closure(q) = { p ∈ Q | p é alcançável a partir de q por zero ou mais ε-transições }
+    <span class="fsub">Sempre inclui o próprio q (zero ε-transições = permanecer em q)</span>
+  </div>
+
+  <h3>Exemplo de cálculo do fecho epsilon</h3>
+  <p>Dado o seguinte conjunto de ε-transições:</p>
+  <div class="card">
+    <code>δ(q1, ε) = {q2}</code><br>
+    <code>δ(q2, ε) = {q3}</code><br>
+    <code>δ(q3, ε) = ∅</code><br>
+    <code>δ(q4, ε) = {q1, q5}</code>
+  </div>
+
+  <div class="eclosure">
+    <div class="eclosure-row">
+      <span class="badge b-purple">ε-closure(q1)</span>
+      <span class="arrow">→</span>
+      <span>Começa em q1. ε leva a q2. De q2, ε leva a q3. De q3, nada mais.</span>
+      <span class="badge b-blue">= {q1, q2, q3}</span>
+    </div>
+    <div class="eclosure-row">
+      <span class="badge b-purple">ε-closure(q3)</span>
+      <span class="arrow">→</span>
+      <span>Começa em q3. Não há ε-transições saindo de q3.</span>
+      <span class="badge b-blue">= {q3}</span>
+    </div>
+    <div class="eclosure-row">
+      <span class="badge b-purple">ε-closure(q4)</span>
+      <span class="arrow">→</span>
+      <span>Começa em q4. ε leva a {q1, q5}. De q1, ε leva a q2. De q2, ε leva a q3. De q5, nada.</span>
+      <span class="badge b-blue">= {q1, q2, q3, q4, q5}</span>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <strong>Algoritmo de cálculo:</strong> é uma busca em largura/profundidade. Comece com {q}, adicione todos os estados alcançáveis por ε, repita para cada estado recém-adicionado até estabilizar. É sempre finito pois Q é finito.
+  </div>
+
+  <h3>Fecho epsilon de um conjunto</h3>
+  <p>Extensão natural: o fecho epsilon de um <em>conjunto</em> S de estados é a união dos fechos individuais:</p>
+  <div class="card">
+    <code>ε-closure(S) = ⋃<sub>q ∈ S</sub> ε-closure(q)</code><br><br>
+    Exemplo: <code>ε-closure({q1, q4}) = ε-closure(q1) ∪ ε-closure(q4) = {q1,q2,q3} ∪ {q1,q2,q3,q4,q5} = {q1,q2,q3,q4,q5}</code>
+  </div>
+</section>
+
+<!-- ══════════════ 4 — EXECUÇÃO ══════════════ -->
+<section id="execucao">
+  <h2><span class="num">4</span> Como o AFN executa — caminhos paralelos</h2>
+
+  <p>A execução de um AFN mantém um <strong>conjunto de estados ativos</strong> (não um único estado como no AFD). A cada passo:</p>
+
+  <div class="card">
+    <strong>Algoritmo de execução do AFN:</strong><br><br>
+    1. Estado inicial: <code>S₀ = ε-closure({q₀})</code><br>
+    2. Para cada símbolo <em>a</em> lido:<br>
+    &nbsp;&nbsp;&nbsp;a. Calcule o conjunto de estados alcançáveis: <code>Move(S, a) = ⋃<sub>q ∈ S</sub> δ(q, a)</code><br>
+    &nbsp;&nbsp;&nbsp;b. Aplique o fecho epsilon: <code>S' = ε-closure(Move(S, a))</code><br>
+    3. Aceita se <code>S_final ∩ F ≠ ∅</code> (ao menos um estado ativo é de aceitação)
+  </div>
+
+  <h3>Exemplo: AFN que aceita strings terminando em "ab"</h3>
+  <p>Sobre Σ = {a, b}, com estados Q = {q0, q1, q2}:</p>
+
+  <div class="card">
+    <table>
+      <tr><th>δ</th><th>a</th><th>b</th><th>ε</th></tr>
+      <tr><td>→ q0</td><td>{q0, q1}</td><td>{q0}</td><td>∅</td></tr>
+      <tr><td>q1</td><td>∅</td><td>{q2}</td><td>∅</td></tr>
+      <tr><td>★ q2</td><td>∅</td><td>∅</td><td>∅</td></tr>
+    </table>
+    <p style="font-size:0.88rem; margin-top:0.5rem; color:var(--muted);">Não-determinismo em q0 com 'a': pode ficar em q0 (continuar buscando) OU ir para q1 (apostando que 'a' é o início de "ab").</p>
+  </div>
+
+  <h3>Trace de "aab" — deve ACEITAR</h3>
+  <div>
+    <div class="trace-step">
+      <span class="badge b-blue">início</span>
+      <div>
+        <div>ε-closure({q0}) = <span class="state-set" style="display:inline-flex;"><span class="state-bubble initial">q0</span></span></div>
+        <div style="font-size:0.85rem; color:var(--muted);">Não há ε-transições saindo de q0.</div>
+      </div>
+    </div>
+    <div class="trace-step">
+      <span class="badge b-purple">lê 'a'</span>
+      <div>
+        <div>Move({q0}, 'a') = δ(q0, 'a') = {q0, q1}</div>
+        <div>ε-closure({q0, q1}) = <span class="state-set" style="display:inline-flex;"><span class="state-bubble">q0</span><span class="state-bubble">q1</span></span></div>
+        <div style="font-size:0.85rem; color:var(--muted);">Dois caminhos paralelos: q0 (continua buscando) e q1 (apostou no 'a').</div>
+      </div>
+    </div>
+    <div class="trace-step">
+      <span class="badge b-purple">lê 'a'</span>
+      <div>
+        <div>Move({q0,q1}, 'a') = δ(q0,'a') ∪ δ(q1,'a') = {q0,q1} ∪ ∅ = {q0,q1}</div>
+        <div>ε-closure({q0, q1}) = <span class="state-set" style="display:inline-flex;"><span class="state-bubble">q0</span><span class="state-bubble">q1</span></span></div>
+        <div style="font-size:0.85rem; color:var(--muted);">Caminho q1 anterior "morreu" (δ(q1,'a')=∅). Novo q1 aberto pelo q0.</div>
+      </div>
+    </div>
+    <div class="trace-step">
+      <span class="badge b-purple">lê 'b'</span>
+      <div>
+        <div>Move({q0,q1}, 'b') = δ(q0,'b') ∪ δ(q1,'b') = {q0} ∪ {q2} = {q0,q2}</div>
+        <div>ε-closure({q0, q2}) = <span class="state-set" style="display:inline-flex;"><span class="state-bubble">q0</span><span class="state-bubble final">q2 ★</span></span></div>
+      </div>
+    </div>
+    <div class="trace-step">
+      <span class="badge b-green">ACEITA</span>
+      <div>
+        <div>Conjunto final = {q0, q2}. Como q2 ∈ F, a interseção com F é não-vazia → ACEITA.</div>
+        <div style="font-size:0.85rem; color:var(--muted);">O caminho que "apostou" em 'a'→q1 e leu 'b'→q2 foi o caminho vencedor.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <strong>Insight fundamental:</strong> o AFN nunca precisa "escolher" de forma irrevogável. Ele mantém todas as apostas vivas em paralelo. Se qualquer caminho alcançar um estado final ao fim da string, a string é aceita. Isso é não-determinismo.
+  </div>
+</section>
+
+<!-- ══════════════ 5 — SIMULADOR AFN ══════════════ -->
+<section id="simulador">
+  <h2><span class="num">5</span> Simulador de AFN — execução paralela</h2>
+
+  <div id="sim-afn">
+    <div class="sim-header">
+      <h3>⚡ Simulador AFN — Caminhos Paralelos</h3>
+      <span class="sbadge">Conjuntos de estados ativos</span>
+    </div>
+    <div class="sim-body">
+
+      <div class="preset-row">
+        <button class="preset-btn active" onclick="afnLoad('termina_ab')">Termina em "ab"</button>
+        <button class="preset-btn" onclick="afnLoad('contem_11')">Contém "11"</button>
+        <button class="preset-btn" onclick="afnLoad('eps_demo')">Demo ε-transições</button>
+      </div>
+
+      <div id="afn-preset-desc" class="callout tip" style="font-size:0.88rem; margin-bottom:0.8rem;">
+        <strong>Termina em "ab":</strong> aceita strings sobre {a,b} cujo sufixo é "ab". O não-determinismo surge no estado q0: ao ler 'a', o AFN pode apostar que esse 'a' inicia o "ab" final, ou continuar no q0 buscando um 'a' posterior.
+      </div>
+
+      <canvas id="afn-canvas"></canvas>
+
+      <div class="active-sets">
+        <div class="active-set">
+          <div class="label">Conjunto de estados ativos</div>
+          <div id="afn-active" class="states"><span style="color:var(--muted); font-size:0.85rem;">—</span></div>
+        </div>
+        <div class="active-set">
+          <div class="label">Fita de entrada</div>
+          <div id="afn-tape" class="sim-tape"></div>
+        </div>
+      </div>
+
+      <div class="sim-input-row">
+        <label for="afn-string">String:</label>
+        <input type="text" id="afn-string" placeholder="ex: aab" maxlength="20">
+        <div class="sim-controls">
+          <button class="sim-btn btn-purple" onclick="afnInit()">▶ Iniciar</button>
+          <button class="sim-btn btn-secondary" onclick="afnStep()">⏭ Passo</button>
+          <button class="sim-btn btn-green" onclick="afnRun()">⚡ Executar</button>
+          <button class="sim-btn btn-secondary" onclick="afnReset()">↺ Reset</button>
+        </div>
+      </div>
+
+      <div id="afn-log"><span style="color:var(--muted);">Escolha um autômato, digite uma string e clique em Iniciar.</span></div>
+      <div id="afn-result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 6 — CONSTRUÇÃO DE SUBCONJUNTOS ══════════════ -->
+<section id="subconjuntos">
+  <h2><span class="num">6</span> Construção de Subconjuntos — AFN → AFD</h2>
+
+  <p>A prova de que AFN e AFD são equivalentes usa o <strong>algoritmo de construção de subconjuntos</strong> (subset construction). Cada estado do AFD resultante corresponde a um <em>conjunto</em> de estados do AFN.</p>
+
+  <div class="callout key">
+    <strong>Ideia central:</strong> se o AFN mantém um conjunto de estados ativos durante a execução, basta transformar esse conjunto em um único estado do AFD. O AFD construído simula o AFN exatamente.
+  </div>
+
+  <h3>Algoritmo formal</h3>
+  <div class="card">
+    Dado AFN N = (Q, Σ, δ<sub>N</sub>, q₀, F<sub>N</sub>), construa AFD M = (Q', Σ, δ<sub>M</sub>, q'₀, F'):<br><br>
+    <strong>1.</strong> Q' = 2<sup>Q</sup> (subconjuntos de Q — potencialmente 2<sup>|Q|</sup> estados)<br>
+    <strong>2.</strong> q'₀ = ε-closure({q₀})<br>
+    <strong>3.</strong> δ<sub>M</sub>(S, a) = ε-closure(⋃<sub>q ∈ S</sub> δ<sub>N</sub>(q, a))<br>
+    <strong>4.</strong> F' = { S ∈ Q' | S ∩ F<sub>N</sub> ≠ ∅ }<br>
+    <strong>5.</strong> Explore apenas os estados alcançáveis (lazy construction) — evita explodir com 2<sup>n</sup> estados não-alcançados
+  </div>
+
+  <h3>Exemplo passo a passo</h3>
+  <p>AFN que aceita strings terminando em "ab" (Q = {q0, q1, q2}, Σ = {a,b}):</p>
+
+  <table class="subset-table">
+    <tr><th>Estado AFD (subconjunto)</th><th>Lê 'a'</th><th>Lê 'b'</th><th>Tipo</th></tr>
+    <tr class="subset-initial">
+      <td><code>{q0}</code> ← estado inicial do AFD</td>
+      <td><code>{q0, q1}</code></td>
+      <td><code>{q0}</code></td>
+      <td>→ inicial</td>
+    </tr>
+    <tr class="subset-new">
+      <td><code>{q0, q1}</code> ← novo!</td>
+      <td><code>{q0, q1}</code></td>
+      <td><code>{q0, q2}</code></td>
+      <td>—</td>
+    </tr>
+    <tr class="subset-new subset-final">
+      <td><code>{q0, q2}</code> ← novo! contém q2 ∈ F</td>
+      <td><code>{q0, q1}</code></td>
+      <td><code>{q0}</code></td>
+      <td>★ final</td>
+    </tr>
+  </table>
+
+  <div class="callout ok">
+    <strong>Resultado:</strong> o AFN com 3 estados gerou um AFD com apenas 3 estados também (os não-alcançáveis foram ignorados). No pior caso, poderia gerar 2³ = 8 estados, mas na prática geralmente muito menos.
+  </div>
+
+  <div class="callout warn">
+    <strong>Explosão de estados:</strong> existem linguagens para as quais o AFD mínimo é exponencialmente maior que o AFN. O exemplo clássico é a linguagem {w ∈ {0,1}* | o n-ésimo símbolo antes do fim é '1'}, que tem um AFN com n+1 estados e cujo AFD mínimo precisa de 2<sup>n</sup> estados.
+  </div>
+</section>
+
+<!-- ══════════════ 7 — BUILDER INTERATIVO ══════════════ -->
+<section id="builder">
+  <h2><span class="num">7</span> Construção de subconjuntos — passo a passo</h2>
+
+  <div class="subset-builder">
+    <div class="sb-header">🔧 Construção de subconjuntos — AFN "termina em ab" → AFD</div>
+    <div class="sb-body">
+      <div class="sb-controls">
+        <button class="sim-btn btn-purple" onclick="sbStep()">⏭ Próximo passo</button>
+        <button class="sim-btn btn-green" onclick="sbAll()">⚡ Construir tudo</button>
+        <button class="sim-btn btn-secondary" onclick="sbReset()">↺ Resetar</button>
+      </div>
+      <div id="subset-steps"></div>
+      <div id="subset-table-container" style="margin-top:1rem;"></div>
+      <div id="sb-status" style="font-size:0.85rem; color:var(--muted); margin-top:0.5rem;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 8 — EQUIVALÊNCIA ══════════════ -->
+<section id="equivalencia">
+  <h2><span class="num">8</span> Teorema da Equivalência AFN ↔ AFD</h2>
+
+  <div class="fbox purple">
+    <span class="flabel">Teorema (Rabin & Scott, 1959)</span>
+    Uma linguagem é reconhecida por um AFD se e somente se é reconhecida por um AFN.
+    <span class="fsub">AFD e AFN têm exatamente o mesmo poder expressivo — ambos reconhecem as linguagens regulares.</span>
+  </div>
+
+  <h3>Por que AFN é útil se AFD faz o mesmo?</h3>
+  <div class="split">
+    <div class="pane">
+      <h4>Design mais simples</h4>
+      <p>Para linguagens como "strings que contêm '101' como subpalavra", um AFN de 4 estados é trivial de projetar. O AFD equivalente exige raciocínio mais cuidadoso.</p>
+    </div>
+    <div class="pane">
+      <h4>Base para expressões regulares</h4>
+      <p>A conversão de expressão regular para autômato passa inevitavelmente pelo AFN (construção de Thompson). O AFN é o passo intermediário natural.</p>
+    </div>
+    <div class="pane">
+      <h4>Prova de propriedades</h4>
+      <p>É mais fácil provar fechamento de linguagens regulares sob união/concatenação usando AFN, e depois converter para AFD.</p>
+    </div>
+    <div class="pane">
+      <h4>Análise de complexidade</h4>
+      <p>A diferença de tamanho entre AFN e AFD mínimo é um tema rico em complexidade computacional, relevante para POSCOMP nível difícil.</p>
+    </div>
+  </div>
+
+  <h3>Roteiro de conversão completo</h3>
+  <div class="card">
+    <table>
+      <tr><th>De</th><th>Para</th><th>Método</th><th>Módulo</th></tr>
+      <tr><td>AFN</td><td>AFD</td><td>Construção de subconjuntos</td><td>Este módulo</td></tr>
+      <tr><td>AFD</td><td>AFN</td><td>Trivial — AFD é um caso especial de AFN</td><td>Este módulo</td></tr>
+      <tr><td>ER</td><td>AFN</td><td>Construção de Thompson</td><td>Módulo 6</td></tr>
+      <tr><td>AFD</td><td>ER</td><td>Método de eliminação de estados</td><td>Módulo 6</td></tr>
+      <tr><td>AFD</td><td>AFD mínimo</td><td>Algoritmo de Myhill-Nerode / Partições</td><td>Módulo 5</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section id="quiz">
+  <h2><span class="num">9</span> Exercícios — estilo POSCOMP</h2>
+
+  <div class="quiz">
+    <h3>Questão 1</h3>
+    <p>Um AFN tem estados Q = {q0, q1, q2} e as seguintes ε-transições: δ(q0,ε) = {q1}, δ(q1,ε) = {q2}, δ(q2,ε) = ∅. Qual é ε-closure(q0)?</p>
+    <div class="options" id="q1">
+      <label class="opt"><input type="radio" name="q1" value="A"> A) {q0}</label>
+      <label class="opt"><input type="radio" name="q1" value="B"> B) {q0, q1}</label>
+      <label class="opt"><input type="radio" name="q1" value="C"> C) {q0, q1, q2}</label>
+      <label class="opt"><input type="radio" name="q1" value="D"> D) {q1, q2}</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q1','C','ε-closure sempre inclui o próprio estado. De q0, ε leva a q1. De q1, ε leva a q2. De q2, nenhuma ε-transição. Resultado: {q0, q1, q2}.')">Verificar</button>
+    <div class="quiz-result" id="q1-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 2</h3>
+    <p>Um AFN N tem 4 estados. Na construção de subconjuntos, qual é o número máximo de estados que o AFD equivalente pode ter?</p>
+    <div class="options" id="q2">
+      <label class="opt"><input type="radio" name="q2" value="A"> A) 4</label>
+      <label class="opt"><input type="radio" name="q2" value="B"> B) 8</label>
+      <label class="opt"><input type="radio" name="q2" value="C"> C) 16</label>
+      <label class="opt"><input type="radio" name="q2" value="D"> D) 256</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q2','C','O AFD tem estados correspondentes a subconjuntos de Q. Como |Q|=4, o conjunto das partes 2^Q tem 2⁴=16 elementos. No pior caso, todos os 16 subconjuntos são alcançáveis e se tornam estados do AFD.')">Verificar</button>
+    <div class="quiz-result" id="q2-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 3</h3>
+    <p>Considere um AFN N com δ(q0,'a') = {q1, q2}, δ(q1,'b') = {q3}, δ(q2,'b') = ∅, F = {q3}. Qual é o resultado da execução de "ab"?</p>
+    <div class="options" id="q3">
+      <label class="opt"><input type="radio" name="q3" value="A"> A) Rejeita, pois δ(q2,'b') = ∅</label>
+      <label class="opt"><input type="radio" name="q3" value="B"> B) Aceita, pois pelo menos um caminho (via q1) chega a q3 ∈ F</label>
+      <label class="opt"><input type="radio" name="q3" value="C"> C) Indefinido, pois δ(q2,'b') = ∅</label>
+      <label class="opt"><input type="radio" name="q3" value="D"> D) Rejeita, pois o AFN é não-determinístico</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q3','B','Lê \'a\': conjunto de estados = {q1, q2}. Lê \'b\': Move({q1,q2},\'b\') = δ(q1,\'b\') ∪ δ(q2,\'b\') = {q3} ∪ ∅ = {q3}. Como q3 ∈ F, aceita. O caminho via q2 morreu, mas o via q1 sobreviveu — isso é suficiente.')">Verificar</button>
+    <div class="quiz-result" id="q3-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 4 — POSCOMP nível difícil</h3>
+    <p>Qual das afirmações sobre AFN e AFD é FALSA?</p>
+    <div class="options" id="q4">
+      <label class="opt"><input type="radio" name="q4" value="A"> A) Todo AFD é um caso especial de AFN</label>
+      <label class="opt"><input type="radio" name="q4" value="B"> B) Para qualquer AFN com n estados, existe um AFD equivalente com no máximo 2ⁿ estados</label>
+      <label class="opt"><input type="radio" name="q4" value="C"> C) AFN podem reconhecer linguagens que AFD não conseguem</label>
+      <label class="opt"><input type="radio" name="q4" value="D"> D) A linguagem reconhecida por um AFN é sempre regular</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q4','C','C é FALSA — pelo Teorema de Rabin & Scott, AFN e AFD reconhecem exatamente as mesmas linguagens (as regulares). A é verdadeira: AFD é AFN com |δ(q,a)|=1 sempre. B é verdadeira: construção de subconjuntos gera no máximo 2ⁿ estados. D é verdadeira por definição.')">Verificar</button>
+    <div class="quiz-result" id="q4-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 5 — Construção de subconjuntos</h3>
+    <p>Na construção de subconjuntos de um AFN N = ({q0,q1,q2}, {0,1}, δ, q0, {q2}) com δ(q0,0)={q0,q1}, δ(q0,1)={q0}, δ(q1,1)={q2}, δ(q1,0)=∅, δ(q2,0)=δ(q2,1)=∅: qual subconjunto do AFD é estado de aceitação?</p>
+    <div class="options" id="q5">
+      <label class="opt"><input type="radio" name="q5" value="A"> A) Apenas {q2}</label>
+      <label class="opt"><input type="radio" name="q5" value="B"> B) Qualquer subconjunto que contenha q2</label>
+      <label class="opt"><input type="radio" name="q5" value="C"> C) Qualquer subconjunto não-vazio</label>
+      <label class="opt"><input type="radio" name="q5" value="D"> D) Apenas {q0, q1, q2}</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q5','B','No AFD construído, um estado (subconjunto S) é de aceitação se e somente se S ∩ F ≠ ∅, onde F = {q2}. Portanto, qualquer subconjunto que contenha q2 — como {q2}, {q0,q2}, {q1,q2}, {q0,q1,q2} — é estado de aceitação do AFD.')">Verificar</button>
+    <div class="quiz-result" id="q5-res"></div>
+  </div>
+</section>
+
+<!-- ══════════════ RESUMO ══════════════ -->
+<section id="resumo">
+  <h2><span class="num">10</span> Resumo do módulo</h2>
+
+  <div class="summary">
+    <h3>O que você agora domina:</h3>
+    <div class="row">AFN: δ retorna um conjunto de estados 2^Q, não um único estado.</div>
+    <div class="row">ε-transições permitem mudar de estado sem consumir símbolo da entrada.</div>
+    <div class="row">ε-closure(q) = conjunto de todos os estados alcançáveis por zero ou mais ε-transições a partir de q.</div>
+    <div class="row">Execução do AFN: mantém um conjunto de estados ativos; aplica Move + ε-closure a cada passo.</div>
+    <div class="row">Aceita se, ao final, o conjunto ativo ∩ F ≠ ∅.</div>
+    <div class="row">Construção de subconjuntos converte AFN → AFD equivalente (no máximo 2^n estados).</div>
+    <div class="row">Teorema de Rabin & Scott: AFN e AFD reconhecem exatamente as mesmas linguagens regulares.</div>
+    <div class="row">AFN é preferido no design; AFD, na implementação.</div>
+  </div>
+
+  <h3>O que vem no próximo módulo</h3>
+  <div class="card">
+    O Módulo 4 cobre <strong>operações sobre linguagens regulares e propriedades de fechamento</strong>: como construir autômatos para a união, concatenação, interseção e complemento de linguagens. Você verá por que as linguagens regulares formam uma álgebra fechada — e como isso facilita a construção de AFDs complexos.
+  </div>
+</section>
+
+<div class="mod-nav">
+  <a href="modulo-02-afd.html" class="mod-btn">
+    <span class="dir">← Anterior</span>
+    Módulo 2: AFD
+  </a>
+  <a href="#" class="mod-btn next">
+    <span class="dir">Próximo →</span>
+    Módulo 4: Operações e Fechamento
+  </a>
+</div></div>
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="modulo-02.html">← Módulo anterior</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 3 de 9</div>
+        </div>
+        <a class="btn-nav next" href="modulo-04.html">Próximo módulo →</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);localStorage.setItem('sb-state',c?'collapsed':'expanded')}
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+</script>
+</body>
+</html>

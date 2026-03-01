@@ -9,7 +9,7 @@ export default function ProfilePage() {
           Ajuste preferências de estudo e gerenciamento de conta autenticada.
         </p>
         <div className="auth-landing-actions">
-          <Link href="/estudo" className="sim-action-btn sim-action-btn-primary">Voltar para estudo</Link>
+          <Link href="/dashboard" className="sim-action-btn sim-action-btn-primary">Voltar para estudo</Link>
         </div>
       </section>
     </main>

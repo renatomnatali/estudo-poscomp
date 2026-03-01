@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E; --ink2:#1C2333;
+  --sap:#1B3FD8; --sap-d:#1230A8; --sap-l:#4B6BF5; --sap-bg:#EEF1FF; --sap-bg2:#E4E9FF;
+  --em:#00B37E; --em-d:#009968; --em-bg:#E6FBF4;
+  --amb:#F59E0B; --amb-bg:#FEF3C7;
+  --coral:#F04E37; --coral-bg:#FEE2E2;
+  --n50:#F8F9FF; --n100:#EFF1FB; --n200:#DDE0F0;
+  --n300:#B8BDD8; --n400:#8A90B0; --n500:#5C6180; --n600:#3E4260; --n700:#262A47;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif; --fb:'DM Sans',sans-serif; --fm:'DM Mono',monospace;
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-xl:20px; --r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08),0 1px 2px rgba(10,15,30,.04);
+  --sh-md:0 4px 16px rgba(10,15,30,.09),0 1px 4px rgba(10,15,30,.05);
+  --sidebar-w:240px; --sidebar-c:64px; --topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--ink);font-size:14px;line-height:1.6;overflow:hidden}
+
+/* ── SHELL ── */
+.shell{display:flex;height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--white);border-right:1px solid var(--n200);
+  display:flex;flex-direction:column;
+  transition:width var(--transition);
+  overflow:hidden;position:relative;z-index:20;
+  box-shadow:var(--sh-sm);
+}
+.sidebar.collapsed{width:var(--sidebar-c)}
+
+.sb-logo{
+  height:var(--topbar-h);padding:0 .8rem 0 1rem;
+  display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap;
+}
+.sb-logo-icon{
+  width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));
+  border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(27,63,216,.25);
+}
+.sb-logo-text{flex:1;min-width:0}
+.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}
+.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{
+  width:28px;height:28px;border:1px solid var(--n200);background:var(--white);
+  border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;margin-left:auto;
+  transition:background var(--transition),border-color var(--transition);
+  color:var(--n500);opacity:1;
+}
+.sb-toggle:hover{background:var(--n100);border-color:var(--n300);color:var(--ink)}
+
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}
+.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,
+.sidebar.collapsed .sb-item-text,
+.sidebar.collapsed .sb-item-badge,
+.sidebar.collapsed .sb-progress-strip,
+.sidebar.collapsed .sb-user-info{display:none}
+
+/* Progress strip */
+.sb-progress-strip{
+  padding:.7rem 1rem;
+  background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));
+  border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;
+}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}
+.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}
+.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}
+.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}
+.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+
+/* Nav */
+.sb-nav{
+  flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;
+  display:flex;flex-direction:column;align-items:center;
+}
+.sb-nav::-webkit-scrollbar{width:3px}
+.sb-nav::-webkit-scrollbar-thumb{background:var(--n200);border-radius:3px}
+.sb-nav-section{width:100%;padding:0 .6rem}
+.sb-nav-label{
+  font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;
+  color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden;
+}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{
+  display:flex;align-items:center;gap:.55rem;
+  padding:.48rem .6rem;border-radius:var(--r-md);
+  cursor:pointer;transition:background var(--transition),color var(--transition);
+  color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;
+  position:relative;white-space:nowrap;text-decoration:none;width:100%;
+}
+.sb-item:hover{background:var(--n100);color:var(--ink)}
+.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}
+.sb-item.active::before{
+  content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0;
+}
+.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item.premium:hover{background:#fde68a}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}
+.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}
+.badge-green{background:var(--em-bg);color:#006B50}
+.badge-amber{background:var(--amb-bg);color:#92400E}
+.sidebar.collapsed .sb-nav-section{padding:0}
+.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}
+.sidebar.collapsed .sb-item::before{display:none}
+.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sidebar.collapsed .sb-sep{margin:.4rem .8rem}
+
+.sb-tooltip{
+  position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);
+  background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;
+  border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity .15s;z-index:200;box-shadow:var(--sh-md);
+}
+.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+
+/* Footer user */
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-user{
+  display:flex;align-items:center;gap:.6rem;padding:.5rem .5rem;
+  border-radius:var(--r-md);cursor:pointer;transition:background var(--transition);
+}
+.sb-user:hover{background:var(--n50)}
+.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{
+  width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd);
+}
+.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}
+.sb-user-plan{font-size:.65rem;color:var(--n400)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--n50)}
+
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}
+.topbar-progress-line.visible{display:block}
+.topbar-progress-fill{height:100%;width:4%;background:linear-gradient(90deg,var(--sap),var(--em))}
+
+.topbar{
+  height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);
+  display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0;
+  box-shadow:var(--sh-xs);
+}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}
+.topbar-breadcrumb .sep{color:var(--n300)}
+.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-search{
+  display:flex;align-items:center;gap:.4rem;background:var(--n100);
+  border:1px solid var(--n200);border-radius:var(--r-md);padding:.35rem .7rem;
+  font-size:.78rem;color:var(--n400);cursor:text;max-width:240px;width:100%;
+  margin-left:.6rem;
+}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{
+  width:30px;height:30px;border:1px solid var(--n200);background:var(--white);
+  border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:.85rem;color:var(--n500);transition:background var(--transition);
+  position:relative;
+}
+.topbar-icon-btn:hover{background:var(--n100);color:var(--ink)}
+.notif-dot{position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:var(--coral);border-radius:50%;border:2px solid white}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:1.6rem;display:flex;flex-direction:column;gap:1.2rem}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+
+/* Page header */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.page-title{font-family:var(--fd);font-size:1.35rem;font-weight:700;color:var(--ink);line-height:1.2}
+.page-sub{font-size:.8rem;color:var(--n400);margin-top:.25rem}
+.btn-primary{
+  background:var(--sap);color:white;border:none;border-radius:var(--r-pill);
+  padding:.48rem 1.1rem;font-size:.82rem;font-weight:600;cursor:pointer;
+  font-family:var(--fb);display:flex;align-items:center;gap:.35rem;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(27,63,216,.25);transition:all .15s;
+}
+.btn-primary:hover{background:var(--sap-d);transform:translateY(-1px)}
+
+/* Hero card */
+.hero-card{
+  background:linear-gradient(130deg,var(--ink2) 0%,var(--sap) 60%,#1B6ED8 100%);
+  border-radius:var(--r-xl);padding:1.3rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  color:white;position:relative;overflow:hidden;
+}
+.hero-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 50% 80% at 90% 50%,rgba(0,179,126,.15) 0%,transparent 60%);
+}
+.hero-text{position:relative}
+.hero-eyebrow{font-family:var(--fm);font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.55);margin-bottom:.3rem}
+.hero-title{font-family:var(--fd);font-size:1rem;font-weight:700;margin-bottom:.25rem}
+.hero-sub{font-size:.78rem;color:rgba(255,255,255,.7)}
+.hero-actions{display:flex;gap:.5rem;align-items:center;flex-shrink:0;position:relative}
+.btn-hero{background:white;color:var(--sap);border:none;border-radius:var(--r-pill);padding:.45rem 1rem;font-size:.8rem;font-weight:700;cursor:pointer;font-family:var(--fb);white-space:nowrap;transition:all .15s}
+.btn-hero:hover{background:var(--sap-bg);transform:translateY(-1px)}
+.btn-hero-ghost{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:white;border-radius:var(--r-pill);padding:.45rem .9rem;font-size:.8rem;font-weight:500;cursor:pointer;font-family:var(--fb);white-space:nowrap;transition:background .15s}
+.btn-hero-ghost:hover{background:rgba(255,255,255,.2)}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}
+.stat-card{
+  background:var(--white);border:1px solid var(--n200);border-radius:var(--r-lg);
+  padding:.9rem 1rem;box-shadow:var(--sh-xs);
+}
+.stat-card .s-eyebrow{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--n400);margin-bottom:.2rem}
+.stat-card .s-value{
+  font-family:var(--fb);font-size:1.75rem;font-weight:700;line-height:1;color:var(--ink);
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum";letter-spacing:-.02em;
+}
+.stat-card .s-value.blue{color:var(--sap)}
+.stat-card .s-value.green{color:var(--em)}
+.stat-card .s-value.amber{color:var(--amb)}
+.stat-card .s-label{font-size:.74rem;color:var(--n500);margin-top:.1rem}
+.stat-card .s-delta{font-size:.71rem;font-weight:600;margin-top:.25rem;display:flex;align-items:center;gap:.2rem}
+.s-delta.up{color:var(--em)}.s-delta.warn{color:var(--amb)}.s-delta.muted{color:var(--n400);font-weight:500}
+
+/* Main grid */
+.main-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:1rem}
+
+/* Cards */
+.card{background:var(--white);border:1px solid var(--n200);border-radius:var(--r-lg);padding:1rem 1.1rem;box-shadow:var(--sh-xs)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}
+.card-title{font-family:var(--fm);font-size:.64rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n400)}
+.card-link{font-size:.76rem;color:var(--sap);font-weight:600;cursor:pointer;text-decoration:none}
+.card-link:hover{text-decoration:underline}
+
+/* Module rows */
+.module-row{
+  display:flex;align-items:center;gap:.65rem;padding:.45rem .2rem;
+  border-radius:var(--r-sm);cursor:pointer;transition:background var(--transition);
+}
+.module-row:hover{background:var(--n50)}
+.module-row+.module-row{border-top:1px solid var(--n100)}
+.module-icon{
+  width:34px;height:34px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd);
+}
+.module-info{flex:1;min-width:0}
+.module-name{font-size:.83rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.module-sub{font-size:.72rem;color:var(--n400);margin-top:1px}
+.module-prog{height:3px;background:var(--n100);border-radius:2px;margin-top:.3rem;overflow:hidden}
+.module-prog-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:2px}
+.module-tag{font-size:.67rem;font-weight:600;padding:2px 8px;border-radius:var(--r-pill);flex-shrink:0}
+.tag-done{background:var(--em-bg);color:#006B50}
+.tag-next{background:var(--sap-bg);color:var(--sap)}
+.tag-lock{background:var(--n100);color:var(--n400)}
+.tag-prog{background:var(--amb-bg);color:#92400E}
+
+/* Area coverage */
+.area-row{margin-bottom:.75rem}
+.area-row:last-child{margin-bottom:0}
+.area-hrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:.28rem}
+.area-name{font-size:.8rem;font-weight:500;color:var(--ink)}
+.area-pct{font-size:.76rem;font-weight:700;color:var(--n500);font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.area-bar-bg{background:var(--n100);border-radius:var(--r-pill);height:5px;overflow:hidden}
+.area-bar-fill{height:100%;border-radius:var(--r-pill)}
+.area-caption{font-size:.68rem;color:var(--n400);margin-top:.22rem}
+
+/* Activity chart */
+.activity-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:3px;
+}
+.day-col{display:flex;flex-direction:column;gap:3px;align-items:center}
+.day-cell{
+  width:100%;aspect-ratio:3/1;border-radius:2px;
+  background:var(--n100);
+}
+.day-cell.lvl-1{background:rgba(27,63,216,.2)}
+.day-cell.lvl-2{background:rgba(27,63,216,.45)}
+.day-cell.lvl-3{background:rgba(27,63,216,.7)}
+.day-cell.lvl-4{background:var(--sap)}
+.day-label{font-size:.58rem;color:var(--n400);font-family:var(--fm);margin-top:2px}
+.activity-legend{display:flex;align-items:center;gap:.4rem;margin-top:.6rem;justify-content:flex-end}
+.activity-legend span{font-size:.66rem;color:var(--n400)}
+.leg-cells{display:flex;gap:3px}
+.leg-cell{width:10px;height:10px;border-radius:2px}
+
+/* Flashcard widget */
+.flash-widget{
+  background:linear-gradient(135deg,var(--em-bg),var(--sap-bg));
+  border:1px solid var(--n200);border-radius:var(--r-lg);
+  padding:1rem 1.1rem;display:flex;align-items:center;gap:.8rem;
+}
+.flash-left{flex:1}
+.flash-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--n500);margin-bottom:.25rem}
+.flash-title{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:.2rem}
+.flash-sub{font-size:.76rem;color:var(--n500);margin-bottom:.6rem}
+.btn-sm{background:var(--em);color:white;border:none;border-radius:var(--r-pill);padding:.38rem .9rem;font-size:.76rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:background .15s}
+.btn-sm:hover{background:var(--em-d)}
+.flash-count{text-align:center;flex-shrink:0}
+.flash-num{font-family:var(--fb);font-size:2rem;font-weight:700;color:var(--em);line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.flash-num-label{font-size:.65rem;color:var(--n400);margin-top:2px}
+
+/* Upcoming */
+.upcoming-row{
+  display:flex;align-items:center;gap:.7rem;padding:.5rem .2rem;
+  border-bottom:1px solid var(--n100);
+}
+.upcoming-row:last-child{border:none}
+.upcoming-icon{
+  width:32px;height:32px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;flex-shrink:0;
+}
+.upcoming-info{flex:1}
+.upcoming-name{font-size:.82rem;font-weight:600;color:var(--ink)}
+.upcoming-sub{font-size:.72rem;color:var(--n400)}
+.upcoming-action{font-size:.74rem;color:var(--sap);font-weight:600;cursor:pointer;white-space:nowrap}
+
+/* Overlay mobile */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15;backdrop-filter:blur(2px)}
+.sb-overlay.visible{display:block}
+
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);transition:transform var(--transition),width var(--transition);width:var(--sidebar-w)!important}
+  .sidebar.open{transform:translateX(0)}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .main-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell" id="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text">
+        <span class="sb-logo-name">POSCOMP</span>
+        <span class="sb-logo-sub">Visual Lab</span>
+      </div>
+      <button class="sb-toggle" onclick="toggleSidebar()" title="Toggle menu">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sb-progress-strip">
+      <div class="sb-ps-header">
+        <span class="sb-ps-label">Progresso geral</span>
+        <span class="sb-ps-pct">4%</span>
+      </div>
+      <div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div>
+      <div class="sb-ps-caption">1 de 25 tópicos concluídos</div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-nav-section">
+        <div class="sb-nav-label">Início</div>
+        <a class="sb-item active" href="dashboard.html">
+          <div class="sb-item-icon">🏠</div>
+          <span class="sb-item-text">Dashboard</span>
+          <span class="sb-tooltip">Dashboard</span>
+        </a>
+      </div>
+      <div class="sb-nav-section">
+        <div class="sb-nav-label">Estudar</div>
+        <a class="sb-item" href="trilhas.html">
+          <div class="sb-item-icon">📚</div>
+          <span class="sb-item-text">Trilhas de Estudo</span>
+          <span class="sb-item-badge badge-green">25</span>
+          <span class="sb-tooltip">Trilhas</span>
+        </a>
+        <a class="sb-item" href="flashcards.html">
+          <div class="sb-item-icon">🃏</div>
+          <span class="sb-item-text">Flashcards</span>
+          <span class="sb-tooltip">Flashcards</span>
+        </a>
+      </div>
+      <div class="sb-nav-section">
+        <div class="sb-nav-label">Praticar</div>
+        <a class="sb-item">
+          <div class="sb-item-icon">📝</div>
+          <span class="sb-item-text">Exercícios</span>
+          <span class="sb-tooltip">Exercícios</span>
+        </a>
+        <a class="sb-item" href="simulado.html">
+          <div class="sb-item-icon">⏱️</div>
+          <span class="sb-item-text">Simulado POSCOMP</span>
+          <span class="sb-tooltip">Simulado</span>
+        </a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item">
+          <div class="sb-item-icon">📊</div>
+          <span class="sb-item-text">Meu Progresso</span>
+          <span class="sb-item-badge badge-amber">PRO</span>
+          <span class="sb-tooltip">Progresso</span>
+        </a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html">
+          <div class="sb-item-icon">⭐</div>
+          <span class="sb-item-text">Seja Premium</span>
+          <span class="sb-tooltip">Premium</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar">RN</div>
+        <div class="sb-user-info">
+          <div class="sb-user-name">Renato Natali</div>
+          <div class="sb-user-plan">Plano Free</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main" id="main">
+    <div class="topbar-progress-line" id="progressLine">
+      <div class="topbar-progress-fill"></div>
+    </div>
+
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <span>App</span><span class="sep">›</span><span class="current">Dashboard</span>
+      </div>
+      <div class="topbar-search">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/></svg>
+        Buscar tópico ou módulo...
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-icon-btn">🔔<div class="notif-dot"></div></button>
+        <button class="topbar-icon-btn">⚙️</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <div>
+          <div class="page-title">Bom dia, Renato</div>
+          <div class="page-sub">Linguagens Formais concluído · Próximo: Análise de Algoritmos</div>
+        </div>
+        <a class="btn-primary" href="modulo-01.html" style="text-decoration:none;cursor:pointer">▶ Continuar estudando</a>
+      </div>
+
+      <!-- Hero card -->
+      <div class="hero-card">
+        <div class="hero-text">
+          <div class="hero-eyebrow">Linguagens Formais concluído · 9 módulos ✓</div>
+          <div class="hero-title">Pronto para o próximo tópico?</div>
+          <div class="hero-sub">F1 — Análise de Algoritmos · Big-O, recorrências, cotas inferiores</div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-hero">Começar F1 →</button>
+          <button class="btn-hero-ghost">Ver currículo</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="s-eyebrow">Módulos concluídos</div>
+          <div class="s-value">9</div>
+          <div class="s-label">de ~200 no currículo</div>
+          <div class="s-delta up">↑ +9 este mês</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-eyebrow">Currículo coberto</div>
+          <div class="s-value blue">4%</div>
+          <div class="s-label">1 de 25 tópicos</div>
+          <div class="s-delta warn">24 tópicos restantes</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-eyebrow">Simulados realizados</div>
+          <div class="s-value green">0</div>
+          <div class="s-label">Nenhum ainda</div>
+          <div class="s-delta muted">Disponível após F1</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-eyebrow">Sequência de estudo</div>
+          <div class="s-value amber">3</div>
+          <div class="s-label">dias seguidos</div>
+          <div class="s-delta up">↑ Recorde pessoal</div>
+        </div>
+      </div>
+
+      <!-- Main grid -->
+      <div class="main-grid">
+
+        <!-- Left col -->
+        <div style="display:flex;flex-direction:column;gap:1rem">
+
+          <!-- Trilhas -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Trilhas de estudo</div>
+              <a class="card-link" href="trilhas.html">Ver todas →</a>
+            </div>
+            <div class="module-row">
+              <div class="module-icon" style="background:var(--em)">F6</div>
+              <div class="module-info">
+                <div class="module-name">Ling. Formais e Autômatos</div>
+                <div class="module-sub">9 módulos · ~6h de estudo</div>
+                <div class="module-prog"><div class="module-prog-fill" style="width:100%"></div></div>
+              </div>
+              <span class="module-tag tag-done">✓ Completo</span>
+            </div>
+            <div class="module-row">
+              <div class="module-icon" style="background:var(--sap)">F1</div>
+              <div class="module-info">
+                <div class="module-name">Análise de Algoritmos</div>
+                <div class="module-sub">Big-O, recorrências · 2–3 módulos</div>
+                <div class="module-prog"><div class="module-prog-fill" style="width:0%"></div></div>
+              </div>
+              <span class="module-tag tag-next">→ Próximo</span>
+            </div>
+            <div class="module-row">
+              <div class="module-icon" style="background:var(--n300)">F2</div>
+              <div class="module-info">
+                <div class="module-name">Algoritmos e Est. de Dados</div>
+                <div class="module-sub">Árvores, hash, ordenação</div>
+              </div>
+              <span class="module-tag tag-lock">🔒 Premium</span>
+            </div>
+            <div class="module-row">
+              <div class="module-icon" style="background:var(--n300)">F3</div>
+              <div class="module-info">
+                <div class="module-name">Arquitetura de Computadores</div>
+                <div class="module-sub">Pipeline, cache, memória</div>
+              </div>
+              <span class="module-tag tag-lock">🔒 Premium</span>
+            </div>
+          </div>
+
+          <!-- Atividade -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Atividade — últimas 4 semanas</div>
+              <span style="font-size:.7rem;color:var(--n400)">módulos estudados/dia</span>
+            </div>
+            <div class="activity-grid">
+              <!-- Semana 1 (mais antiga) -->
+              <div class="day-col"><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell lvl-1"></div><div class="day-cell lvl-2"></div><div class="day-cell"></div><div class="day-label">S</div></div>
+              <div class="day-col"><div class="day-cell"></div><div class="day-cell lvl-1"></div><div class="day-cell"></div><div class="day-cell lvl-2"></div><div class="day-cell lvl-3"></div><div class="day-cell lvl-2"></div><div class="day-cell"></div><div class="day-label">T</div></div>
+              <div class="day-col"><div class="day-cell lvl-1"></div><div class="day-cell"></div><div class="day-cell lvl-2"></div><div class="day-cell lvl-3"></div><div class="day-cell lvl-4"></div><div class="day-cell lvl-3"></div><div class="day-cell lvl-1"></div><div class="day-label">Q</div></div>
+              <div class="day-col"><div class="day-cell"></div><div class="day-cell lvl-2"></div><div class="day-cell lvl-1"></div><div class="day-cell lvl-3"></div><div class="day-cell lvl-4"></div><div class="day-cell lvl-2"></div><div class="day-cell"></div><div class="day-label">Q</div></div>
+              <div class="day-col"><div class="day-cell lvl-2"></div><div class="day-cell lvl-3"></div><div class="day-cell lvl-4"></div><div class="day-cell lvl-2"></div><div class="day-cell lvl-3"></div><div class="day-cell lvl-4"></div><div class="day-cell lvl-2"></div><div class="day-label">S</div></div>
+              <div class="day-col"><div class="day-cell lvl-1"></div><div class="day-cell lvl-2"></div><div class="day-cell lvl-3"></div><div class="day-cell"></div><div class="day-cell lvl-2"></div><div class="day-cell lvl-3"></div><div class="day-cell lvl-4"></div><div class="day-label">S</div></div>
+              <div class="day-col"><div class="day-cell"></div><div class="day-cell lvl-1"></div><div class="day-cell"></div><div class="day-cell lvl-2"></div><div class="day-cell"></div><div class="day-cell lvl-1"></div><div class="day-cell lvl-3"></div><div class="day-label">D</div></div>
+            </div>
+            <div class="activity-legend">
+              <span>Menos</span>
+              <div class="leg-cells">
+                <div class="leg-cell" style="background:var(--n100)"></div>
+                <div class="leg-cell" style="background:rgba(27,63,216,.2)"></div>
+                <div class="leg-cell" style="background:rgba(27,63,216,.45)"></div>
+                <div class="leg-cell" style="background:rgba(27,63,216,.7)"></div>
+                <div class="leg-cell" style="background:var(--sap)"></div>
+              </div>
+              <span>Mais</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right col -->
+        <div style="display:flex;flex-direction:column;gap:1rem">
+
+          <!-- Cobertura por área -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Cobertura por área</div>
+            </div>
+            <div class="area-row">
+              <div class="area-hrow">
+                <span class="area-name">Fundamentos (F1–F10)</span>
+                <span class="area-pct" style="color:var(--sap)">10%</span>
+              </div>
+              <div class="area-bar-bg"><div class="area-bar-fill" style="width:10%;background:var(--sap)"></div></div>
+              <div class="area-caption">1 de 10 tópicos</div>
+            </div>
+            <div class="area-row">
+              <div class="area-hrow">
+                <span class="area-name">Matemática (M1–M7)</span>
+                <span class="area-pct">0%</span>
+              </div>
+              <div class="area-bar-bg"><div class="area-bar-fill" style="width:0%;background:var(--amb)"></div></div>
+              <div class="area-caption">0 de 7 tópicos</div>
+            </div>
+            <div class="area-row">
+              <div class="area-hrow">
+                <span class="area-name">Tecnologia (T1–T8)</span>
+                <span class="area-pct">0%</span>
+              </div>
+              <div class="area-bar-bg"><div class="area-bar-fill" style="width:0%;background:var(--coral)"></div></div>
+              <div class="area-caption">0 de 8 tópicos</div>
+            </div>
+          </div>
+
+          <!-- Flashcards -->
+          <div class="flash-widget">
+            <div class="flash-left">
+              <div class="flash-label">Flashcards</div>
+              <div class="flash-title">Linguagens Formais prontos para revisão</div>
+              <div class="flash-sub">Spaced repetition ativado · ~15 min/dia</div>
+              <a class="btn-sm" href="flashcards.html" style="text-decoration:none">Revisar agora →</a>
+            </div>
+            <div class="flash-count">
+              <div class="flash-num">47</div>
+              <div class="flash-num-label">cartões</div>
+            </div>
+          </div>
+
+          <!-- A seguir -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Próximas ações</div>
+            </div>
+            <div class="upcoming-row">
+              <div class="upcoming-icon" style="background:var(--sap-bg)">📚</div>
+              <div class="upcoming-info">
+                <div class="upcoming-name">Começar F1 — Análise</div>
+                <div class="upcoming-sub">Módulo 1 de 3 · ~35 min</div>
+              </div>
+              <span class="upcoming-action">Iniciar →</span>
+            </div>
+            <div class="upcoming-row">
+              <div class="upcoming-icon" style="background:var(--em-bg)">🃏</div>
+              <div class="upcoming-info">
+                <div class="upcoming-name">Revisar flashcards F6</div>
+                <div class="upcoming-sub">47 cartões · ~15 min</div>
+              </div>
+              <span class="upcoming-action">Revisar →</span>
+            </div>
+            <div class="upcoming-row">
+              <div class="upcoming-icon" style="background:var(--amb-bg)">⏱️</div>
+              <div class="upcoming-info">
+                <div class="upcoming-name">Simulado parcial F6</div>
+                <div class="upcoming-sub">20 questões · ~45 min</div>
+              </div>
+              <span class="upcoming-action">Fazer →</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const progressLine = document.getElementById('progressLine');
+const overlay = document.getElementById('sbOverlay');
+const isMobile = () => window.innerWidth < 768;
+
+const saved = localStorage.getItem('sb-state');
+if (saved === 'collapsed' && !isMobile()) {
+  sidebar.classList.add('collapsed');
+  progressLine.classList.add('visible');
+}
+
+function toggleSidebar() {
+  if (isMobile()) {
+    const isOpen = sidebar.classList.toggle('open');
+    overlay.classList.toggle('visible', isOpen);
+    return;
+  }
+  const isCollapsed = sidebar.classList.toggle('collapsed');
+  progressLine.classList.toggle('visible', isCollapsed);
+  localStorage.setItem('sb-state', isCollapsed ? 'collapsed' : 'expanded');
+}
+
+document.querySelectorAll('.sb-item').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+window.addEventListener('resize', () => {
+  if (!isMobile()) { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+});
+</script>
+</body>
+</html>

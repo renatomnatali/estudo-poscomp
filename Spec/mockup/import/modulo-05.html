@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 5 — Minimização de AFDs · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  /* original module vars */
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item::before{display:none}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}.sidebar.collapsed .sb-sep{margin:.4rem .8rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:55%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500)}.topbar-icon-btn:hover{background:var(--n100)}
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#1a6bcc 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+/* SECTION NAV */
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover{background:rgba(255,255,255,.15);color:white}.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+/* CONTENT */
+.lesson-content{max-width:900px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.75}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0;font-size:.92rem;line-height:1.7}
+.callout{border-left:4px solid var(--accent);background:#e8f0fe;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem}.callout.warning{border-color:var(--accent2);background:#fff3e0}.callout.success{border-color:var(--green);background:#e8f5ee}.callout strong{color:var(--primary)}
+.formula-box{background:var(--primary);color:white;border-radius:12px;padding:1.4rem 2rem;text-align:center;margin:1.5rem 0;font-size:1.3rem;font-family:Georgia,serif}
+.formula-box .label{font-size:.75rem;opacity:.7;display:block;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;font-family:var(--fb)}.formula-box .sub{font-size:.85rem;opacity:.85;display:block;margin-top:.5rem;font-family:var(--fb)}
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.analogy .side{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.analogy .side h4{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}.analogy .side .val{font-size:1rem;font-weight:600;color:var(--primary)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--primary);color:white;padding:.65rem 1rem;text-align:left}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+tr:nth-child(even) td{background:#f5f8ff}tr:hover td{background:#e8f0fe}
+.highlight-row td{background:#fff3cd!important;font-weight:600}
+.automaton-viz{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.8rem;margin:1.5rem 0;text-align:center}
+.states{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.state{width:70px;height:70px;border-radius:50%;border:3px solid var(--accent);background:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--primary);position:relative}
+.state.initial::before{content:'▶';position:absolute;left:-22px;color:var(--accent2);font-size:1rem}
+.state.final{box-shadow:0 0 0 5px white,0 0 0 8px var(--accent)}
+.arrow{font-size:1.5rem;color:var(--accent2);position:relative}.arrow span{position:absolute;top:-1.2rem;left:50%;transform:translateX(-50%);font-size:.8rem;color:var(--muted);white-space:nowrap;font-family:monospace;background:var(--bg);padding:0 4px}
+.step-trace{margin:1rem 0}.step{display:flex;align-items:flex-start;gap:1rem;margin:.5rem 0;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.9rem}
+.step .badge{background:var(--accent);color:white;border-radius:6px;padding:2px 10px;font-size:.78rem;white-space:nowrap;flex-shrink:0;font-family:monospace}.step .badge.ok{background:var(--green)}.step .badge.fail{background:var(--red)}
+.step .body{font-size:.9rem;line-height:1.6}.step .body code,.step code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.comparison .col{border-radius:10px;padding:1.2rem;font-size:.9rem}.comparison .col.dfa{background:#e8f5ee;border:1px solid #a8d8b8}.comparison .col.nfa{background:#fff3e0;border:1px solid #f0c070}.comparison h4{margin-bottom:.5rem;font-size:.92rem}
+.applications{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin:1rem 0}.app-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.app-card .icon{font-size:1.8rem;margin-bottom:.5rem}.app-card h4{color:var(--primary);font-size:.9rem;margin-bottom:.3rem}.app-card p{font-size:.82rem;color:var(--muted);margin:0}
+.summary-box{background:var(--primary);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}.summary-box h3{color:white;margin-bottom:1rem;font-size:1.1rem}.summary-box .row{display:flex;gap:.5rem;margin:.4rem 0;align-items:flex-start;font-size:.9rem}.summary-box .row::before{content:'✓';color:#7ef0a0;flex-shrink:0;font-weight:700}
+/* quiz / interactive */
+.quiz-option{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f8faff;margin:.4rem 0;font-size:.9rem}.quiz-option:hover{background:#e8f0fe;border-color:var(--accent)}
+.quiz-option.selected{background:#e8f0fe;border-color:var(--accent)}.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05);position:sticky;bottom:0}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:55%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap)}.btn-nav.next:hover{background:var(--sap-d)}
+/* EXTRAS from original */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .breadcrumb { font-size: 0.8rem; opacity: 0.65; margin-bottom: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+  .module-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; display: inline-block; padding: 4px 16px; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1rem; }
+  header h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem; }
+  header .subtitle { opacity: 0.85; font-size: 1.05rem; max-width: 620px; margin: 0 auto 1.5rem; }
+  .header-meta { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+  .header-meta span { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 6px; margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .progress-fill { background: white; border-radius: 4px; height: 100%; width: 62.5%; }
+  .progress-label { font-size: 0.78rem; opacity: 0.7; text-align: center; margin-top: 0.3rem; }
+  nav a { color: rgba(255,255,255,0.75); text-decoration: none; padding: 5px 11px; font-size: 0.82rem; border-radius: 4px; }
+  nav a:hover { background: rgba(255,255,255,0.15); color: white; }
+  section { margin-bottom: 3.5rem; scroll-margin-top: 60px; }
+  h2 { color: var(--primary); font-size: 1.55rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--amber2); }
+  h2 .num { background: var(--amber2); color: white; min-width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.88rem; font-weight: 700; flex-shrink: 0; }
+  h3 { color: var(--amber); font-size: 1.08rem; margin: 1.6rem 0 0.6rem; }
+  p { margin-bottom: 0.9rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.6rem; margin: 1rem 0; }
+  .callout { border-left: 4px solid var(--accent); background: var(--code-bg); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1.1rem 0; }
+  .callout.warn { border-color: var(--amber2); background: #fff3e0; }
+  .callout.ok { border-color: var(--green); background: #e4f4ec; }
+  .callout.tip { border-color: var(--amber); background: #fef3dc; }
+  .callout.key { border-color: var(--primary); background: #e8f0fe; border-width: 4px; }
+  .callout strong { color: var(--primary); }
+  .callout.tip strong { color: var(--amber); }
+
+  .fbox { background: var(--primary); color: white; border-radius: 12px; padding: 1.4rem 2rem; text-align: center; margin: 1.5rem 0; font-size: 1.1rem; font-family: 'Georgia', serif; }
+  .fbox.amber { background: linear-gradient(135deg, #0d2d6b, #b45a00); }
+  .fbox .flabel { font-size: 0.75rem; opacity: 0.65; display: block; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.4rem; font-family: 'Segoe UI', sans-serif; }
+  .fbox .fsub { font-size: 0.88rem; opacity: 0.8; display: block; margin-top: 0.5rem; font-family: 'Segoe UI', sans-serif; }
+
+  code { background: var(--code-bg); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.9rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.93rem; }
+  th { background: var(--primary); color: white; padding: 0.7rem 1rem; text-align: left; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #faf4e8; }
+  tr:hover td { background: #fef3dc; }
+  .hl td { background: #fde9b8 !important; font-weight: 600; color: var(--amber); }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .split .pane { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; }
+  .split .pane h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.6rem; }
+
+  /* ── TABELA DE DISTINGUIBILIDADE ── */
+  .dist-table-wrap { overflow-x: auto; margin: 1rem 0; }
+  .dist-table { border-collapse: collapse; font-size: 0.88rem; }
+  .dist-table th, .dist-table td { border: 1px solid var(--border); padding: 0.5rem 0.8rem; text-align: center; min-width: 48px; }
+  .dist-table th { background: var(--primary); color: white; }
+  .dist-table .dist-x { background: #fde9b8; color: var(--amber); font-weight: 700; }
+  .dist-table .dist-eq { background: #e4f4ec; color: var(--green); font-weight: 700; }
+  .dist-table .dist-dash { background: #f5f5f5; color: #ccc; }
+  .dist-table .dist-step1 { background: #fdecea; color: var(--red); font-weight: 700; }
+  .dist-table .dist-step2 { background: #fff3e0; color: var(--amber2); font-weight: 700; }
+
+  /* ── PARTIÇÃO VISUAL ── */
+  .partition { display: flex; gap: 0.8rem; flex-wrap: wrap; margin: 1rem 0; align-items: center; }
+  .partition .class { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 0.7rem 1.1rem; font-family: monospace; font-size: 0.92rem; }
+  .partition .class.final { border-color: var(--green); background: #e4f4ec; color: var(--green); font-weight: 700; }
+  .partition .class.nonfinal { border-color: var(--amber); background: #fef3dc; color: var(--amber); font-weight: 700; }
+  .partition .class.split-class { border-color: var(--red); background: #fdecea; color: var(--red); }
+  .partition .arrow { font-size: 1.4rem; color: var(--muted); }
+
+  /* ── SIMULADOR ── */
+  #minimizer { background: var(--card); border: 2px solid var(--border); border-radius: 16px; overflow: hidden; margin: 1.5rem 0; box-shadow: 0 4px 20px rgba(180,90,0,0.08); }
+  .min-header { background: linear-gradient(90deg, #0d2d6b, #b45a00); color: white; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+  .min-header h3 { font-size: 1rem; margin: 0; }
+  .min-badge { background: rgba(255,255,255,0.2); border-radius: 6px; padding: 3px 10px; font-size: 0.78rem; }
+  .min-body { padding: 1.4rem 1.5rem; }
+
+  .preset-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .preset-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; color: var(--primary); font-weight: 500; }
+  .preset-btn.active, .preset-btn:hover { background: var(--amber2); color: white; border-color: var(--amber2); }
+
+  .min-canvases { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .min-canvas-wrap { }
+  .min-canvas-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.4rem; font-weight: 600; }
+  canvas.min-canvas { width: 100%; height: 200px; border: 1px solid var(--border); border-radius: 8px; background: #faf4e8; display: block; }
+
+  .min-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .min-btn { padding: 7px 16px; border: none; border-radius: 7px; cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+  .btn-amber { background: var(--amber2); color: white; }
+  .btn-amber:hover { background: var(--amber); }
+  .btn-sec { background: var(--bg); border: 1px solid var(--border); color: var(--primary); }
+  .btn-sec:hover { background: #fef3dc; }
+  .btn-green { background: var(--green); color: white; }
+
+  /* Partições animadas */
+  .partition-display { margin-bottom: 1rem; }
+  .partition-display .pd-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.4rem; }
+  .pd-classes { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .pd-class { border: 2px solid var(--border); border-radius: 8px; padding: 0.5rem 0.9rem; font-family: monospace; font-size: 0.88rem; transition: all 0.3s; }
+  .pd-class.c-final { border-color: var(--green); background: #e4f4ec; color: var(--green2, #0e6e3a); }
+  .pd-class.c-nonfinal { border-color: var(--amber); background: #fef3dc; color: var(--amber); }
+  .pd-class.c-sub { border-color: var(--red); background: #fdecea; color: var(--red); }
+  .pd-class.c-merged { border-color: var(--purple); background: #f3eeff; color: var(--purple); }
+
+  .min-log { background: #faf4e8; border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; max-height: 180px; overflow-y: auto; font-size: 0.84rem; font-family: monospace; }
+  .ml-line { padding: 2px 0; border-bottom: 1px solid #e8d8b0; }
+  .ml-line:last-child { border-bottom: none; }
+  .ml-split { color: var(--red); }
+  .ml-stable { color: var(--green); font-weight: 700; }
+  .ml-info { color: var(--primary); }
+  .ml-merge { color: var(--purple); }
+
+  /* QUIZ */
+  .quiz { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .quiz h3 { color: var(--primary); font-size: 1rem; margin-bottom: 1rem; }
+  .quiz h3::before { content: '🧠 '; }
+  .options { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+  .opt { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 0.9rem; background: var(--bg); }
+  .opt:hover { background: #fef3dc; border-color: var(--amber2); }
+  .opt input { accent-color: var(--amber2); margin-top: 3px; flex-shrink: 0; }
+  .quiz-btn { margin-top: 1rem; background: var(--amber2); color: white; border: none; padding: 8px 22px; border-radius: 7px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+  .quiz-btn:hover { background: var(--amber); }
+  .quiz-result { margin-top: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; display: none; }
+  .quiz-result.show { display: block; }
+  .quiz-result.correct { background: #e4f4ec; border: 1px solid #90c8a0; color: #0e6e3a; }
+  .quiz-result.wrong { background: #fdecea; border: 1px solid #f0a8a0; color: var(--red); }
+
+  .summary { background: linear-gradient(135deg, #0d2d6b, #b45a00); color: white; border-radius: 14px; padding: 2rem; margin: 2rem 0; }
+  .summary h3 { color: white; margin-bottom: 1rem; font-size: 1.15rem; }
+  .summary .row { display: flex; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  .summary .row::before { content: '✓'; color: #ffd080; font-weight: 700; flex-shrink: 0; }
+
+  .mod-nav { display: flex; justify-content: space-between; align-items: center; margin: 3rem 0 1rem; gap: 1rem; flex-wrap: wrap; }
+  .mod-btn { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 1rem 1.4rem; text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; flex: 1; min-width: 160px; }
+  .mod-btn:hover { border-color: var(--amber2); background: #fef3dc; }
+  .mod-btn.next { background: var(--amber2); color: white; border-color: var(--amber2); text-align: right; }
+  .mod-btn.next:hover { background: var(--amber); border-color: var(--amber); }
+  .mod-btn .dir { display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7; margin-bottom: 2px; }
+
+  @media (max-width: 640px) {
+    .split, .min-canvases { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.8rem; }
+  }
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .analogy,.comparison{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">1 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div>
+        <a class="sb-item " href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas</span></a>
+        <a class="sb-item " href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div>
+        <a class="sb-item " href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Linguagens Formais</a><span class="sep">›</span>
+        <span class="current">Módulo 5 — Minimização de AFDs</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header"><div class="breadcrumb">POSCOMP Visual Lab › Autômatos</div>
+  <div class="module-badge">Módulo 5 de 8</div>
+  <h1>Minimização de AFD</h1>
+  <p class="subtitle">Encontre o menor AFD possível para uma linguagem — e prove que ele é único.</p>
+  <div class="header-meta">
+    <span>⏱ ~55 min</span>
+    <span>📐 Nível: Intermediário-Avançado</span>
+    <span>⚙️ Algoritmo passo a passo interativo</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div class="progress-label">Módulo 5 de 8 — Minimização</div></div>
+      <nav class="section-nav" id="sectionNav"><a href="#motivacao">Motivação</a>
+  <a href="#equivalencia">Equivalência</a>
+  <a href="#distinguivel">Distinguível</a>
+  <a href="#algoritmo">Algoritmo</a>
+  <a href="#exemplo">Exemplo</a>
+  <a href="#simulador">Simulador</a>
+  <a href="#unicidade">Unicidade</a>
+  <a href="#nerode">Myhill-Nerode</a>
+  <a href="#quiz">Exercícios</a>
+  <a href="#resumo">Resumo</a></nav>
+      <div class="lesson-content"><!-- ══════════════ 1 — MOTIVAÇÃO ══════════════ -->
+<section id="motivacao">
+  <h2><span class="num">1</span> Por que minimizar?</h2>
+
+  <p>A construção de subconjuntos (Módulo 3) pode gerar AFDs com estados redundantes. A conversão de expressões regulares (Módulo 6) também. Dois AFDs podem reconhecer exatamente a mesma linguagem mas ter números de estados diferentes.</p>
+
+  <p>A <strong>minimização</strong> encontra o AFD com o menor número possível de estados para uma dada linguagem. Isso importa por:</p>
+
+  <div class="split">
+    <div class="pane">
+      <h4>Eficiência prática</h4>
+      <p>Menos estados = menos memória em implementações de compiladores, analisadores léxicos e protocolos. Um AFD mínimo é o "kernel" irredutível da linguagem.</p>
+    </div>
+    <div class="pane">
+      <h4>Comparação de linguagens</h4>
+      <p>Dois AFDs reconhecem a mesma linguagem se e somente se seus AFDs mínimos são isomorfos. A minimização é o teste definitivo de igualdade entre linguagens regulares.</p>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <strong>Teorema central:</strong> para cada linguagem regular existe um AFD mínimo único (a menos de renomeação de estados). A minimização não é apenas uma otimização — ela revela a estrutura essencial da linguagem.
+  </div>
+</section>
+
+<!-- ══════════════ 2 — EQUIVALÊNCIA DE ESTADOS ══════════════ -->
+<section id="equivalencia">
+  <h2><span class="num">2</span> Estados equivalentes</h2>
+
+  <p>Dois estados são <strong>equivalentes</strong> se a máquina se comporta identicamente a partir de ambos — ou seja, para qualquer string w, a máquina aceita w em um se e somente se aceita w no outro.</p>
+
+  <div class="fbox amber">
+    <span class="flabel">Definição — estados equivalentes</span>
+    p ≡ q &nbsp;⟺&nbsp; ∀w ∈ Σ* : δ*(p, w) ∈ F ↔ δ*(q, w) ∈ F
+    <span class="fsub">p e q são indistinguíveis: nenhuma string os separa</span>
+  </div>
+
+  <p>Se p ≡ q, eles podem ser <strong>fundidos</strong> em um único estado sem alterar a linguagem reconhecida. O AFD mínimo é aquele onde nenhum par de estados distintos é equivalente.</p>
+
+  <h3>Equivalência é uma relação de equivalência</h3>
+  <div class="card">
+    <table>
+      <tr><th>Propriedade</th><th>Prova</th></tr>
+      <tr><td>Reflexiva: p ≡ p</td><td>Trivial — um estado concorda consigo mesmo</td></tr>
+      <tr><td>Simétrica: p ≡ q ⟹ q ≡ p</td><td>A definição é simétrica em p e q</td></tr>
+      <tr><td>Transitiva: p ≡ q e q ≡ r ⟹ p ≡ r</td><td>Se p e q concordam, e q e r concordam, então p e r concordam</td></tr>
+    </table>
+    <p style="margin-top:0.5rem; font-size:0.88rem; color:var(--muted);">Como é uma relação de equivalência, ela particiona Q em classes de equivalência. O AFD mínimo tem um estado por classe.</p>
+  </div>
+</section>
+
+<!-- ══════════════ 3 — DISTINGUÍVEL ══════════════ -->
+<section id="distinguivel">
+  <h2><span class="num">3</span> Estados distinguíveis</h2>
+
+  <p>É mais fácil trabalhar com a noção oposta: dois estados são <strong>distinguíveis</strong> se existe alguma string que os separa.</p>
+
+  <div class="fbox amber">
+    <span class="flabel">Definição — estados distinguíveis</span>
+    p e q são distinguíveis &nbsp;⟺&nbsp; ∃w ∈ Σ* : δ*(p,w) ∈ F &nbsp;⊕&nbsp; δ*(q,w) ∈ F
+    <span class="fsub">A string w é uma "testemunha" da distinguibilidade de p e q</span>
+  </div>
+
+  <h3>Casos base de distinguibilidade</h3>
+  <div class="callout ok">
+    <strong>Base:</strong> todo par (final, não-final) é distinguido pela string vazia ε.<br>
+    Prova: δ*(p, ε) = p ∈ F, mas δ*(q, ε) = q ∉ F. A testemunha é ε.
+  </div>
+
+  <h3>Passo indutivo</h3>
+  <div class="card">
+    Se p e q são distinguíveis por w, então para qualquer símbolo a:<br>
+    os estados r = δ(r₀, a) e s = δ(s₀, a) tais que δ*(r, w) = p e δ*(s, w) = q<br>
+    são distinguíveis pela string <strong>aw</strong>.<br><br>
+    Equivalentemente: se <code>δ(p, a)</code> e <code>δ(q, a)</code> são distinguíveis, então p e q também são distinguíveis (pela string <em>a</em> concatenada com a testemunha dos sucessores).
+  </div>
+</section>
+
+<!-- ══════════════ 4 — ALGORITMO ══════════════ -->
+<section id="algoritmo">
+  <h2><span class="num">4</span> Algoritmo de particionamento (Table-Filling)</h2>
+
+  <p>O algoritmo mais clássico para minimização é o <strong>algoritmo de preenchimento de tabela</strong> (também chamado de algoritmo de Hopcroft simplificado ou de marcação). Ele identifica todos os pares distinguíveis de forma sistemática.</p>
+
+  <div class="card">
+    <strong>Entrada:</strong> AFD M completo, sem estados inacessíveis<br>
+    <strong>Saída:</strong> tabela triangular onde cada célula (p, q) está marcada se p e q são distinguíveis<br><br>
+
+    <strong>Passo 1 — Remoção de estados inacessíveis:</strong><br>
+    Remova estados que não são alcançáveis a partir de q₀ (busca em largura/profundidade).<br><br>
+
+    <strong>Passo 2 — Base (inicialização):</strong><br>
+    Marque como distinguíveis todos os pares (p, q) onde um é final e o outro não.<br><br>
+
+    <strong>Passo 3 — Propagação (iterar até estabilizar):</strong><br>
+    Para cada par não-marcado (p, q) e para cada símbolo a ∈ Σ:<br>
+    &nbsp;&nbsp;&nbsp;Se (δ(p,a), δ(q,a)) já está marcado → marque (p, q) também.<br><br>
+
+    <strong>Passo 4 — Fusão:</strong><br>
+    Pares não-marcados ao final são equivalentes. Funda-os em um único estado.
+  </div>
+
+  <div class="callout tip">
+    <strong>Por que o algoritmo termina?</strong> A cada iteração do passo 3, ou marcamos pelo menos um par novo, ou paramos. Como há no máximo |Q|² pares e cada marcação é permanente, o algoritmo termina em no máximo |Q|² iterações.
+  </div>
+
+  <h3>Algoritmo alternativo — Particionamento iterativo</h3>
+  <div class="card">
+    Inicia com a partição P = {F, Q\F} (estados finais vs. não-finais).<br><br>
+    Itera: para cada classe C e símbolo a, verifica se todos os estados de C vão para a mesma classe ao ler a.<br>
+    Se não: divide C nas sub-classes que vão para classes diferentes.<br><br>
+    Para quando nenhuma classe pode mais ser dividida.
+  </div>
+</section>
+
+<!-- ══════════════ 5 — EXEMPLO PASSO A PASSO ══════════════ -->
+<section id="exemplo">
+  <h2><span class="num">5</span> Exemplo completo — passo a passo</h2>
+
+  <p>Vamos minimizar um AFD com 6 estados sobre Σ = {a, b}. A tabela de transição é:</p>
+
+  <table>
+    <tr><th>Estado</th><th>Lê a</th><th>Lê b</th><th>Tipo</th></tr>
+    <tr><td><strong>→ A</strong></td><td>B</td><td>C</td><td>inicial</td></tr>
+    <tr><td>B</td><td>A</td><td>D</td><td>—</td></tr>
+    <tr><td>C</td><td>E</td><td>F</td><td>—</td></tr>
+    <tr><td>★ D</td><td>E</td><td>F</td><td>final</td></tr>
+    <tr><td>★ E</td><td>E</td><td>F</td><td>final</td></tr>
+    <tr><td>★ F</td><td>F</td><td>F</td><td>final</td></tr>
+  </table>
+
+  <h3>Passo 1 — Verificar acessibilidade</h3>
+  <p>A partir de A: A→B, A→C, B→D, C→E, C→F, D→E, D→F, E→F. Todos os 6 estados são acessíveis.</p>
+
+  <h3>Passo 2 — Inicialização da tabela (base)</h3>
+  <p>Finais = {D, E, F}. Não-finais = {A, B, C}. Marcamos com ✗ todos os pares (final, não-final):</p>
+
+  <div class="dist-table-wrap">
+    <table class="dist-table">
+      <tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>
+      <tr><th>B</th><td class="dist-dash">—</td><td></td><td></td><td></td><td></td></tr>
+      <tr><th>C</th><td class="dist-dash">—</td><td class="dist-dash">—</td><td></td><td></td><td></td></tr>
+      <tr><th>D</th><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td></td><td></td></tr>
+      <tr><th>E</th><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-dash">—</td><td></td></tr>
+      <tr><th>F</th><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-dash">—</td><td class="dist-dash">—</td></tr>
+    </table>
+  </div>
+  <p style="font-size:0.85rem; color:var(--muted);">✗₀ = distinguido na base (por ε). — = mesma classe (mesmo tipo).</p>
+
+  <h3>Passo 3 — Propagação</h3>
+  <p>Verificamos pares não-marcados: (A,B), (A,C), (B,C), (D,E), (D,F), (E,F).</p>
+
+  <div class="card">
+    <strong>Par (D,E):</strong> δ(D,a)=E, δ(E,a)=E → par (E,E), não marcado. δ(D,b)=F, δ(E,b)=F → (F,F), não marcado. → D e E não distinguidos ainda.<br><br>
+    <strong>Par (D,F):</strong> δ(D,a)=E, δ(F,a)=F → par (E,F), não marcado. δ(D,b)=F, δ(F,b)=F → (F,F). → D e F não distinguidos ainda.<br><br>
+    <strong>Par (E,F):</strong> δ(E,a)=E, δ(F,a)=F → (E,F) — próprio par! δ(E,b)=F, δ(F,b)=F → (F,F). → E e F não distinguidos.<br><br>
+    <strong>Par (A,B):</strong> δ(A,a)=B, δ(B,a)=A → (B,A) = (A,B), não marcado. δ(A,b)=C, δ(B,b)=D → (C,D), marcado! → (A,B) fica marcado ✗₁.<br><br>
+    <strong>Par (A,C):</strong> δ(A,a)=B, δ(C,a)=E → (B,E), marcado (B é não-final, E é final)! → (A,C) fica marcado ✗₁.<br><br>
+    <strong>Par (B,C):</strong> δ(B,a)=A, δ(C,a)=E → (A,E), marcado! → (B,C) fica marcado ✗₁.
+  </div>
+
+  <h3>Tabela final</h3>
+  <div class="dist-table-wrap">
+    <table class="dist-table">
+      <tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>
+      <tr><th>B</th><td class="dist-step2">✗₁</td><td></td><td></td><td></td><td></td></tr>
+      <tr><th>C</th><td class="dist-step2">✗₁</td><td class="dist-step2">✗₁</td><td></td><td></td><td></td></tr>
+      <tr><th>D</th><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td></td><td></td></tr>
+      <tr><th>E</th><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-eq">≡</td><td></td></tr>
+      <tr><th>F</th><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-step1">✗₀</td><td class="dist-eq">≡</td><td class="dist-eq">≡</td></tr>
+    </table>
+  </div>
+  <p style="font-size:0.85rem; color:var(--muted);">✗₀ = base | ✗₁ = propagação | ≡ = equivalentes (não distinguidos)</p>
+
+  <h3>Passo 4 — Fusão</h3>
+  <p>Classes de equivalência: <strong>{A}</strong>, <strong>{B}</strong>, <strong>{C}</strong>, <strong>{D, E, F}</strong>.</p>
+
+  <div class="partition">
+    <div class="class nonfinal">{A}</div>
+    <div class="class nonfinal">{B}</div>
+    <div class="class nonfinal">{C}</div>
+    <div class="class final">{D, E, F} → estado único "DEF"</div>
+  </div>
+
+  <div class="card">
+    <strong>AFD mínimo resultante (4 estados):</strong>
+    <table style="margin-top:0.7rem;">
+      <tr><th>Estado</th><th>Lê a</th><th>Lê b</th><th>Tipo</th></tr>
+      <tr><td><strong>→ A</strong></td><td>B</td><td>C</td><td>inicial</td></tr>
+      <tr><td>B</td><td>A</td><td>DEF</td><td>—</td></tr>
+      <tr><td>C</td><td>DEF</td><td>DEF</td><td>—</td></tr>
+      <tr><td class="hl">★ DEF</td><td>DEF</td><td>DEF</td><td>final</td></tr>
+    </table>
+    <p style="font-size:0.88rem; color:var(--muted); margin-top:0.5rem;">D, E e F se fundiram: todos têm o mesmo comportamento futuro — qualquer string lida a partir deles termina em DEF (final).</p>
+  </div>
+</section>
+
+<!-- ══════════════ 6 — SIMULADOR ══════════════ -->
+<section id="simulador">
+  <h2><span class="num">6</span> Simulador de minimização interativo</h2>
+
+  <div id="minimizer">
+    <div class="min-header">
+      <h3>⚙️ Minimizador de AFD — Algoritmo de Partições</h3>
+      <span class="min-badge">Passo a passo</span>
+    </div>
+    <div class="min-body">
+
+      <div class="preset-row">
+        <button class="preset-btn active" onclick="loadPreset('exemplo5')">Exemplo do módulo (6→4)</button>
+        <button class="preset-btn" onclick="loadPreset('redundante')">Com redundâncias (5→3)</button>
+        <button class="preset-btn" onclick="loadPreset('jaminimo')">Já mínimo (3 estados)</button>
+      </div>
+
+      <div class="min-canvases">
+        <div class="min-canvas-wrap">
+          <div class="min-canvas-label">AFD original</div>
+          <canvas id="canvas-original" class="min-canvas"></canvas>
+        </div>
+        <div class="min-canvas-wrap">
+          <div class="min-canvas-label">AFD mínimo</div>
+          <canvas id="canvas-minimal" class="min-canvas"></canvas>
+        </div>
+      </div>
+
+      <div class="partition-display">
+        <div class="pd-label">Partição atual</div>
+        <div id="pd-classes" class="pd-classes"><span style="color:var(--muted);font-size:0.85rem;">Clique em Iniciar para começar.</span></div>
+      </div>
+
+      <div class="min-controls">
+        <button class="min-btn btn-amber" onclick="minInit()">▶ Iniciar</button>
+        <button class="min-btn btn-sec" onclick="minStep()">⏭ Próxima iteração</button>
+        <button class="min-btn btn-green" onclick="minAll()">⚡ Minimizar tudo</button>
+        <button class="min-btn btn-sec" onclick="minReset()">↺ Resetar</button>
+      </div>
+
+      <div id="min-log" class="min-log"><span style="color:var(--muted);">Selecione um AFD e clique em Iniciar.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 7 — UNICIDADE ══════════════ -->
+<section id="unicidade">
+  <h2><span class="num">7</span> Unicidade do AFD mínimo</h2>
+
+  <div class="fbox amber">
+    <span class="flabel">Teorema</span>
+    Para cada linguagem regular L, existe um único AFD mínimo M* que reconhece L (a menos de isomorfismo).
+  </div>
+
+  <p>Isso significa que independente de qual AFD você comece, aplicando a minimização chegará sempre ao mesmo resultado (com os estados possivelmente nomeados diferente). Dois AFDs reconhecem a mesma linguagem se e somente se seus mínimos são isomorfos.</p>
+
+  <h3>Consequência prática: teste de igualdade</h3>
+  <div class="card">
+    <strong>Como decidir se L(M₁) = L(M₂)?</strong><br><br>
+    1. Minimize M₁ → M₁*<br>
+    2. Minimize M₂ → M₂*<br>
+    3. Verifique se M₁* e M₂* são isomorfos (mesmo número de estados, mesmas transições a menos de renomeação)<br><br>
+    Se isomorfos → L(M₁) = L(M₂). Caso contrário → linguagens diferentes.
+  </div>
+
+  <h3>Estados inacessíveis vs. estados equivalentes</h3>
+  <div class="split">
+    <div class="pane">
+      <h4>Estados inacessíveis</h4>
+      <p>Não são alcançáveis a partir de q₀. Removê-los não altera L(M). <strong>Devem ser removidos antes</strong> do algoritmo de minimização.</p>
+    </div>
+    <div class="pane">
+      <h4>Estados equivalentes (indistinguíveis)</h4>
+      <p>São alcançáveis mas têm o mesmo comportamento futuro. São fundidos pelo algoritmo. Essa é a redução essencial.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 8 — MYHILL-NERODE ══════════════ -->
+<section id="nerode">
+  <h2><span class="num">8</span> Teorema de Myhill-Nerode</h2>
+
+  <p>O teorema de Myhill-Nerode fornece uma caracterização algébrica das linguagens regulares que também determina o número mínimo de estados de qualquer AFD para L.</p>
+
+  <div class="fbox amber">
+    <span class="flabel">Relação de Myhill-Nerode</span>
+    x ≡_L y &nbsp;⟺&nbsp; ∀z ∈ Σ* : (xz ∈ L ↔ yz ∈ L)
+    <span class="fsub">x e y são indistinguíveis por L: qualquer sufixo z os classifica da mesma forma</span>
+  </div>
+
+  <div class="fbox amber" style="margin-top:0.5rem;">
+    <span class="flabel">Teorema de Myhill-Nerode</span>
+    L é regular &nbsp;⟺&nbsp; a relação ≡_L tem índice finito (número finito de classes)
+    <span class="fsub">O número de classes de ≡_L = número de estados do AFD mínimo para L</span>
+  </div>
+
+  <h3>Classes de equivalência de Myhill-Nerode = estados do AFD mínimo</h3>
+  <div class="card">
+    Cada classe de ≡_L corresponde a um estado do AFD mínimo. A classe de x é "tudo que a máquina lembrou ao processar x".<br><br>
+    <strong>Exemplo — L = strings binárias terminando em "01":</strong><br>
+    <table style="margin-top:0.7rem; font-size:0.88rem;">
+      <tr><th>Classe (≡_L)</th><th>Strings representativas</th><th>Comportamento</th></tr>
+      <tr><td>[ε] = {ε, 1, 11, 111, ...}</td><td>Terminam em 1 ou são vazias</td><td>Estado q0</td></tr>
+      <tr><td>[0] = {0, 10, 110, ...}</td><td>Terminam em 0 (não precedido por "0→1")</td><td>Estado q1</td></tr>
+      <tr><td>[01] = {01, 001, 101, ...}</td><td>Terminam em "01"</td><td>Estado q2 (final)</td></tr>
+    </table>
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:0.4rem;">3 classes → AFD mínimo tem 3 estados (o mesmo do Módulo 2!).</p>
+  </div>
+
+  <div class="callout tip">
+    <strong>Uso do teorema em provas de não-regularidade:</strong> se conseguirmos mostrar que ≡_L tem infinitas classes, então L não é regular — sem precisar do Lema do Bombeamento. Isso é útil para linguagens como {aⁿbⁿ}, onde cada prefixo "aⁿ" cria uma classe nova.
+  </div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section id="quiz">
+  <h2><span class="num">9</span> Exercícios — estilo POSCOMP</h2>
+
+  <div class="quiz">
+    <h3>Questão 1</h3>
+    <p>Um AFD M tem 5 estados: q0 (inicial), q1, q2 (finais), q3, q4. Após a aplicação do algoritmo de minimização, q0 ≡ q3 e q1 ≡ q4. O AFD mínimo tem quantos estados?</p>
+    <div class="options" id="q1">
+      <label class="opt"><input type="radio" name="q1" value="A"> A) 5</label>
+      <label class="opt"><input type="radio" name="q1" value="B"> B) 4</label>
+      <label class="opt"><input type="radio" name="q1" value="C"> C) 3</label>
+      <label class="opt"><input type="radio" name="q1" value="D"> D) 2</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q1','C','e1')">Verificar</button>
+    <div class="quiz-result" id="q1-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 2</h3>
+    <p>No algoritmo de Table-Filling, a base marca como distinguíveis os pares:</p>
+    <div class="options" id="q2">
+      <label class="opt"><input type="radio" name="q2" value="A"> A) Pares com estados que têm transições diferentes</label>
+      <label class="opt"><input type="radio" name="q2" value="B"> B) Pares onde ambos são estados finais</label>
+      <label class="opt"><input type="radio" name="q2" value="C"> C) Pares onde um é final e o outro não é final</label>
+      <label class="opt"><input type="radio" name="q2" value="D"> D) Pares onde os estados têm o mesmo nome</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q2','C','e2')">Verificar</button>
+    <div class="quiz-result" id="q2-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 3 — Myhill-Nerode</h3>
+    <p>Pela teoria de Myhill-Nerode, a linguagem L = {aⁿbⁿ | n ≥ 0} (número igual de a's seguido de b's):</p>
+    <div class="options" id="q3">
+      <label class="opt"><input type="radio" name="q3" value="A"> A) É regular, com AFD mínimo de 3 estados</label>
+      <label class="opt"><input type="radio" name="q3" value="B"> B) É regular, mas seu AFD mínimo tem infinitos estados</label>
+      <label class="opt"><input type="radio" name="q3" value="C"> C) Não é regular, pois a relação ≡_L tem infinitas classes</label>
+      <label class="opt"><input type="radio" name="q3" value="D"> D) Não é regular, pois não pode ser descrita por expressão regular simples</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q3','C','e3')">Verificar</button>
+    <div class="quiz-result" id="q3-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 4</h3>
+    <p>Dois AFDs M₁ e M₂ reconhecem a mesma linguagem se e somente se:</p>
+    <div class="options" id="q4">
+      <label class="opt"><input type="radio" name="q4" value="A"> A) Têm o mesmo número de estados</label>
+      <label class="opt"><input type="radio" name="q4" value="B"> B) Têm a mesma tabela de transição</label>
+      <label class="opt"><input type="radio" name="q4" value="C"> C) Seus AFDs mínimos são isomorfos</label>
+      <label class="opt"><input type="radio" name="q4" value="D"> D) Ambos aceitam a string vazia ε</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q4','C','e4')">Verificar</button>
+    <div class="quiz-result" id="q4-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 5 — POSCOMP nível difícil</h3>
+    <p>Um AFD tem 8 estados e seu AFD mínimo tem 5 estados. Qual é a afirmação correta sobre o processo de minimização?</p>
+    <div class="options" id="q5">
+      <label class="opt"><input type="radio" name="q5" value="A"> A) Exatamente 3 estados foram removidos por serem inacessíveis</label>
+      <label class="opt"><input type="radio" name="q5" value="B"> B) Exatamente 3 pares de estados foram fundidos um a um</label>
+      <label class="opt"><input type="radio" name="q5" value="C"> C) A redução de 3 estados pode ter ocorrido por remoção de inacessíveis, fusão de equivalentes, ou ambos — não há como saber só pelo número</label>
+      <label class="opt"><input type="radio" name="q5" value="D"> D) O AFD original tinha necessariamente 3 estados equivalentes entre si</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q5','C','e5')">Verificar</button>
+    <div class="quiz-result" id="q5-res"></div>
+  </div>
+</section>
+
+<!-- ══════════════ RESUMO ══════════════ -->
+<section id="resumo">
+  <h2><span class="num">10</span> Resumo do módulo</h2>
+
+  <div class="summary">
+    <h3>O que você agora domina:</h3>
+    <div class="row">Estados equivalentes: p ≡ q se qualquer string os classifica da mesma forma a partir de ambos.</div>
+    <div class="row">Distinguibilidade: p e q distinguíveis se existe w tal que δ*(p,w) ∈ F ⊕ δ*(q,w) ∈ F.</div>
+    <div class="row">Base: todo par (final, não-final) é distinguido por ε.</div>
+    <div class="row">Propagação: se δ(p,a) e δ(q,a) são distinguíveis, então p e q são distinguíveis por "a + testemunha".</div>
+    <div class="row">AFD mínimo: remova inacessíveis, aplique table-filling, funda as classes equivalentes.</div>
+    <div class="row">O AFD mínimo é único (a menos de isomorfismo) — é a estrutura canônica da linguagem.</div>
+    <div class="row">Myhill-Nerode: L é regular ⟺ ≡_L tem índice finito; o índice = número de estados do mínimo.</div>
+  </div>
+
+  <h3>O que vem no próximo módulo</h3>
+  <div class="card">
+    O Módulo 6 apresenta as <strong>Expressões Regulares</strong> — a notação algébrica para linguagens regulares. Você verá a construção de Thompson (ER → AFN) e a eliminação de estados (AFD → ER), completando o triângulo de equivalências: AFD ↔ AFN ↔ ER.
+  </div>
+</section>
+
+<div class="mod-nav">
+  <a href="modulo-04-operacoes.html" class="mod-btn">
+    <span class="dir">← Anterior</span>
+    Módulo 4: Operações
+  </a>
+  <a href="#" class="mod-btn next">
+    <span class="dir">Próximo →</span>
+    Módulo 6: Expressões Regulares
+  </a>
+</div></div>
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="modulo-04.html">← Módulo anterior</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 5 de 9</div>
+        </div>
+        <a class="btn-nav next" href="modulo-06.html">Próximo módulo →</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);localStorage.setItem('sb-state',c?'collapsed':'expanded')}
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+</script>
+</body>
+</html>

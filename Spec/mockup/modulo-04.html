@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 4 — Operações sobre Linguagens Regulares · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  /* original module vars */
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item::before{display:none}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}.sidebar.collapsed .sb-sep{margin:.4rem .8rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:44%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500)}.topbar-icon-btn:hover{background:var(--n100)}
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#1a6bcc 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+/* SECTION NAV */
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover{background:rgba(255,255,255,.15);color:white}.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+/* CONTENT */
+.lesson-content{max-width:900px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.75}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0;font-size:.92rem;line-height:1.7}
+.callout{border-left:4px solid var(--accent);background:#e8f0fe;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem}.callout.warning{border-color:var(--accent2);background:#fff3e0}.callout.success{border-color:var(--green);background:#e8f5ee}.callout strong{color:var(--primary)}
+.formula-box{background:var(--primary);color:white;border-radius:12px;padding:1.4rem 2rem;text-align:center;margin:1.5rem 0;font-size:1.3rem;font-family:Georgia,serif}
+.formula-box .label{font-size:.75rem;opacity:.7;display:block;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;font-family:var(--fb)}.formula-box .sub{font-size:.85rem;opacity:.85;display:block;margin-top:.5rem;font-family:var(--fb)}
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.analogy .side{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.analogy .side h4{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}.analogy .side .val{font-size:1rem;font-weight:600;color:var(--primary)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--primary);color:white;padding:.65rem 1rem;text-align:left}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+tr:nth-child(even) td{background:#f5f8ff}tr:hover td{background:#e8f0fe}
+.highlight-row td{background:#fff3cd!important;font-weight:600}
+.automaton-viz{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.8rem;margin:1.5rem 0;text-align:center}
+.states{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.state{width:70px;height:70px;border-radius:50%;border:3px solid var(--accent);background:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--primary);position:relative}
+.state.initial::before{content:'▶';position:absolute;left:-22px;color:var(--accent2);font-size:1rem}
+.state.final{box-shadow:0 0 0 5px white,0 0 0 8px var(--accent)}
+.arrow{font-size:1.5rem;color:var(--accent2);position:relative}.arrow span{position:absolute;top:-1.2rem;left:50%;transform:translateX(-50%);font-size:.8rem;color:var(--muted);white-space:nowrap;font-family:monospace;background:var(--bg);padding:0 4px}
+.step-trace{margin:1rem 0}.step{display:flex;align-items:flex-start;gap:1rem;margin:.5rem 0;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.9rem}
+.step .badge{background:var(--accent);color:white;border-radius:6px;padding:2px 10px;font-size:.78rem;white-space:nowrap;flex-shrink:0;font-family:monospace}.step .badge.ok{background:var(--green)}.step .badge.fail{background:var(--red)}
+.step .body{font-size:.9rem;line-height:1.6}.step .body code,.step code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.comparison .col{border-radius:10px;padding:1.2rem;font-size:.9rem}.comparison .col.dfa{background:#e8f5ee;border:1px solid #a8d8b8}.comparison .col.nfa{background:#fff3e0;border:1px solid #f0c070}.comparison h4{margin-bottom:.5rem;font-size:.92rem}
+.applications{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin:1rem 0}.app-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.app-card .icon{font-size:1.8rem;margin-bottom:.5rem}.app-card h4{color:var(--primary);font-size:.9rem;margin-bottom:.3rem}.app-card p{font-size:.82rem;color:var(--muted);margin:0}
+.summary-box{background:var(--primary);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}.summary-box h3{color:white;margin-bottom:1rem;font-size:1.1rem}.summary-box .row{display:flex;gap:.5rem;margin:.4rem 0;align-items:flex-start;font-size:.9rem}.summary-box .row::before{content:'✓';color:#7ef0a0;flex-shrink:0;font-weight:700}
+/* quiz / interactive */
+.quiz-option{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f8faff;margin:.4rem 0;font-size:.9rem}.quiz-option:hover{background:#e8f0fe;border-color:var(--accent)}
+.quiz-option.selected{background:#e8f0fe;border-color:var(--accent)}.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05);position:sticky;bottom:0}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:44%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap)}.btn-nav.next:hover{background:var(--sap-d)}
+/* EXTRAS from original */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .breadcrumb { font-size: 0.8rem; opacity: 0.65; margin-bottom: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+  .module-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; display: inline-block; padding: 4px 16px; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1rem; }
+  header h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem; }
+  header .subtitle { opacity: 0.85; font-size: 1.05rem; max-width: 620px; margin: 0 auto 1.5rem; }
+  .header-meta { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+  .header-meta span { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 6px; margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .progress-fill { background: white; border-radius: 4px; height: 100%; width: 50%; }
+  .progress-label { font-size: 0.78rem; opacity: 0.7; text-align: center; margin-top: 0.3rem; }
+  nav a { color: rgba(255,255,255,0.75); text-decoration: none; padding: 5px 11px; font-size: 0.82rem; border-radius: 4px; }
+  nav a:hover { background: rgba(255,255,255,0.15); color: white; }
+  section { margin-bottom: 3.5rem; scroll-margin-top: 60px; }
+  h2 { color: var(--primary); font-size: 1.55rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--teal); }
+  h2 .num { background: var(--teal); color: white; min-width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.88rem; font-weight: 700; flex-shrink: 0; }
+  h3 { color: var(--teal); font-size: 1.08rem; margin: 1.6rem 0 0.6rem; }
+  p { margin-bottom: 0.9rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.6rem; margin: 1rem 0; }
+  .callout { border-left: 4px solid var(--accent); background: #e4f4ec; padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1.1rem 0; }
+  .callout.warn { border-color: var(--orange); background: #fff3e0; }
+  .callout.ok { border-color: var(--green); background: #e4f4ec; }
+  .callout.tip { border-color: var(--teal); background: #e0f4f0; }
+  .callout.key { border-color: var(--primary); background: #e8f0fe; border-width: 4px; }
+  .callout strong { color: var(--primary); }
+  .callout.tip strong { color: var(--teal); }
+
+  .fbox { background: var(--primary); color: white; border-radius: 12px; padding: 1.4rem 2rem; text-align: center; margin: 1.5rem 0; font-size: 1.15rem; font-family: 'Georgia', serif; }
+  .fbox.teal { background: linear-gradient(135deg, #0d2d6b, #0e7a72); }
+  .fbox .flabel { font-size: 0.75rem; opacity: 0.65; display: block; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.4rem; font-family: 'Segoe UI', sans-serif; }
+  .fbox .fsub { font-size: 0.88rem; opacity: 0.8; display: block; margin-top: 0.5rem; font-family: 'Segoe UI', sans-serif; }
+
+  code { background: var(--code-bg); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.9rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.93rem; }
+  th { background: var(--primary); color: white; padding: 0.7rem 1rem; text-align: left; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #f2faf5; }
+  tr:hover td { background: #e4f4ec; }
+  .hl td { background: #d4eddf !important; font-weight: 600; color: var(--green2); }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .split .pane { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; }
+  .split .pane h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.6rem; }
+
+  /* ── OPERAÇÕES CARDS ── */
+  .op-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.2rem 0; }
+  .op-card { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.2rem; text-align: center; }
+  .op-card .sym { font-size: 1.8rem; color: var(--teal); font-family: Georgia, serif; display: block; margin-bottom: 0.4rem; }
+  .op-card .name { font-weight: 700; color: var(--primary); font-size: 0.9rem; }
+  .op-card .nota { font-family: monospace; font-size: 0.85rem; color: var(--muted); margin-top: 0.3rem; }
+  .op-card .desc { font-size: 0.82rem; color: var(--text); margin-top: 0.5rem; line-height: 1.5; }
+
+  /* ── CONSTRUÇÃO VISUAL ── */
+  .build-wrap { background: var(--card); border: 2px solid var(--border); border-radius: 14px; overflow: hidden; margin: 1.5rem 0; }
+  .build-header { background: linear-gradient(90deg, #0d2d6b, #0e7a72); color: white; padding: 0.9rem 1.4rem; font-weight: 700; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+  .build-body { padding: 1.4rem; }
+
+  canvas { display: block; width: 100%; border: 1px solid var(--border); border-radius: 10px; background: #f2faf5; margin-bottom: 1rem; }
+  #canvas-union { height: 200px; }
+  #canvas-concat { height: 200px; }
+  #canvas-star { height: 180px; }
+  #canvas-complement { height: 180px; }
+  #canvas-intersection { height: 200px; }
+
+  /* ── TRACE ── */
+  .trace-step { display: flex; gap: 0.8rem; align-items: flex-start; padding: 0.65rem 0.9rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 0.35rem 0; font-size: 0.91rem; }
+  .badge { border-radius: 5px; padding: 2px 9px; font-size: 0.78rem; white-space: nowrap; font-family: monospace; flex-shrink: 0; margin-top: 2px; color: white; }
+  .b-teal { background: var(--teal); }
+  .b-green { background: var(--green); }
+  .b-red { background: var(--red); }
+  .b-orange { background: var(--orange); }
+  .b-blue { background: var(--accent); }
+  .b-purple { background: var(--purple); }
+
+  /* ── PRODUTO CARTESIANO (INTERSEÇÃO/COMPLEMENTO) ── */
+  .product-table { font-size: 0.82rem; }
+  .product-table th { padding: 0.5rem 0.7rem; font-size: 0.8rem; }
+  .product-table td { padding: 0.5rem 0.7rem; font-family: monospace; }
+  .pt-initial { background: #e4f4ec !important; }
+  .pt-final { background: #d4eddf !important; font-weight: 700; }
+  .pt-dead { background: #f5f5f5 !important; color: var(--muted); }
+
+  /* ── DEMO INTERATIVO ── */
+  #op-demo { background: var(--card); border: 2px solid var(--border); border-radius: 16px; overflow: hidden; margin: 1.5rem 0; box-shadow: 0 4px 20px rgba(14,122,114,0.08); }
+  .demo-header { background: linear-gradient(90deg, #0d2d6b, #0e7a72); color: white; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+  .demo-header h3 { font-size: 1rem; margin: 0; }
+  .demo-badge { background: rgba(255,255,255,0.2); border-radius: 6px; padding: 3px 10px; font-size: 0.78rem; }
+  .demo-body { padding: 1.4rem 1.5rem; }
+
+  .op-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+  .op-tab { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 6px 14px; font-size: 0.85rem; cursor: pointer; color: var(--primary); font-weight: 500; }
+  .op-tab.active, .op-tab:hover { background: var(--teal); color: white; border-color: var(--teal); }
+
+  .demo-desc { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1.1rem; font-size: 0.88rem; margin-bottom: 1rem; }
+
+  .demo-input-row { display: flex; gap: 0.7rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+  .demo-input-row label { font-size: 0.88rem; font-weight: 600; color: var(--primary); }
+  .demo-input-row input { font-family: monospace; font-size: 1.05rem; padding: 6px 12px; border: 2px solid var(--border); border-radius: 7px; width: 150px; }
+  .demo-input-row input:focus { outline: none; border-color: var(--teal); }
+
+  .demo-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .demo-btn { padding: 7px 16px; border: none; border-radius: 7px; cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+  .btn-teal { background: var(--teal); color: white; }
+  .btn-teal:hover { background: var(--green2); }
+  .btn-sec { background: var(--bg); border: 1px solid var(--border); color: var(--primary); }
+  .btn-sec:hover { background: #e0f4f0; }
+
+  #demo-result { margin-top: 1rem; padding: 0.9rem 1.2rem; border-radius: 10px; font-size: 1rem; font-weight: 600; display: none; }
+  #demo-result.accept { background: #d4eddf; border: 2px solid var(--green); color: var(--green2); }
+  #demo-result.reject { background: #fdecea; border: 2px solid var(--red); color: var(--red); }
+  #demo-log { background: #f2faf5; border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; max-height: 160px; overflow-y: auto; font-size: 0.84rem; font-family: monospace; margin-top: 0.8rem; }
+  .demo-log-line { padding: 2px 0; border-bottom: 1px solid #c8e8d8; }
+  .demo-log-line:last-child { border-bottom: none; }
+
+  /* tabela de fechamento */
+  .closure-table { font-size: 0.88rem; }
+  .closure-table th { padding: 0.6rem 0.9rem; }
+  .closure-table td { padding: 0.6rem 0.9rem; }
+  .yes { color: var(--green); font-weight: 700; }
+  .no { color: var(--red); font-weight: 700; }
+
+  /* QUIZ */
+  .quiz { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .quiz h3 { color: var(--primary); font-size: 1rem; margin-bottom: 1rem; }
+  .quiz h3::before { content: '🧠 '; }
+  .options { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+  .opt { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 0.9rem; background: var(--bg); }
+  .opt:hover { background: #e0f4f0; border-color: var(--teal); }
+  .opt input { accent-color: var(--teal); margin-top: 3px; flex-shrink: 0; }
+  .quiz-btn { margin-top: 1rem; background: var(--teal); color: white; border: none; padding: 8px 22px; border-radius: 7px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+  .quiz-btn:hover { background: var(--green2); }
+  .quiz-result { margin-top: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; display: none; }
+  .quiz-result.show { display: block; }
+  .quiz-result.correct { background: #d4eddf; border: 1px solid #90c8a0; color: var(--green2); }
+  .quiz-result.wrong { background: #fdecea; border: 1px solid #f0a8a0; color: var(--red); }
+
+  .summary { background: linear-gradient(135deg, #0d2d6b, #0e7a72); color: white; border-radius: 14px; padding: 2rem; margin: 2rem 0; }
+  .summary h3 { color: white; margin-bottom: 1rem; font-size: 1.15rem; }
+  .summary .row { display: flex; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  .summary .row::before { content: '✓'; color: #80e8b0; font-weight: 700; flex-shrink: 0; }
+
+  .mod-nav { display: flex; justify-content: space-between; align-items: center; margin: 3rem 0 1rem; gap: 1rem; flex-wrap: wrap; }
+  .mod-btn { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 1rem 1.4rem; text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; flex: 1; min-width: 160px; }
+  .mod-btn:hover { border-color: var(--teal); background: #e0f4f0; }
+  .mod-btn.next { background: var(--teal); color: white; border-color: var(--teal); text-align: right; }
+  .mod-btn.next:hover { background: var(--green2); border-color: var(--green2); }
+  .mod-btn .dir { display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7; margin-bottom: 2px; }
+
+  @media (max-width: 640px) {
+    .split, .op-grid { grid-template-columns: 1fr 1fr; }
+    .op-grid { grid-template-columns: 1fr 1fr; }
+    header h1 { font-size: 1.8rem; }
+  }
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .analogy,.comparison{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">1 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div>
+        <a class="sb-item " href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas</span></a>
+        <a class="sb-item " href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div>
+        <a class="sb-item " href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Linguagens Formais</a><span class="sep">›</span>
+        <span class="current">Módulo 4 — Operações sobre Linguagens Regulares</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header"><div class="breadcrumb">POSCOMP Visual Lab › Autômatos</div>
+  <div class="module-badge">Módulo 4 de 8</div>
+  <h1>Operações e Fechamento</h1>
+  <p class="subtitle">Como combinar linguagens regulares — e provar que o resultado sempre continua sendo regular.</p>
+  <div class="header-meta">
+    <span>⏱ ~55 min</span>
+    <span>📐 Nível: Intermediário</span>
+    <span>⚙️ Construções visuais + Testador interativo</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div class="progress-label">Módulo 4 de 8 — Operações</div></div>
+      <nav class="section-nav" id="sectionNav"><a href="#panorama">Panorama</a>
+  <a href="#uniao">União</a>
+  <a href="#concatenacao">Concatenação</a>
+  <a href="#kleene">Kleene Star</a>
+  <a href="#complemento">Complemento</a>
+  <a href="#intersecao">Interseção</a>
+  <a href="#demo">Demonstração</a>
+  <a href="#tabela">Tabela</a>
+  <a href="#quiz">Exercícios</a>
+  <a href="#resumo">Resumo</a></nav>
+      <div class="lesson-content"><!-- ══════════════ 1 — PANORAMA ══════════════ -->
+<section id="panorama">
+  <h2><span class="num">1</span> Por que estudar operações?</h2>
+
+  <p>Sabemos construir AFDs para linguagens simples. Mas e quando precisamos de "<em>L₁ mas não L₂</em>", "<em>L₁ seguido de L₂</em>", ou "<em>L repetida qualquer número de vezes</em>"? As <strong>operações sobre linguagens</strong> respondem exatamente isso.</p>
+
+  <p>O resultado mais importante deste módulo é a <strong>propriedade de fechamento</strong>: as linguagens regulares são fechadas sob todas as operações abaixo — ou seja, se você combinar regulares, o resultado também é regular.</p>
+
+  <div class="op-grid">
+    <div class="op-card">
+      <span class="sym">∪</span>
+      <div class="name">União</div>
+      <div class="nota">L₁ ∪ L₂</div>
+      <div class="desc">Strings em L₁ ou em L₂ (ou ambas)</div>
+    </div>
+    <div class="op-card">
+      <span class="sym">∘</span>
+      <div class="name">Concatenação</div>
+      <div class="nota">L₁ ∘ L₂</div>
+      <div class="desc">Strings xy onde x ∈ L₁ e y ∈ L₂</div>
+    </div>
+    <div class="op-card">
+      <span class="sym">★</span>
+      <div class="name">Fecho de Kleene</div>
+      <div class="nota">L*</div>
+      <div class="desc">Concatenação de zero ou mais strings de L</div>
+    </div>
+    <div class="op-card">
+      <span class="sym">∩</span>
+      <div class="name">Interseção</div>
+      <div class="nota">L₁ ∩ L₂</div>
+      <div class="desc">Strings que pertencem a L₁ e a L₂</div>
+    </div>
+    <div class="op-card">
+      <span class="sym">¬</span>
+      <div class="name">Complemento</div>
+      <div class="nota">L̄ = Σ* \ L</div>
+      <div class="desc">Todas as strings que não pertencem a L</div>
+    </div>
+    <div class="op-card">
+      <span class="sym">R</span>
+      <div class="name">Reversão</div>
+      <div class="nota">Lᴿ</div>
+      <div class="desc">Strings de L escritas de trás para frente</div>
+    </div>
+  </div>
+
+  <div class="callout key">
+    <strong>A estratégia de prova:</strong> para mostrar que a operação preserva regularidade, basta construir um autômato para a linguagem resultante usando os autômatos originais como componentes. Cada operação usa uma técnica de construção diferente.
+  </div>
+</section>
+
+<!-- ══════════════ 2 — UNIÃO ══════════════ -->
+<section id="uniao">
+  <h2><span class="num">2</span> União — L₁ ∪ L₂</h2>
+
+  <p>A união de duas linguagens contém todas as strings que pertencem a pelo menos uma delas.</p>
+
+  <div class="fbox teal">
+    <span class="flabel">Definição</span>
+    L₁ ∪ L₂ = { w | w ∈ L₁ ou w ∈ L₂ }
+  </div>
+
+  <h3>Construção por AFN (mais simples)</h3>
+  <p>Dado M₁ = (Q₁, Σ, δ₁, q₁, F₁) e M₂ = (Q₂, Σ, δ₂, q₂, F₂), construímos um AFN N que:</p>
+
+  <div class="card">
+    <strong>1.</strong> Cria um novo estado inicial q₀ (fora de Q₁ e Q₂)<br>
+    <strong>2.</strong> Adiciona ε-transições: δ(q₀, ε) = {q₁, q₂}<br>
+    <strong>3.</strong> Q = {q₀} ∪ Q₁ ∪ Q₂ | F = F₁ ∪ F₂<br>
+    <strong>4.</strong> δ herdado de δ₁ e δ₂ nos respectivos estados<br><br>
+    <em>Resultado:</em> N "escolhe" no-deterministicamente qual máquina rodar. Aceita se qualquer uma das duas aceitar.
+  </div>
+
+  <div class="build-wrap">
+    <div class="build-header">
+      <span>🔵 Construção por AFN — União</span>
+      <span style="font-size:0.82rem; opacity:0.8;">M₁: termina com 'a' | M₂: começa com 'b'</span>
+    </div>
+    <div class="build-body">
+      <canvas id="canvas-union"></canvas>
+      <p style="font-size:0.82rem; color:var(--muted); text-align:center;">
+        Novo estado inicial q₀ com ε-transições para q₁ (início de M₁) e p₁ (início de M₂). Estados com duplo círculo são finais.
+      </p>
+    </div>
+  </div>
+
+  <h3>Construção por produto cartesiano (AFD direto)</h3>
+  <p>Alternativamente, podemos construir um AFD diretamente usando o <strong>produto cartesiano</strong> Q₁ × Q₂. Cada estado do novo AFD é um par (q, p) com q ∈ Q₁ e p ∈ Q₂.</p>
+
+  <div class="card">
+    <strong>M = (Q₁ × Q₂, Σ, δ, (q₁, q₂), F)</strong><br>
+    <code>δ((q, p), a) = (δ₁(q, a), δ₂(p, a))</code><br>
+    Para <strong>união</strong>: F = { (q, p) | q ∈ F₁ <strong>ou</strong> p ∈ F₂ }<br>
+    Para <strong>interseção</strong>: F = { (q, p) | q ∈ F₁ <strong>e</strong> p ∈ F₂ }<br>
+    Para <strong>diferença</strong> L₁ \ L₂: F = { (q, p) | q ∈ F₁ <strong>e</strong> p ∉ F₂ }
+  </div>
+
+  <div class="callout tip">
+    <strong>Ponto POSCOMP:</strong> o produto cartesiano é a prova mais direta de fechamento sob união, interseção e diferença. Memorize: basta mudar a condição de aceitação F — a estrutura de δ é sempre a mesma.
+  </div>
+</section>
+
+<!-- ══════════════ 3 — CONCATENAÇÃO ══════════════ -->
+<section id="concatenacao">
+  <h2><span class="num">3</span> Concatenação — L₁ ∘ L₂</h2>
+
+  <div class="fbox teal">
+    <span class="flabel">Definição</span>
+    L₁ ∘ L₂ = { xy | x ∈ L₁ e y ∈ L₂ }
+    <span class="fsub">Também escrito simplesmente como L₁L₂</span>
+  </div>
+
+  <p>O desafio da concatenação: não sabemos onde x termina e y começa. É exatamente aí que o não-determinismo do AFN é útil.</p>
+
+  <h3>Construção por AFN</h3>
+  <div class="card">
+    <strong>1.</strong> Estado inicial = q₁ (estado inicial de M₁)<br>
+    <strong>2.</strong> Para cada estado f ∈ F₁, adicione ε-transição para q₂ (início de M₂)<br>
+    <strong>3.</strong> Estados finais = F₂ apenas (não mais F₁)<br>
+    <strong>4.</strong> δ herdado de M₁ e M₂<br><br>
+    <em>Intuição:</em> M₁ processa um prefixo; quando chega a um estado final de M₁, um salto ε "passa o bastão" para M₂.
+  </div>
+
+  <div class="build-wrap">
+    <div class="build-header">
+      <span>🟢 Construção AFN — Concatenação</span>
+      <span style="font-size:0.82rem; opacity:0.8;">M₁ ∘ M₂ via ε-transições dos estados finais de M₁ para o início de M₂</span>
+    </div>
+    <div class="build-body">
+      <canvas id="canvas-concat"></canvas>
+      <p style="font-size:0.82rem; color:var(--muted); text-align:center;">
+        ε-transição do estado final de M₁ para o estado inicial de M₂. Apenas os finais de M₂ são finais do resultado.
+      </p>
+    </div>
+  </div>
+
+  <h3>Exemplo</h3>
+  <div class="split">
+    <div class="pane">
+      <h4>L₁ = {a} (aceita só "a")</h4>
+      <p>Estados: q0 →<sup>a</sup> q1★</p>
+    </div>
+    <div class="pane">
+      <h4>L₂ = {b}* (qualquer nº de 'b's)</h4>
+      <p>Estados: p0★ →<sup>b</sup> p0★ (self-loop)</p>
+    </div>
+  </div>
+  <div class="card">
+    <strong>L₁ ∘ L₂ = a·b*</strong> — a string "a" seguida de zero ou mais 'b's.<br>
+    Aceita: "a", "ab", "abb", "abbb"…<br>
+    Rejeita: "b", "ba", "aab", ε…
+  </div>
+</section>
+
+<!-- ══════════════ 4 — KLEENE STAR ══════════════ -->
+<section id="kleene">
+  <h2><span class="num">4</span> Fecho de Kleene — L*</h2>
+
+  <div class="fbox teal">
+    <span class="flabel">Definição</span>
+    L* = { x₁x₂…xₖ | k ≥ 0 e cada xᵢ ∈ L }
+    <span class="fsub">k=0 dá a string vazia ε — portanto ε ∈ L* para qualquer L</span>
+  </div>
+
+  <p>L* é "zero ou mais concatenações de strings de L". O caso k=0 garante que ε sempre pertence a L*.</p>
+
+  <h3>Construção por AFN</h3>
+  <div class="card">
+    <strong>1.</strong> Novo estado inicial q₀ (que também é final — para aceitar ε)<br>
+    <strong>2.</strong> ε-transição de q₀ para o estado inicial original de M<br>
+    <strong>3.</strong> Para cada estado f ∈ F, adicione ε-transição de f de volta para o estado inicial de M<br>
+    <strong>4.</strong> F' = F ∪ {q₀}
+  </div>
+
+  <div class="build-wrap">
+    <div class="build-header">
+      <span>⭐ Construção AFN — Kleene Star</span>
+    </div>
+    <div class="build-body">
+      <canvas id="canvas-star"></canvas>
+      <p style="font-size:0.82rem; color:var(--muted); text-align:center;">
+        Novo q₀ final → ε para M. Do final de M, ε de volta ao início de M. Permite repetir qualquer número de vezes.
+      </p>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Cuidado:</strong> por que precisamos de um novo estado inicial? Se simplesmente transformarmos o estado inicial de M em final, podemos criar comportamentos incorretos. O estado inicial original pode ter transições que não deveriam ser disparadas no início de cada repetição. O novo q₀ isola essa questão.
+  </div>
+
+  <h3>Exemplos importantes</h3>
+  <table>
+    <tr><th>L</th><th>L*</th><th>Observação</th></tr>
+    <tr><td><code>{a}</code></td><td><code>{ε, a, aa, aaa, …} = a*</code></td><td>Qualquer nº de 'a's</td></tr>
+    <tr><td><code>{ab}</code></td><td><code>{ε, ab, abab, ababab, …}</code></td><td>Repetições de "ab"</td></tr>
+    <tr><td><code>∅</code></td><td><code>{ε}</code></td><td>∅* sempre tem ε</td></tr>
+    <tr><td><code>{ε}</code></td><td><code>{ε}</code></td><td>ε* = {ε}</td></tr>
+    <tr><td><code>Σ*</code></td><td><code>Σ*</code></td><td>Σ* é fechado sob Kleene</td></tr>
+  </table>
+</section>
+
+<!-- ══════════════ 5 — COMPLEMENTO ══════════════ -->
+<section id="complemento">
+  <h2><span class="num">5</span> Complemento — L̄</h2>
+
+  <div class="fbox teal">
+    <span class="flabel">Definição</span>
+    L̄ = Σ* \ L = { w ∈ Σ* | w ∉ L }
+  </div>
+
+  <p>O complemento é a operação mais elegante sobre AFDs — e só funciona diretamente em AFDs (não em AFNs). A construção é surpreendentemente simples:</p>
+
+  <div class="card">
+    <strong>Dado AFD M = (Q, Σ, δ, q₀, F), construa M̄ = (Q, Σ, δ, q₀, Q \ F)</strong><br><br>
+    Inverta o conjunto de estados de aceitação: estados que eram finais deixam de ser, e vice-versa.<br><br>
+    <em>A mesma estrutura de δ, o mesmo diagrama — apenas troca quais estados têm o círculo duplo.</em>
+  </div>
+
+  <div class="callout warn">
+    <strong>Atenção crítica:</strong> esta construção exige que o AFD seja <strong>completo</strong> (δ total). Se o AFD tiver transições indefinidas (estado morto implícito), você precisa explicitá-las antes de complementar. Caso contrário, o estado morto se tornaria um estado de aceitação do complemento — o que alteraria a linguagem incorretamente.
+  </div>
+
+  <div class="build-wrap">
+    <div class="build-header"><span>🔴 Complemento — inversão dos estados finais</span></div>
+    <div class="build-body">
+      <canvas id="canvas-complement"></canvas>
+      <p style="font-size:0.82rem; color:var(--muted); text-align:center;">
+        Esquerda: AFD original (aceita strings terminando em 'a'). Direita: complemento (aceita todas as outras).
+      </p>
+    </div>
+  </div>
+
+  <h3>Por que AFN não funciona diretamente?</h3>
+  <p>Se invertermos os estados finais de um AFN, o resultado não é necessariamente o complemento. Isso ocorre porque um AFN aceita se <em>algum</em> caminho aceita. Inverter os estados finais inverte a aceitação de cada caminho individual, mas não do autômato como um todo. Para complementar um AFN, converta-o para AFD primeiro (via construção de subconjuntos) e então inverta.</p>
+</section>
+
+<!-- ══════════════ 6 — INTERSEÇÃO ══════════════ -->
+<section id="intersecao">
+  <h2><span class="num">6</span> Interseção — L₁ ∩ L₂</h2>
+
+  <div class="fbox teal">
+    <span class="flabel">Definição</span>
+    L₁ ∩ L₂ = { w | w ∈ L₁ e w ∈ L₂ }
+  </div>
+
+  <h3>Método 1 — Produto cartesiano (direto, elegante)</h3>
+  <p>Como visto na seção de união, o produto cartesiano funciona para ambas. A única mudança está na condição de aceitação:</p>
+
+  <div class="card">
+    <code>F_∩ = { (q, p) | q ∈ F₁ e p ∈ F₂ }</code>
+    — os dois estados devem ser finais simultaneamente.
+  </div>
+
+  <h3>Método 2 — Lei de De Morgan (usando complemento e união)</h3>
+  <div class="card">
+    <strong>L₁ ∩ L₂ = ¬(¬L₁ ∪ ¬L₂)</strong><br><br>
+    Se temos fechamento sob complemento e união, temos interseção. Esse argumento indireto é frequente em questões teóricas do POSCOMP.
+  </div>
+
+  <h3>Produto cartesiano — exemplo concreto</h3>
+  <p>Seja M₁ o AFD que aceita strings com número par de 'a's (estados: {par, ímpar}) e M₂ o AFD que aceita strings sobre {a,b} terminando em 'b' (estados: {q0, q1}).</p>
+  <p><strong>L₁ ∩ L₂</strong> = strings com número par de 'a's <em>e</em> que terminam em 'b'.</p>
+
+  <div class="build-wrap">
+    <div class="build-header"><span>⊗ Produto Cartesiano — Interseção</span></div>
+    <div class="build-body">
+      <canvas id="canvas-intersection"></canvas>
+      <p style="font-size:0.82rem; color:var(--muted); text-align:center;">
+        Cada estado do AFD produto é um par (estado_M₁, estado_M₂). Final = par de finais.
+      </p>
+    </div>
+  </div>
+
+  <h3>A tabela do produto cartesiano</h3>
+  <table class="product-table">
+    <tr><th>Estado (M₁×M₂)</th><th>Lê 'a'</th><th>Lê 'b'</th><th>Tipo</th></tr>
+    <tr class="pt-initial">
+      <td><code>(par, q0)</code></td>
+      <td><code>(ímpar, q0)</code></td>
+      <td><code>(par, q1)</code></td>
+      <td>→ inicial</td>
+    </tr>
+    <tr>
+      <td><code>(ímpar, q0)</code></td>
+      <td><code>(par, q0)</code></td>
+      <td><code>(ímpar, q1)</code></td>
+      <td>—</td>
+    </tr>
+    <tr class="pt-final">
+      <td><code>(par, q1)</code></td>
+      <td><code>(ímpar, q1)</code></td>
+      <td><code>(par, q1)</code></td>
+      <td>★ final (par ∈ F₁ e q1 ∈ F₂)</td>
+    </tr>
+    <tr>
+      <td><code>(ímpar, q1)</code></td>
+      <td><code>(par, q1)</code></td>
+      <td><code>(ímpar, q1)</code></td>
+      <td>—</td>
+    </tr>
+  </table>
+  <p style="font-size:0.88rem; color:var(--muted); margin-top:0.3rem;">Estado final: (par, q1) — par número de 'a's e último símbolo foi 'b'.</p>
+</section>
+
+<!-- ══════════════ 7 — DEMONSTRAÇÃO INTERATIVA ══════════════ -->
+<section id="demo">
+  <h2><span class="num">7</span> Testador interativo de operações</h2>
+  <p>Teste strings contra as linguagens combinadas. As linguagens base são: <strong>L₁</strong> = strings binárias com número par de 1s | <strong>L₂</strong> = strings binárias terminando em '0'.</p>
+
+  <div id="op-demo">
+    <div class="demo-header">
+      <h3>🧪 Testador de Operações</h3>
+      <span class="demo-badge">L₁ e L₂ sobre {0, 1}</span>
+    </div>
+    <div class="demo-body">
+
+      <div class="op-tabs">
+        <button class="op-tab active" onclick="setOp('union', this)">L₁ ∪ L₂</button>
+        <button class="op-tab" onclick="setOp('intersection', this)">L₁ ∩ L₂</button>
+        <button class="op-tab" onclick="setOp('complement1', this)">¬L₁</button>
+        <button class="op-tab" onclick="setOp('complement2', this)">¬L₂</button>
+        <button class="op-tab" onclick="setOp('difference', this)">L₁ \ L₂</button>
+        <button class="op-tab" onclick="setOp('l1', this)">Só L₁</button>
+        <button class="op-tab" onclick="setOp('l2', this)">Só L₂</button>
+      </div>
+
+      <div id="demo-desc" class="demo-desc"></div>
+
+      <div class="demo-input-row">
+        <label>String sobre {0,1}:</label>
+        <input type="text" id="demo-input" placeholder="ex: 0110" maxlength="20">
+        <div class="demo-controls">
+          <button class="demo-btn btn-teal" onclick="demoRun()">▶ Testar</button>
+          <button class="demo-btn btn-sec" onclick="demoReset()">↺</button>
+        </div>
+      </div>
+
+      <div id="demo-log"><span style="color:var(--muted);">Selecione uma operação, digite uma string e clique em Testar.</span></div>
+      <div id="demo-result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 8 — TABELA DE FECHAMENTO ══════════════ -->
+<section id="tabela">
+  <h2><span class="num">8</span> Tabela de fechamento — linguagens regulares</h2>
+
+  <p>Esta é a tabela que o POSCOMP adora cobrar. Regulares são fechadas sob todas as operações abaixo:</p>
+
+  <table class="closure-table">
+    <tr><th>Operação</th><th>Regular fechada?</th><th>Técnica de prova</th><th>Complexidade</th></tr>
+    <tr>
+      <td>União (∪)</td>
+      <td class="yes">✓ Sim</td>
+      <td>AFN com novo q₀ + ε-trans, ou produto cartesiano</td>
+      <td>|Q₁| + |Q₂| + 1 (AFN); |Q₁|·|Q₂| (AFD)</td>
+    </tr>
+    <tr>
+      <td>Concatenação (∘)</td>
+      <td class="yes">✓ Sim</td>
+      <td>AFN com ε-trans dos finais de M₁ para início de M₂</td>
+      <td>|Q₁| + |Q₂|</td>
+    </tr>
+    <tr>
+      <td>Kleene Star (*)</td>
+      <td class="yes">✓ Sim</td>
+      <td>AFN com novo q₀ final + ε-trans de volta ao início</td>
+      <td>|Q| + 1</td>
+    </tr>
+    <tr>
+      <td>Complemento (¬)</td>
+      <td class="yes">✓ Sim</td>
+      <td>Inverter estados finais do AFD completo</td>
+      <td>|Q| (mesmo AFD)</td>
+    </tr>
+    <tr>
+      <td>Interseção (∩)</td>
+      <td class="yes">✓ Sim</td>
+      <td>Produto cartesiano com F = F₁ × F₂</td>
+      <td>|Q₁| · |Q₂|</td>
+    </tr>
+    <tr>
+      <td>Diferença (L₁\L₂)</td>
+      <td class="yes">✓ Sim</td>
+      <td>Produto cartesiano com F = F₁ × (Q₂\F₂)</td>
+      <td>|Q₁| · |Q₂|</td>
+    </tr>
+    <tr>
+      <td>Reversão (Lᴿ)</td>
+      <td class="yes">✓ Sim</td>
+      <td>Inverter todas as arestas do AFD + trocar inicial/final</td>
+      <td>|Q| (gera AFN)</td>
+    </tr>
+    <tr>
+      <td>Homomorfismo</td>
+      <td class="yes">✓ Sim</td>
+      <td>Substituir símbolos; aplicar ao AFD</td>
+      <td>Depende do homomorfismo</td>
+    </tr>
+    <tr>
+      <td>Homomorfismo inverso</td>
+      <td class="yes">✓ Sim</td>
+      <td>Pré-composição com M; δ'(q, a) = δ(q, h(a))</td>
+      <td>|Q| (mesmo)</td>
+    </tr>
+  </table>
+
+  <div class="callout ok">
+    <strong>Contraste com linguagens livres de contexto (LLC):</strong> LLCs são fechadas sob ∪, ∘ e *, mas <strong>não</strong> sob ∩ (em geral), ¬ ou \. Isso é uma distinção clássica do POSCOMP — regulares têm fechamento mais amplo.
+  </div>
+
+  <h3>Argumento de fechamento por De Morgan</h3>
+  <div class="card">
+    Uma vez estabelecido fechamento sob ∪ e ¬, obtemos ∩ e \ de graça:<br><br>
+    <code>L₁ ∩ L₂ = ¬(¬L₁ ∪ ¬L₂)</code> &nbsp;&nbsp;&nbsp; (De Morgan)<br>
+    <code>L₁ \ L₂ = L₁ ∩ ¬L₂</code><br><br>
+    Esse tipo de argumento é o que o POSCOMP chama de "prova por redução a operações conhecidas".
+  </div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section id="quiz">
+  <h2><span class="num">9</span> Exercícios — estilo POSCOMP</h2>
+
+  <div class="quiz">
+    <h3>Questão 1</h3>
+    <p>Sejam L₁ e L₂ linguagens regulares sobre Σ = {a, b}. Qual operação NÃO é garantida de produzir uma linguagem regular?</p>
+    <div class="options" id="q1">
+      <label class="opt"><input type="radio" name="q1" value="A"> A) L₁ ∩ L₂</label>
+      <label class="opt"><input type="radio" name="q1" value="B"> B) L₁ ∘ L₂</label>
+      <label class="opt"><input type="radio" name="q1" value="C"> C) L₁* ∩ L₂*</label>
+      <label class="opt"><input type="radio" name="q1" value="D"> D) Nenhuma — todas produzem regular</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q1','D','e1')">Verificar</button>
+    <div class="quiz-result" id="q1-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 2</h3>
+    <p>Para construir o complemento de uma linguagem regular L reconhecida por um AFD M, a operação correta é:</p>
+    <div class="options" id="q2">
+      <label class="opt"><input type="radio" name="q2" value="A"> A) Inverter todas as transições de M</label>
+      <label class="opt"><input type="radio" name="q2" value="B"> B) Trocar o estado inicial pelo conjunto de estados finais</label>
+      <label class="opt"><input type="radio" name="q2" value="C"> C) Inverter o conjunto de estados finais: F' = Q \ F</label>
+      <label class="opt"><input type="radio" name="q2" value="D"> D) Aplicar a construção de subconjuntos e então inverter</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q2','C','e2')">Verificar</button>
+    <div class="quiz-result" id="q2-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 3 — POSCOMP nível difícil</h3>
+    <p>L₁ e L₂ são regulares. Qual afirmação é verdadeira sobre a interseção L₁ ∩ L₂ de duas linguagens livres de contexto (não regulares)?</p>
+    <div class="options" id="q3">
+      <label class="opt"><input type="radio" name="q3" value="A"> A) Sempre é livre de contexto</label>
+      <label class="opt"><input type="radio" name="q3" value="B"> B) Sempre é regular</label>
+      <label class="opt"><input type="radio" name="q3" value="C"> C) Pode não ser livre de contexto — LLC não é fechada sob interseção</label>
+      <label class="opt"><input type="radio" name="q3" value="D"> D) Sempre é sensível ao contexto mas nunca regular</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q3','C','e3')">Verificar</button>
+    <div class="quiz-result" id="q3-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 4</h3>
+    <p>Na construção do produto cartesiano M = M₁ × M₂, o número de estados de M é:</p>
+    <div class="options" id="q4">
+      <label class="opt"><input type="radio" name="q4" value="A"> A) |Q₁| + |Q₂|</label>
+      <label class="opt"><input type="radio" name="q4" value="B"> B) |Q₁| × |Q₂|</label>
+      <label class="opt"><input type="radio" name="q4" value="C"> C) 2^(|Q₁| + |Q₂|)</label>
+      <label class="opt"><input type="radio" name="q4" value="D"> D) max(|Q₁|, |Q₂|)</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q4','B','e4')">Verificar</button>
+    <div class="quiz-result" id="q4-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 5</h3>
+    <p>Considere L = {w ∈ {0,1}* | w contém igual número de 0s e 1s}. Qual das afirmações é correta?</p>
+    <div class="options" id="q5">
+      <label class="opt"><input type="radio" name="q5" value="A"> A) L é regular pois pode ser descrita por expressão regular</label>
+      <label class="opt"><input type="radio" name="q5" value="B"> B) L é regular pois é fechamento de linguagens regulares simples</label>
+      <label class="opt"><input type="radio" name="q5" value="C"> C) L não é regular — não pode ser reconhecida por AFD (requer memória ilimitada para contar)</label>
+      <label class="opt"><input type="radio" name="q5" value="D"> D) L é regular, pois todo AFN pode reconhecê-la</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q5','C','e5')">Verificar</button>
+    <div class="quiz-result" id="q5-res"></div>
+  </div>
+</section>
+
+<!-- ══════════════ RESUMO ══════════════ -->
+<section id="resumo">
+  <h2><span class="num">10</span> Resumo do módulo</h2>
+
+  <div class="summary">
+    <h3>O que você agora domina:</h3>
+    <div class="row">As linguagens regulares são fechadas sob união, concatenação, Kleene star, complemento, interseção e diferença.</div>
+    <div class="row">União via AFN: novo estado inicial com ε-transições para ambas as máquinas.</div>
+    <div class="row">Concatenação via AFN: ε-transições dos finais de M₁ para o início de M₂.</div>
+    <div class="row">Kleene star: novo estado inicial final + ε-transições de volta ao início de M.</div>
+    <div class="row">Complemento: inverter F no AFD completo — Q \ F. Só funciona diretamente em AFD.</div>
+    <div class="row">Interseção/diferença: produto cartesiano Q₁ × Q₂ com condição de aceitação ajustada.</div>
+    <div class="row">LLCs NÃO são fechadas sob interseção nem complemento — distinção crítica para POSCOMP.</div>
+    <div class="row">De Morgan: fechamento sob ∩ segue de fechamento sob ∪ e ¬.</div>
+  </div>
+
+  <h3>O que vem no próximo módulo</h3>
+  <div class="card">
+    O Módulo 5 apresenta a <strong>minimização de AFD</strong> — o algoritmo que encontra o menor AFD possível para uma linguagem regular. Você verá o algoritmo de particionamento de Myhill-Nerode, estados equivalentes/distinguíveis, e como provar que dois AFDs reconhecem a mesma linguagem.
+  </div>
+</section>
+
+<div class="mod-nav">
+  <a href="modulo-03-afn.html" class="mod-btn">
+    <span class="dir">← Anterior</span>
+    Módulo 3: AFN
+  </a>
+  <a href="#" class="mod-btn next">
+    <span class="dir">Próximo →</span>
+    Módulo 5: Minimização de AFD
+  </a>
+</div></div>
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="modulo-03.html">← Módulo anterior</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 4 de 9</div>
+        </div>
+        <a class="btn-nav next" href="modulo-05.html">Próximo módulo →</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);localStorage.setItem('sb-state',c?'collapsed':'expanded')}
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+</script>
+</body>
+</html>

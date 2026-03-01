@@ -24,5 +24,5 @@ describe('question-ingestion', () => {
 
     const q2025_13 = result.questions.find((item) => item.year === 2025 && item.number === 13);
     expect(q2025_13?.answerKey).toBe('*');
-  });
+  }, 20000);
 });

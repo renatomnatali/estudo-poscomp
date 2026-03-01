@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 6 — Expressões Regulares · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  /* original module vars */
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item::before{display:none}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}.sidebar.collapsed .sb-sep{margin:.4rem .8rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:66%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500)}.topbar-icon-btn:hover{background:var(--n100)}
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#1a6bcc 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+/* SECTION NAV */
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover{background:rgba(255,255,255,.15);color:white}.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+/* CONTENT */
+.lesson-content{max-width:900px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.75}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0;font-size:.92rem;line-height:1.7}
+.callout{border-left:4px solid var(--accent);background:#e8f0fe;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem}.callout.warning{border-color:var(--accent2);background:#fff3e0}.callout.success{border-color:var(--green);background:#e8f5ee}.callout strong{color:var(--primary)}
+.formula-box{background:var(--primary);color:white;border-radius:12px;padding:1.4rem 2rem;text-align:center;margin:1.5rem 0;font-size:1.3rem;font-family:Georgia,serif}
+.formula-box .label{font-size:.75rem;opacity:.7;display:block;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;font-family:var(--fb)}.formula-box .sub{font-size:.85rem;opacity:.85;display:block;margin-top:.5rem;font-family:var(--fb)}
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.analogy .side{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.analogy .side h4{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}.analogy .side .val{font-size:1rem;font-weight:600;color:var(--primary)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--primary);color:white;padding:.65rem 1rem;text-align:left}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+tr:nth-child(even) td{background:#f5f8ff}tr:hover td{background:#e8f0fe}
+.highlight-row td{background:#fff3cd!important;font-weight:600}
+.automaton-viz{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.8rem;margin:1.5rem 0;text-align:center}
+.states{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.state{width:70px;height:70px;border-radius:50%;border:3px solid var(--accent);background:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--primary);position:relative}
+.state.initial::before{content:'▶';position:absolute;left:-22px;color:var(--accent2);font-size:1rem}
+.state.final{box-shadow:0 0 0 5px white,0 0 0 8px var(--accent)}
+.arrow{font-size:1.5rem;color:var(--accent2);position:relative}.arrow span{position:absolute;top:-1.2rem;left:50%;transform:translateX(-50%);font-size:.8rem;color:var(--muted);white-space:nowrap;font-family:monospace;background:var(--bg);padding:0 4px}
+.step-trace{margin:1rem 0}.step{display:flex;align-items:flex-start;gap:1rem;margin:.5rem 0;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.9rem}
+.step .badge{background:var(--accent);color:white;border-radius:6px;padding:2px 10px;font-size:.78rem;white-space:nowrap;flex-shrink:0;font-family:monospace}.step .badge.ok{background:var(--green)}.step .badge.fail{background:var(--red)}
+.step .body{font-size:.9rem;line-height:1.6}.step .body code,.step code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.comparison .col{border-radius:10px;padding:1.2rem;font-size:.9rem}.comparison .col.dfa{background:#e8f5ee;border:1px solid #a8d8b8}.comparison .col.nfa{background:#fff3e0;border:1px solid #f0c070}.comparison h4{margin-bottom:.5rem;font-size:.92rem}
+.applications{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin:1rem 0}.app-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.app-card .icon{font-size:1.8rem;margin-bottom:.5rem}.app-card h4{color:var(--primary);font-size:.9rem;margin-bottom:.3rem}.app-card p{font-size:.82rem;color:var(--muted);margin:0}
+.summary-box{background:var(--primary);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}.summary-box h3{color:white;margin-bottom:1rem;font-size:1.1rem}.summary-box .row{display:flex;gap:.5rem;margin:.4rem 0;align-items:flex-start;font-size:.9rem}.summary-box .row::before{content:'✓';color:#7ef0a0;flex-shrink:0;font-weight:700}
+/* quiz / interactive */
+.quiz-option{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f8faff;margin:.4rem 0;font-size:.9rem}.quiz-option:hover{background:#e8f0fe;border-color:var(--accent)}
+.quiz-option.selected{background:#e8f0fe;border-color:var(--accent)}.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05);position:sticky;bottom:0}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:66%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap)}.btn-nav.next:hover{background:var(--sap-d)}
+/* EXTRAS from original */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .breadcrumb { font-size: 0.8rem; opacity: 0.65; margin-bottom: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+  .module-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; display: inline-block; padding: 4px 16px; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1rem; }
+  header h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem; }
+  header .subtitle { opacity: 0.85; font-size: 1.05rem; max-width: 620px; margin: 0 auto 1.5rem; }
+  .header-meta { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+  .header-meta span { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 6px; margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .progress-fill { background: white; border-radius: 4px; height: 100%; width: 75%; }
+  .progress-label { font-size: 0.78rem; opacity: 0.7; text-align: center; margin-top: 0.3rem; }
+  nav a { color: rgba(255,255,255,0.75); text-decoration: none; padding: 5px 11px; font-size: 0.82rem; border-radius: 4px; }
+  nav a:hover { background: rgba(255,255,255,0.15); color: white; }
+  section { margin-bottom: 3.5rem; scroll-margin-top: 60px; }
+  h2 { color: var(--primary); font-size: 1.55rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--purple); }
+  h2 .num { background: var(--purple); color: white; min-width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.88rem; font-weight: 700; flex-shrink: 0; }
+  h3 { color: var(--purple); font-size: 1.08rem; margin: 1.6rem 0 0.6rem; }
+  p { margin-bottom: 0.9rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.6rem; margin: 1rem 0; }
+  .callout { border-left: 4px solid var(--accent); background: var(--code-bg); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1.1rem 0; }
+  .callout.warn { border-color: var(--orange); background: #fff3e0; }
+  .callout.ok { border-color: var(--green); background: #e4f4ec; }
+  .callout.tip { border-color: var(--purple); background: #ede8f8; }
+  .callout.key { border-color: var(--primary); background: #e8f0fe; border-width: 4px; }
+  .callout strong { color: var(--primary); }
+  .callout.tip strong { color: var(--purple); }
+
+  .fbox { background: var(--primary); color: white; border-radius: 12px; padding: 1.4rem 2rem; text-align: center; margin: 1.5rem 0; font-family: 'Georgia', serif; }
+  .fbox.purple { background: linear-gradient(135deg, #0d2d6b, #6c3faa); }
+  .fbox .flabel { font-size: 0.75rem; opacity: 0.65; display: block; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.4rem; font-family: 'Segoe UI', sans-serif; }
+  .fbox .fsub { font-size: 0.88rem; opacity: 0.8; display: block; margin-top: 0.5rem; font-family: 'Segoe UI', sans-serif; }
+
+  code { background: var(--code-bg); color: var(--purple); padding: 2px 7px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.9rem; }
+  .re { font-family: 'Georgia', serif; font-size: 1.05rem; color: var(--purple2); font-style: italic; }
+
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.93rem; }
+  th { background: var(--primary); color: white; padding: 0.7rem 1rem; text-align: left; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #f5f0fc; }
+  tr:hover td { background: #ede8f8; }
+  .hl td { background: #ddd0f8 !important; font-weight: 600; color: var(--purple2); }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .split .pane { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; }
+  .split .pane h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.6rem; }
+
+  /* ── ER SYNTAX HIGHLIGHT ── */
+  .re-block { background: #1a0a2e; color: #e0c8ff; border-radius: 10px; padding: 1.2rem 1.5rem; font-family: 'Consolas', monospace; font-size: 1.1rem; margin: 0.8rem 0; line-height: 2; }
+  .re-block .op { color: #ff9d5c; } /* operadores */
+  .re-block .sym { color: #7dd3fc; } /* símbolos */
+  .re-block .eps { color: #86efac; } /* ε */
+  .re-block .grp { color: #fbbf24; } /* parênteses */
+  .re-block .comment { color: #6b7280; font-style: italic; font-size: 0.85rem; margin-left: 1.5rem; }
+
+  /* ── THOMPSON CANVAS ── */
+  .thompson-wrap { background: var(--card); border: 2px solid var(--border); border-radius: 14px; overflow: hidden; margin: 1.5rem 0; }
+  .thompson-header { background: linear-gradient(90deg, #0d2d6b, #6c3faa); color: white; padding: 0.9rem 1.4rem; font-weight: 700; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+  .thompson-body { padding: 1.2rem; }
+  canvas.tc { display: block; width: 100%; border: 1px solid var(--border); border-radius: 8px; background: #faf4ff; margin-bottom: 0.6rem; }
+
+  /* ── CONSTRUTOR INTERATIVO ── */
+  #re-builder { background: var(--card); border: 2px solid var(--border); border-radius: 16px; overflow: hidden; margin: 1.5rem 0; box-shadow: 0 4px 20px rgba(108,63,170,0.1); }
+  .rb-header { background: linear-gradient(90deg, #0d2d6b, #6c3faa); color: white; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+  .rb-header h3 { font-size: 1rem; margin: 0; }
+  .rb-badge { background: rgba(255,255,255,0.2); border-radius: 6px; padding: 3px 10px; font-size: 0.78rem; }
+  .rb-body { padding: 1.4rem 1.5rem; }
+
+  .re-input-row { display: flex; gap: 0.7rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+  .re-input-row label { font-size: 0.88rem; font-weight: 600; color: var(--primary); }
+  #re-input { font-family: 'Georgia', serif; font-size: 1.2rem; padding: 8px 14px; border: 2px solid var(--border); border-radius: 8px; width: 220px; color: var(--purple2); }
+  #re-input:focus { outline: none; border-color: var(--purple); }
+  #str-input { font-family: 'Consolas', monospace; font-size: 1rem; padding: 7px 12px; border: 2px solid var(--border); border-radius: 8px; width: 160px; }
+  #str-input:focus { outline: none; border-color: var(--purple); }
+
+  .rb-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .rb-btn { padding: 7px 16px; border: none; border-radius: 7px; cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+  .btn-purple { background: var(--purple); color: white; }
+  .btn-purple:hover { background: var(--purple2); }
+  .btn-sec { background: var(--bg); border: 1px solid var(--border); color: var(--primary); }
+  .btn-sec:hover { background: #ede8f8; }
+
+  .re-presets { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .re-preset { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 0.82rem; cursor: pointer; font-family: 'Georgia', serif; color: var(--purple2); }
+  .re-preset:hover { background: var(--purple); color: white; border-color: var(--purple); }
+
+  #re-result { padding: 0.9rem 1.2rem; border-radius: 10px; font-size: 1rem; font-weight: 600; margin-top: 0.8rem; display: none; }
+  #re-result.accept { background: #e4f4ec; border: 2px solid var(--green); color: #0e6e3a; }
+  #re-result.reject { background: #fdecea; border: 2px solid var(--red); color: var(--red); }
+  #re-status { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
+
+  /* Árvore de análise */
+  #re-tree-canvas { width: 100%; height: 160px; border: 1px solid var(--border); border-radius: 8px; background: #faf4ff; display: block; margin: 0.8rem 0; }
+
+  /* ── TABELA DE PRECEDÊNCIA ── */
+  .prec-table td:first-child { font-family: 'Georgia', serif; font-size: 1.05rem; color: var(--purple2); font-style: italic; }
+
+  /* QUIZ */
+  .quiz { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .quiz h3 { color: var(--primary); font-size: 1rem; margin-bottom: 1rem; }
+  .quiz h3::before { content: '🧠 '; }
+  .options { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+  .opt { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 0.9rem; background: var(--bg); }
+  .opt:hover { background: #ede8f8; border-color: var(--purple); }
+  .opt input { accent-color: var(--purple); margin-top: 3px; flex-shrink: 0; }
+  .quiz-btn { margin-top: 1rem; background: var(--purple); color: white; border: none; padding: 8px 22px; border-radius: 7px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+  .quiz-btn:hover { background: var(--purple2); }
+  .quiz-result { margin-top: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; display: none; }
+  .quiz-result.show { display: block; }
+  .quiz-result.correct { background: #e4f4ec; border: 1px solid #90c8a0; color: #0e6e3a; }
+  .quiz-result.wrong { background: #fdecea; border: 1px solid #f0a8a0; color: var(--red); }
+
+  .summary { background: linear-gradient(135deg, #0d2d6b, #6c3faa); color: white; border-radius: 14px; padding: 2rem; margin: 2rem 0; }
+  .summary h3 { color: white; margin-bottom: 1rem; }
+  .summary .row { display: flex; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  .summary .row::before { content: '✓'; color: #c8a0ff; font-weight: 700; flex-shrink: 0; }
+
+  .mod-nav { display: flex; justify-content: space-between; align-items: center; margin: 3rem 0 1rem; gap: 1rem; flex-wrap: wrap; }
+  .mod-btn { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 1rem 1.4rem; text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; flex: 1; min-width: 160px; }
+  .mod-btn:hover { border-color: var(--purple); background: #ede8f8; }
+  .mod-btn.next { background: var(--purple); color: white; border-color: var(--purple); text-align: right; }
+  .mod-btn.next:hover { background: var(--purple2); border-color: var(--purple2); }
+  .mod-btn .dir { display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7; margin-bottom: 2px; }
+
+  @media (max-width: 640px) {
+    .split { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.8rem; }
+  }
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .analogy,.comparison{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">1 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div>
+        <a class="sb-item " href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas</span></a>
+        <a class="sb-item " href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div>
+        <a class="sb-item " href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Linguagens Formais</a><span class="sep">›</span>
+        <span class="current">Módulo 6 — Expressões Regulares</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header"><div class="breadcrumb">POSCOMP Visual Lab › Autômatos</div>
+  <div class="module-badge">Módulo 6 de 8</div>
+  <h1>Expressões Regulares</h1>
+  <p class="subtitle">A notação algébrica das linguagens regulares — e as três conversões que fecham o triângulo AFD ↔ AFN ↔ ER.</p>
+  <div class="header-meta">
+    <span>⏱ ~60 min</span>
+    <span>📐 Nível: Intermediário</span>
+    <span>⚙️ Testador de ER + Construção de Thompson</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div class="progress-label">Módulo 6 de 8 — Expressões Regulares</div></div>
+      <nav class="section-nav" id="sectionNav"><a href="#sintaxe">Sintaxe</a>
+  <a href="#semantica">Semântica</a>
+  <a href="#precedencia">Precedência</a>
+  <a href="#exemplos">Exemplos</a>
+  <a href="#testador">Testador</a>
+  <a href="#thompson">Thompson</a>
+  <a href="#eliminacao">ER→AFD</a>
+  <a href="#triangulo">Triângulo</a>
+  <a href="#quiz">Exercícios</a>
+  <a href="#resumo">Resumo</a></nav>
+      <div class="lesson-content"><!-- ══════════════ 1 — SINTAXE ══════════════ -->
+<section id="sintaxe">
+  <h2><span class="num">1</span> O que é uma expressão regular?</h2>
+
+  <p>Uma <strong>expressão regular (ER)</strong> é uma fórmula que descreve um conjunto de strings — uma linguagem — usando três operações primitivas: <em>união</em>, <em>concatenação</em> e <em>fecho de Kleene</em>.</p>
+
+  <p>Diferente de um autômato (que é uma máquina), uma ER é uma notação <em>declarativa</em>: ela descreve o que a linguagem contém, não como reconhecê-la.</p>
+
+  <div class="fbox purple">
+    <span class="flabel">Definição indutiva — Expressão Regular sobre Σ</span>
+    <div style="text-align:left; max-width:420px; margin:0.8rem auto 0; font-size:0.95rem; line-height:2;">
+      Base:<br>
+      &nbsp;&nbsp;• ∅ é uma ER (linguagem vazia)<br>
+      &nbsp;&nbsp;• ε é uma ER (linguagem {ε})<br>
+      &nbsp;&nbsp;• a é uma ER para cada a ∈ Σ (linguagem {a})<br>
+      Indução: se R e S são ERs, então:<br>
+      &nbsp;&nbsp;• (R ∪ S) é uma ER — união<br>
+      &nbsp;&nbsp;• (R ∘ S) ou (RS) é uma ER — concatenação<br>
+      &nbsp;&nbsp;• (R*) é uma ER — fecho de Kleene
+    </div>
+  </div>
+
+  <h3>Notação na prática</h3>
+  <table>
+    <tr><th>Operação</th><th>Notação formal</th><th>Notação comum</th><th>Significado</th></tr>
+    <tr><td>União</td><td><code>R ∪ S</code></td><td><code>R|S</code></td><td>Strings em R ou S</td></tr>
+    <tr><td>Concatenação</td><td><code>R ∘ S</code></td><td><code>RS</code></td><td>String de R seguida de string de S</td></tr>
+    <tr><td>Kleene star</td><td><code>R*</code></td><td><code>R*</code></td><td>Zero ou mais repetições de R</td></tr>
+    <tr><td>Kleene plus</td><td><code>R ∘ R*</code></td><td><code>R+</code></td><td>Uma ou mais repetições de R (abreviação)</td></tr>
+    <tr><td>Opcional</td><td><code>ε ∪ R</code></td><td><code>R?</code></td><td>Zero ou uma ocorrência de R (abreviação)</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <strong>R+ e R? são abreviações</strong> — não são operações primitivas. O modelo mínimo usa apenas ∪, concatenação e *. As formas abreviadas aparecem em ferramentas práticas (grep, sed, linguagens de programação) mas não na definição teórica.
+  </div>
+</section>
+
+<!-- ══════════════ 2 — SEMÂNTICA ══════════════ -->
+<section id="semantica">
+  <h2><span class="num">2</span> Semântica — o que cada ER denota</h2>
+
+  <p>Cada ER R denota uma linguagem L(R). A definição é indutiva, acompanhando a sintaxe:</p>
+
+  <table>
+    <tr><th>Expressão</th><th>Linguagem denotada L(R)</th></tr>
+    <tr><td><code>∅</code></td><td>∅ (linguagem vazia — nenhuma string)</td></tr>
+    <tr><td><code>ε</code></td><td>{ε} (apenas a string vazia)</td></tr>
+    <tr><td><code>a</code></td><td>{a} (string de comprimento 1)</td></tr>
+    <tr><td><code>R|S</code></td><td>L(R) ∪ L(S)</td></tr>
+    <tr><td><code>RS</code></td><td>L(R) ∘ L(S) = {xy | x∈L(R), y∈L(S)}</td></tr>
+    <tr class="hl"><td><code>R*</code></td><td>L(R)* = {x₁x₂…xₖ | k≥0, cada xᵢ∈L(R)}</td></tr>
+  </table>
+
+  <div class="callout key">
+    <strong>Teorema de Kleene:</strong> uma linguagem é regular se e somente se pode ser descrita por uma expressão regular. Esse é o terceiro lado do triângulo: ER, AFD e AFN reconhecem exatamente as mesmas linguagens.
+  </div>
+
+  <h3>Identidades algébricas importantes</h3>
+  <div class="card">
+    <table style="font-size:0.88rem; margin:0;">
+      <tr><th>Identidade</th><th>Explicação</th></tr>
+      <tr><td><code>∅* = ε</code></td><td>Zero concatenações de strings de ∅ dá ε</td></tr>
+      <tr><td><code>ε* = ε</code></td><td>Kleene de ε ainda é só ε</td></tr>
+      <tr><td><code>∅R = R∅ = ∅</code></td><td>Concatenar com ∅ anula tudo</td></tr>
+      <tr><td><code>εR = Rε = R</code></td><td>ε é o neutro da concatenação</td></tr>
+      <tr><td><code>∅|R = R|∅ = R</code></td><td>∅ é o neutro da união</td></tr>
+      <tr><td><code>R** = R*</code></td><td>Star é idempotente</td></tr>
+      <tr><td><code>(R|S)* = (R*S*)* = (R*|S*)*</code></td><td>Identidade de Kleene</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════ 3 — PRECEDÊNCIA ══════════════ -->
+<section id="precedencia">
+  <h2><span class="num">3</span> Precedência e parênteses</h2>
+
+  <p>Assim como em aritmética, a precedência determina como uma ER sem parênteses é lida. Da maior para a menor prioridade:</p>
+
+  <table class="prec-table">
+    <tr><th>Prioridade</th><th>Operação</th><th>Exemplo</th><th>Leitura</th></tr>
+    <tr><td>1 (maior)</td><td>Kleene star <code>*</code></td><td><code>ab*</code></td><td><code>a(b*)</code> — a seguido de zero ou mais b's</td></tr>
+    <tr><td>2</td><td>Concatenação</td><td><code>ab|c</code></td><td><code>(ab)|c</code> — "ab" ou "c"</td></tr>
+    <tr><td>3 (menor)</td><td>União <code>|</code></td><td><code>a|bc*</code></td><td><code>a|(b(c*))</code> — "a" ou b seguido de c's</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <strong>Erro clássico:</strong> <code>ab*</code> não é "(ab)*". O star se aplica apenas ao <code>b</code>. Para a string repetida, use parênteses: <code>(ab)*</code>.
+  </div>
+
+  <h3>Exemplos de análise de precedência</h3>
+  <div class="split">
+    <div class="pane">
+      <h4>Expressão: <span class="re">a|b*c</span></h4>
+      <p>Análise: star primeiro → <code>a | (b*)(c)</code><br>
+      Lê: "a" ou "qualquer nº de b's seguido de um c"</p>
+    </div>
+    <div class="pane">
+      <h4>Expressão: <span class="re">(a|b)*c</span></h4>
+      <p>Análise: parênteses primeiro → <code>((a|b)*)c</code><br>
+      Lê: "qualquer sequência de a's e b's seguida de c"</p>
+    </div>
+    <div class="pane">
+      <h4>Expressão: <span class="re">a(b|c)*d</span></h4>
+      <p>Análise: <code>a ((b|c)*) d</code><br>
+      Lê: "a, depois qualquer mix de b's e c's, depois d"</p>
+    </div>
+    <div class="pane">
+      <h4>Expressão: <span class="re">0*(1|ε)0*</span></h4>
+      <p>Análise: <code>(0*)(1|ε)(0*)</code><br>
+      Lê: "zeros, opcionalmente um 1, mais zeros" = binários com no máximo um '1'</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 4 — EXEMPLOS ══════════════ -->
+<section id="exemplos">
+  <h2><span class="num">4</span> Expressões regulares e suas linguagens</h2>
+
+  <table>
+    <tr><th>ER sobre {a,b} ou {0,1}</th><th>Linguagem denotada</th></tr>
+    <tr><td><code>a*b*</code></td><td>Zero ou mais a's seguidos de zero ou mais b's: ε, a, b, aa, ab, aab, abb…</td></tr>
+    <tr><td><code>(a|b)*</code></td><td>Todas as strings sobre {a,b} incluindo ε = Σ*</td></tr>
+    <tr><td><code>(a|b)*aba(a|b)*</code></td><td>Strings sobre {a,b} que contêm "aba" como subpalavra</td></tr>
+    <tr><td><code>b*(ab*)*</code></td><td>Strings sobre {a,b} com número par de a's? — não; esta é Σ*</td></tr>
+    <tr><td><code>(aa)*</code></td><td>Strings de a's com comprimento par: ε, aa, aaaa, …</td></tr>
+    <tr><td><code>0*10*</code></td><td>Strings binárias com exatamente um '1'</td></tr>
+    <tr><td><code>(0|1)*00(0|1)*</code></td><td>Strings binárias que contêm "00" como subpalavra</td></tr>
+    <tr><td><code>(01|10|11|00)*</code></td><td>Strings binárias de comprimento par</td></tr>
+    <tr><td><code>ε|a|aa</code></td><td>Strings de a's com comprimento 0, 1 ou 2</td></tr>
+  </table>
+
+  <h3>Linguagens que NÃO são regulares — e portanto não têm ER</h3>
+  <div class="callout warn">
+    <strong>Não existe ER para:</strong><br>
+    • <code>{aⁿbⁿ | n ≥ 0}</code> — requer contar<br>
+    • <code>{ww | w ∈ {a,b}*}</code> — requer memória ilimitada da primeira metade<br>
+    • <code>{w ∈ {a,b}* | w é palíndromo}</code> — requer verificação simétrica<br><br>
+    A prova usa o Lema do Bombeamento (Módulo 8).
+  </div>
+</section>
+
+<!-- ══════════════ 5 — TESTADOR ══════════════ -->
+<section id="testador">
+  <h2><span class="num">5</span> Testador de Expressões Regulares</h2>
+
+  <div id="re-builder">
+    <div class="rb-header">
+      <h3>🔬 Testador de ER</h3>
+      <span class="rb-badge">Subset do JavaScript RegExp</span>
+    </div>
+    <div class="rb-body">
+
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.8rem;">
+        Sintaxe suportada: <code>a</code> <code>ab</code> (concat) <code>a|b</code> (união) <code>a*</code> <code>a+</code> <code>a?</code> <code>(ER)</code>.
+        Use <code>ε</code> ou deixe campo vazio para string vazia.
+      </p>
+
+      <div style="margin-bottom:0.8rem;">
+        <div style="font-size:0.78rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:0.4rem;">Exemplos prontos</div>
+        <div class="re-presets">
+          <button class="re-preset" onclick="setRE('(a|b)*aba(a|b)*')">contém "aba"</button>
+          <button class="re-preset" onclick="setRE('(aa)*')">comprimento par de a's</button>
+          <button class="re-preset" onclick="setRE('0*10*')">exatamente um 1</button>
+          <button class="re-preset" onclick="setRE('(0|1)*00(0|1)*')">contém "00"</button>
+          <button class="re-preset" onclick="setRE('a(b|c)*d')">a...d com b's e c's</button>
+          <button class="re-preset" onclick="setRE('(01|10)*')">alternância par</button>
+          <button class="re-preset" onclick="setRE('[01]{2}([01]{2})*')">comprimento par</button>
+        </div>
+      </div>
+
+      <div class="re-input-row">
+        <label>ER:</label>
+        <input type="text" id="re-input" placeholder="ex: (a|b)*aba" value="(a|b)*aba(a|b)*">
+        <label>String:</label>
+        <input type="text" id="str-input" placeholder="ex: babab">
+        <div class="rb-controls">
+          <button class="rb-btn btn-purple" onclick="reTest()">▶ Testar</button>
+          <button class="rb-btn btn-sec" onclick="reClear()">↺</button>
+        </div>
+      </div>
+
+      <canvas id="re-tree-canvas"></canvas>
+
+      <div id="re-status" class=""></div>
+      <div id="re-result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 6 — CONSTRUÇÃO DE THOMPSON ══════════════ -->
+<section id="thompson">
+  <h2><span class="num">6</span> Construção de Thompson — ER → AFN</h2>
+
+  <p>A <strong>construção de Thompson</strong> (1968) converte uma expressão regular em um AFN com ε-transições de forma sistemática, respeitando a estrutura indutiva da ER.</p>
+
+  <p>Cada sub-ER gera um "fragmento" de AFN com <strong>exatamente um estado inicial e um estado final</strong>. Os fragmentos são depois compostos pelas regras de cada operação.</p>
+
+  <h3>Casos base</h3>
+
+  <div class="thompson-wrap">
+    <div class="thompson-header"><span>🔵 Casos base da construção de Thompson</span></div>
+    <div class="thompson-body">
+      <canvas id="tc-base" class="tc" style="height:160px;"></canvas>
+      <p style="font-size:0.82rem; color:var(--muted); text-align:center;">Esquerda: ∅ (nenhuma transição). Centro: ε (ε-transição). Direita: símbolo a (transição com a).</p>
+    </div>
+  </div>
+
+  <h3>Operação: União (R|S)</h3>
+
+  <div class="thompson-wrap">
+    <div class="thompson-header"><span>🟠 Thompson — União</span></div>
+    <div class="thompson-body">
+      <canvas id="tc-union" class="tc" style="height:180px;"></canvas>
+      <p style="font-size:0.82rem; color:var(--muted); text-align:center;">Novo q_i e q_f. ε de q_i para inícios de N(R) e N(S). ε dos finais de N(R) e N(S) para q_f.</p>
+    </div>
+  </div>
+
+  <h3>Operação: Concatenação (RS)</h3>
+
+  <div class="thompson-wrap">
+    <div class="thompson-header"><span>🟢 Thompson — Concatenação</span></div>
+    <div class="thompson-body">
+      <canvas id="tc-concat" class="tc" style="height:130px;"></canvas>
+      <p style="font-size:0.82rem; color:var(--muted); text-align:center;">ε do estado final de N(R) para o estado inicial de N(S). O estado inicial de N(R) é o inicial do resultado; o final de N(S) é o final.</p>
+    </div>
+  </div>
+
+  <h3>Operação: Kleene Star (R*)</h3>
+
+  <div class="thompson-wrap">
+    <div class="thompson-header"><span>⭐ Thompson — Kleene Star</span></div>
+    <div class="thompson-body">
+      <canvas id="tc-star" class="tc" style="height:160px;"></canvas>
+      <p style="font-size:0.82rem; color:var(--muted); text-align:center;">Novo q_i (ε → q₀ do N(R) e ε → q_f). Do final de N(R), ε de volta para q₀ de N(R) e ε para q_f.</p>
+    </div>
+  </div>
+
+  <h3>Exemplo completo — construção de Thompson para <span class="re">(a|b)*a</span></h3>
+
+  <div class="card">
+    <strong>Decomposição:</strong><br>
+    1. Átomo <code>a</code> → N(a): q0 →<sup>a</sup> q1<br>
+    2. Átomo <code>b</code> → N(b): q2 →<sup>b</sup> q3<br>
+    3. União <code>a|b</code> → N(a|b): novo qi ε→{q0,q2}, dos finais {q1,q3} ε→novo qf<br>
+    4. Kleene <code>(a|b)*</code> → N((a|b)*): envolve N(a|b) com loop ε<br>
+    5. Átomo final <code>a</code> → N(a): qx →<sup>a</sup> qy<br>
+    6. Concatenação <code>(a|b)*a</code>: ε do final de N((a|b)*) para início de N(a)<br><br>
+    <strong>Resultado:</strong> AFN com ~10 estados, equivalente ao AFD de 2 estados que aceita "termina em a".
+  </div>
+
+  <div class="callout tip">
+    <strong>Propriedade chave da construção de Thompson:</strong> o AFN resultante tem no máximo <em>2|R|</em> estados, onde |R| é o número de símbolos e operadores em R. Cada símbolo contribui com 2 estados, cada operação com no máximo 2 estados extras.
+  </div>
+</section>
+
+<!-- ══════════════ 7 — AFD PARA ER ══════════════ -->
+<section id="eliminacao">
+  <h2><span class="num">7</span> AFD → ER — eliminação de estados</h2>
+
+  <p>A conversão inversa — de AFD para ER — usa o método de <strong>eliminação de estados</strong> (também chamado de método de Arden ou GNFA). O processo "remove" estados intermediários enquanto acumula a linguagem aceita nos rótulos das transições restantes.</p>
+
+  <h3>GNFA — Generalized NFA</h3>
+  <div class="card">
+    Um GNFA é um AFN cujas transições são rotuladas por <em>expressões regulares</em> (não apenas símbolos).<br><br>
+    <strong>Passo 1:</strong> Converter o AFD em GNFA adicionando um novo estado inicial q_i e um novo estado final q_f, com ε-transições.<br>
+    <strong>Passo 2:</strong> Eliminar estados intermediários um a um. Ao eliminar o estado q_rip:<br>
+    <code>δ'(q1, q2) = δ(q1, q2) | δ(q1, q_rip) δ(q_rip, q_rip)* δ(q_rip, q2)</code><br>
+    <strong>Passo 3:</strong> Quando restar apenas q_i e q_f, a única transição restante é a ER para L(M).
+  </div>
+
+  <h3>Exemplo — 2 estados para <span class="re">a*b</span></h3>
+  <div class="card">
+    AFD: q0 →<sup>a</sup> q0, q0 →<sup>b</sup> q1★<br><br>
+    GNFA: qi → q0 → q1 → qf<br><br>
+    Eliminar q0:<br>
+    &nbsp;&nbsp;<code>δ'(qi, q1) = δ(qi,q0) · δ(q0,q0)* · δ(q0,q1) = ε · a* · b = a*b</code><br><br>
+    Restar: qi →<sup>a*b</sup> qf<br>
+    ER resultante: <code>a*b</code>
+  </div>
+
+  <div class="callout ok">
+    <strong>Complexidade:</strong> o processo de eliminação de n-2 estados (removendo q_i e q_f da contagem) pode gerar uma ER de tamanho exponencial no pior caso. Na prática, a ordem de eliminação afeta o tamanho — eliminar estados com muitas transições primeiro geralmente produz ERs maiores.
+  </div>
+</section>
+
+<!-- ══════════════ 8 — TRIÂNGULO ══════════════ -->
+<section id="triangulo">
+  <h2><span class="num">8</span> O triângulo das equivalências</h2>
+
+  <div class="fbox purple" style="font-size:0.95rem; padding: 2rem;">
+    <span class="flabel">Teorema de Kleene — todas as direções</span>
+    <div style="margin: 1rem 0; font-size:1.05rem; line-height:2.2;">
+      AFD &nbsp;⟺&nbsp; AFN &nbsp;⟺&nbsp; ER
+    </div>
+    <div style="font-size:0.82rem; opacity:0.8; text-align:left; max-width:480px; margin:0 auto; font-family:'Segoe UI',sans-serif;">
+      AFD → AFN: trivial (AFD é caso especial de AFN)<br>
+      AFN → AFD: construção de subconjuntos (Módulo 3)<br>
+      ER → AFN: construção de Thompson (este módulo)<br>
+      AFD → ER: eliminação de estados / GNFA (este módulo)<br>
+      AFN → ER: converta AFN→AFD, depois AFD→ER
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="pane">
+      <h4>Quando usar cada modelo</h4>
+      <p><strong>AFD:</strong> implementação eficiente, análise léxica, comparação de linguagens</p>
+      <p><strong>AFN:</strong> design de autômatos, prova de fechamento, construção modular</p>
+      <p><strong>ER:</strong> especificação de padrões, interface humana, entrada para ferramentas</p>
+    </div>
+    <div class="pane">
+      <h4>Tamanho nos formatos</h4>
+      <p>Seja L uma linguagem regular com AFD mínimo de n estados:</p>
+      <p>• AFN equivalente: no máximo n estados (igual)</p>
+      <p>• ER equivalente: pode ter tamanho exponencial em n</p>
+      <p>• AFD a partir de ER de tamanho m: pode ter 2<sup>m</sup> estados</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section id="quiz">
+  <h2><span class="num">9</span> Exercícios — estilo POSCOMP</h2>
+
+  <div class="quiz">
+    <h3>Questão 1</h3>
+    <p>Qual das ERs sobre {a,b} descreve a linguagem de strings que começam e terminam com 'a'?</p>
+    <div class="options" id="q1">
+      <label class="opt"><input type="radio" name="q1" value="A"> A) <code>a(a|b)*a</code></label>
+      <label class="opt"><input type="radio" name="q1" value="B"> B) <code>a(a|b)*a | a</code></label>
+      <label class="opt"><input type="radio" name="q1" value="C"> C) <code>a(a|b)*</code></label>
+      <label class="opt"><input type="radio" name="q1" value="D"> D) <code>(a|b)*a(a|b)*</code></label>
+    </div>
+    <button class="quiz-btn" onclick="check('q1','B','e1')">Verificar</button>
+    <div class="quiz-result" id="q1-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 2</h3>
+    <p>A expressão regular <code>(ab)*|ε</code> é equivalente a qual das seguintes?</p>
+    <div class="options" id="q2">
+      <label class="opt"><input type="radio" name="q2" value="A"> A) <code>(ab)+</code></label>
+      <label class="opt"><input type="radio" name="q2" value="B"> B) <code>(ab)*</code></label>
+      <label class="opt"><input type="radio" name="q2" value="C"> C) <code>a*b*</code></label>
+      <label class="opt"><input type="radio" name="q2" value="D"> D) <code>(a|b)*</code></label>
+    </div>
+    <button class="quiz-btn" onclick="check('q2','B','e2')">Verificar</button>
+    <div class="quiz-result" id="q2-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 3</h3>
+    <p>Na construção de Thompson para a ER <code>R|S</code>, quantos estados são criados além dos estados de N(R) e N(S)?</p>
+    <div class="options" id="q3">
+      <label class="opt"><input type="radio" name="q3" value="A"> A) 0 — reutiliza estados existentes</label>
+      <label class="opt"><input type="radio" name="q3" value="B"> B) 1 — apenas o novo estado inicial</label>
+      <label class="opt"><input type="radio" name="q3" value="C"> C) 2 — um novo estado inicial e um novo estado final</label>
+      <label class="opt"><input type="radio" name="q3" value="D"> D) 4 — dois de entrada e dois de saída</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q3','C','e3')">Verificar</button>
+    <div class="quiz-result" id="q3-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 4 — POSCOMP nível difícil</h3>
+    <p>Qual das linguagens abaixo é descrita pela ER <code>1(0|1)*0</code> sobre {0,1}?</p>
+    <div class="options" id="q4">
+      <label class="opt"><input type="radio" name="q4" value="A"> A) Strings binárias que começam com 1 e terminam com 0</label>
+      <label class="opt"><input type="radio" name="q4" value="B"> B) Strings binárias com exatamente um 1 e um 0</label>
+      <label class="opt"><input type="radio" name="q4" value="C"> C) Strings binárias de comprimento par que começam com 1</label>
+      <label class="opt"><input type="radio" name="q4" value="D"> D) Strings binárias cujo valor em binário é par</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q4','A','e4')">Verificar</button>
+    <div class="quiz-result" id="q4-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 5</h3>
+    <p>Seja R = <code>a*</code>. Qual das afirmações sobre L(R) é FALSA?</p>
+    <div class="options" id="q5">
+      <label class="opt"><input type="radio" name="q5" value="A"> A) ε ∈ L(R)</label>
+      <label class="opt"><input type="radio" name="q5" value="B"> B) "aaa" ∈ L(R)</label>
+      <label class="opt"><input type="radio" name="q5" value="C"> C) L(R) é infinita</label>
+      <label class="opt"><input type="radio" name="q5" value="D"> D) "b" ∈ L(R)</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q5','D','e5')">Verificar</button>
+    <div class="quiz-result" id="q5-res"></div>
+  </div>
+</section>
+
+<!-- ══════════════ RESUMO ══════════════ -->
+<section id="resumo">
+  <h2><span class="num">10</span> Resumo do módulo</h2>
+
+  <div class="summary">
+    <h3>O que você agora domina:</h3>
+    <div class="row">ERs são definidas indutivamente com ∅, ε, símbolos do alfabeto, união, concatenação e Kleene star.</div>
+    <div class="row">Precedência: * > concatenação > | (mesmo que exponenciação > multiplicação > adição).</div>
+    <div class="row">Identidades: ∅* = ε, εR = R, ∅R = ∅, R** = R*.</div>
+    <div class="row">Teorema de Kleene: ER, AFD e AFN têm o mesmo poder expressivo — linguagens regulares.</div>
+    <div class="row">Thompson: ER → AFN em O(|R|) estados. Cada operação tem uma construção canônica com 1 entrada e 1 saída.</div>
+    <div class="row">GNFA/eliminação de estados: AFD → ER removendo estados intermediários.</div>
+    <div class="row">O triângulo está completo: qualquer dos três formatos pode ser convertido para qualquer outro.</div>
+  </div>
+
+  <h3>O que vem no próximo módulo</h3>
+  <div class="card">
+    O Módulo 7 apresenta as <strong>Gramáticas Livres de Contexto (GLCs)</strong> — o próximo nível da hierarquia de Chomsky. Você verá como GLCs descrevem linguagens que autômatos finitos não conseguem reconhecer, como {aⁿbⁿ}, e como os Autômatos de Pilha (PDAs) são o equivalente computacional das GLCs.
+  </div>
+</section>
+
+<div class="mod-nav">
+  <a href="modulo-05-minimizacao.html" class="mod-btn">
+    <span class="dir">← Anterior</span>
+    Módulo 5: Minimização
+  </a>
+  <a href="#" class="mod-btn next">
+    <span class="dir">Próximo →</span>
+    Módulo 7: Gramáticas Livres de Contexto
+  </a>
+</div></div>
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="modulo-05.html">← Módulo anterior</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 6 de 9</div>
+        </div>
+        <a class="btn-nav next" href="modulo-07.html">Próximo módulo →</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);localStorage.setItem('sb-state',c?'collapsed':'expanded')}
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+</script>
+</body>
+</html>

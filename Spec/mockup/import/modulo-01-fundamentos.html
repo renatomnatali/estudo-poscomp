@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 1 — Fundamentos | POSCOMP Visual Lab</title>
+<style>
+  :root {
+    --bg: #f0f6ff;
+    --card: #ffffff;
+    --primary: #0d2d6b;
+    --accent: #1a6bcc;
+    --accent2: #e8700a;
+    --green: #1a8c4e;
+    --red: #c0392b;
+    --purple: #6c3faa;
+    --teal: #0e7a72;
+    --border: #c8d8f0;
+    --code-bg: #e8f0fe;
+    --text: #1a1a2e;
+    --muted: #5a6a8a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; }
+
+  /* ─── HEADER ─── */
+  header {
+    background: linear-gradient(135deg, #0d2d6b 0%, #1a6bcc 100%);
+    color: white; padding: 3rem 2rem 2.5rem; text-align: center;
+  }
+  .breadcrumb { font-size: 0.8rem; opacity: 0.65; margin-bottom: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+  .breadcrumb a { color: white; text-decoration: none; }
+  .module-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; display: inline-block; padding: 4px 16px; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1rem; }
+  header h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem; }
+  header .subtitle { opacity: 0.85; font-size: 1.05rem; max-width: 580px; margin: 0 auto 1.5rem; }
+  .header-meta { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+  .header-meta span { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; }
+
+  /* ─── NAV ─── */
+  nav {
+    background: var(--primary); color: white;
+    display: flex; flex-wrap: wrap; gap: 2px; padding: 0.5rem 1.5rem;
+    position: sticky; top: 0; z-index: 100; border-bottom: 2px solid rgba(255,255,255,0.1);
+  }
+  nav a { color: rgba(255,255,255,0.75); text-decoration: none; padding: 5px 11px; font-size: 0.82rem; border-radius: 4px; transition: all 0.15s; }
+  nav a:hover { background: rgba(255,255,255,0.15); color: white; }
+
+  /* ─── MAIN ─── */
+  main { max-width: 920px; margin: 2.5rem auto; padding: 0 1.5rem; }
+
+  /* ─── SECTIONS ─── */
+  section { margin-bottom: 3.5rem; scroll-margin-top: 60px; }
+  h2 { color: var(--primary); font-size: 1.55rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--accent); }
+  h2 .num { background: var(--accent); color: white; min-width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.88rem; font-weight: 700; flex-shrink: 0; }
+  h3 { color: var(--accent); font-size: 1.08rem; margin: 1.6rem 0 0.6rem; }
+  p { margin-bottom: 0.9rem; }
+
+  /* ─── CARDS ─── */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.6rem; margin: 1rem 0; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .card-mini { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem; }
+  .card-mini h4 { color: var(--primary); font-size: 0.95rem; margin-bottom: 0.4rem; }
+  .card-mini p { font-size: 0.88rem; color: var(--muted); margin: 0; }
+
+  /* ─── CALLOUTS ─── */
+  .callout { border-left: 4px solid var(--accent); background: #e8f0fe; padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1.1rem 0; }
+  .callout.warn { border-color: var(--accent2); background: #fff3e0; }
+  .callout.ok { border-color: var(--green); background: #e8f5ee; }
+  .callout.tip { border-color: var(--purple); background: #f3eeff; }
+  .callout strong { color: var(--primary); }
+  .callout.warn strong { color: #a0500a; }
+  .callout.ok strong { color: var(--green); }
+  .callout.tip strong { color: var(--purple); }
+
+  /* ─── FORMULA BOX ─── */
+  .fbox {
+    background: var(--primary); color: white; border-radius: 12px;
+    padding: 1.4rem 2rem; text-align: center; margin: 1.5rem 0;
+    font-size: 1.3rem; font-family: 'Georgia', serif;
+  }
+  .fbox .flabel { font-size: 0.75rem; opacity: 0.65; display: block; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.4rem; font-family: 'Segoe UI', sans-serif; }
+  .fbox .fsub { font-size: 0.88rem; opacity: 0.8; display: block; margin-top: 0.5rem; font-family: 'Segoe UI', sans-serif; }
+
+  /* ─── TABLE ─── */
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.93rem; }
+  th { background: var(--primary); color: white; padding: 0.7rem 1rem; text-align: left; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #f5f8ff; }
+  tr:hover td { background: #e8f0fe; }
+  td code, th code { background: rgba(255,255,255,0.15); padding: 1px 5px; border-radius: 3px; }
+  td code { background: var(--code-bg); color: var(--primary); }
+
+  /* ─── CODE / INLINE ─── */
+  code { background: var(--code-bg); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.9rem; }
+
+  /* ─── CONCEPT SPLIT ─── */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .split .pane { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; }
+  .split .pane h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.5rem; }
+
+  /* ─── HIGHLIGHT ROW ─── */
+  .hl td { background: #fff3cd !important; font-weight: 600; }
+
+  /* ─── SYMBOL LEGEND ─── */
+  .sym-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.7rem; margin: 1rem 0; }
+  .sym-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start; }
+  .sym-card .sym { font-size: 1.4rem; font-family: 'Georgia', serif; color: var(--primary); min-width: 28px; text-align: center; line-height: 1.3; }
+  .sym-card .def { font-size: 0.85rem; }
+  .sym-card .def strong { display: block; color: var(--primary); margin-bottom: 2px; font-size: 0.9rem; }
+  .sym-card .def span { color: var(--muted); }
+
+  /* ─── EXAMPLE TRACE ─── */
+  .trace { margin: 1rem 0; }
+  .trace-step { display: flex; gap: 0.8rem; align-items: flex-start; padding: 0.7rem 0.9rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 0.4rem 0; font-size: 0.93rem; }
+  .trace-step .badge { background: var(--accent); color: white; border-radius: 5px; padding: 2px 9px; font-size: 0.78rem; white-space: nowrap; font-family: monospace; flex-shrink: 0; margin-top: 2px; }
+  .trace-step .badge.ok { background: var(--green); }
+  .trace-step .badge.warn { background: var(--accent2); }
+
+  /* ─── QUIZ ─── */
+  .quiz { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .quiz h3 { color: var(--primary); font-size: 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .quiz h3::before { content: '🧠'; }
+  .quiz-q { margin: 1rem 0; }
+  .quiz-q p { font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem; }
+  .options { display: flex; flex-direction: column; gap: 0.4rem; }
+  .opt { display: flex; align-items: center; gap: 0.7rem; padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 0.9rem; transition: all 0.15s; background: var(--bg); }
+  .opt:hover { background: #e8f0fe; border-color: var(--accent); }
+  .opt input { accent-color: var(--accent); }
+  .quiz-btn { margin-top: 1rem; background: var(--accent); color: white; border: none; padding: 8px 22px; border-radius: 7px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+  .quiz-btn:hover { background: var(--primary); }
+  .quiz-result { margin-top: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; display: none; }
+  .quiz-result.show { display: block; }
+  .quiz-result.correct { background: #e8f5ee; border: 1px solid #a8d8b8; color: var(--green); }
+  .quiz-result.wrong { background: #fdecea; border: 1px solid #f0a8a0; color: var(--red); }
+
+  /* ─── SUMMARY ─── */
+  .summary { background: var(--primary); color: white; border-radius: 14px; padding: 2rem; margin: 2rem 0; }
+  .summary h3 { color: white; margin-bottom: 1rem; font-size: 1.15rem; }
+  .summary .row { display: flex; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  .summary .row::before { content: '✓'; color: #7ef0a0; font-weight: 700; flex-shrink: 0; }
+
+  /* ─── MODULE NAV ─── */
+  .mod-nav { display: flex; justify-content: space-between; align-items: center; margin: 3rem 0 1rem; gap: 1rem; flex-wrap: wrap; }
+  .mod-btn { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 1rem 1.4rem; text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; flex: 1; min-width: 160px; transition: all 0.15s; }
+  .mod-btn:hover { border-color: var(--accent); background: #e8f0fe; }
+  .mod-btn.next { background: var(--accent); color: white; border-color: var(--accent); text-align: right; }
+  .mod-btn.next:hover { background: var(--primary); border-color: var(--primary); }
+  .mod-btn .dir { display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7; margin-bottom: 2px; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 6px; margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .progress-fill { background: white; border-radius: 4px; height: 100%; width: 12.5%; /* 1/8 módulos */ }
+  .progress-label { font-size: 0.78rem; opacity: 0.7; text-align: center; margin-top: 0.3rem; }
+
+  @media (max-width: 620px) {
+    .split, .card-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.8rem; }
+    nav { display: none; }
+    .mod-nav { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header>
+  <div class="breadcrumb"><a href="#">POSCOMP Visual Lab</a> › Autômatos</div>
+  <div class="module-badge">Módulo 1 de 8</div>
+  <h1>Fundamentos Matemáticos</h1>
+  <p class="subtitle">Conjuntos, relações, funções, alfabetos e linguagens — o vocabulário que torna a teoria dos autômatos legível.</p>
+  <div class="header-meta">
+    <span>⏱ ~40 min</span>
+    <span>📐 Nível: Iniciante</span>
+    <span>🧠 8 conceitos-chave</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div class="progress-label">Módulo 1 de 8 — Fundamentos</div>
+</header>
+
+<!-- ══════════════════ NAV ══════════════════ -->
+<nav>
+  <a href="#por-que">Por quê?</a>
+  <a href="#conjuntos">Conjuntos</a>
+  <a href="#operacoes">Operações</a>
+  <a href="#relacoes">Relações</a>
+  <a href="#funcoes">Funções</a>
+  <a href="#alfabetos">Alfabetos</a>
+  <a href="#strings">Strings</a>
+  <a href="#linguagens">Linguagens</a>
+  <a href="#quiz">Exercícios</a>
+  <a href="#resumo">Resumo</a>
+</nav>
+
+<main>
+
+<!-- ══════════════════ 0 — POR QUÊ ══════════════════ -->
+<section id="por-que">
+  <h2><span class="num">0</span> Por que estudar isso antes de autômatos?</h2>
+
+  <p>Toda vez que você encontrar uma expressão como esta:</p>
+  <div class="fbox">
+    <span class="flabel">Função de transição de um AFD</span>
+    δ: Q × Σ → Q
+    <span class="fsub">"delta recebe um estado e um símbolo e retorna um estado"</span>
+  </div>
+  <p>ela usa simultaneamente <strong>três conceitos</strong> deste módulo: conjuntos (Q e Σ), produto cartesiano (×) e função (→). Se qualquer um desses estiver nebuloso, a expressão vira ruído.</p>
+
+  <p>Este módulo resolve isso de uma vez. Não é pré-cálculo, não é abstrato sem motivo — cada conceito aqui vai reaparecer diretamente quando estudarmos AFD, AFN, gramáticas e minimização.</p>
+
+  <div class="callout ok">
+    <strong>Objetivo do módulo:</strong> ao terminar, você vai conseguir ler qualquer definição formal de autômato sem travar numa notação desconhecida.
+  </div>
+</section>
+
+<!-- ══════════════════ 1 — CONJUNTOS ══════════════════ -->
+<section id="conjuntos">
+  <h2><span class="num">1</span> Conjuntos</h2>
+
+  <p>Um <strong>conjunto</strong> é uma coleção de elementos distintos e sem ordem definida. É a estrutura mais básica da matemática discreta.</p>
+
+  <div class="card">
+    <strong>Notação por extensão</strong> — listar todos os elementos:<br><br>
+    <code>A = { 1, 2, 3 }</code><br>
+    <code>Vogais = { a, e, i, o, u }</code><br>
+    <code>Q = { q0, q1, q2 }</code> &nbsp;← conjunto de estados de um autômato
+  </div>
+
+  <div class="card">
+    <strong>Notação por compreensão</strong> — descrever a propriedade:<br><br>
+    <code>P = { x ∈ ℤ | x > 0 e x é par }</code> → "todos os inteiros positivos e pares"<br>
+    <code>P = { 2, 4, 6, 8, ... }</code> → mesma coisa, por extensão
+  </div>
+
+  <h3>Conceitos essenciais sobre conjuntos</h3>
+  <div class="sym-grid">
+    <div class="sym-card">
+      <div class="sym">∈</div>
+      <div class="def"><strong>Pertence</strong><span><code>a ∈ A</code> → "a é elemento de A"</span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">∉</div>
+      <div class="def"><strong>Não pertence</strong><span><code>x ∉ A</code> → "x não está em A"</span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">⊆</div>
+      <div class="def"><strong>Subconjunto</strong><span><code>A ⊆ B</code> → todo elemento de A está em B</span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">∅</div>
+      <div class="def"><strong>Conjunto vazio</strong><span>Nenhum elemento. Diferente de <code>{ ∅ }</code>!</span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">|A|</div>
+      <div class="def"><strong>Cardinalidade</strong><span>Número de elementos. <code>|{a,b,c}| = 3</code></span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">2^A</div>
+      <div class="def"><strong>Conjunto das partes</strong><span>Todos os subconjuntos de A. Se <code>|A|=n</code>, então <code>|2^A|=2ⁿ</code></span></div>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <strong>Por que 2^A importa para autômatos?</strong> Na conversão de AFN para AFD, o conjunto de estados do AFD resultante é exatamente 2^Q — o conjunto de todos os subconjuntos dos estados do AFN. Com 3 estados no AFN, o AFD pode ter até 2³ = 8 estados.
+  </div>
+
+  <h3>Exemplo com conjunto das partes</h3>
+  <div class="card">
+    <code>Q = { q0, q1 }</code> &nbsp;(2 estados)<br><br>
+    <code>2^Q = { ∅, {q0}, {q1}, {q0,q1} }</code> &nbsp;(4 subconjuntos = 2²)
+  </div>
+</section>
+
+<!-- ══════════════════ 2 — OPERAÇÕES ══════════════════ -->
+<section id="operacoes">
+  <h2><span class="num">2</span> Operações sobre conjuntos</h2>
+
+  <div class="split">
+    <div class="pane">
+      <h4>União — A ∪ B</h4>
+      <p>Todos os elementos que estão em A <em>ou</em> em B (ou em ambos).</p>
+      <code>{1,2} ∪ {2,3} = {1,2,3}</code>
+    </div>
+    <div class="pane">
+      <h4>Interseção — A ∩ B</h4>
+      <p>Apenas os elementos que estão em A <em>e</em> em B simultaneamente.</p>
+      <code>{1,2} ∩ {2,3} = {2}</code>
+    </div>
+    <div class="pane">
+      <h4>Diferença — A \ B</h4>
+      <p>Elementos de A que <em>não</em> estão em B.</p>
+      <code>{1,2,3} \ {2} = {1,3}</code>
+    </div>
+    <div class="pane">
+      <h4>Complemento — Aᶜ</h4>
+      <p>Tudo que <em>não</em> está em A (relativo a um universo U).</p>
+      <code>Se U={0,1}* e A=strings pares, Aᶜ=strings ímpares</code>
+    </div>
+  </div>
+
+  <h3>Produto Cartesiano — A × B</h3>
+  <p>Conjunto de todos os pares ordenados <code>(a, b)</code> onde <code>a ∈ A</code> e <code>b ∈ B</code>. A ordem importa: <code>(a,b) ≠ (b,a)</code>.</p>
+
+  <div class="card">
+    <code>A = {1, 2}</code> &nbsp;&nbsp; <code>B = {x, y, z}</code><br><br>
+    <code>A × B = { (1,x), (1,y), (1,z), (2,x), (2,y), (2,z) }</code><br><br>
+    <code>|A × B| = |A| · |B| = 2 · 3 = 6</code>
+  </div>
+
+  <div class="callout">
+    <strong>Conexão direta com autômatos:</strong> em <code>δ: Q × Σ → Q</code>, o domínio da função é <code>Q × Σ</code>. Se <code>|Q|=3</code> e <code>|Σ|=2</code>, então δ precisa ser definida para <code>3 × 2 = 6</code> pares distintos — uma linha para cada estado, uma coluna para cada símbolo na tabela de transição.
+  </div>
+</section>
+
+<!-- ══════════════════ 3 — RELAÇÕES ══════════════════ -->
+<section id="relacoes">
+  <h2><span class="num">3</span> Relações</h2>
+
+  <p>Uma <strong>relação</strong> R entre os conjuntos A e B é qualquer subconjunto do produto cartesiano A × B.</p>
+
+  <div class="card">
+    <p>Exemplo: relação "é maior que" sobre <code>A = {1,2,3}</code>:</p>
+    <code>R = { (2,1), (3,1), (3,2) }</code><br><br>
+    <p style="margin-top:0.6rem;">Lemos: "2 é maior que 1", "3 é maior que 1", "3 é maior que 2".</p>
+  </div>
+
+  <h3>Relações importantes</h3>
+  <table>
+    <tr><th>Propriedade</th><th>Significado</th><th>Exemplo</th></tr>
+    <tr><td><strong>Reflexiva</strong></td><td>Todo elemento se relaciona consigo mesmo: <code>(a,a) ∈ R</code></td><td>Igualdade, ≤</td></tr>
+    <tr><td><strong>Simétrica</strong></td><td>Se <code>(a,b) ∈ R</code> então <code>(b,a) ∈ R</code></td><td>Amizade mútua</td></tr>
+    <tr><td><strong>Transitiva</strong></td><td>Se <code>(a,b) ∈ R</code> e <code>(b,c) ∈ R</code> então <code>(a,c) ∈ R</code></td><td><, ≤, divisibilidade</td></tr>
+    <tr class="hl"><td><strong>Equivalência</strong></td><td>Reflexiva + Simétrica + Transitiva</td><td>Relevante na minimização de AFD!</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <strong>Para que serve na teoria dos autômatos?</strong> Na minimização de AFD, dois estados são "equivalentes" se aceitam exatamente as mesmas strings a partir deles. Essa equivalência é uma relação de equivalência — reflexiva, simétrica e transitiva. O algoritmo de Myhill-Nerode é baseado nisso.
+  </div>
+</section>
+
+<!-- ══════════════════ 4 — FUNÇÕES ══════════════════ -->
+<section id="funcoes">
+  <h2><span class="num">4</span> Funções</h2>
+
+  <p>Uma <strong>função</strong> <code>f: A → B</code> é uma relação especial onde <strong>cada elemento de A está associado a exatamente um elemento de B</strong>.</p>
+
+  <div class="split">
+    <div class="pane">
+      <h4>✅ Isso É uma função</h4>
+      <p>Cada entrada tem exatamente uma saída.</p>
+      <code>f(1)=a, f(2)=b, f(3)=a</code>
+      <p style="margin-top:0.5rem; font-size:0.85rem; color:var(--muted);">Ok repetir saídas. O que não pode é uma entrada sem saída ou com duas saídas.</p>
+    </div>
+    <div class="pane">
+      <h4>❌ Isso NÃO é uma função</h4>
+      <p>Uma entrada com duas saídas = não-determinismo.</p>
+      <code>f(1)=a, f(1)=b</code>
+      <p style="margin-top:0.5rem; font-size:0.85rem; color:var(--muted);">Isso descreve um AFN (não-determinístico), não um AFD.</p>
+    </div>
+  </div>
+
+  <h3>Terminologia</h3>
+  <div class="card">
+    Dada <code>f: A → B</code>:<br><br>
+    <strong>Domínio</strong> = A &nbsp;(de onde vêm as entradas)<br>
+    <strong>Codomínio</strong> = B &nbsp;(onde vivem as saídas possíveis)<br>
+    <strong>Imagem</strong> = subconjunto de B que f realmente atinge &nbsp;(pode ser menor que B)<br>
+    <strong>f é total</strong> = definida para todo elemento de A &nbsp;(exigido no AFD!)<br>
+    <strong>f é parcial</strong> = pode ser indefinida em alguns pontos de A
+  </div>
+
+  <div class="callout warn">
+    <strong>AFD exige função total.</strong> A função δ de um AFD deve estar definida para todo par (estado, símbolo). Se algum par não tiver saída, o autômato é incompleto. Na prática, isso se resolve adicionando um <em>estado morto</em> (estado-lixo) para onde vão as transições indefinidas.
+  </div>
+
+  <h3>Tipos de função</h3>
+  <table>
+    <tr><th>Tipo</th><th>Propriedade</th><th>Notação alternativa</th></tr>
+    <tr><td><strong>Injetora</strong></td><td>Entradas distintas → saídas distintas. <code>f(a)=f(b) ⟹ a=b</code></td><td>one-to-one</td></tr>
+    <tr><td><strong>Sobrejetora</strong></td><td>Todo elemento do codomínio é atingido por alguma entrada</td><td>onto / surjective</td></tr>
+    <tr><td><strong>Bijetora</strong></td><td>Injetora + Sobrejetora. Permite inversa</td><td>one-to-one correspondence</td></tr>
+  </table>
+
+  <div class="callout ok">
+    <strong>Voltando a δ: Q × Σ → Q:</strong> δ é uma função total. O domínio é Q × Σ (todos os pares estado-símbolo), o codomínio é Q (estados), e a saída de cada chamada é exatamente um estado — nunca zero, nunca dois. Isso é o que garante o "D" de <em>Determinístico</em>.
+  </div>
+</section>
+
+<!-- ══════════════════ 5 — ALFABETOS ══════════════════ -->
+<section id="alfabetos">
+  <h2><span class="num">5</span> Alfabetos</h2>
+
+  <p>Um <strong>alfabeto</strong> é um conjunto finito e não-vazio de símbolos. Na teoria dos autômatos, o alfabeto é sempre representado por <strong>Σ</strong> (sigma maiúsculo).</p>
+
+  <div class="card-grid">
+    <div class="card-mini">
+      <h4>Binário</h4>
+      <p><code>Σ = {0, 1}</code><br>O mais comum em provas de POSCOMP.</p>
+    </div>
+    <div class="card-mini">
+      <h4>Letras</h4>
+      <p><code>Σ = {a, b, c}</code><br>Para linguagens como {aⁿbⁿ}.</p>
+    </div>
+    <div class="card-mini">
+      <h4>ASCII</h4>
+      <p><code>Σ = {A-Z, a-z, 0-9, ...}</code><br>Para compiladores e regex.</p>
+    </div>
+    <div class="card-mini">
+      <h4>Unário</h4>
+      <p><code>Σ = {a}</code><br>Um único símbolo. Deceptivamente interessante.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>O alfabeto é uma escolha do problema.</strong> Você define Σ antes de construir o autômato. O AFD só pode ler símbolos que estão em Σ — qualquer outro símbolo deve ir para o estado morto.
+  </div>
+</section>
+
+<!-- ══════════════════ 6 — STRINGS ══════════════════ -->
+<section id="strings">
+  <h2><span class="num">6</span> Strings (palavras)</h2>
+
+  <p>Uma <strong>string</strong> (também chamada de <em>palavra</em> ou <em>sentença</em>) é uma sequência finita de símbolos de um alfabeto Σ.</p>
+
+  <div class="card">
+    <p>Dado <code>Σ = {0, 1}</code>:</p><br>
+    <code>0</code> &nbsp;→ string de comprimento 1<br>
+    <code>101</code> &nbsp;→ string de comprimento 3<br>
+    <code>0000</code> &nbsp;→ string de comprimento 4<br>
+    <code>ε</code> &nbsp;→ string vazia (comprimento 0) — <em>epsilon</em>
+  </div>
+
+  <h3>Notações importantes</h3>
+  <div class="sym-grid">
+    <div class="sym-card">
+      <div class="sym">ε</div>
+      <div class="def"><strong>String vazia</strong><span>Comprimento zero. Não é o mesmo que o conjunto vazio ∅.</span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">|w|</div>
+      <div class="def"><strong>Comprimento</strong><span><code>|aba| = 3</code>, <code>|ε| = 0</code></span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">wʳ</div>
+      <div class="def"><strong>Reverso</strong><span><code>(abc)ʳ = cba</code></span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">Σ*</div>
+      <div class="def"><strong>Fecho de Kleene</strong><span>Todas as strings sobre Σ, incluindo ε.</span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">Σ⁺</div>
+      <div class="def"><strong>Fecho positivo</strong><span>Todas as strings sobre Σ, exceto ε.</span></div>
+    </div>
+    <div class="sym-card">
+      <div class="sym">xy</div>
+      <div class="def"><strong>Concatenação</strong><span>"ab" · "cd" = "abcd". Associativa, não comutativa.</span></div>
+    </div>
+  </div>
+
+  <h3>O Fecho de Kleene em detalhe</h3>
+  <p>Dado <code>Σ = {a, b}</code>, o fecho <code>Σ*</code> contém infinitas strings:</p>
+  <div class="card">
+    <code>Σ* = { ε, a, b, aa, ab, ba, bb, aaa, aab, aba, abb, baa, ... }</code><br><br>
+    <p>Organizando por comprimento:</p>
+    <table style="margin-top:0.5rem;">
+      <tr><th>Comprimento n</th><th>Strings</th><th>Quantidade</th></tr>
+      <tr><td>0</td><td><code>ε</code></td><td>1</td></tr>
+      <tr><td>1</td><td><code>a, b</code></td><td>2</td></tr>
+      <tr><td>2</td><td><code>aa, ab, ba, bb</code></td><td>4</td></tr>
+      <tr><td>n</td><td>...</td><td>2ⁿ</td></tr>
+      <tr><td>∞</td><td>Σ* inteiro</td><td>∞ (enumerável)</td></tr>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <strong>Atenção:</strong> <code>ε ≠ ∅</code>. A string vazia ε é um elemento — existe e tem comprimento 0. O conjunto vazio ∅ não tem nenhum elemento. Confundir os dois é um erro clássico.
+  </div>
+
+  <h3>Concatenação de strings</h3>
+  <div class="card">
+    Sejam <code>w = "abc"</code> e <code>x = "de"</code>:<br><br>
+    <code>wx = "abcde"</code> &nbsp;(concatenação)<br>
+    <code>xw = "deabc"</code> &nbsp;(ordem importa!)<br>
+    <code>wε = εw = w</code> &nbsp;(ε é elemento neutro da concatenação)<br>
+    <code>w² = ww = "abcabc"</code> &nbsp;(potência = concatenação repetida)<br>
+    <code>w⁰ = ε</code> &nbsp;(por convenção)
+  </div>
+</section>
+
+<!-- ══════════════════ 7 — LINGUAGENS ══════════════════ -->
+<section id="linguagens">
+  <h2><span class="num">7</span> Linguagens formais</h2>
+
+  <p>Uma <strong>linguagem formal</strong> L sobre um alfabeto Σ é simplesmente um <strong>conjunto de strings</strong>. Isso é tudo. Uma linguagem é um conjunto — e tudo que vale para conjuntos vale para linguagens.</p>
+
+  <div class="fbox">
+    <span class="flabel">Definição</span>
+    L ⊆ Σ*
+    <span class="fsub">Uma linguagem é qualquer subconjunto do fecho de Kleene do alfabeto</span>
+  </div>
+
+  <h3>Exemplos</h3>
+  <div class="card-grid">
+    <div class="card-mini">
+      <h4>Linguagem vazia</h4>
+      <p><code>L = ∅</code><br>Nenhuma string é aceita.</p>
+    </div>
+    <div class="card-mini">
+      <h4>Contém apenas ε</h4>
+      <p><code>L = {ε}</code><br>Só a string vazia é aceita.</p>
+    </div>
+    <div class="card-mini">
+      <h4>Strings binárias pares</h4>
+      <p><code>L = {ε, 00, 11, 01, 10, 0000, ...}</code></p>
+    </div>
+    <div class="card-mini">
+      <h4>Strings com nº par de 0s</h4>
+      <p><code>L = {ε, 00, 100, 010, 001, ...}</code><br>AFD clássico de prova.</p>
+    </div>
+    <div class="card-mini">
+      <h4>Palíndromos binários</h4>
+      <p><code>L = {ε, 0, 1, 00, 11, 010, 101, ...}</code><br>Não é regular!</p>
+    </div>
+    <div class="card-mini">
+      <h4>Linguagem total</h4>
+      <p><code>L = Σ*</code><br>Todo AFD aceita algo de Σ*.</p>
+    </div>
+  </div>
+
+  <h3>Operações sobre linguagens</h3>
+  <p>Como linguagens são conjuntos, as operações de conjunto se aplicam diretamente:</p>
+  <table>
+    <tr><th>Operação</th><th>Notação</th><th>Significado</th></tr>
+    <tr><td>União</td><td><code>L₁ ∪ L₂</code></td><td>Strings em L₁ ou em L₂</td></tr>
+    <tr><td>Interseção</td><td><code>L₁ ∩ L₂</code></td><td>Strings em L₁ e em L₂</td></tr>
+    <tr><td>Complemento</td><td><code>L̄ ou Lᶜ</code></td><td>Strings de Σ* que <em>não</em> estão em L</td></tr>
+    <tr><td>Concatenação</td><td><code>L₁ · L₂</code></td><td>{xy | x ∈ L₁ e y ∈ L₂}</td></tr>
+    <tr class="hl"><td>Fecho de Kleene</td><td><code>L*</code></td><td>{ε} ∪ L ∪ LL ∪ LLL ∪ ...</td></tr>
+  </table>
+
+  <h3>A hierarquia de Chomsky</h3>
+  <p>Linguagens formais se organizam em quatro classes de complexidade crescente. Autômatos reconhecem cada classe:</p>
+  <div class="card">
+    <table>
+      <tr><th>Tipo</th><th>Linguagem</th><th>Reconhecedor</th><th>Exemplo</th></tr>
+      <tr class="hl"><td><strong>Tipo 3</strong></td><td>Regular</td><td>AFD / AFN</td><td><code>{0ⁿ | n≥0}</code></td></tr>
+      <tr><td><strong>Tipo 2</strong></td><td>Livre de contexto</td><td>Autômato de Pilha</td><td><code>{0ⁿ1ⁿ | n≥0}</code></td></tr>
+      <tr><td><strong>Tipo 1</strong></td><td>Sensível ao contexto</td><td>Autômato linearmente limitado</td><td><code>{0ⁿ1ⁿ2ⁿ | n≥0}</code></td></tr>
+      <tr><td><strong>Tipo 0</strong></td><td>Recursivamente enumerável</td><td>Máquina de Turing</td><td>Problema da parada</td></tr>
+    </table>
+    <p style="margin-top:0.8rem; font-size:0.88rem; color:var(--muted);">Tipo 3 ⊂ Tipo 2 ⊂ Tipo 1 ⊂ Tipo 0 — cada classe é estritamente contida na próxima.</p>
+  </div>
+
+  <div class="callout tip">
+    <strong>Foco do POSCOMP:</strong> linguagens regulares (Tipo 3) são o assunto central dos módulos 2 a 8. Entender que uma linguagem é um conjunto de strings — e que um autômato decide "está nesse conjunto ou não?" — é o insight fundamental.
+  </div>
+</section>
+
+<!-- ══════════════════ QUIZ ══════════════════ -->
+<section id="quiz">
+  <h2><span class="num">8</span> Exercícios — estilo POSCOMP</h2>
+
+  <!-- Q1 -->
+  <div class="quiz">
+    <h3>Questão 1</h3>
+    <div class="quiz-q">
+      <p>Dado <code>A = {a, b, c}</code>, qual é o valor de <code>|2^A|</code>?</p>
+      <div class="options" id="q1">
+        <label class="opt"><input type="radio" name="q1" value="3"> 3</label>
+        <label class="opt"><input type="radio" name="q1" value="6"> 6</label>
+        <label class="opt"><input type="radio" name="q1" value="8"> 8</label>
+        <label class="opt"><input type="radio" name="q1" value="9"> 9</label>
+      </div>
+    </div>
+    <button class="quiz-btn" onclick="check('q1','8','O conjunto das partes de um conjunto com n elementos tem 2ⁿ elementos. Como |A|=3, temos 2³=8 subconjuntos: ∅, {a}, {b}, {c}, {a,b}, {a,c}, {b,c}, {a,b,c}.')">Verificar</button>
+    <div class="quiz-result" id="q1-res"></div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="quiz">
+    <h3>Questão 2</h3>
+    <div class="quiz-q">
+      <p>Seja <code>Σ = {0, 1}</code>. Qual das alternativas <strong>não</strong> é uma string válida sobre Σ?</p>
+      <div class="options" id="q2">
+        <label class="opt"><input type="radio" name="q2" value="eps"> ε</label>
+        <label class="opt"><input type="radio" name="q2" value="0110"> 0110</label>
+        <label class="opt"><input type="radio" name="q2" value="012"> 012</label>
+        <label class="opt"><input type="radio" name="q2" value="0000"> 0000</label>
+      </div>
+    </div>
+    <button class="quiz-btn" onclick="check('q2','012','O símbolo 2 não pertence a Σ={0,1}. Strings válidas só podem usar símbolos do alfabeto. A string vazia ε também é válida — pertence a todo Σ*.')">Verificar</button>
+    <div class="quiz-result" id="q2-res"></div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="quiz">
+    <h3>Questão 3</h3>
+    <div class="quiz-q">
+      <p>Qual das relações a seguir é uma <strong>função</strong>?</p>
+      <div class="options" id="q3">
+        <label class="opt"><input type="radio" name="q3" value="A"> A) R = {(1,a), (1,b), (2,c)} sobre A={1,2} → B={a,b,c}</label>
+        <label class="opt"><input type="radio" name="q3" value="B"> B) R = {(1,a), (2,b)} sobre A={1,2,3} → B={a,b,c}</label>
+        <label class="opt"><input type="radio" name="q3" value="C"> C) R = {(1,a), (2,b), (3,a)} sobre A={1,2,3} → B={a,b,c}</label>
+        <label class="opt"><input type="radio" name="q3" value="D"> D) R = {(1,a), (2,b), (1,c), (3,a)} sobre A={1,2,3} → B={a,b,c}</label>
+      </div>
+    </div>
+    <button class="quiz-btn" onclick="check('q3','C','C é função: cada elemento do domínio tem exatamente uma saída. A falha porque 1 tem duas saídas (a e b). B falha porque 3 não tem saída (função parcial). D falha porque 1 aparece duas vezes.')">Verificar</button>
+    <div class="quiz-result" id="q3-res"></div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="quiz">
+    <h3>Questão 4 — nível POSCOMP</h3>
+    <div class="quiz-q">
+      <p>Um AFD tem <code>|Q| = 4</code> estados e alfabeto <code>Σ = {a, b}</code>. Para que δ seja uma função total, quantas entradas δ deve ter definidas?</p>
+      <div class="options" id="q4">
+        <label class="opt"><input type="radio" name="q4" value="4"> 4</label>
+        <label class="opt"><input type="radio" name="q4" value="6"> 6</label>
+        <label class="opt"><input type="radio" name="q4" value="8"> 8</label>
+        <label class="opt"><input type="radio" name="q4" value="16"> 16</label>
+      </div>
+    </div>
+    <button class="quiz-btn" onclick="check('q4','8','O domínio de δ é Q × Σ. Como |Q|=4 e |Σ|=2, temos |Q × Σ| = 4×2 = 8 pares. Para ser total, δ deve estar definida para todos os 8 pares — isso equivale a uma tabela de transição com 4 linhas e 2 colunas.')">Verificar</button>
+    <div class="quiz-result" id="q4-res"></div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="quiz">
+    <h3>Questão 5</h3>
+    <div class="quiz-q">
+      <p>Qual afirmação sobre <code>ε</code> (string vazia) e <code>∅</code> (conjunto vazio) é correta?</p>
+      <div class="options" id="q5">
+        <label class="opt"><input type="radio" name="q5" value="A"> A) ε = ∅, ambos representam ausência</label>
+        <label class="opt"><input type="radio" name="q5" value="B"> B) {ε} = ∅, pois ε não tem elementos</label>
+        <label class="opt"><input type="radio" name="q5" value="C"> C) ε é uma string de comprimento 0; ∅ é uma linguagem sem strings; {ε} é uma linguagem com uma única string</label>
+        <label class="opt"><input type="radio" name="q5" value="D"> D) ∅* = ∅, pois o fecho de vazio é vazio</label>
+      </div>
+    </div>
+    <button class="quiz-btn" onclick="check('q5','C','C é a afirmação correta. ε e ∅ são objetos completamente distintos. Além disso, ∅* = {ε} — não ∅ — porque o fecho de Kleene inclui a concatenação de zero strings, que é ε.')">Verificar</button>
+    <div class="quiz-result" id="q5-res"></div>
+  </div>
+</section>
+
+<!-- ══════════════════ RESUMO ══════════════════ -->
+<section id="resumo">
+  <h2><span class="num">9</span> Resumo do módulo</h2>
+
+  <div class="summary">
+    <h3>O que você agora domina:</h3>
+    <div class="row">Conjunto é uma coleção de elementos distintos. Cardinalidade, subconjunto, conjunto das partes (2^A).</div>
+    <div class="row">Produto cartesiano A × B gera todos os pares ordenados (a,b). É o domínio de δ.</div>
+    <div class="row">Função f: A → B associa cada elemento de A a exatamente um de B. Isso define "determinístico".</div>
+    <div class="row">Relação de equivalência (reflexiva + simétrica + transitiva) é a base da minimização de AFD.</div>
+    <div class="row">Alfabeto Σ é um conjunto finito de símbolos. Você o define antes de construir o autômato.</div>
+    <div class="row">String é uma sequência finita de símbolos. ε é a string vazia (comprimento 0).</div>
+    <div class="row">Σ* é o conjunto de todas as strings sobre Σ, incluindo ε. Σ⁺ = Σ* \ {ε}.</div>
+    <div class="row">Linguagem L ⊆ Σ* é um conjunto de strings. Um autômato decide se uma string pertence a L ou não.</div>
+  </div>
+
+  <h3>Conexão com os próximos módulos</h3>
+  <div class="card">
+    <table>
+      <tr><th>Conceito deste módulo</th><th>Onde reaparece</th></tr>
+      <tr><td>Produto cartesiano Q × Σ</td><td>Domínio de δ no AFD (Módulo 2)</td></tr>
+      <tr><td>Função total</td><td>Definição de determinístico (Módulo 2)</td></tr>
+      <tr><td>Conjunto das partes 2^Q</td><td>Estados do AFD na conversão AFN→AFD (Módulo 3)</td></tr>
+      <tr><td>Relação de equivalência</td><td>Algoritmo de minimização de AFD (Módulo 5)</td></tr>
+      <tr><td>Fecho de Kleene L*</td><td>Expressões regulares (Módulo 6)</td></tr>
+      <tr><td>Hierarquia de Chomsky</td><td>Gramáticas regulares e limite das linguagens regulares (Módulos 7 e 8)</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════ NAVEGAÇÃO ══════════════════ -->
+<div class="mod-nav">
+  <a href="#" class="mod-btn">
+    <span class="dir">← Anterior</span>
+    Início
+  </a>
+  <a href="#" class="mod-btn next">
+    <span class="dir">Próximo →</span>
+    Módulo 2: Autômatos Finitos Determinísticos
+  </a>
+</div>
+
+</main>
+
+<footer style="text-align:center; padding:2rem; color:var(--muted); font-size:0.82rem; border-top: 1px solid var(--border); margin-top:2rem;">
+  POSCOMP Visual Lab · Módulo 1 de 8 · Baseado em Sipser (2013) e Hopcroft, Motwani & Ullman (2007)
+</footer>
+
+<script>
+  const answers = {
+    q1: { correct: '8', explanation: '' },
+    q2: { correct: '012', explanation: '' },
+    q3: { correct: 'C', explanation: '' },
+    q4: { correct: '8', explanation: '' },
+    q5: { correct: 'C', explanation: '' },
+  };
+
+  function check(id, correct, explanation) {
+    const sel = document.querySelector(`input[name="${id}"]:checked`);
+    const res = document.getElementById(`${id}-res`);
+    if (!sel) { res.textContent = 'Selecione uma alternativa.'; res.className = 'quiz-result show wrong'; return; }
+    const ok = sel.value === correct;
+    res.className = `quiz-result show ${ok ? 'correct' : 'wrong'}`;
+    res.innerHTML = ok
+      ? `✅ <strong>Correto!</strong> ${explanation}`
+      : `❌ <strong>Incorreto.</strong> ${explanation}`;
+  }
+</script>
+
+</body>
+</html>

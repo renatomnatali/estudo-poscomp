@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 2 — Autômatos Finitos Determinísticos · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  /* original module vars */
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item::before{display:none}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}.sidebar.collapsed .sb-sep{margin:.4rem .8rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:22%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500)}.topbar-icon-btn:hover{background:var(--n100)}
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#1a6bcc 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+/* SECTION NAV */
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover{background:rgba(255,255,255,.15);color:white}.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+/* CONTENT */
+.lesson-content{max-width:900px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.35rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.75}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0;font-size:.92rem;line-height:1.7}
+.callout{border-left:4px solid var(--accent);background:#e8f0fe;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem}.callout.warning{border-color:var(--accent2);background:#fff3e0}.callout.success{border-color:var(--green);background:#e8f5ee}.callout strong{color:var(--primary)}
+.formula-box{background:var(--primary);color:white;border-radius:12px;padding:1.4rem 2rem;text-align:center;margin:1.5rem 0;font-size:1.3rem;font-family:Georgia,serif}
+.formula-box .label{font-size:.75rem;opacity:.7;display:block;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;font-family:var(--fb)}.formula-box .sub{font-size:.85rem;opacity:.85;display:block;margin-top:.5rem;font-family:var(--fb)}
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.analogy .side{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.analogy .side h4{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}.analogy .side .val{font-size:1rem;font-weight:600;color:var(--primary)}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+th{background:var(--primary);color:white;padding:.65rem 1rem;text-align:left}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+tr:nth-child(even) td{background:#f5f8ff}tr:hover td{background:#e8f0fe}
+.highlight-row td{background:#fff3cd!important;font-weight:600}
+.automaton-viz{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.8rem;margin:1.5rem 0;text-align:center}
+.states{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.state{width:70px;height:70px;border-radius:50%;border:3px solid var(--accent);background:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--primary);position:relative}
+.state.initial::before{content:'▶';position:absolute;left:-22px;color:var(--accent2);font-size:1rem}
+.state.final{box-shadow:0 0 0 5px white,0 0 0 8px var(--accent)}
+.arrow{font-size:1.5rem;color:var(--accent2);position:relative}.arrow span{position:absolute;top:-1.2rem;left:50%;transform:translateX(-50%);font-size:.8rem;color:var(--muted);white-space:nowrap;font-family:monospace;background:var(--bg);padding:0 4px}
+.step-trace{margin:1rem 0}.step{display:flex;align-items:flex-start;gap:1rem;margin:.5rem 0;padding:.75rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:.9rem}
+.step .badge{background:var(--accent);color:white;border-radius:6px;padding:2px 10px;font-size:.78rem;white-space:nowrap;flex-shrink:0;font-family:monospace}.step .badge.ok{background:var(--green)}.step .badge.fail{background:var(--red)}
+.step .body{font-size:.9rem;line-height:1.6}.step .body code,.step code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.88rem}
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}.comparison .col{border-radius:10px;padding:1.2rem;font-size:.9rem}.comparison .col.dfa{background:#e8f5ee;border:1px solid #a8d8b8}.comparison .col.nfa{background:#fff3e0;border:1px solid #f0c070}.comparison h4{margin-bottom:.5rem;font-size:.92rem}
+.applications{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin:1rem 0}.app-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}.app-card .icon{font-size:1.8rem;margin-bottom:.5rem}.app-card h4{color:var(--primary);font-size:.9rem;margin-bottom:.3rem}.app-card p{font-size:.82rem;color:var(--muted);margin:0}
+.summary-box{background:var(--primary);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}.summary-box h3{color:white;margin-bottom:1rem;font-size:1.1rem}.summary-box .row{display:flex;gap:.5rem;margin:.4rem 0;align-items:flex-start;font-size:.9rem}.summary-box .row::before{content:'✓';color:#7ef0a0;flex-shrink:0;font-weight:700}
+/* quiz / interactive */
+.quiz-option{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f8faff;margin:.4rem 0;font-size:.9rem}.quiz-option:hover{background:#e8f0fe;border-color:var(--accent)}
+.quiz-option.selected{background:#e8f0fe;border-color:var(--accent)}.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05);position:sticky;bottom:0}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:22%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap)}.btn-nav.next:hover{background:var(--sap-d)}
+/* EXTRAS from original */
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .breadcrumb { font-size: 0.8rem; opacity: 0.65; margin-bottom: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+  .module-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; display: inline-block; padding: 4px 16px; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1rem; }
+  header h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.6rem; }
+  header .subtitle { opacity: 0.85; font-size: 1.05rem; max-width: 580px; margin: 0 auto 1.5rem; }
+  .header-meta { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+  .header-meta span { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 14px; font-size: 0.85rem; }
+  .progress-bar { background: rgba(255,255,255,0.15); border-radius: 4px; height: 6px; margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .progress-fill { background: white; border-radius: 4px; height: 100%; width: 25%; }
+  .progress-label { font-size: 0.78rem; opacity: 0.7; text-align: center; margin-top: 0.3rem; }
+  nav a { color: rgba(255,255,255,0.75); text-decoration: none; padding: 5px 11px; font-size: 0.82rem; border-radius: 4px; }
+  nav a:hover { background: rgba(255,255,255,0.15); color: white; }
+  section { margin-bottom: 3.5rem; scroll-margin-top: 60px; }
+  h2 { color: var(--primary); font-size: 1.55rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.5rem; border-bottom: 3px solid var(--accent); }
+  h2 .num { background: var(--accent); color: white; min-width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.88rem; font-weight: 700; flex-shrink: 0; }
+  h3 { color: var(--accent); font-size: 1.08rem; margin: 1.6rem 0 0.6rem; }
+  p { margin-bottom: 0.9rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.6rem; margin: 1rem 0; }
+  .callout { border-left: 4px solid var(--accent); background: #e8f0fe; padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1.1rem 0; }
+  .callout.warn { border-color: var(--accent2); background: #fff3e0; }
+  .callout.ok { border-color: var(--green); background: #e8f5ee; }
+  .callout.tip { border-color: var(--purple); background: #f3eeff; }
+  .callout strong { color: var(--primary); }
+
+  .fbox { background: var(--primary); color: white; border-radius: 12px; padding: 1.4rem 2rem; text-align: center; margin: 1.5rem 0; font-size: 1.3rem; font-family: 'Georgia', serif; }
+  .fbox .flabel { font-size: 0.75rem; opacity: 0.65; display: block; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.4rem; font-family: 'Segoe UI', sans-serif; }
+  .fbox .fsub { font-size: 0.88rem; opacity: 0.8; display: block; margin-top: 0.5rem; font-family: 'Segoe UI', sans-serif; }
+
+  code { background: var(--code-bg); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.9rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.93rem; }
+  th { background: var(--primary); color: white; padding: 0.7rem 1rem; text-align: left; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: #f5f8ff; }
+  tr:hover td { background: #e8f0fe; }
+  td code { background: var(--code-bg); }
+  .hl td { background: #fff3cd !important; font-weight: 600; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .split .pane { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; }
+  .split .pane h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.5rem; }
+
+  /* ─── TRACE STEPS ─── */
+  .trace-step { display: flex; gap: 0.8rem; align-items: flex-start; padding: 0.7rem 0.9rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 0.4rem 0; font-size: 0.93rem; }
+  .trace-step .badge { border-radius: 5px; padding: 2px 9px; font-size: 0.78rem; white-space: nowrap; font-family: monospace; flex-shrink: 0; margin-top: 2px; color: white; }
+  .badge-blue { background: var(--accent); }
+  .badge-green { background: var(--green); }
+  .badge-red { background: var(--red); }
+  .badge-orange { background: var(--accent2); }
+
+  /* ─── FIVE-TUPLE ─── */
+  .five-tuple { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem; margin: 1rem 0; }
+  .tuple-item { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 1rem 0.8rem; text-align: center; }
+  .tuple-item .sym { font-size: 1.6rem; font-family: 'Georgia', serif; color: var(--primary); display: block; }
+  .tuple-item .name { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 4px 0; display: block; }
+  .tuple-item .val { font-size: 0.8rem; color: var(--text); font-family: monospace; }
+  .tuple-item.highlight { border-color: var(--accent); background: #e8f0fe; }
+
+  /* ══════════════════════════════════════════
+     SIMULADOR
+  ══════════════════════════════════════════ */
+  #simulator {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+    box-shadow: 0 4px 20px rgba(13,45,107,0.08);
+  }
+  .sim-header {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    color: white; padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .sim-header h3 { font-size: 1rem; margin: 0; }
+  .sim-header .sim-badge { background: rgba(255,255,255,0.2); border-radius: 6px; padding: 3px 10px; font-size: 0.78rem; }
+
+  .sim-body { padding: 1.4rem 1.5rem; }
+
+  /* preset selector */
+  .preset-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .preset-btn { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; padding: 5px 12px; font-size: 0.82rem; cursor: pointer; color: var(--primary); font-weight: 500; }
+  .preset-btn:hover, .preset-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* canvas */
+  #afd-canvas {
+    width: 100%; height: 220px; border: 1px solid var(--border); border-radius: 10px;
+    background: #f8fbff; display: block; margin-bottom: 1rem;
+  }
+
+  /* tabela de transição dinâmica */
+  .sim-table-wrap { overflow-x: auto; margin-bottom: 1rem; }
+  #sim-table { font-size: 0.88rem; }
+  #sim-table th { padding: 0.5rem 0.9rem; }
+  #sim-table td { padding: 0.5rem 0.9rem; font-family: monospace; }
+  #sim-table .td-current { background: #fff3cd !important; font-weight: 700; }
+  #sim-table .td-next { background: #e8f5ee !important; font-weight: 700; }
+
+  /* input de string */
+  .sim-input-row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+  .sim-input-row label { font-size: 0.88rem; font-weight: 600; color: var(--primary); }
+  #sim-string { font-family: monospace; font-size: 1.1rem; padding: 6px 12px; border: 2px solid var(--border); border-radius: 7px; width: 180px; }
+  #sim-string:focus { outline: none; border-color: var(--accent); }
+
+  /* controles */
+  .sim-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .sim-btn { padding: 7px 16px; border: none; border-radius: 7px; cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--primary); }
+  .btn-secondary { background: var(--bg); border: 1px solid var(--border); color: var(--primary); }
+  .btn-secondary:hover { background: #e8f0fe; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: #157040; }
+  .btn-orange { background: var(--accent2); color: white; }
+
+  /* display atual */
+  .sim-status { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin: 0.8rem 0; }
+  .sim-state-display { background: var(--primary); color: white; border-radius: 50%; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; font-family: monospace; flex-shrink: 0; }
+  .sim-tape { display: flex; gap: 2px; align-items: center; flex-wrap: wrap; }
+  .sim-tape .cell { width: 34px; height: 34px; border: 2px solid var(--border); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 1rem; font-weight: 700; background: var(--card); }
+  .sim-tape .cell.read { border-color: var(--accent2); background: #fff3e0; }
+  .sim-tape .cell.done { border-color: var(--green); background: #e8f5ee; color: var(--green); }
+  .sim-tape .cell.pending { opacity: 0.4; }
+  .sim-tape .cell.eps { font-style: italic; color: var(--muted); font-size: 0.85rem; }
+
+  /* log */
+  #sim-log { background: #f8fbff; border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; max-height: 180px; overflow-y: auto; font-size: 0.85rem; font-family: monospace; }
+  .log-line { padding: 2px 0; border-bottom: 1px solid #eef2fb; }
+  .log-line:last-child { border-bottom: none; }
+  .log-accept { color: var(--green); font-weight: 700; }
+  .log-reject { color: var(--red); font-weight: 700; }
+  .log-step { color: var(--primary); }
+
+  /* resultado final */
+  #sim-result { padding: 0.9rem 1.2rem; border-radius: 10px; font-size: 1.05rem; font-weight: 600; margin-top: 0.8rem; display: none; }
+  #sim-result.accept { background: #e8f5ee; border: 2px solid var(--green); color: var(--green); }
+  #sim-result.reject { background: #fdecea; border: 2px solid var(--red); color: var(--red); }
+
+  /* ─── QUIZ ─── */
+  .quiz { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+  .quiz h3 { color: var(--primary); font-size: 1rem; margin-bottom: 1rem; }
+  .quiz h3::before { content: '🧠 '; }
+  .options { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+  .opt { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 0.9rem; background: var(--bg); }
+  .opt:hover { background: #e8f0fe; border-color: var(--accent); }
+  .opt input { accent-color: var(--accent); margin-top: 3px; flex-shrink: 0; }
+  .quiz-btn { margin-top: 1rem; background: var(--accent); color: white; border: none; padding: 8px 22px; border-radius: 7px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+  .quiz-btn:hover { background: var(--primary); }
+  .quiz-result { margin-top: 0.8rem; padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.9rem; display: none; }
+  .quiz-result.show { display: block; }
+  .quiz-result.correct { background: #e8f5ee; border: 1px solid #a8d8b8; color: var(--green); }
+  .quiz-result.wrong { background: #fdecea; border: 1px solid #f0a8a0; color: var(--red); }
+
+  .summary { background: var(--primary); color: white; border-radius: 14px; padding: 2rem; margin: 2rem 0; }
+  .summary h3 { color: white; margin-bottom: 1rem; font-size: 1.15rem; }
+  .summary .row { display: flex; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  .summary .row::before { content: '✓'; color: #7ef0a0; font-weight: 700; flex-shrink: 0; }
+
+  .mod-nav { display: flex; justify-content: space-between; align-items: center; margin: 3rem 0 1rem; gap: 1rem; flex-wrap: wrap; }
+  .mod-btn { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 1rem 1.4rem; text-decoration: none; color: var(--primary); font-weight: 600; font-size: 0.9rem; flex: 1; min-width: 160px; }
+  .mod-btn:hover { border-color: var(--accent); background: #e8f0fe; }
+  .mod-btn.next { background: var(--accent); color: white; border-color: var(--accent); text-align: right; }
+  .mod-btn.next:hover { background: var(--primary); border-color: var(--primary); }
+  .mod-btn .dir { display: block; font-size: 0.75rem; font-weight: 400; opacity: 0.7; margin-bottom: 2px; }
+
+  @media (max-width: 620px) {
+    .split, .five-tuple { grid-template-columns: 1fr 1fr; }
+    header h1 { font-size: 1.8rem; }
+  }
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .analogy,.comparison{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">1 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div>
+        <a class="sb-item " href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas</span></a>
+        <a class="sb-item " href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div>
+        <a class="sb-item " href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Linguagens Formais</a><span class="sep">›</span>
+        <span class="current">Módulo 2 — Autômatos Finitos Determinísticos</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header"><div class="breadcrumb">POSCOMP Visual Lab › Autômatos</div>
+  <div class="module-badge">Módulo 2 de 8</div>
+  <h1>Autômato Finito Determinístico</h1>
+  <p class="subtitle">Da definição formal à execução visual — construa, leia e simule um AFD do zero.</p>
+  <div class="header-meta">
+    <span>⏱ ~55 min</span>
+    <span>📐 Nível: Fundamental</span>
+    <span>⚙️ Simulador interativo</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div class="progress-label">Módulo 2 de 8 — AFD</div></div>
+      <nav class="section-nav" id="sectionNav"><a href="#definicao">Definição</a>
+  <a href="#cinco-tupla">5-Tupla</a>
+  <a href="#exemplo1">Exemplo 1</a>
+  <a href="#tabela">Tabela δ</a>
+  <a href="#execucao">Execução</a>
+  <a href="#simulador">Simulador</a>
+  <a href="#estado-morto">Estado morto</a>
+  <a href="#linguagem">Linguagem</a>
+  <a href="#quiz">Exercícios</a>
+  <a href="#resumo">Resumo</a></nav>
+      <div class="lesson-content"><!-- ══════════════ 1 — DEFINIÇÃO ══════════════ -->
+<section id="definicao">
+  <h2><span class="num">1</span> O que é um AFD?</h2>
+
+  <p>Um <strong>Autômato Finito Determinístico</strong> (AFD, ou DFA em inglês) é uma máquina abstrata que lê uma string símbolo por símbolo, muda de estado conforme regras fixas, e ao final decide: <strong>aceitar</strong> ou <strong>rejeitar</strong>.</p>
+
+  <p>É a máquina mais simples da hierarquia computacional — e também a mais importante para o POSCOMP, pois está na base de regex, compiladores, protocolos e minimização.</p>
+
+  <div class="callout ok">
+    <strong>A intuição central:</strong> um AFD é uma máquina com memória finita. Ela não pode "voltar atrás" na string, não pode guardar contadores ilimitados, e nunca hesita — cada símbolo leva a exatamente um próximo estado.
+  </div>
+
+  <h3>Analogia concreta: catraca de metrô</h3>
+  <div class="split">
+    <div class="pane">
+      <h4>Estados</h4>
+      <p><strong>Travada</strong> e <strong>Destravada</strong> — a catraca só pode estar em um desses dois modos.</p>
+    </div>
+    <div class="pane">
+      <h4>Alfabeto</h4>
+      <p><strong>Moeda</strong> e <strong>Empurrão</strong> — os únicos eventos possíveis.</p>
+    </div>
+    <div class="pane">
+      <h4>Transições (δ)</h4>
+      <p>Travada + Moeda → Destravada<br>Destravada + Empurrão → Travada<br>Travada + Empurrão → Travada (continua travada)<br>Destravada + Moeda → Destravada (moeda desperdiçada)</p>
+    </div>
+    <div class="pane">
+      <h4>Estado inicial / final</h4>
+      <p>Começa <strong>Travada</strong>. "Aceita" (passa) quando está <strong>Destravada</strong> no momento do empurrão.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 2 — 5-TUPLA ══════════════ -->
+<section id="cinco-tupla">
+  <h2><span class="num">2</span> A definição formal — 5-tupla</h2>
+
+  <p>Um AFD é definido formalmente por cinco componentes:</p>
+
+  <div class="fbox">
+    <span class="flabel">Definição formal de AFD</span>
+    M = (Q, Σ, δ, q₀, F)
+    <span class="fsub">Cada componente tem um papel preciso — nenhum pode faltar</span>
+  </div>
+
+  <div class="five-tuple">
+    <div class="tuple-item">
+      <span class="sym">Q</span>
+      <span class="name">Estados</span>
+      <span class="val">Conjunto finito e não-vazio</span>
+    </div>
+    <div class="tuple-item">
+      <span class="sym">Σ</span>
+      <span class="name">Alfabeto</span>
+      <span class="val">Símbolos que a máquina lê</span>
+    </div>
+    <div class="tuple-item highlight">
+      <span class="sym">δ</span>
+      <span class="name">Transição</span>
+      <span class="val">δ: Q × Σ → Q — o coração do AFD</span>
+    </div>
+    <div class="tuple-item">
+      <span class="sym">q₀</span>
+      <span class="name">Estado inicial</span>
+      <span class="val">q₀ ∈ Q — único</span>
+    </div>
+    <div class="tuple-item">
+      <span class="sym">F</span>
+      <span class="name">Aceitação</span>
+      <span class="val">F ⊆ Q — pode ser vazio ou Q inteiro</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>δ é o coração.</strong> Ela define completamente o comportamento da máquina. Dado o estado atual e o símbolo lido, δ diz — sem ambiguidade — qual é o próximo estado. Isso é o "D" de <em>Determinístico</em>.
+  </div>
+
+  <h3>Restrições que tornam o autômato determinístico</h3>
+  <div class="card">
+    <table>
+      <tr><th>Regra</th><th>O que significa</th><th>Consequência</th></tr>
+      <tr><td>δ é função total</td><td>Definida para todo par (q, a) ∈ Q × Σ</td><td>A máquina nunca "trava" sem saber o que fazer</td></tr>
+      <tr><td>δ retorna exatamente um estado</td><td>Não pode retornar ∅ ou {q1, q2}</td><td>O comportamento é previsível e único</td></tr>
+      <tr><td>q₀ é único</td><td>Um só estado inicial</td><td>A execução sempre começa no mesmo lugar</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════ 3 — EXEMPLO 1 ══════════════ -->
+<section id="exemplo1">
+  <h2><span class="num">3</span> Construindo um AFD do zero</h2>
+
+  <h3>Problema: aceitar strings binárias com número par de 1s</h3>
+  <p>Queremos um AFD sobre <code>Σ = {0, 1}</code> que aceite <code>ε</code>, <code>11</code>, <code>0110</code>, <code>1001</code>… e rejeite <code>1</code>, <code>01</code>, <code>100</code>…</p>
+
+  <p><strong>Raciocínio:</strong> o que a máquina precisa "lembrar"? Apenas se já viu um número par ou ímpar de 1s. Isso implica dois estados.</p>
+
+  <div class="card">
+    <strong>Q = {par, ímpar}</strong><br>
+    <strong>Σ = {0, 1}</strong><br>
+    <strong>q₀ = par</strong> (começamos com zero 1s — zero é par)<br>
+    <strong>F = {par}</strong> (aceitamos quando o total de 1s é par)
+  </div>
+
+  <h3>Definindo δ — raciocínio estado por estado</h3>
+
+  <div class="split">
+    <div class="pane">
+      <h4>Do estado "par"</h4>
+      <p>Lê <code>0</code> → continua par (0 não muda a paridade) → vai para <strong>par</strong><br>
+      Lê <code>1</code> → paridade muda → vai para <strong>ímpar</strong></p>
+    </div>
+    <div class="pane">
+      <h4>Do estado "ímpar"</h4>
+      <p>Lê <code>0</code> → continua ímpar → vai para <strong>ímpar</strong><br>
+      Lê <code>1</code> → paridade muda de volta → vai para <strong>par</strong></p>
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <strong>Insight de design:</strong> para construir um AFD, pergunte "o que minha máquina precisa lembrar para tomar a decisão final?". Cada resposta diferente é um estado. Estados são memória — e a memória de um AFD é sempre finita.
+  </div>
+</section>
+
+<!-- ══════════════ 4 — TABELA DE TRANSIÇÃO ══════════════ -->
+<section id="tabela">
+  <h2><span class="num">4</span> A tabela de transição</h2>
+
+  <p>A <strong>tabela de transição</strong> é a representação mais direta de δ. Cada linha é um estado, cada coluna é um símbolo, cada célula é o próximo estado.</p>
+
+  <table>
+    <tr>
+      <th>Estado atual</th>
+      <th>Lê 0</th>
+      <th>Lê 1</th>
+    </tr>
+    <tr>
+      <td><strong>→★ par</strong> (inicial e final)</td>
+      <td>par</td>
+      <td>ímpar</td>
+    </tr>
+    <tr>
+      <td><strong>ímpar</strong></td>
+      <td>ímpar</td>
+      <td>par</td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <strong>Convenções de notação:</strong> → indica o estado inicial; ★ (ou círculo duplo no diagrama) indica estado de aceitação. Um estado pode ser ambos simultaneamente — como "par" aqui.
+  </div>
+
+  <h3>Diagrama de estados equivalente</h3>
+  <div class="card" style="text-align:center; padding: 2rem;">
+    <svg width="340" height="130" viewBox="0 0 340 130" style="max-width:100%;">
+      <!-- seta inicial -->
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#1a6bcc"/>
+        </marker>
+        <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#e8700a"/>
+        </marker>
+      </defs>
+      <!-- seta de entrada -->
+      <line x1="20" y1="65" x2="52" y2="65" stroke="#1a6bcc" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- estado par (aceitação = círculo duplo) -->
+      <circle cx="85" cy="65" r="30" fill="white" stroke="#1a6bcc" stroke-width="3"/>
+      <circle cx="85" cy="65" r="24" fill="none" stroke="#1a6bcc" stroke-width="1.5"/>
+      <text x="85" y="70" text-anchor="middle" font-size="13" font-weight="700" fill="#0d2d6b">par</text>
+      <!-- estado ímpar -->
+      <circle cx="255" cy="65" r="30" fill="white" stroke="#1a6bcc" stroke-width="2"/>
+      <text x="255" y="62" text-anchor="middle" font-size="11" font-weight="700" fill="#0d2d6b">ím-</text>
+      <text x="255" y="76" text-anchor="middle" font-size="11" font-weight="700" fill="#0d2d6b">par</text>
+      <!-- arco par → ímpar (lê 1) -->
+      <path d="M115,55 Q170,20 225,55" fill="none" stroke="#e8700a" stroke-width="2" marker-end="url(#arrow-orange)"/>
+      <text x="170" y="22" text-anchor="middle" font-size="12" fill="#e8700a" font-weight="600">1</text>
+      <!-- arco ímpar → par (lê 1) -->
+      <path d="M225,75 Q170,110 115,75" fill="none" stroke="#e8700a" stroke-width="2" marker-end="url(#arrow-orange)"/>
+      <text x="170" y="110" text-anchor="middle" font-size="12" fill="#e8700a" font-weight="600">1</text>
+      <!-- self-loop par (lê 0) -->
+      <path d="M70,37 Q50,5 90,35" fill="none" stroke="#1a6bcc" stroke-width="2" marker-end="url(#arrow)"/>
+      <text x="55" y="12" text-anchor="middle" font-size="12" fill="#1a6bcc" font-weight="600">0</text>
+      <!-- self-loop ímpar (lê 0) -->
+      <path d="M240,37 Q260,5 270,38" fill="none" stroke="#1a6bcc" stroke-width="2" marker-end="url(#arrow)"/>
+      <text x="270" y="12" text-anchor="middle" font-size="12" fill="#1a6bcc" font-weight="600">0</text>
+    </svg>
+    <p style="font-size:0.82rem; color:var(--muted); margin-top:0.5rem;">Círculo duplo = estado de aceitação · seta entrante = estado inicial · azul = lê 0 · laranja = lê 1</p>
+  </div>
+</section>
+
+<!-- ══════════════ 5 — EXECUÇÃO MANUAL ══════════════ -->
+<section id="execucao">
+  <h2><span class="num">5</span> Executando o AFD manualmente</h2>
+
+  <h3>Trace 1: "0110" → deve ACEITAR (dois 1s = par)</h3>
+  <div>
+    <div class="trace-step">
+      <span class="badge badge-blue">início</span>
+      <div>Estado: <code>par</code> | Restante: <code>0110</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-blue">lê '0'</span>
+      <div><code>δ(par, 0) = par</code> | Estado: <code>par</code> | Restante: <code>110</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-orange">lê '1'</span>
+      <div><code>δ(par, 1) = ímpar</code> | Estado: <code>ímpar</code> | Restante: <code>10</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-orange">lê '1'</span>
+      <div><code>δ(ímpar, 1) = par</code> | Estado: <code>par</code> | Restante: <code>0</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-blue">lê '0'</span>
+      <div><code>δ(par, 0) = par</code> | Estado: <code>par</code> | Restante: <code>(fim)</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-green">ACEITA</span>
+      <div>Estado final <code>par</code> ∈ F = {par} ✓</div>
+    </div>
+  </div>
+
+  <h3>Trace 2: "101" → deve REJEITAR (três 1s = ímpar)</h3>
+  <div>
+    <div class="trace-step">
+      <span class="badge badge-blue">início</span>
+      <div>Estado: <code>par</code> | Restante: <code>101</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-orange">lê '1'</span>
+      <div><code>δ(par, 1) = ímpar</code> | Estado: <code>ímpar</code> | Restante: <code>01</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-blue">lê '0'</span>
+      <div><code>δ(ímpar, 0) = ímpar</code> | Estado: <code>ímpar</code> | Restante: <code>1</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-orange">lê '1'</span>
+      <div><code>δ(ímpar, 1) = par</code> | Estado: <code>par</code>... espera.</div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-green">ACEITA</span>
+      <div>Estado final <code>par</code> ∈ F = {par} ✓ — Dois 1s lidos, mais o terceiro 1, são três no total. Mas o terceiro 1 levou de volta para "par". Contagem: 3 uns... vamos re-examinar.</div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Atenção ao trace acima!</strong> "101" tem dois 1s — então é aceita! Correto, pois o AFD conta paridade, não quantidade. Para rejeitar, use "1" ou "011" (um e três 1s). O trace abaixo usa "1":
+  </div>
+
+  <h3>Trace 3: "1" → REJEITA (um 1 = ímpar)</h3>
+  <div>
+    <div class="trace-step">
+      <span class="badge badge-blue">início</span>
+      <div>Estado: <code>par</code> | Restante: <code>1</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-orange">lê '1'</span>
+      <div><code>δ(par, 1) = ímpar</code> | Estado: <code>ímpar</code> | Restante: <code>(fim)</code></div>
+    </div>
+    <div class="trace-step">
+      <span class="badge badge-red">REJEITA</span>
+      <div>Estado final <code>ímpar</code> ∉ F = {par} ✗</div>
+    </div>
+  </div>
+
+  <h3>A δ* — executando sobre uma string inteira</h3>
+  <p>Para processar a string completa de uma vez, usamos a <strong>função de transição estendida</strong> δ*:</p>
+  <div class="card">
+    <strong>Definição recursiva:</strong><br><br>
+    <code>δ*(q, ε) = q</code> &nbsp;&nbsp;&nbsp;(string vazia: não muda de estado)<br>
+    <code>δ*(q, wa) = δ(δ*(q, w), a)</code> &nbsp;&nbsp;&nbsp;(processa w, depois aplica δ com o último símbolo a)<br><br>
+    <strong>Exemplo:</strong><br>
+    <code>δ*(par, "011") = δ(δ*(par, "01"), '1')</code><br>
+    <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= δ(δ(δ*(par,"0"),'1'), '1')</code><br>
+    <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= δ(δ(par,'1'), '1')</code><br>
+    <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= δ(ímpar, '1')</code><br>
+    <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= par ∈ F → ACEITA</code>
+  </div>
+</section>
+
+<!-- ══════════════ SIMULADOR ══════════════ -->
+<section id="simulador">
+  <h2><span class="num">6</span> Simulador interativo de AFD</h2>
+  <p>Escolha um dos autômatos pré-carregados ou use o seu próprio. Digite uma string e execute passo a passo ou de uma vez.</p>
+
+  <div id="simulator">
+    <div class="sim-header">
+      <h3>🔬 Simulador AFD</h3>
+      <span class="sim-badge">Execução passo a passo</span>
+    </div>
+    <div class="sim-body">
+
+      <!-- presets -->
+      <div class="preset-row">
+        <button class="preset-btn active" onclick="loadPreset('par1s')">Nº par de 1s</button>
+        <button class="preset-btn" onclick="loadPreset('termina01')">Termina em 01</button>
+        <button class="preset-btn" onclick="loadPreset('multiplo3')">Binário ÷ 3</button>
+        <button class="preset-btn" onclick="loadPreset('começa1')">Começa com 1</button>
+      </div>
+
+      <!-- descrição do preset -->
+      <div id="preset-desc" class="callout" style="margin-bottom:0.8rem; font-size:0.88rem;">
+        <strong>Nº par de 1s:</strong> aceita strings binárias com quantidade par de 1s (incluindo ε, onde zero 1s é par).
+      </div>
+
+      <!-- canvas do diagrama -->
+      <canvas id="afd-canvas"></canvas>
+
+      <!-- tabela de transição dinâmica -->
+      <div class="sim-table-wrap">
+        <table id="sim-table"><tbody id="sim-table-body"></tbody></table>
+      </div>
+
+      <!-- input -->
+      <div class="sim-input-row">
+        <label for="sim-string">String de entrada:</label>
+        <input type="text" id="sim-string" placeholder="ex: 0110" maxlength="20">
+        <div class="sim-controls">
+          <button class="sim-btn btn-primary" onclick="simInit()">▶ Iniciar</button>
+          <button class="sim-btn btn-secondary" onclick="simStep()">⏭ Passo</button>
+          <button class="sim-btn btn-green" onclick="simRun()">⚡ Executar tudo</button>
+          <button class="sim-btn btn-secondary" onclick="simReset()">↺ Resetar</button>
+        </div>
+      </div>
+
+      <!-- status visual -->
+      <div class="sim-status">
+        <div id="sim-state-circle" class="sim-state-display">—</div>
+        <div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-bottom:4px;">Fita de entrada</div>
+          <div id="sim-tape" class="sim-tape"></div>
+        </div>
+      </div>
+
+      <!-- log -->
+      <div style="font-size:0.82rem; color:var(--muted); margin-bottom:0.4rem; margin-top:0.8rem;">Log de execução</div>
+      <div id="sim-log"><span style="color:var(--muted);">Selecione um autômato, digite uma string e clique em Iniciar.</span></div>
+
+      <!-- resultado -->
+      <div id="sim-result"></div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 7 — ESTADO MORTO ══════════════ -->
+<section id="estado-morto">
+  <h2><span class="num">7</span> O estado morto (estado-lixo)</h2>
+
+  <p>Um AFD incompleto é aquele onde δ não está definida para alguns pares (q, a). Na prática, assumimos que esses casos existem, adicionando um <strong>estado morto</strong> — um estado não-final do qual nenhuma transição sai (exceto para ele mesmo).</p>
+
+  <div class="card">
+    <p><strong>Exemplo:</strong> AFD que aceita apenas "ab" sobre Σ = {a, b}.</p>
+    <table>
+      <tr><th>Estado</th><th>Lê a</th><th>Lê b</th></tr>
+      <tr><td>→ q0</td><td>q1</td><td><strong>morto</strong></td></tr>
+      <tr><td>q1</td><td><strong>morto</strong></td><td>q2 ★</td></tr>
+      <tr><td>q2 ★</td><td><strong>morto</strong></td><td><strong>morto</strong></td></tr>
+      <tr class="hl"><td><strong>morto</strong></td><td><strong>morto</strong></td><td><strong>morto</strong></td></tr>
+    </table>
+    <p style="margin-top:0.6rem; font-size:0.88rem; color:var(--muted);">O estado morto absorve qualquer entrada que já tornou a string inaceitável.</p>
+  </div>
+
+  <div class="callout warn">
+    <strong>Atenção em provas:</strong> quando o enunciado pede um AFD completo, inclua o estado morto. Quando pede apenas o diagrama funcional, pode omiti-lo para clareza. Saiba distinguir o que a questão exige.
+  </div>
+</section>
+
+<!-- ══════════════ 8 — LINGUAGEM RECONHECIDA ══════════════ -->
+<section id="linguagem">
+  <h2><span class="num">8</span> A linguagem reconhecida por um AFD</h2>
+
+  <p>A <strong>linguagem reconhecida</strong> (ou aceita) por um AFD M é o conjunto de todas as strings que M aceita:</p>
+
+  <div class="fbox">
+    <span class="flabel">Definição</span>
+    L(M) = { w ∈ Σ* | δ*(q₀, w) ∈ F }
+    <span class="fsub">"todas as strings que, partindo de q₀, terminam num estado de aceitação"</span>
+  </div>
+
+  <h3>Linguagens regulares</h3>
+  <p>Uma linguagem L é chamada de <strong>regular</strong> se existe algum AFD M tal que L = L(M). Esse é o elo central entre a teoria de autômatos e as linguagens formais.</p>
+
+  <div class="card">
+    <table>
+      <tr><th>AFD</th><th>Linguagem reconhecida</th></tr>
+      <tr><td>Nº par de 1s</td><td><code>{ w ∈ {0,1}* | #₁(w) é par }</code></td></tr>
+      <tr><td>Termina em 01</td><td><code>{ w ∈ {0,1}* | w termina com "01" }</code></td></tr>
+      <tr><td>Binário divisível por 3</td><td><code>{ w ∈ {0,1}* | val(w) mod 3 = 0 }</code></td></tr>
+      <tr><td>Estado morto = único estado não-final</td><td><code>∅ (linguagem vazia)</code></td></tr>
+      <tr><td>Todos os estados são finais</td><td><code>Σ* (aceita tudo)</code></td></tr>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <strong>Questão clássica de POSCOMP:</strong> dado um AFD (tabela ou diagrama), descreva a linguagem que ele reconhece. A estratégia é: observe o que os estados "lembram", trace algumas strings aceitas/rejeitadas, e generalize o padrão.
+  </div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section id="quiz">
+  <h2><span class="num">9</span> Exercícios — estilo POSCOMP</h2>
+
+  <div class="quiz">
+    <h3>Questão 1</h3>
+    <p style="margin-bottom:0.5rem;">Um AFD M tem Q = {q0, q1, q2}, Σ = {a, b}, q₀ = q0, F = {q2}, e a seguinte tabela:</p>
+    <table style="width:auto; margin-bottom:0.8rem;">
+      <tr><th>δ</th><th>a</th><th>b</th></tr>
+      <tr><td>q0</td><td>q1</td><td>q0</td></tr>
+      <tr><td>q1</td><td>q1</td><td>q2</td></tr>
+      <tr><td>q2</td><td>q1</td><td>q0</td></tr>
+    </table>
+    <p>Qual das strings a seguir é aceita por M?</p>
+    <div class="options" id="q1">
+      <label class="opt"><input type="radio" name="q1" value="A"> A) "ba"</label>
+      <label class="opt"><input type="radio" name="q1" value="B"> B) "ab"</label>
+      <label class="opt"><input type="radio" name="q1" value="C"> C) "aab"</label>
+      <label class="opt"><input type="radio" name="q1" value="D"> D) "bba"</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q1','C','e1')">Verificar</button>
+    <div class="quiz-result" id="q1-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 2</h3>
+    <p>Um AFD sobre Σ = {0,1} tem 3 estados e reconhece números binários divisíveis por 2. Qual deve ser o estado de aceitação e o que ele representa?</p>
+    <div class="options" id="q2">
+      <label class="opt"><input type="radio" name="q2" value="A"> A) O estado que foi atingido quando o último símbolo lido foi '1'</label>
+      <label class="opt"><input type="radio" name="q2" value="B"> B) O estado que foi atingido quando o último símbolo lido foi '0'</label>
+      <label class="opt"><input type="radio" name="q2" value="C"> C) O estado inicial, pois zero é divisível por 2</label>
+      <label class="opt"><input type="radio" name="q2" value="D"> D) Qualquer estado, pois divisibilidade não depende do último símbolo</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q2','B','e2')">Verificar</button>
+    <div class="quiz-result" id="q2-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 3 — nível POSCOMP</h3>
+    <p>Considere M = ({q0,q1}, {a,b}, δ, q0, {q1}) com δ(q0,a)=q1, δ(q0,b)=q0, δ(q1,a)=q1, δ(q1,b)=q0. Qual é a linguagem L(M)?</p>
+    <div class="options" id="q3">
+      <label class="opt"><input type="radio" name="q3" value="A"> A) Strings que terminam com 'a'</label>
+      <label class="opt"><input type="radio" name="q3" value="B"> B) Strings com número par de 'a's</label>
+      <label class="opt"><input type="radio" name="q3" value="C"> C) Strings com pelo menos um 'a'</label>
+      <label class="opt"><input type="radio" name="q3" value="D"> D) Strings que começam com 'a'</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q3','A','e3')">Verificar</button>
+    <div class="quiz-result" id="q3-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 4</h3>
+    <p>Qual afirmação sobre o estado morto (dead state) em um AFD é correta?</p>
+    <div class="options" id="q4">
+      <label class="opt"><input type="radio" name="q4" value="A"> A) O estado morto é sempre o estado inicial</label>
+      <label class="opt"><input type="radio" name="q4" value="B"> B) O estado morto é um estado de aceitação especial</label>
+      <label class="opt"><input type="radio" name="q4" value="C"> C) O estado morto é um estado não-final do qual todas as transições retornam para ele mesmo</label>
+      <label class="opt"><input type="radio" name="q4" value="D"> D) Todo AFD precisa ter exatamente um estado morto</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q4','C','e4')">Verificar</button>
+    <div class="quiz-result" id="q4-res"></div>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 5 — POSCOMP 2015 (adaptada)</h3>
+    <p>Um AFD M = (Q, {a,b}, δ, q0, F) aceita a linguagem L = {w ∈ {a,b}* | w contém "ab" como subpalavra}. Qual é o número mínimo de estados de M?</p>
+    <div class="options" id="q5">
+      <label class="opt"><input type="radio" name="q5" value="A"> A) 2</label>
+      <label class="opt"><input type="radio" name="q5" value="B"> B) 3</label>
+      <label class="opt"><input type="radio" name="q5" value="C"> C) 4</label>
+      <label class="opt"><input type="radio" name="q5" value="D"> D) 5</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q5','B','e5')">Verificar</button>
+    <div class="quiz-result" id="q5-res"></div>
+  </div>
+</section>
+
+<!-- ══════════════ RESUMO ══════════════ -->
+<section id="resumo">
+  <h2><span class="num">10</span> Resumo do módulo</h2>
+
+  <div class="summary">
+    <h3>O que você agora domina:</h3>
+    <div class="row">AFD = máquina que lê string símbolo a símbolo e decide aceitar ou rejeitar.</div>
+    <div class="row">Definido pela 5-tupla M = (Q, Σ, δ, q₀, F) — cada componente tem papel preciso.</div>
+    <div class="row">δ: Q × Σ → Q é função total — definida para todo par (estado, símbolo).</div>
+    <div class="row">Tabela de transição e diagrama de estados são representações equivalentes de δ.</div>
+    <div class="row">δ* (delta estendida) processa uma string inteira — definida recursivamente.</div>
+    <div class="row">Estado morto completa o AFD para pares sem transição definida.</div>
+    <div class="row">L(M) = { w | δ*(q₀, w) ∈ F } — a linguagem reconhecida pelo AFD.</div>
+    <div class="row">Uma linguagem é regular se e somente se existe um AFD que a reconhece.</div>
+  </div>
+
+  <h3>O que vem no próximo módulo</h3>
+  <div class="card">
+    O Módulo 3 apresenta o <strong>AFN — Autômato Finito Não-Determinístico</strong>. Você verá que a assinatura de δ muda para <code>δ: Q × (Σ ∪ {ε}) → 2^Q</code> — uma função que retorna um <em>conjunto</em> de estados em vez de um único. E o Teorema da Determinização vai mostrar que, apesar da aparente maior potência, AFN e AFD reconhecem exatamente as mesmas linguagens.
+  </div>
+</section>
+
+<div class="mod-nav">
+  <a href="modulo-01-fundamentos.html" class="mod-btn">
+    <span class="dir">← Anterior</span>
+    Módulo 1: Fundamentos
+  </a>
+  <a href="#" class="mod-btn next">
+    <span class="dir">Próximo →</span>
+    Módulo 3: AFN e ε-Transições
+  </a>
+</div></div>
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="modulo-01.html">← Módulo anterior</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 2 de 9</div>
+        </div>
+        <a class="btn-nav next" href="modulo-03.html">Próximo módulo →</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);localStorage.setItem('sb-state',c?'collapsed':'expanded')}
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+</script>
+</body>
+</html>

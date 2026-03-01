@@ -29,6 +29,7 @@ export function ClerkStudyShell() {
     <PoscompApp
       auth={{
         mode: 'authenticated',
+        userId: user?.id,
         displayName: user?.fullName || user?.username || user?.firstName || 'Estudante',
         email: user?.primaryEmailAddress?.emailAddress,
         onSignOut: () => void clerk.signOut({ redirectUrl: '/' }),

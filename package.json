@@ -17,7 +17,12 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "questions:ingest": "tsx scripts/ingest-question-bank.ts",
-    "questions:ingest:dry": "tsx scripts/ingest-question-bank.ts --dry-run"
+    "questions:ingest:dry": "tsx scripts/ingest-question-bank.ts --dry-run",
+    "content:ingest": "tsx scripts/ingest-topic-content.ts",
+    "content:ingest:dry": "tsx scripts/ingest-topic-content.ts --dry-run",
+    "study:modules:ingest": "tsx scripts/ingest-study-modules.ts",
+    "flashcards:ingest": "tsx scripts/ingest-flashcards.ts",
+    "flashcards:ingest:dry": "tsx scripts/ingest-flashcards.ts --dry-run"
   },
   "dependencies": {
     "@clerk/nextjs": "6.18.0",

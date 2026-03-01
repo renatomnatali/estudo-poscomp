@@ -1,0 +1,778 @@
+{
+  "version": 1,
+  "generatedAt": "2026-02-25T00:00:00.000Z",
+  "topics": [
+    {
+      "id": "topic-linguagens-formais",
+      "slug": "linguagens-formais-e-operacoes",
+      "title": "Linguagens Formais e Operações",
+      "macroArea": "fundamentos",
+      "subTopic": "fundamentos_geral",
+      "difficulty": "easy",
+      "incidence": "high",
+      "estimatedMinutes": 35,
+      "prerequisites": [],
+      "learningObjectives": [
+        "Definir alfabeto, palavra e linguagem formal.",
+        "Aplicar operações de união, concatenação e estrela de Kleene.",
+        "Traduzir enunciados em definição formal de linguagem."
+      ],
+      "sourceLessons": [
+        { "pdf": "aula_04_Linguagens.pdf", "pageStart": 1, "pageEnd": 60 }
+      ],
+      "sections": [
+        {
+          "id": "sec-lf-essential",
+          "kind": "essential",
+          "title": "Camada essencial",
+          "content": "Linguagem formal é um conjunto de palavras sobre um alfabeto. No POSCOMP, a maioria das questões cobra leitura correta de notação e aplicação rápida de operações básicas.",
+          "order": 1
+        },
+        {
+          "id": "sec-lf-advanced",
+          "kind": "advanced",
+          "title": "Camada avançada",
+          "content": "Operações: L1 ∪ L2, L1.L2, L* e complemento em relação a Σ*. Entender fechamento das linguagens regulares sob essas operações ajuda a eliminar alternativas incorretas sem construir autômato completo.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-lf-1",
+          "title": "Reconhecer padrão por notação",
+          "problem": "Dada L = { w em {a,b}* | w termina com ab }, qual palavra pertence a L?",
+          "strategy": "Verificar o sufixo final da palavra candidata.",
+          "solution": "A palavra baab pertence a L porque termina com ab.",
+          "takeaway": "Questões de pertencimento costumam ser resolvidas por inspeção de padrão.",
+          "order": 1
+        },
+        {
+          "id": "ex-lf-2",
+          "title": "Aplicar estrela de Kleene",
+          "problem": "Se L = {ab}, quais palavras estão em L*?",
+          "strategy": "Gerar concatenações repetidas de elementos de L, incluindo ε.",
+          "solution": "L* = {ε, ab, abab, ababab, ...}.",
+          "takeaway": "L* sempre inclui ε, mesmo quando L não inclui.",
+          "order": 2
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-lf-1",
+          "title": "Definição de padrões em pipelines",
+          "context": "Sistemas de observabilidade filtram eventos por padrões de strings.",
+          "howItApplies": "Modelar conjuntos de mensagens válidas como linguagem formal ajuda a escrever filtros corretos e testáveis.",
+          "order": 1
+        }
+      ],
+      "references": [
+        {
+          "id": "ref-lf-1",
+          "label": "MIT OCW 6.045J - Formal Languages",
+          "url": "https://ocw.mit.edu/courses/6-045j-automata-computability-and-complexity-spring-2011/",
+          "order": 1
+        }
+      ],
+      "quickChecks": [
+        {
+          "id": "qc-lf-1",
+          "prompt": "Se L = {a}, então ε pertence a L*?",
+          "options": [
+            { "key": "A", "text": "Sim" },
+            { "key": "B", "text": "Não" }
+          ],
+          "answerKey": "A",
+          "explanation": "Por definição, a estrela de Kleene inclui a concatenação de zero elementos, que é ε.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-expressoes-regulares",
+      "slug": "expressoes-regulares",
+      "title": "Expressões Regulares",
+      "macroArea": "fundamentos",
+      "subTopic": "fundamentos_geral",
+      "difficulty": "medium",
+      "incidence": "high",
+      "estimatedMinutes": 45,
+      "prerequisites": ["topic-linguagens-formais"],
+      "learningObjectives": [
+        "Interpretar expressões regulares e linguagem denotada.",
+        "Aplicar equivalências algébricas comuns.",
+        "Relacionar ER com AFD/AFN em questões de prova."
+      ],
+      "sourceLessons": [
+        { "pdf": "aula_04_Linguagens.pdf", "pageStart": 61, "pageEnd": 110 },
+        { "pdf": "aula_06_AutomatosFinitosDeterministicos.pdf", "pageStart": 1, "pageEnd": 20 }
+      ],
+      "sections": [
+        {
+          "id": "sec-er-essential",
+          "kind": "essential",
+          "title": "Camada essencial",
+          "content": "ER usa união (+ ou |), concatenação e estrela. No POSCOMP, foco é interpretar rapidamente a linguagem aceita e comparar alternativas.",
+          "order": 1
+        },
+        {
+          "id": "sec-er-advanced",
+          "kind": "advanced",
+          "title": "Camada avançada",
+          "content": "Equivalências úteis: (R*)* = R*; R(R* ) = R+; distributividade com cuidado para não perder precedência. Em questões objetivas, substituir por forma equivalente simplifica análise.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-er-1",
+          "title": "Leitura de linguagem",
+          "problem": "Qual linguagem é descrita por (a+b)*c?",
+          "strategy": "Isolar prefixo livre e sufixo obrigatório.",
+          "solution": "Todas as palavras sobre {a,b} que terminam com c.",
+          "takeaway": "Estrutura prefixo livre + sufixo fixo aparece muito em questões de AFD.",
+          "order": 1
+        },
+        {
+          "id": "ex-er-2",
+          "title": "Equivalência",
+          "problem": "(a+b)*a(a+b)* + (a+b)*b(a+b)* pode ser simplificada?",
+          "strategy": "Interpretar semântica: contém a ou contém b em algum ponto.",
+          "solution": "A expressão equivale a (a+b)+.",
+          "takeaway": "Semântica do conjunto evita manipulação algébrica longa.",
+          "order": 2
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-er-1",
+          "title": "Validação de formatos de entrada",
+          "context": "Sistemas web validam e-mails, tokens e identificadores.",
+          "howItApplies": "ER oferece validação declarativa e rápida para regras sintáticas antes do processamento semântico.",
+          "order": 1
+        }
+      ],
+      "references": [
+        {
+          "id": "ref-er-1",
+          "label": "JFLAP - RegEx and Automata",
+          "url": "https://jflap.org/",
+          "order": 1
+        }
+      ],
+      "quickChecks": [
+        {
+          "id": "qc-er-1",
+          "prompt": "A expressão (a+b)* inclui a palavra ε?",
+          "options": [
+            { "key": "A", "text": "Inclui" },
+            { "key": "B", "text": "Não inclui" }
+          ],
+          "answerKey": "A",
+          "explanation": "A estrela de Kleene sempre inclui ε.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-gramaticas",
+      "slug": "gramaticas-e-derivacao",
+      "title": "Gramáticas e Derivação",
+      "macroArea": "fundamentos",
+      "subTopic": "fundamentos_geral",
+      "difficulty": "medium",
+      "incidence": "high",
+      "estimatedMinutes": 50,
+      "prerequisites": ["topic-linguagens-formais"],
+      "learningObjectives": [
+        "Classificar gramáticas por tipo e reconhecer gramática regular.",
+        "Executar derivações e interpretar árvores sintáticas.",
+        "Detectar ambiguidades em produções."
+      ],
+      "sourceLessons": [
+        { "pdf": "aula_05_Gramaticas.pdf", "pageStart": 1, "pageEnd": 80 },
+        { "pdf": "aula_12_LinguagensLivresDoContexto.pdf", "pageStart": 1, "pageEnd": 25 }
+      ],
+      "sections": [
+        {
+          "id": "sec-gr-essential",
+          "kind": "essential",
+          "title": "Camada essencial",
+          "content": "Gramática G = (V, Σ, P, S). Em prova, é comum pedir linguagem gerada ou ER equivalente para gramática regular simples.",
+          "order": 1
+        },
+        {
+          "id": "sec-gr-advanced",
+          "kind": "advanced",
+          "title": "Camada avançada",
+          "content": "Derivações leftmost/rightmost e ambiguidade impactam análise sintática. Para GLC, uma sentença pode ter múltiplas árvores, sinalizando ambiguidade.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-gr-1",
+          "title": "Converter gramática regular em padrão",
+          "problem": "S -> abS | a. Qual linguagem é gerada?",
+          "strategy": "Observar recursão e caso base.",
+          "solution": "L = { (ab)^n a | n >= 0 }.",
+          "takeaway": "A produção recursiva repete bloco fixo; a base encerra derivação.",
+          "order": 1
+        },
+        {
+          "id": "ex-gr-2",
+          "title": "Derivação em GLC",
+          "problem": "Para E -> E+E | id, derive id+id+id.",
+          "strategy": "Executar leftmost e comparar estrutura de árvore.",
+          "solution": "Há mais de uma árvore possível, indicando ambiguidade.",
+          "takeaway": "Ambiguidade é cobrada em questões conceituais de compiladores.",
+          "order": 2
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-gr-1",
+          "title": "Parsing de linguagens de programação",
+          "context": "Compiladores usam gramáticas para definir sintaxe válida.",
+          "howItApplies": "A definição gramatical determina como o parser constrói árvore sintática e reporta erros.",
+          "order": 1
+        }
+      ],
+      "references": [
+        {
+          "id": "ref-gr-1",
+          "label": "Dragon Book (referência clássica)",
+          "url": "https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools",
+          "order": 1
+        }
+      ],
+      "quickChecks": [
+        {
+          "id": "qc-gr-1",
+          "prompt": "Uma gramática regular pode gerar uma linguagem não regular?",
+          "options": [
+            { "key": "A", "text": "Pode" },
+            { "key": "B", "text": "Não pode" }
+          ],
+          "answerKey": "B",
+          "explanation": "Gramáticas regulares geram exatamente linguagens regulares.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-automatos-afd",
+      "slug": "automatos-finitos-afd",
+      "title": "Autômatos Finitos Determinísticos",
+      "macroArea": "fundamentos",
+      "subTopic": "afd_modelagem_execucao",
+      "difficulty": "medium",
+      "incidence": "high",
+      "estimatedMinutes": 55,
+      "prerequisites": ["topic-linguagens-formais", "topic-expressoes-regulares"],
+      "learningObjectives": [
+        "Modelar AFDs para linguagens regulares.",
+        "Executar leitura de palavra com rastreio de estados.",
+        "Explicar aceitação/rejeição formalmente."
+      ],
+      "sourceLessons": [
+        { "pdf": "aula_06_AutomatosFinitosDeterministicos.pdf", "pageStart": 1, "pageEnd": 80 }
+      ],
+      "sections": [
+        {
+          "id": "sec-afd-essential",
+          "kind": "essential",
+          "title": "Camada essencial",
+          "content": "AFD é definido por M = (E, Σ, δ, i, F). Para cada (estado, símbolo), há exatamente um próximo estado.",
+          "order": 1
+        },
+        {
+          "id": "sec-afd-advanced",
+          "kind": "advanced",
+          "title": "Camada avançada",
+          "content": "Introduzir estado de erro explícito facilita tornar δ total e comparar equivalência entre representações gráfica e matricial.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-afd-1",
+          "title": "Palavra aceita",
+          "problem": "No AFD da linguagem (a+b)*c, a palavra ababc é aceita?",
+          "strategy": "Consumir símbolos na ordem e acompanhar estado corrente.",
+          "solution": "A execução termina em estado final após ler c, então aceita.",
+          "takeaway": "Sempre decida com base no estado final após consumir toda a entrada.",
+          "order": 1
+        },
+        {
+          "id": "ex-afd-2",
+          "title": "Palavra rejeitada",
+          "problem": "No mesmo AFD, a palavra aba é aceita?",
+          "strategy": "Executar passo a passo sem pular transições.",
+          "solution": "Termina em estado não final; rejeita.",
+          "takeaway": "Parecer próxima da linguagem não basta; o estado final decide.",
+          "order": 2
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-afd-1",
+          "title": "Análise léxica",
+          "context": "Compiladores transformam código em tokens via autômatos.",
+          "howItApplies": "Cada token é reconhecido por máquina determinística, com custo linear no tamanho da entrada.",
+          "order": 1
+        }
+      ],
+      "references": [
+        {
+          "id": "ref-afd-1",
+          "label": "MIT OCW 6.045J - Finite Automata",
+          "url": "https://ocw.mit.edu/courses/6-045j-automata-computability-and-complexity-spring-2011/",
+          "order": 1
+        }
+      ],
+      "quickChecks": [
+        {
+          "id": "qc-afd-1",
+          "prompt": "Em um AFD, podem existir duas transições para o mesmo símbolo no mesmo estado?",
+          "options": [
+            { "key": "A", "text": "Sim" },
+            { "key": "B", "text": "Não" }
+          ],
+          "answerKey": "B",
+          "explanation": "Não. Essa restrição é justamente o determinismo.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-minimizacao-afd",
+      "slug": "minimizacao-de-afd",
+      "title": "Minimização de AFD",
+      "macroArea": "fundamentos",
+      "subTopic": "minimizacao_afd",
+      "difficulty": "hard",
+      "incidence": "high",
+      "estimatedMinutes": 50,
+      "prerequisites": ["topic-automatos-afd"],
+      "learningObjectives": [
+        "Remover estados inalcançáveis.",
+        "Aplicar refinamento de partições.",
+        "Comparar AFD original e mínimo preservando linguagem."
+      ],
+      "sourceLessons": [
+        { "pdf": "aula_08_MinimizacaoDeAFDs.pdf", "pageStart": 1, "pageEnd": 60 },
+        { "pdf": "aula_09_ExerciciosAFD.pdf", "pageStart": 1, "pageEnd": 40 }
+      ],
+      "sections": [
+        {
+          "id": "sec-min-essential",
+          "kind": "essential",
+          "title": "Camada essencial",
+          "content": "Passos: remover inalcançáveis, iniciar partição F e E-F, refinar até estabilizar e construir autômato mínimo.",
+          "order": 1
+        },
+        {
+          "id": "sec-min-advanced",
+          "kind": "advanced",
+          "title": "Camada avançada",
+          "content": "Equivalência de estados depende de comportamento futuro para toda palavra possível. Refinamento é um procedimento de ponto fixo.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-min-1",
+          "title": "Eliminar inalcançáveis",
+          "problem": "AFD possui estado q4 sem caminho a partir de q0.",
+          "strategy": "Executar busca a partir do estado inicial.",
+          "solution": "q4 é removido antes de qualquer partição.",
+          "takeaway": "Não minimiza corretamente sem limpar estados mortos/inatingíveis.",
+          "order": 1
+        },
+        {
+          "id": "ex-min-2",
+          "title": "Refinamento",
+          "problem": "Estados q1 e q2 inicialmente na mesma partição.",
+          "strategy": "Comparar destino por símbolo em partições correntes.",
+          "solution": "Se algum símbolo envia para classes distintas, separar q1 e q2.",
+          "takeaway": "Separação acontece por distinção observável de transições.",
+          "order": 2
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-min-1",
+          "title": "Otimização de analisadores",
+          "context": "AFDs grandes consomem memória e afetam desempenho.",
+          "howItApplies": "Minimizar reduz estados e acelera matching em motores de reconhecimento.",
+          "order": 1
+        }
+      ],
+      "references": [
+        {
+          "id": "ref-min-1",
+          "label": "Hopcroft DFA minimization (overview)",
+          "url": "https://en.wikipedia.org/wiki/DFA_minimization",
+          "order": 1
+        }
+      ],
+      "quickChecks": [
+        {
+          "id": "qc-min-1",
+          "prompt": "A minimização pode alterar a linguagem reconhecida?",
+          "options": [
+            { "key": "A", "text": "Pode" },
+            { "key": "B", "text": "Não pode" }
+          ],
+          "answerKey": "B",
+          "explanation": "Minimização correta preserva linguagem; só reduz representação.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-afn-epsilon",
+      "slug": "afn-com-epsilon",
+      "title": "AFN com ε-fecho",
+      "macroArea": "fundamentos",
+      "subTopic": "afn_epsilon",
+      "difficulty": "hard",
+      "incidence": "high",
+      "estimatedMinutes": 50,
+      "prerequisites": ["topic-automatos-afd"],
+      "learningObjectives": [
+        "Calcular ε-fecho de estados.",
+        "Simular execução não determinística por conjuntos de estados.",
+        "Comparar AFN e AFD para mesma linguagem."
+      ],
+      "sourceLessons": [
+        { "pdf": "aula_10_AFN.pdf", "pageStart": 1, "pageEnd": 50 },
+        { "pdf": "aula_11_AFN_parte2.pdf", "pageStart": 1, "pageEnd": 35 }
+      ],
+      "sections": [
+        {
+          "id": "sec-afn-essential",
+          "kind": "essential",
+          "title": "Camada essencial",
+          "content": "AFN permite múltiplas transições para um símbolo e transições ε (sem consumir entrada). Estado atual vira conjunto de estados possíveis.",
+          "order": 1
+        },
+        {
+          "id": "sec-afn-advanced",
+          "kind": "advanced",
+          "title": "Camada avançada",
+          "content": "A cada símbolo: aplicar transições do conjunto atual e fechar novamente por ε. Aceita se ao menos um estado final estiver no conjunto final.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-afn-1",
+          "title": "ε-fecho inicial",
+          "problem": "De q0 há ε para q1 e q2. Qual ε-fecho(q0)?",
+          "strategy": "Explorar todas as transições ε recursivamente.",
+          "solution": "ε-fecho(q0) = {q0, q1, q2}.",
+          "takeaway": "Sempre inclua o próprio estado no ε-fecho.",
+          "order": 1
+        },
+        {
+          "id": "ex-afn-2",
+          "title": "Execução por conjuntos",
+          "problem": "Após ler símbolo a, conjunto vira {q1,q3}. O que fazer depois?",
+          "strategy": "Aplicar ε-fecho ao conjunto antes do próximo símbolo.",
+          "solution": "Novo conjunto é ε-fecho({q1,q3}) e só então lê próximo símbolo.",
+          "takeaway": "Esquecer ε-fecho entre símbolos é erro clássico de prova.",
+          "order": 2
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-afn-1",
+          "title": "Construção intermediária em motores de regex",
+          "context": "Compiladores de regex costumam construir AFN antes de otimizar.",
+          "howItApplies": "AFN facilita composição de operadores e depois pode ser convertido para AFD para execução rápida.",
+          "order": 1
+        }
+      ],
+      "references": [
+        {
+          "id": "ref-afn-1",
+          "label": "Thompson construction (visão geral)",
+          "url": "https://en.wikipedia.org/wiki/Thompson%27s_construction",
+          "order": 1
+        }
+      ],
+      "quickChecks": [
+        {
+          "id": "qc-afn-1",
+          "prompt": "Transição ε consome símbolo da entrada?",
+          "options": [
+            { "key": "A", "text": "Consome" },
+            { "key": "B", "text": "Não consome" }
+          ],
+          "answerKey": "B",
+          "explanation": "Transição ε muda estado sem consumir símbolo.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-conversao-afn-afd",
+      "slug": "conversao-afn-para-afd",
+      "title": "Conversão AFN → AFD",
+      "macroArea": "fundamentos",
+      "subTopic": "conversao_afn_afd",
+      "difficulty": "hard",
+      "incidence": "high",
+      "estimatedMinutes": 60,
+      "prerequisites": ["topic-afn-epsilon"],
+      "learningObjectives": [
+        "Construir estados do AFD como subconjuntos do AFN.",
+        "Definir transições com ε-fecho na construção.",
+        "Verificar preservação da linguagem após conversão."
+      ],
+      "sourceLessons": [
+        { "pdf": "aula_11_AFN_parte2.pdf", "pageStart": 36, "pageEnd": 60 }
+      ],
+      "sections": [
+        {
+          "id": "sec-conv-essential",
+          "kind": "essential",
+          "title": "Camada essencial",
+          "content": "Na construção por subconjuntos, cada estado do AFD representa um conjunto de estados do AFN.",
+          "order": 1
+        },
+        {
+          "id": "sec-conv-advanced",
+          "kind": "advanced",
+          "title": "Camada avançada",
+          "content": "Estado inicial do AFD é ε-fecho do estado inicial do AFN. Estado é final se o subconjunto contém ao menos um estado final do AFN.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-conv-1",
+          "title": "Estado inicial convertido",
+          "problem": "AFN inicial q0 com ε para q1.",
+          "strategy": "Calcular ε-fecho(q0).",
+          "solution": "Estado inicial do AFD é {q0,q1}.",
+          "takeaway": "Conversão começa por ε-fecho, não por q0 isolado.",
+          "order": 1
+        },
+        {
+          "id": "ex-conv-2",
+          "title": "Estado final no AFD",
+          "problem": "Subconjunto {q1,q3} contém q3 final do AFN.",
+          "strategy": "Aplicar regra de aceitação por interseção.",
+          "solution": "{q1,q3} é estado final no AFD.",
+          "takeaway": "Qualquer subconjunto com final do AFN vira final no AFD.",
+          "order": 2
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-conv-1",
+          "title": "Execução eficiente de reconhecimento",
+          "context": "AFN é fácil de compor, AFD é rápido de executar.",
+          "howItApplies": "Pipeline clássico: construir AFN da ER e converter para AFD para runtime.",
+          "order": 1
+        }
+      ],
+      "references": [
+        {
+          "id": "ref-conv-1",
+          "label": "Subset construction",
+          "url": "https://en.wikipedia.org/wiki/Powerset_construction",
+          "order": 1
+        }
+      ],
+      "quickChecks": [
+        {
+          "id": "qc-conv-1",
+          "prompt": "Todo estado do AFD convertido representa um único estado do AFN?",
+          "options": [
+            { "key": "A", "text": "Sim" },
+            { "key": "B", "text": "Não" }
+          ],
+          "answerKey": "B",
+          "explanation": "Cada estado do AFD representa um subconjunto de estados do AFN.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-glc-ap",
+      "slug": "glc-e-automatos-com-pilha",
+      "title": "GLC e Autômatos com Pilha",
+      "macroArea": "fundamentos",
+      "subTopic": "fundamentos_geral",
+      "difficulty": "hard",
+      "incidence": "medium",
+      "estimatedMinutes": 60,
+      "prerequisites": ["topic-gramaticas"],
+      "learningObjectives": [
+        "Relacionar GLC com linguagens reconhecidas por AP.",
+        "Simular uso da pilha em reconhecimento.",
+        "Comparar poder computacional de AFD, AP e MT."
+      ],
+      "sourceLessons": [
+        { "pdf": "aula_12_LinguagensLivresDoContexto.pdf", "pageStart": 1, "pageEnd": 60 },
+        { "pdf": "aula_13_AutomatoComPilha.pdf", "pageStart": 1, "pageEnd": 60 }
+      ],
+      "sections": [
+        {
+          "id": "sec-ap-essential",
+          "kind": "essential",
+          "title": "Camada essencial",
+          "content": "AP usa estado + pilha. A pilha permite reconhecer padrões balanceados, inviáveis para AFD puro.",
+          "order": 1
+        },
+        {
+          "id": "sec-ap-advanced",
+          "kind": "advanced",
+          "title": "Camada avançada",
+          "content": "GLC e AP não determinístico têm equivalência expressiva para linguagens livres de contexto.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-ap-1",
+          "title": "Balanceamento simples",
+          "problem": "Reconhecer { a^n b^n | n>=0 }.",
+          "strategy": "Empilhar para cada a e desempilhar para cada b.",
+          "solution": "Aceita quando entrada termina e pilha volta ao marcador base.",
+          "takeaway": "Pilha conta quantidade sem armazenar n explicitamente.",
+          "order": 1
+        },
+        {
+          "id": "ex-ap-2",
+          "title": "Palavra inválida",
+          "problem": "A palavra aab pertence a {a^n b^n}?",
+          "strategy": "Comparar número de push e pop.",
+          "solution": "Rejeita, pois sobra símbolo empilhado.",
+          "takeaway": "Aceitação exige consumo completo da entrada e consistência da pilha.",
+          "order": 2
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-ap-1",
+          "title": "Parsing de expressões aninhadas",
+          "context": "Analisadores sintáticos precisam validar parênteses e escopos.",
+          "howItApplies": "Estrutura de pilha mapeia naturalmente abertura/fechamento de blocos em código.",
+          "order": 1
+        }
+      ],
+      "references": [
+        {
+          "id": "ref-ap-1",
+          "label": "Stanford CS103 - PDA notes",
+          "url": "https://web.stanford.edu/class/cs103/",
+          "order": 1
+        }
+      ],
+      "quickChecks": [
+        {
+          "id": "qc-ap-1",
+          "prompt": "AFD reconhece a linguagem a^n b^n para n>=0?",
+          "options": [
+            { "key": "A", "text": "Reconhece" },
+            { "key": "B", "text": "Não reconhece" }
+          ],
+          "answerKey": "B",
+          "explanation": "Essa linguagem não é regular; requer memória de contagem.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-mt-decidibilidade",
+      "slug": "maquinas-de-turing-e-decidibilidade",
+      "title": "Máquinas de Turing e Decidibilidade",
+      "macroArea": "fundamentos",
+      "subTopic": "fundamentos_geral",
+      "difficulty": "hard",
+      "incidence": "medium",
+      "estimatedMinutes": 70,
+      "prerequisites": ["topic-glc-ap"],
+      "learningObjectives": [
+        "Descrever formalismo de Máquina de Turing.",
+        "Diferenciar decidível, semidecidível e indecidível.",
+        "Aplicar ideia de redução em problemas clássicos."
+      ],
+      "sourceLessons": [
+        { "pdf": "aula_14_MaquinasDeTuring.pdf", "pageStart": 1, "pageEnd": 60 },
+        { "pdf": "aula_15_MaquinasDeTuring_parte2.pdf", "pageStart": 1, "pageEnd": 60 },
+        { "pdf": "aula_16_Decidibilidade.pdf", "pageStart": 1, "pageEnd": 60 }
+      ],
+      "sections": [
+        {
+          "id": "sec-mt-essential",
+          "kind": "essential",
+          "title": "Camada essencial",
+          "content": "MT é modelo geral de computação com fita potencialmente infinita. Decidível: algoritmo sempre para com resposta correta.",
+          "order": 1
+        },
+        {
+          "id": "sec-mt-advanced",
+          "kind": "advanced",
+          "title": "Camada avançada",
+          "content": "Redução A <= B: se B fosse decidível, então A também seria. Usada para provar indecidibilidade por contradição.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-mt-1",
+          "title": "Classificar problema",
+          "problem": "Problema da parada é decidível?",
+          "strategy": "Usar resultado clássico de Turing.",
+          "solution": "Não. Halting Problem é indecidível.",
+          "takeaway": "Conhecer problemas clássicos acelera eliminação de alternativas.",
+          "order": 1
+        },
+        {
+          "id": "ex-mt-2",
+          "title": "Raciocínio por redução",
+          "problem": "Mostrar que problema X é indecidível.",
+          "strategy": "Reduzir Halting Problem para X.",
+          "solution": "Se X fosse decidível, Halting também seria, contradição.",
+          "takeaway": "A direção correta da redução é o ponto crítico.",
+          "order": 2
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-mt-1",
+          "title": "Limites de verificadores automáticos",
+          "context": "Ferramentas de análise estática não resolvem todo problema possível.",
+          "howItApplies": "Decidibilidade explica por que certas garantias totais são impossíveis em software real.",
+          "order": 1
+        }
+      ],
+      "references": [
+        {
+          "id": "ref-mt-1",
+          "label": "MIT OCW 6.045J - Turing Machines and Decidability",
+          "url": "https://ocw.mit.edu/courses/6-045j-automata-computability-and-complexity-spring-2011/",
+          "order": 1
+        }
+      ],
+      "quickChecks": [
+        {
+          "id": "qc-mt-1",
+          "prompt": "Problema da parada é decidível?",
+          "options": [
+            { "key": "A", "text": "Sim" },
+            { "key": "B", "text": "Não" }
+          ],
+          "answerKey": "B",
+          "explanation": "É indecidível; não existe algoritmo geral que sempre decida parada para toda MT e entrada.",
+          "order": 1
+        }
+      ]
+    }
+  ]
+}

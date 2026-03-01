@@ -19,6 +19,31 @@ enum Difficulty {
   hard
 }
 
+enum TopicIncidence {
+  high
+  medium
+  low
+}
+
+enum TopicSectionKind {
+  essential
+  advanced
+  summary
+}
+
+enum TopicProgressStatus {
+  not_started
+  in_progress
+  completed
+}
+
+enum FlashcardRating {
+  again
+  hard
+  good
+  easy
+}
+
 model Question {
   id                 String           @id
   year               Int
@@ -63,4 +88,189 @@ model IngestionReport {
   missingAnswerKey Int
   parseWarnings    Int
   metadata         Json?
+}
+
+model Topic {
+  id                String             @id
+  slug              String             @unique
+  title             String
+  macroArea         MacroArea
+  subTopic          String
+  difficulty        Difficulty
+  incidence         TopicIncidence
+  estimatedMinutes  Int
+  prerequisites     String[]
+  learningObjectives String[]
+  sourceLessons     Json
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  sections          TopicSection[]
+  examples          TopicExample[]
+  applications      TopicApplication[]
+  references        TopicReference[]
+  quickChecks       TopicQuickCheck[]
+  progress          UserTopicProgress[]
+
+  @@index([macroArea, subTopic])
+}
+
+model TopicSection {
+  id        String           @id
+  topicId   String
+  kind      TopicSectionKind
+  title     String
+  content   String
+  order     Int
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  topic     Topic            @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, order])
+  @@index([topicId])
+}
+
+model TopicExample {
+  id        String   @id
+  topicId   String
+  title     String
+  problem   String
+  strategy  String
+  solution  String
+  takeaway  String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, order])
+  @@index([topicId])
+}
+
+model TopicApplication {
+  id           String   @id
+  topicId      String
+  title        String
+  context      String
+  howItApplies String
+  order        Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  topic        Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, order])
+  @@index([topicId])
+}
+
+model TopicReference {
+  id        String   @id
+  topicId   String
+  label     String
+  url       String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, order])
+  @@index([topicId])
+}
+
+model TopicQuickCheck {
+  id          String   @id
+  topicId     String
+  prompt      String
+  options     Json
+  answerKey   String   @db.VarChar(1)
+  explanation String
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  topic       Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, order])
+  @@index([topicId])
+}
+
+model UserTopicProgress {
+  id        String             @id @default(cuid())
+  userId    String
+  topicId   String
+  status    TopicProgressStatus @default(not_started)
+  score     Float?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  topic     Topic              @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@index([userId])
+  @@index([topicId])
+}
+
+model FlashcardDeck {
+  id               String      @id
+  slug             String      @unique
+  title            String
+  macroArea        MacroArea
+  subTopic         String
+  difficulty       Difficulty
+  description      String
+  estimatedMinutes Int
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  cards            Flashcard[]
+
+  @@index([macroArea, subTopic])
+}
+
+model Flashcard {
+  id              String                  @id
+  deckId          String
+  front           String
+  back            String
+  explanation     String
+  tags            String[]
+  sourceTopicSlug String?
+  sourceQuestionId String?
+  order           Int
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  deck            FlashcardDeck           @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  progress        UserFlashcardProgress[]
+  reviewEvents    FlashcardReviewEvent[]
+
+  @@unique([deckId, order])
+  @@index([deckId])
+}
+
+model UserFlashcardProgress {
+  id             String          @id @default(cuid())
+  userId         String
+  flashcardId    String
+  easeFactor     Float           @default(2.5)
+  intervalDays   Int             @default(0)
+  repetitions    Int             @default(0)
+  lapses         Int             @default(0)
+  dueAt          DateTime        @default(now())
+  lastReviewedAt DateTime?
+  lastRating     FlashcardRating?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  flashcard      Flashcard       @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, flashcardId])
+  @@index([userId, dueAt])
+  @@index([flashcardId])
+}
+
+model FlashcardReviewEvent {
+  id         String         @id @default(cuid())
+  userId     String
+  flashcardId String
+  rating     FlashcardRating
+  sessionId  String?
+  reviewedAt DateTime       @default(now())
+  flashcard  Flashcard      @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@index([userId, reviewedAt])
+  @@index([flashcardId])
 }
