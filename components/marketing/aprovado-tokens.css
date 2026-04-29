@@ -185,6 +185,10 @@
    ============================================================ */
 
 .marketing {
+  /* min-height + background cobrem 100vh para que o body global do app
+     (bg-slate-100 / text-slate-900 vindos do Tailwind preflight em
+     globals.css) não vaze por trás do nav sticky semi-transparente. */
+  min-height: 100vh;
   font-family: var(--fb);
   color: var(--fg-1);
   background: var(--bg-1);
@@ -199,7 +203,10 @@
 .marketing *::after {
   box-sizing: border-box;
 }
-.marketing a {
+/* Reset de <a> com especificidade zero (via :where) para não pisar em
+   seletores de cor — .nav-cta, .footer-col a, .legal-body a etc. ficam
+   livres para definir suas próprias cores. */
+:where(.marketing) a {
   color: inherit;
   text-decoration: none;
 }

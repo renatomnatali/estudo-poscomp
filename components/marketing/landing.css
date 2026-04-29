@@ -49,6 +49,7 @@
   color: var(--fg-2);
   padding: 8px 12px;
   border-radius: var(--r-md);
+  white-space: nowrap;
   transition: var(--transition-fast);
 }
 .nav-link:hover { background: var(--bg-3); color: var(--fg-1); }
@@ -66,6 +67,7 @@
   gap: 6px;
   font-size: 0.86rem;
   font-weight: 600;
+  white-space: nowrap;
   box-shadow: var(--sh-cta);
   transition: var(--transition-fast);
 }
@@ -162,6 +164,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
   box-shadow: 0 4px 24px rgba(27, 63, 216, .45);
   transition: var(--transition);
 }
@@ -181,6 +184,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
   transition: var(--transition-fast);
 }
 .btn-ghost-dark:hover { background: rgba(255,255,255,.12); }
@@ -193,6 +197,7 @@
   font-size: 0.92rem;
   font-weight: 600;
   display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap;
   transition: var(--transition-fast);
 }
 .btn-ghost:hover { background: var(--bg-3); }
