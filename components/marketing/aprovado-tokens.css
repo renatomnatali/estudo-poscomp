@@ -185,6 +185,10 @@
    ============================================================ */
 
 .marketing {
+  /* min-height + background cobrem 100vh para que o body global do app
+     (bg-slate-100 / text-slate-900 vindos do Tailwind preflight em
+     globals.css) não vaze por trás do nav sticky semi-transparente. */
+  min-height: 100vh;
   font-family: var(--fb);
   color: var(--fg-1);
   background: var(--bg-1);
@@ -200,8 +204,13 @@
   box-sizing: border-box;
 }
 .marketing a {
-  color: inherit;
+  /* Link sem classe (ex.: links genéricos dentro de copy) herda a cor do
+     contexto. Links com classe (.nav-cta, .btn-primary, .footer-col a etc.)
+     definem a sua própria cor — não pisar nelas com seletor mais específico. */
   text-decoration: none;
+}
+.marketing a:not([class]) {
+  color: inherit;
 }
 .marketing button {
   font-family: inherit;
