@@ -203,14 +203,12 @@
 .marketing *::after {
   box-sizing: border-box;
 }
-.marketing a {
-  /* Link sem classe (ex.: links genéricos dentro de copy) herda a cor do
-     contexto. Links com classe (.nav-cta, .btn-primary, .footer-col a etc.)
-     definem a sua própria cor — não pisar nelas com seletor mais específico. */
-  text-decoration: none;
-}
-.marketing a:not([class]) {
+/* Reset de <a> com especificidade zero (via :where) para não pisar em
+   seletores de cor — .nav-cta, .footer-col a, .legal-body a etc. ficam
+   livres para definir suas próprias cores. */
+:where(.marketing) a {
   color: inherit;
+  text-decoration: none;
 }
 .marketing button {
   font-family: inherit;
