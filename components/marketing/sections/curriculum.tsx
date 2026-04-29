@@ -254,12 +254,21 @@ export function Curriculum() {
                       ]
                         .filter(Boolean)
                         .join(' ');
+                      const topic = TOPICS[code];
+                      const ariaLabel = `${code} · ${topic.name} · ${
+                        topic.status === 'free'
+                          ? 'liberado no plano free'
+                          : 'premium ou em breve'
+                      }`;
                       return (
                         <button
                           key={code}
                           type="button"
                           className={cls}
+                          aria-label={ariaLabel}
+                          aria-pressed={isSel}
                           onMouseEnter={() => setSelected(code)}
+                          onFocus={() => setSelected(code)}
                           onClick={() => setSelected(code)}
                         >
                           {code}
@@ -278,7 +287,7 @@ export function Curriculum() {
                 <span className="swatch locked" /> Premium ou em breve
               </span>
               <span className="lg" style={{ marginLeft: 'auto' }}>
-                passe o mouse para ver detalhes
+                clique ou foque um tópico para ver detalhes
               </span>
             </div>
           </div>

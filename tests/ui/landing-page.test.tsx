@@ -90,10 +90,10 @@ describe('LandingPage — comportamento', () => {
       const statusBefore = container.querySelector('.td-status') as HTMLElement;
       expect(statusBefore.className).toContain('free');
 
-      // Localiza o botão do tópico F1 (apenas o tile do mapa do edital tem texto exato "F1").
+      // Localiza o botão do tópico F1 pelo aria-label, que começa com o código.
       const f1Tile = within(
         container.querySelector('.edital-tiles') as HTMLElement,
-      ).getByRole('button', { name: /^F1$/ });
+      ).getByRole('button', { name: /^F1\b/ });
 
       await user.click(f1Tile);
 

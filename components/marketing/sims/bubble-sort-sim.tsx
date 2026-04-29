@@ -44,7 +44,8 @@ export function BubbleSortSim() {
     if (!running || done) return;
     const id = setTimeout(step, 380);
     return () => clearTimeout(id);
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running, done, i, j, arr, comps, swaps]);
 
   function reset() {
     const next = INITIAL.slice().sort(() => Math.random() - 0.5);
@@ -139,7 +140,7 @@ export function BubbleSortSim() {
         <div className="bs-meta-cell">
           <div className="bs-meta-l">passe</div>
           <div className="bs-meta-v tabular">
-            {i + 1}
+            {Math.min(done ? arr.length - 1 : i + 1, arr.length - 1)}
             <span style={{ fontSize: '0.7em', color: 'var(--on-dark-3)' }}>
               /{arr.length - 1}
             </span>

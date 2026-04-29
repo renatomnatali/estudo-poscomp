@@ -59,8 +59,12 @@
   margin-left: 8px;
   background: var(--sap);
   color: #fff;
-  border-radius: var(--r-pill);
-  padding: 8px 18px;
+  border-radius: var(--r-md);
+  padding: 11px 18px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.86rem;
   font-weight: 600;
   box-shadow: var(--sh-cta);
@@ -152,8 +156,9 @@
   background: var(--sap);
   color: #fff;
   border: none;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   padding: 13px 22px;
+  min-height: 44px;
   font-size: 0.95rem;
   font-weight: 600;
   display: inline-flex;
@@ -171,8 +176,9 @@
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.18);
   color: rgba(255,255,255,.92);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   padding: 13px 20px;
+  min-height: 44px;
   font-size: 0.95rem;
   font-weight: 500;
   display: inline-flex;
@@ -185,8 +191,9 @@
   background: var(--bg-1);
   border: 1px solid var(--border-1);
   color: var(--fg-1);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   padding: 12px 20px;
+  min-height: 44px;
   font-size: 0.92rem;
   font-weight: 600;
   display: inline-flex; align-items: center; gap: 6px;
@@ -1033,8 +1040,9 @@
 
 .plan .btn-plan {
   margin-top: 8px;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   padding: 13px 20px;
+  min-height: 44px;
   font-size: 0.95rem;
   font-weight: 600;
   text-align: center;
@@ -1336,8 +1344,9 @@
   display: flex; align-items: center; gap: 8px;
   background: rgba(255,255,255,.04);
   border: 1px solid rgba(255,255,255,.1);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   padding: 4px 4px 4px 14px;
+  min-height: 44px;
   flex: 1;
   min-width: 200px;
 }
@@ -1362,8 +1371,9 @@
   background: var(--sap);
   color: #fff;
   border: none;
-  border-radius: var(--r-pill);
-  padding: 8px 16px;
+  border-radius: var(--r-md);
+  padding: 12px 18px;
+  min-height: 44px;
   font-family: var(--fb);
   font-weight: 600;
   font-size: 0.84rem;
@@ -1626,4 +1636,48 @@
   .nav-links { gap: 0; }
   .nav-link { display: none; }
   .nav-cta { margin-left: auto; }
+}
+
+/* ============================================================
+   Focus visible — WCAG 2.1 SC 2.4.7
+   Aplicado a tudo que é interativo na landing.
+   ============================================================ */
+.marketing :is(a, button, input, [role='button']):focus {
+  outline: none;
+}
+.marketing :is(a, button, [role='button']):focus-visible {
+  outline: 2px solid var(--sap-l);
+  outline-offset: 2px;
+  border-radius: var(--r-md);
+}
+.marketing .nav-link:focus-visible,
+.marketing .nav-cta:focus-visible,
+.marketing .btn-primary:focus-visible,
+.marketing .btn-ghost-dark:focus-visible,
+.marketing .btn-ghost:focus-visible,
+.marketing .btn-plan:focus-visible,
+.marketing .aut-btn:focus-visible,
+.marketing .aut-chip:focus-visible,
+.marketing .edital-tile:focus-visible,
+.marketing .footer-col a:focus-visible {
+  outline: 2px solid var(--sap-l);
+  outline-offset: 2px;
+}
+/* Em superfícies escuras, usa o tom claro do safira para contraste */
+.marketing .nav.on-dark .nav-link:focus-visible,
+.marketing .nav.on-dark .nav-cta:focus-visible,
+.marketing .hero-slab .btn-primary:focus-visible,
+.marketing .hero-slab .btn-ghost-dark:focus-visible,
+.marketing .why-section .aut-btn:focus-visible,
+.marketing .why-section .aut-chip:focus-visible,
+.marketing .final-cta .btn-primary:focus-visible,
+.marketing .final-cta .btn-ghost-dark:focus-visible {
+  outline-color: #fff;
+}
+.marketing .aut-input:focus-visible {
+  outline: none;
+}
+.marketing .aut-input-group:focus-within {
+  border-color: var(--sap-l);
+  box-shadow: 0 0 0 2px rgba(75, 107, 245, 0.35);
 }

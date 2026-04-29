@@ -71,7 +71,8 @@ export default function PrivacidadePage() {
           </li>
           <li>
             <strong>Compartilho com:</strong> processador de pagamento (Stripe), provedor de
-            email transacional, Google Analytics. Lista completa abaixo.
+            email transacional. Lista completa abaixo. Não usamos analytics de terceiros no
+            momento.
           </li>
           <li>
             <strong>Vendo dados:</strong> nunca.
@@ -102,7 +103,8 @@ export default function PrivacidadePage() {
             <strong>No cadastro:</strong> nome (ou apelido) e email.
           </li>
           <li>
-            <strong>Senha:</strong> armazenada como hash bcrypt — nem eu vejo.
+            <strong>Senha:</strong> gerenciada inteiramente pelo Clerk; nunca é armazenada
+            por mim em texto puro nem fica visível pra mim.
           </li>
           <li>
             <strong>Na compra (premium):</strong> os dados de pagamento são coletados{' '}
@@ -129,13 +131,11 @@ export default function PrivacidadePage() {
         </ul>
 
         <h3>Dados coletados por terceiros</h3>
-        <ul>
-          <li>
-            <strong>Google Analytics:</strong> identificador de sessão (cookie), páginas
-            visitadas, tempo na página, país. Anonimizado quando possível. Você pode optar por
-            não participar via banner de cookies (ver <Link href="/cookies">Política de Cookies</Link>).
-          </li>
-        </ul>
+        <p>
+          Hoje não rodamos analytics de terceiros (Google Analytics, pixel etc.). Se isso
+          mudar no futuro, será com consentimento explícito via banner — ver{' '}
+          <Link href="/cookies">Política de Cookies</Link>.
+        </p>
 
         <h2 id="s4">
           <span className="num">04</span>Por que coletamos (bases legais da LGPD)
@@ -150,13 +150,9 @@ export default function PrivacidadePage() {
             (Marco Civil), dados fiscais de pagamento.
           </li>
           <li>
-            <strong>Legítimo interesse</strong> (art. 7º, IX): analítica agregada de uso
-            (Google Analytics) pra entender o que está funcionando — sem identificação
-            individual.
-          </li>
-          <li>
-            <strong>Consentimento</strong> (art. 7º, I): cookies não-essenciais, emails de
-            marketing (ainda não envio nenhum, mas se um dia for enviar, será opt-in).
+            <strong>Consentimento</strong> (art. 7º, I): cookies não-essenciais e analytics
+            (caso venham a ser adicionados) e emails de marketing (ainda não envio nenhum,
+            mas se um dia for enviar, será opt-in).
           </li>
         </ul>
 
@@ -174,10 +170,11 @@ export default function PrivacidadePage() {
             de confirmação de cadastro, recuperação de senha, recibos.
           </li>
           <li>
-            <strong>Hospedagem</strong> (Vercel ou similar) — servidores onde o site roda.
+            <strong>Clerk</strong> (autenticação) — armazena nome, email e gerencia sessões.
+            Hospedado em infraestrutura própria, com criptografia em trânsito e em repouso.
           </li>
           <li>
-            <strong>Google Analytics</strong> — analítica agregada de uso.
+            <strong>Hospedagem</strong> (Vercel ou similar) — servidores onde o site roda.
           </li>
         </ul>
         <p>
@@ -248,9 +245,10 @@ export default function PrivacidadePage() {
           <span className="num">09</span>Segurança
         </h2>
         <p>
-          Senhas armazenadas como hash bcrypt. Conexões em HTTPS (TLS 1.3). Backups
-          criptografados. Acesso a dados restrito a mim. Pagamentos processados em PCI-DSS
-          Level 1 pelo Stripe.
+          Autenticação delegada ao Clerk (provedor especializado, com SOC 2 Type II e
+          criptografia em repouso). Conexões em HTTPS (TLS 1.3). Backups criptografados.
+          Acesso a dados restrito a mim. Pagamentos processados em PCI-DSS Level 1 pelo
+          Stripe.
         </p>
         <p>
           Em caso de incidente que comprometa dados pessoais (vazamento), comunico pelos

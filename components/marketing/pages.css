@@ -562,3 +562,19 @@
 }
 .cookies-table .badge.essential { background: var(--em-bg); color: var(--em-d); }
 .cookies-table .badge.analytics { background: var(--sap-bg); color: var(--sap); }
+
+/* ============================================================
+   Focus visible — WCAG 2.1 SC 2.4.7 (páginas legais)
+   ============================================================ */
+.marketing.page-shell :is(a, button):focus {
+  outline: none;
+}
+.marketing.page-shell :is(a, button):focus-visible {
+  outline: 2px solid var(--sap-l);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+.marketing.page-shell .credits-card a:focus-visible,
+.marketing.page-shell .credit-tool .info a:focus-visible {
+  outline-color: #fff;
+}

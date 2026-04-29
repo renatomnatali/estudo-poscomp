@@ -16,35 +16,25 @@ interface CookieRow {
 
 const COOKIES: CookieRow[] = [
   {
-    name: 'apv_session',
-    purpose: 'Mantém você logado entre páginas. Sem ele você precisaria entrar a cada clique.',
+    name: '__session',
+    purpose:
+      'Cookie de sessão do Clerk (provedor de autenticação). Mantém você logado entre páginas.',
     type: 'essential',
-    duration: '30 dias',
+    duration: 'Sessão · até 7 dias',
   },
   {
-    name: 'apv_csrf',
-    purpose: 'Token de segurança pra prevenir ataques CSRF em formulários.',
-    type: 'essential',
-    duration: 'Sessão',
-  },
-  {
-    name: 'apv_consent',
-    purpose: 'Lembra suas preferências de cookies pra não mostrar o banner de novo.',
+    name: '__client_uat',
+    purpose:
+      'Cookie do Clerk que indica a última vez que você se autenticou. Necessário para rotação de sessão e proteção contra CSRF.',
     type: 'essential',
     duration: '1 ano',
   },
   {
-    name: '_ga, _ga_*',
+    name: '__clerk_db_jwt',
     purpose:
-      'Google Analytics. Identifica sessões anônimas pra eu entender quais páginas funcionam.',
-    type: 'analytics',
-    duration: '2 anos',
-  },
-  {
-    name: '_gid',
-    purpose: 'Google Analytics. Distingue usuários únicos no dia.',
-    type: 'analytics',
-    duration: '24 horas',
+      'Token JWT do Clerk usado para validar a sessão no backend. Sem ele o login não funciona.',
+    type: 'essential',
+    duration: 'Sessão',
   },
 ];
 
@@ -62,8 +52,9 @@ export default function CookiesPage() {
 
       <article className="legal-body">
         <div className="callout">
-          <strong>Resumo:</strong> usamos 2 cookies essenciais (login e preferência) e o
-          cookie do Google Analytics, que você pode recusar no banner ao entrar no site.
+          <strong>Resumo:</strong> hoje usamos apenas cookies essenciais — os do nosso
+          provedor de autenticação (Clerk). Não rodamos cookies analíticos nem de marketing
+          neste momento. Se isso mudar, mostraremos um banner pedindo seu consentimento antes.
         </div>
 
         <h2>
@@ -71,12 +62,11 @@ export default function CookiesPage() {
         </h2>
         <p>
           Cookie é um arquivo de texto pequeno que o site armazena no seu navegador. Serve
-          pra lembrar coisas entre páginas (que você está logado, qual o seu tema preferido)
-          ou pra ajudar no analytics.
+          pra lembrar coisas entre páginas — no nosso caso, manter sua sessão de login ativa.
         </p>
 
         <h2>
-          <span className="num">02</span>Cookies que usamos
+          <span className="num">02</span>Cookies que usamos hoje
         </h2>
 
         <table className="cookies-table">
@@ -108,23 +98,20 @@ export default function CookiesPage() {
           <span className="num">03</span>Cookies essenciais não podem ser desativados
         </h2>
         <p>
-          Os 3 primeiros (apv_session, apv_csrf, apv_consent) são necessários pra o site
-          funcionar com login e segurança. Sem eles, você não consegue usar o aprovado.xyz.
-          Por isso não há opção de recusá-los — mas eu também não os uso pra rastreamento.
+          Os cookies do Clerk (<code>__session</code>, <code>__client_uat</code>,{' '}
+          <code>__clerk_db_jwt</code>) são necessários pra o site funcionar com login e
+          segurança. Sem eles, você não consegue usar o aprovado.xyz. Por isso não há opção
+          de recusá-los — eles não são usados pra rastreamento, apenas pra autenticação.
         </p>
 
         <h2>
-          <span className="num">04</span>Cookies analíticos são opcionais
+          <span className="num">04</span>Cookies analíticos e de terceiros
         </h2>
         <p>
-          Os cookies do Google Analytics (_ga, _gid) só são instalados se você consentir no
-          banner que aparece na primeira visita. Se você recusar, não rodam — e nada no site
-          quebra.
-        </p>
-        <p>
-          Você pode mudar sua escolha a qualquer momento clicando em{' '}
-          <strong>&ldquo;Cookies&rdquo;</strong> no rodapé do site, ou apagando os cookies do
-          navegador (o banner reaparece).
+          No momento <strong>não usamos</strong> Google Analytics, pixel de rastreamento ou
+          qualquer ferramenta de analítica baseada em cookies. Se eu adicionar uma no futuro,
+          ela só rodará após você consentir explicitamente em um banner — e você poderá mudar
+          essa escolha a qualquer momento.
         </p>
 
         <h2>

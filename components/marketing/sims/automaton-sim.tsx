@@ -198,7 +198,12 @@ export function AutomatonSim() {
       </div>
 
       <div className="aut-canvas">
-        <svg viewBox="0 0 540 220" preserveAspectRatio="xMidYMid meet">
+        <svg
+          viewBox="0 0 540 220"
+          preserveAspectRatio="xMidYMid meet"
+          role="img"
+          aria-label="Diagrama do autômato finito determinístico com três estados (q0, q1, q2) e transições rotuladas a/b. Estado atual destacado durante a simulação."
+        >
           <defs>
             <marker
               id="arr"
