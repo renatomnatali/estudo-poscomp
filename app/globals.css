@@ -1726,10 +1726,42 @@ body {
   white-space: nowrap;
 }
 
-.sb-logo .aprovado-lockup {
-  text-decoration: none;
+.sb-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--sap), var(--em));
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fd);
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--white);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(27, 63, 216, 0.25);
+}
+
+.sb-logo-text {
   flex: 1;
   min-width: 0;
+}
+
+.sb-logo-name {
+  font-family: var(--fd);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
+  display: block;
+  line-height: 1.1;
+}
+
+.sb-logo-sub {
+  font-family: var(--fm);
+  font-size: 0.6rem;
+  color: var(--n400);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
 }
 
 .sb-toggle {
@@ -1765,7 +1797,7 @@ body {
   margin-left: 0;
 }
 
-.study-sidebar.collapsed .sb-logo .aprovado-word,
+.study-sidebar.collapsed .sb-logo-text,
 .study-sidebar.collapsed .sb-item-text,
 .study-sidebar.collapsed .sb-item-badge,
 .study-sidebar.collapsed .sb-progress-strip,

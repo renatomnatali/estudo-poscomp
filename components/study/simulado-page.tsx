@@ -326,8 +326,11 @@ export function SimuladoPage({ userId, userEmail, isPremiumUser = false }: Simul
           <h3 className="page-title" style={{ fontSize: '1.05rem' }}>
             Desempenho da sessão
           </h3>
-          <p className="page-sub tabular">
-            {result.score.correct}/{result.score.total} · {Math.round(result.score.accuracy * 100)}% — acertos e acurácia
+          <p className="page-sub">
+            <span className="tabular">
+              {result.score.correct}/{result.score.total} · {Math.round(result.score.accuracy * 100)}%
+            </span>
+            {' — acertos e acurácia.'}
           </p>
           <p className="page-sub" style={{ marginTop: '0.4rem' }}>
             Revisões sugeridas:{' '}
