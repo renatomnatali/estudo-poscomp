@@ -152,7 +152,7 @@ export function FlashcardsPanel({ userId }: FlashcardsPanelProps) {
               {decks.map((deck, index) => (
                 <article key={deck.id} className={`rounded-xl border p-4 ${index === 0 ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'}`}>
                   <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {index === 0 ? 'Free' : 'Premium'}
+                    Disponível
                   </div>
                   <h4 className="mt-1 text-sm font-semibold text-slate-900">{deck.title}</h4>
                   <p className="mt-1 text-xs text-slate-600">{deck.cardsCount} cartões</p>

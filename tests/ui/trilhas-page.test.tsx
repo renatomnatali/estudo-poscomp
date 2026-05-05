@@ -113,9 +113,9 @@ describe('trilhas no padrão do mockup', () => {
 
     expect(screen.getByText(/✓ concluído/i)).toBeInTheDocument();
     expect(screen.getByText(/→ próximo/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/premium/i).length).toBeGreaterThan(0);
 
-    expect(screen.getByRole('link', { name: /assinar premium/i })).toBeInTheDocument();
+    // Usuário entra como pagante: banner de upsell e CTA "Assinar Premium" não aparecem.
+    expect(screen.queryByRole('link', { name: /assinar premium/i })).not.toBeInTheDocument();
   });
 
   it('filtra por free e por macroárea', async () => {

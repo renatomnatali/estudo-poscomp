@@ -4,6 +4,7 @@ import type {
   StudyTrackCard,
   ModuleQuiz,
 } from '@/lib/types';
+import { IS_PREMIUM_USER } from '@/lib/auth-config';
 
 const TRACK_CARDS: StudyTrackCard[] = [
   {
@@ -711,11 +712,19 @@ const MODULES: StudyModule[] = [
   },
 ];
 
-export function getStudyTrackCards() {
-  return TRACK_CARDS;
+export function getStudyTrackCards(): StudyTrackCard[] {
+  if (!IS_PREMIUM_USER) {
+    return TRACK_CARDS;
+  }
+  return TRACK_CARDS.map((card) => {
+    if (card.status === 'done' || card.status === 'in_progress') {
+      return card;
+    }
+    return { ...card, free: true, status: 'in_progress' as const };
+  });
 }
 
-export function getDashboardSummary(): DashboardSummary {
+function buildDashboardSummary(): DashboardSummary {
   return {
     greeting: {
       title: 'Bom dia, Renato',
@@ -889,6 +898,26 @@ export function getDashboardSummary(): DashboardSummary {
         tone: 'amb',
       },
     ],
+  };
+}
+
+export function getDashboardSummary(): DashboardSummary {
+  const summary = buildDashboardSummary();
+  if (!IS_PREMIUM_USER) {
+    return summary;
+  }
+  return {
+    ...summary,
+    tracks: summary.tracks.map((track) => {
+      if (track.tagTone !== 'locked') return track;
+      return {
+        ...track,
+        tagLabel: 'Em construção',
+        tagTone: 'next',
+        href: '/trilhas',
+        iconTone: 'sap',
+      };
+    }),
   };
 }
 

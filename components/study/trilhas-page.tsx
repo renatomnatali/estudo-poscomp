@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
 import type { StudyTrackCard } from '@/lib/types';
+import { IS_PREMIUM_USER } from '@/lib/auth-config';
 
 type FilterId = 'all' | 'free' | 'done' | 'fund' | 'mat' | 'tec';
 type VisualStatus = 'done' | 'next' | 'progress' | 'locked';
@@ -66,7 +67,7 @@ function getStatusLabel(item: StudyTrackCard) {
   const visualStatus = getVisualStatus(item);
   if (visualStatus === 'done') return '✓ Concluído';
   if (visualStatus === 'next') return '→ Próximo';
-  if (visualStatus === 'progress') return 'Em progresso';
+  if (visualStatus === 'progress') return IS_PREMIUM_USER ? 'Em construção' : 'Em progresso';
   return 'Premium';
 }
 
@@ -285,7 +286,7 @@ export function TrilhasPage() {
                     />
                   </div>
 
-                  {visualStatus !== 'done' ? <div className="tracks-lock-overlay">🔒</div> : null}
+                  {visualStatus === 'locked' ? <div className="tracks-lock-overlay">🔒</div> : null}
                 </article>
               );
 
@@ -303,18 +304,20 @@ export function TrilhasPage() {
         </section>
       ))}
 
-      <section className="tracks-premium-banner">
-        <div>
-          <p className="tracks-premium-eyebrow">Premium</p>
-          <h3 className="tracks-premium-title">Desbloqueie os 24 tópicos restantes</h3>
-          <p className="tracks-premium-sub">
-            Acesso completo a todas as trilhas, simulado completo e flashcards por R$39/mês
-          </p>
-        </div>
-        <Link href="/premium" className="tracks-premium-cta">
-          Assinar Premium →
-        </Link>
-      </section>
+      {IS_PREMIUM_USER ? null : (
+        <section className="tracks-premium-banner">
+          <div>
+            <p className="tracks-premium-eyebrow">Premium</p>
+            <h3 className="tracks-premium-title">Desbloqueie os 24 tópicos restantes</h3>
+            <p className="tracks-premium-sub">
+              Acesso completo a todas as trilhas, simulado completo e flashcards por R$39/mês
+            </p>
+          </div>
+          <Link href="/premium" className="tracks-premium-cta">
+            Assinar Premium →
+          </Link>
+        </section>
+      )}
     </div>
   );
 }

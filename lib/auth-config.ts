@@ -8,3 +8,6 @@ export function isClerkEnabledServer() {
 export function isClerkEnabledClient() {
   return CLERK_PUBLISHABLE_KEY.length > 0;
 }
+
+// Enquanto não há tabela de assinaturas, todos os usuários da app entram como pagantes.
+export const IS_PREMIUM_USER = true;
