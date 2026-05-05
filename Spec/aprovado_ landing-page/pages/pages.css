@@ -1,0 +1,523 @@
+/* ============================================================
+   Inner pages — Sobre, Contato, Termos, Privacidade, Cookies
+   Shared shell: minimal nav · narrow column · simple type
+   ============================================================ */
+
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Compact nav (reuse .nav from landing.css for the heavy version) ── */
+.page-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,.78);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  border-bottom: 1px solid var(--border-2);
+}
+.page-nav-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.page-nav .back {
+  font-family: var(--fm);
+  font-size: 0.78rem;
+  color: var(--fg-3);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.page-nav .back:hover { color: var(--fg-1); }
+
+/* ── Generic page header ── */
+.page-hd {
+  max-width: 720px;
+  margin: 64px auto 36px;
+  padding: 0 28px;
+}
+.page-hd .eyebrow {
+  font-family: var(--fm);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--sap);
+  margin-bottom: 14px;
+  display: block;
+}
+.page-hd h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0 0 16px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.page-hd .lead {
+  font-size: 1.1rem;
+  color: var(--fg-2);
+  line-height: 1.55;
+  margin: 0;
+}
+.page-hd .meta {
+  font-family: var(--fm);
+  font-size: 0.72rem;
+  color: var(--fg-4);
+  margin-top: 18px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Long-form body (legal docs) ── */
+.legal-body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 28px 96px;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--fg-1);
+}
+.legal-body h2 {
+  font-size: 1.3rem;
+  margin: 56px 0 14px;
+  letter-spacing: -0.01em;
+  scroll-margin-top: 90px;
+}
+.legal-body h2 .num {
+  font-family: var(--fm);
+  font-size: 0.78rem;
+  color: var(--sap);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+.legal-body h3 {
+  font-size: 1.05rem;
+  margin: 32px 0 10px;
+}
+.legal-body p, .legal-body li {
+  color: var(--fg-2);
+}
+.legal-body strong {
+  color: var(--fg-1);
+  font-weight: 600;
+}
+.legal-body ul {
+  padding-left: 22px;
+  margin: 12px 0 16px;
+}
+.legal-body li {
+  margin-bottom: 6px;
+}
+.legal-body a {
+  color: var(--sap);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.legal-body a:hover {
+  color: var(--sap-d);
+}
+.legal-body .callout {
+  margin: 28px 0;
+  padding: 18px 22px;
+  border-left: 3px solid var(--em);
+  background: var(--em-bg);
+  border-radius: 0 8px 8px 0;
+  color: var(--ink);
+  font-size: 0.94rem;
+}
+.legal-body .callout strong { color: var(--em-d); }
+
+/* ── TOC for legal docs ── */
+.toc {
+  max-width: 720px;
+  margin: 0 auto 56px;
+  padding: 0 28px;
+}
+.toc-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: 12px;
+  padding: 18px 22px;
+}
+.toc-card .ttl {
+  font-family: var(--fm);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--fg-4);
+  margin-bottom: 10px;
+}
+.toc-card ol {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: toc;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 18px;
+}
+.toc-card li {
+  counter-increment: toc;
+  font-size: 0.92rem;
+}
+.toc-card li::before {
+  content: counter(toc, decimal-leading-zero) " ";
+  font-family: var(--fm);
+  color: var(--fg-4);
+  font-size: 0.78rem;
+  margin-right: 8px;
+}
+.toc-card a {
+  color: var(--fg-1);
+  text-decoration: none;
+}
+.toc-card a:hover { color: var(--sap); }
+
+/* ── Footer (simplified) ── */
+.page-foot {
+  margin-top: auto;
+  border-top: 1px solid var(--border-2);
+  padding: 32px 28px;
+  font-family: var(--fm);
+  font-size: 0.78rem;
+  color: var(--fg-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+.page-foot a {
+  color: var(--fg-3);
+  text-decoration: none;
+  margin-left: 18px;
+}
+.page-foot a:hover { color: var(--fg-1); }
+
+/* ============================================================
+   SOBRE — film-credits style
+   ============================================================ */
+.about-body {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 28px 64px;
+}
+.about-body p {
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+.about-body p strong { color: var(--ink); font-weight: 600; }
+
+.about-body .pull {
+  font-family: var(--fd);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 36px 0;
+  padding-left: 22px;
+  border-left: 3px solid var(--em);
+  color: var(--ink);
+}
+
+/* ── Credits card — film-poster style with Renato as headline ── */
+.credits {
+  margin: 64px auto 0;
+  max-width: 760px;
+  padding: 0 28px;
+}
+.credits-card {
+  background: var(--ink);
+  color: var(--on-dark-1);
+  border-radius: 16px;
+  padding: 40px 44px 36px;
+  position: relative;
+  overflow: hidden;
+}
+.credits-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--grad-dotgrid);
+  background-size: var(--dotgrid-size);
+  opacity: .55;
+  pointer-events: none;
+}
+.credits-eyebrow {
+  font-family: var(--fm);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--em);
+  margin-bottom: 6px;
+  position: relative; z-index: 1;
+}
+.credits-title {
+  font-family: var(--fd);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 32px;
+  color: #fff;
+  position: relative; z-index: 1;
+}
+
+/* ── Headline credit (Renato) ── */
+.credit-headline {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 24px;
+  align-items: center;
+  padding: 0 0 28px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.credit-headline .photo {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  background: #fff;
+  padding: 4px;
+  box-shadow: 0 0 0 1px rgba(0,179,126,.5), 0 0 24px rgba(0,179,126,.15);
+}
+.credit-headline .photo img {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  display: block;
+  object-fit: cover;
+}
+.credit-headline .role {
+  font-family: var(--fm);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--em);
+  margin-bottom: 6px;
+}
+.credit-headline .name {
+  font-family: var(--fd);
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.05;
+  margin-bottom: 6px;
+}
+.credit-headline .desc {
+  font-family: var(--fm);
+  font-size: 0.82rem;
+  color: var(--on-dark-2);
+  letter-spacing: 0.3px;
+  line-height: 1.5;
+}
+
+/* ── Supporting credits: tools (logos) ── */
+.credit-tools-label {
+  position: relative; z-index: 1;
+  font-family: var(--fm);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--on-dark-3);
+  margin: 24px 0 14px;
+}
+.credit-tools {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+}
+.credit-tool {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 18px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px;
+  align-items: center;
+  transition: background 160ms, border-color 160ms;
+}
+.credit-tool:hover {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.1);
+}
+.credit-tool .logo {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.credit-tool .logo img,
+.credit-tool .logo svg { width: 30px; height: 30px; display: block; }
+.credit-tool .logo.tool-cc { background: #D97757; color: #fff; }
+.credit-tool .logo.tool-cd { background: #1F1E1D; color: #D97757; border: 1px solid rgba(255,255,255,.08); }
+.credit-tool .logo.tool-tc { background: #fff; }
+.credit-tool .info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.credit-tool .info .nm {
+  font-family: var(--fd);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.credit-tool .info .role {
+  font-family: var(--fm);
+  font-size: 0.72rem;
+  color: var(--on-dark-2);
+  letter-spacing: 0.5px;
+}
+.credit-tool .info a {
+  color: var(--em);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,179,126,.35);
+}
+.credit-tool .info a:hover {
+  color: #fff; border-bottom-color: #fff;
+}
+.credit-tool .ver {
+  font-family: var(--fm);
+  font-size: 0.7rem;
+  color: var(--on-dark-3);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* ── Other credits (small rows below tools) ── */
+.credit-misc {
+  position: relative; z-index: 1;
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+.credit-misc-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 18px;
+  padding: 8px 0;
+  font-family: var(--fm);
+  font-size: 0.78rem;
+  border-top: 1px dashed rgba(255,255,255,.08);
+  padding-top: 12px;
+}
+.credit-misc-row:first-child { border-top: none; padding-top: 0; }
+.credit-misc-row .k {
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--on-dark-3);
+  font-size: 0.66rem;
+  text-align: right;
+  padding-top: 2px;
+}
+.credit-misc-row .v {
+  color: var(--on-dark-1);
+  font-weight: 500;
+}
+.credit-misc-row .v small {
+  display: block;
+  font-weight: 400;
+  color: var(--on-dark-3);
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
+
+.credits-foot {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-family: var(--fm);
+  font-size: 0.7rem;
+  color: var(--on-dark-3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .credit-headline { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+  .credit-tool { grid-template-columns: 40px 1fr; }
+  .credit-tool .ver { grid-column: 1 / -1; padding-left: 58px; }
+  .credit-misc-row { grid-template-columns: 1fr; gap: 2px; }
+  .credit-misc-row .k { text-align: left; }
+}
+
+/* ============================================================
+   CONTATO
+   ============================================================ */
+.contact-body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 28px 96px;
+}
+.contact-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+.contact-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: 14px;
+  padding: 24px;
+}
+.contact-card .icon-tile {
+  width: 36px; height: 36px;
+  background: var(--em-bg);
+  color: var(--em-d);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.contact-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+.contact-card p {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  color: var(--fg-3);
+}
+.contact-card a.email {
+  font-family: var(--fm);
+  font-size: 0.95rem;
+  color: var(--sap);
+  text-decoration: none;
+  word-break: break-all;
+}
+.contact-card a.email:hover { text-decoration: underline; }
+.contact-card .when {
+  font-family: var(--fm);
+  font-size: 0.74rem;
+  color: var(--fg-4);
+  margin-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .contact-cards { grid-template-columns: 1fr; }
+  .credit-row { grid-template-columns: 1fr; gap: 4px; }
+  .credit-role { text-align: left; }
+  .toc-card ol { grid-template-columns: 1fr; }
+}

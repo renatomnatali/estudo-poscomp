@@ -1,0 +1,31 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.btn{font-family:var(--fb);font-weight:600;font-size:13.5px;cursor:pointer;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;transition:all .15s;}
+.btn-pri{background:var(--sap);color:#fff;border-radius:9999px;padding:.55rem 1.15rem;box-shadow:var(--sh-cta);font-weight:700;}
+.btn-pri:hover{background:var(--sap-d);transform:translateY(-1px);box-shadow:var(--sh-cta-hover);}
+.btn-ghost-dark{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.85);border-radius:9999px;padding:.55rem 1.1rem;}
+.btn-sec{background:var(--white);color:var(--ink);border:1px solid var(--n-200);border-radius:12px;padding:.5rem 1rem;}
+.btn-sec:hover{border-color:var(--n-300);background:var(--n-50);}
+.btn-tertiary{background:var(--sap-bg);color:var(--sap-d);border-radius:12px;padding:.5rem 1rem;font-weight:600;}
+.btn-pill-mode{background:transparent;color:var(--n-500);border:1px solid transparent;border-radius:9999px;padding:.4rem .9rem;font-size:13px;font-weight:600;}
+.btn-pill-mode.is-active{background:var(--sap-bg);border-color:var(--sap-bg-2);color:var(--sap-d);}
+</style></head>
+<body><div class="card">
+  <span class="eyebrow">Components · Buttons</span>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <button class="btn btn-pri">Começar grátis →</button>
+    <button class="btn btn-sec">Ver currículo</button>
+    <button class="btn btn-tertiary">Revisar</button>
+    <button class="btn btn-pri" style="opacity:.55;cursor:not-allowed;box-shadow:none;">Disabled</button>
+  </div>
+  <div style="background:var(--ink);padding:14px;border-radius:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <button class="btn btn-pri">Começar grátis</button>
+    <button class="btn btn-ghost-dark">Ver como funciona</button>
+  </div>
+  <div style="background:var(--n-50);border:1px solid var(--n-200);border-radius:9999px;padding:4px;display:inline-flex;width:fit-content;gap:2px;">
+    <button class="btn btn-pill-mode is-active">AFD</button>
+    <button class="btn btn-pill-mode">Minimização</button>
+    <button class="btn btn-pill-mode">AFN→AFD</button>
+  </div>
+  <small style="font-family:var(--fm);font-size:10.5px;color:var(--fg-4);margin-top:auto;">Primary = pill + sap glow · Secondary = 12px radius + n-200 border · Mode = segmented pill switch</small>
+</div></body></html>

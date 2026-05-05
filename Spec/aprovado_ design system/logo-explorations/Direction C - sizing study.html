@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Aprovado — Direction C · sizing study</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body, html { margin:0; padding:0; min-height:100%; background:#F4F5FB; font-family: var(--fb); color: var(--ink); }
+  .wrap{max-width:1100px;margin:0 auto;padding:48px 32px 80px;}
+  h1{font-family:var(--fd);font-weight:800;font-size:30px;letter-spacing:-.02em;margin:0 0 .25rem;}
+  .lede{color:var(--fg-2);font-size:15px;line-height:1.6;max-width:62ch;margin:0 0 32px;}
+  .row-h{font-family:var(--fm);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--n-400);margin:36px 0 12px;}
+  .study{background:#fff;border:1px solid var(--n-200);border-radius:16px;padding:28px 32px;display:flex;align-items:center;gap:48px;flex-wrap:wrap;}
+  .lockup{display:flex;align-items:center;gap:1rem;}
+  .meta{font-family:var(--fm);font-size:10.5px;color:var(--n-400);margin-top:8px;}
+  .label{font-family:var(--fm);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--em-d);font-weight:600;}
+
+  /* Variant base — same logic as Direction C */
+  .ring{
+    position:relative;border-radius:50%;
+    background:var(--em);display:inline-flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;flex-shrink:0;
+  }
+  .ring::before{
+    content:'';position:absolute;border-radius:50%;border:2px solid var(--em);opacity:.45;
+  }
+  .word{font-family:var(--fd);font-weight:800;letter-spacing:-.025em;color:var(--ink);}
+  .word .a{color:var(--em);}
+
+  /* — Size variants — the ring is sized RELATIVE to the wordmark cap-height. */
+  /* Wordmark = 38px → cap-height ~28px. Try ring at 56 / 44 / 38 / 32. */
+
+  /* current = same height as wordmark + ascender, slightly oversized */
+  .v-current .ring{width:56px;height:56px;font-size:24px;}
+  .v-current .ring::before{inset:-6px;}
+  .v-current .word{font-size:38px;}
+
+  /* equal to ascender height — visually balanced */
+  .v-balanced .ring{width:44px;height:44px;font-size:18px;}
+  .v-balanced .ring::before{inset:-5px;}
+  .v-balanced .word{font-size:38px;}
+
+  /* equal to cap-height — most refined */
+  .v-tight .ring{width:38px;height:38px;font-size:16px;}
+  .v-tight .ring::before{inset:-4px;}
+  .v-tight .word{font-size:38px;}
+
+  /* below cap-height — punctuation feel */
+  .v-mini .ring{width:32px;height:32px;font-size:14px;}
+  .v-mini .ring::before{inset:-3px;}
+  .v-mini .word{font-size:38px;}
+
+  /* — Inline ring as the 'a' (no separate mark) — */
+  .v-inline{display:inline-flex;align-items:center;font-family:var(--fd);font-weight:800;letter-spacing:-.025em;font-size:38px;}
+  .v-inline .ring{width:32px;height:32px;font-size:14px;margin:0 1px 0 1px;position:relative;top:-2px;}
+  .v-inline .ring::before{inset:-3px;}
+
+  .compare{display:grid;grid-template-columns:1fr;gap:16px;}
+  .compare-row{background:#fff;border:1px solid var(--n-200);border-radius:14px;padding:24px 28px;display:grid;grid-template-columns:160px 1fr 1fr;align-items:center;gap:24px;}
+  .compare-row .label-col{font-family:var(--fb);font-weight:700;font-size:13.5px;color:var(--ink);}
+  .compare-row .label-col small{display:block;font-family:var(--fm);font-weight:500;font-size:10.5px;color:var(--n-400);text-transform:uppercase;letter-spacing:1.2px;margin-top:3px;}
+  .compare-row .verdict{font-size:13px;color:var(--fg-2);line-height:1.55;}
+  .compare-row .verdict strong{color:var(--ink);font-weight:600;}
+
+  .recommend{background:var(--em-bg);border:1px solid #B8E5D6;border-radius:14px;padding:18px 22px;margin-top:32px;display:flex;gap:14px;align-items:flex-start;}
+  .recommend .tag{font-family:var(--fm);font-size:10.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:#006B50;background:#D7F5E9;padding:3px 9px;border-radius:9999px;flex-shrink:0;margin-top:2px;}
+  .recommend p{margin:0;font-size:14px;line-height:1.6;color:#0F4F3F;}
+  .recommend p strong{color:#003D2E;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Direction C — sizing study</h1>
+  <p class="lede">Você está certo: o anel atual está grande. Aqui estão quatro tamanhos relativos ao tipo, mais uma variante onde o anel substitui o "a". Cap-height da wordmark = ~28px (38px × .73).</p>
+
+  <div class="compare">
+
+    <div class="compare-row">
+      <div class="label-col">Atual <small>56px · ~2× cap</small></div>
+      <div class="lockup v-current">
+        <span class="ring">✓</span>
+        <span class="word">aprov<span class="a">a</span>do</span>
+      </div>
+      <div class="verdict"><strong>Pesado.</strong> O anel domina o tipo — vira um botão com texto ao lado, não um lockup. Em favicon ainda funciona, em hero tira o foco da palavra.</div>
+    </div>
+
+    <div class="compare-row">
+      <div class="label-col">Equilibrado <small>44px · ~1.5× cap</small></div>
+      <div class="lockup v-balanced">
+        <span class="ring">✓</span>
+        <span class="word">aprov<span class="a">a</span>do</span>
+      </div>
+      <div class="verdict"><strong>Bom equilíbrio.</strong> O anel é claramente um símbolo, mas o tipo continua sendo o protagonista. Funciona em escala média e grande.</div>
+    </div>
+
+    <div class="compare-row">
+      <div class="label-col">Justo <small>38px · ~cap-height</small></div>
+      <div class="lockup v-tight">
+        <span class="ring">✓</span>
+        <span class="word">aprov<span class="a">a</span>do</span>
+      </div>
+      <div class="verdict"><strong>Mais refinado.</strong> Anel = altura do "A" maiúsculo. Lê como pontuação tipográfica — selo discreto. Minha preferência para uso geral.</div>
+    </div>
+
+    <div class="compare-row">
+      <div class="label-col">Pequeno <small>32px · ~x-height</small></div>
+      <div class="lockup v-mini">
+        <span class="ring">✓</span>
+        <span class="word">aprov<span class="a">a</span>do</span>
+      </div>
+      <div class="verdict"><strong>Sutil.</strong> Quase um marcador. Bonito em aplicações longas (footer, e-mail, header de PDF), mas perde força como mark autônomo.</div>
+    </div>
+
+    <div class="compare-row">
+      <div class="label-col">Inline <small>anel = "a" interno</small></div>
+      <div class="lockup">
+        <span class="v-inline">aprov<span class="ring">a</span>do</span>
+      </div>
+      <div class="verdict"><strong>Mais ousado.</strong> O anel <em>vira</em> o segundo "a" da palavra — só uma forma, dois trabalhos. Memorável, mas precisa testar legibilidade em corpo pequeno.</div>
+    </div>
+
+  </div>
+
+  <div class="recommend">
+    <span class="tag">Recomendação</span>
+    <p><strong>Justo (38px).</strong> Mantém a leitura limpa do tipo, o anel funciona como pontuação visual, e em favicon você usa só o anel em 64px. A versão Inline é mais distinta como assinatura — vale guardar como variante para casos onde você quer mais personalidade (sticker, app icon de splash, etc.).</p>
+  </div>
+
+  <div class="row-h">Em escala — comparação direta</div>
+  <div class="study">
+    <div class="lockup v-current"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+    <div class="lockup v-balanced"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+    <div class="lockup v-tight"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+    <div class="lockup v-mini"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+  </div>
+
+  <div class="row-h">Em contexto — header de app</div>
+  <div class="study" style="background:var(--ink);border-color:rgba(255,255,255,.08);">
+    <div class="lockup v-tight"><span class="ring">✓</span><span class="word" style="color:#fff;">aprov<span class="a">a</span>do</span></div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;font-family:var(--fm);font-size:10.5px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1.5px;">
+      <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9999px;padding:.3rem .8rem;">F6 · Linguagens Formais</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
