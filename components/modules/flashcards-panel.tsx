@@ -133,11 +133,11 @@ export function FlashcardsPanel({ userId }: FlashcardsPanelProps) {
                     Ver resposta
                   </button>
                 ) : (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button type="button" className="sim-action-btn sim-action-btn-tertiary" onClick={() => void rateCard('again')}>Errei</button>
-                    <button type="button" className="sim-action-btn sim-action-btn-tertiary" onClick={() => void rateCard('hard')}>Difícil</button>
-                    <button type="button" className="sim-action-btn sim-action-btn-secondary" onClick={() => void rateCard('good')}>Bom</button>
-                    <button type="button" className="sim-action-btn sim-action-btn-primary" onClick={() => void rateCard('easy')}>Fácil</button>
+                  <div className="flash-srs-row">
+                    <button type="button" className="flash-srs-btn flash-srs-again" onClick={() => void rateCard('again')}>Errei</button>
+                    <button type="button" className="flash-srs-btn flash-srs-hard" onClick={() => void rateCard('hard')}>Difícil</button>
+                    <button type="button" className="flash-srs-btn flash-srs-good" onClick={() => void rateCard('good')}>Bom</button>
+                    <button type="button" className="flash-srs-btn flash-srs-easy" onClick={() => void rateCard('easy')}>Fácil</button>
                   </div>
                 )}
               </>
