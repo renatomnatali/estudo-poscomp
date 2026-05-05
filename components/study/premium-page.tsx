@@ -1,6 +1,16 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { Check } from 'lucide-react';
+
+const FEATURES = [
+  '25 tópicos do edital SBC 2025 destrinchados',
+  '400+ flashcards com repetição espaçada',
+  'Simulado completo (70 questões cronometradas)',
+  'Analytics de desempenho por área',
+  'Trilhas premium com exercícios resolvidos',
+  'Suporte prioritário',
+];
 
 export function PremiumPage() {
   const [billing, setBilling] = useState<'monthly' | 'annual'>('annual');
@@ -24,45 +34,61 @@ export function PremiumPage() {
   }, [billing]);
 
   return (
-    <>
-      <section className="section-card bg-slate-900 text-white">
-        <p className="text-xs uppercase tracking-wide text-amber-300">Premium</p>
-        <h2 className="mt-2 text-3xl font-bold">Desbloqueie o currículo completo do POSCOMP</h2>
-        <p className="mt-2 text-sm text-white/75">
+    <div className="premium-view">
+      <section className="premium-hero">
+        <span className="premium-eyebrow">Premium · plano completo</span>
+        <h2 className="premium-title">
+          Vá além com o <span className="accent-em">currículo completo</span> do POSCOMP
+        </h2>
+        <p className="premium-sub">
           25 tópicos, 400+ flashcards, simulado completo e analytics detalhado de desempenho.
         </p>
       </section>
 
-      <section className="section-card">
-        <div className="inline-flex rounded-full border border-slate-200 p-1">
-          <button
-            type="button"
-            className={`rounded-full px-3 py-1 text-sm ${billing === 'monthly' ? 'bg-slate-900 text-white' : 'text-slate-700'}`}
-            onClick={() => setBilling('monthly')}
-          >
-            Mensal
-          </button>
-          <button
-            type="button"
-            className={`rounded-full px-3 py-1 text-sm ${billing === 'annual' ? 'bg-slate-900 text-white' : 'text-slate-700'}`}
-            onClick={() => setBilling('annual')}
-          >
-            Anual
-          </button>
+      <section className="premium-plan-card">
+        <div className="premium-plan-strip" aria-hidden="true" />
+        <div className="premium-plan-toolbar">
+          <div className="premium-billing-switch">
+            <button
+              type="button"
+              className={`premium-billing-pill ${billing === 'monthly' ? 'is-active' : ''}`}
+              onClick={() => setBilling('monthly')}
+            >
+              Mensal
+            </button>
+            <button
+              type="button"
+              className={`premium-billing-pill ${billing === 'annual' ? 'is-active' : ''}`}
+              onClick={() => setBilling('annual')}
+            >
+              Anual
+            </button>
+          </div>
+          {billing === 'annual' ? <span className="premium-billing-tag">economize 36%</span> : null}
         </div>
 
-        <article className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Plano Premium</p>
-          <div className="mt-2 flex items-end gap-2">
-            <strong className="text-4xl text-slate-900">{pricing.value}</strong>
-            <span className="text-slate-500">{pricing.period}</span>
-          </div>
-          <p className="mt-2 text-sm text-slate-600">{pricing.note}</p>
-          <button type="button" className="sim-action-btn sim-action-btn-primary mt-4">
-            {pricing.cta}
-          </button>
-        </article>
+        <p className="premium-plan-eyebrow">Plano Premium</p>
+        <div className="premium-plan-price">
+          <strong className="premium-plan-value tabular">{pricing.value}</strong>
+          <span className="premium-plan-period">{pricing.period}</span>
+        </div>
+        <p className="premium-plan-note">{pricing.note}</p>
+
+        <ul className="premium-feature-list">
+          {FEATURES.map((feature) => (
+            <li key={feature}>
+              <span className="premium-feature-tick" aria-hidden="true">
+                <Check width={12} height={12} strokeWidth={2.5} />
+              </span>
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <button type="button" className="premium-plan-cta">
+          {pricing.cta}
+        </button>
       </section>
-    </>
+    </div>
   );
 }
