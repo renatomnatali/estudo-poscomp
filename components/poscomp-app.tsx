@@ -11,6 +11,7 @@ import { MinimizationPanel } from '@/components/modules/minimization-panel';
 import { PremiumPanel } from '@/components/modules/premium-panel';
 import { QuestionsPanel } from '@/components/modules/questions-panel';
 import { TopicsPanel } from '@/components/modules/topics-panel';
+import { IS_PREMIUM_USER } from '@/lib/auth-config';
 
 type SimulatorTabId = 'afd' | 'min' | 'conv';
 type MenuId = 'dashboard' | 'topics' | 'simulator' | 'flashcards' | 'exercises' | 'premium';
@@ -104,7 +105,9 @@ export function PoscompApp({ auth }: PoscompAppProps) {
     ? 'Modo: Demo pública'
     : activeMenu === 'flashcards'
       ? 'Flashcards · revisão diária'
-      : 'Plano: Gratuito';
+      : IS_PREMIUM_USER
+        ? 'Plano: Premium'
+        : 'Plano: Gratuito';
 
   useEffect(() => {
     const hash = window.location.hash.replace('#', '') as MenuId;
