@@ -169,7 +169,7 @@ export function StudyShell({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const clerkEnabled = isClerkEnabledClient();
-  const viewerName = viewer?.displayName || 'Renato Natali';
+  const viewerName = viewer?.displayName || 'Estudante';
   const viewerPlan =
     viewer?.planLabel ||
     (viewer?.isPremium ? (viewer?.premiumSource === 'vip' ? 'Plano VIP' : 'Plano Premium') : 'Plano Free');
@@ -179,7 +179,7 @@ export function StudyShell({
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() || '')
     .join('')
-    .padEnd(2, 'R')
+    .padEnd(2, 'E')
     .slice(0, 2);
 
   useEffect(() => {
