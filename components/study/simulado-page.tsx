@@ -6,8 +6,8 @@ import type { Question, SimuladoConfig } from '@/lib/types';
 
 const MODES: SimuladoConfig[] = [
   { mode: 'partial', questionCount: 20, minutes: 45, premium: false },
-  { mode: 'full', questionCount: 70, minutes: 240, premium: true },
-  { mode: 'area', questionCount: 25, minutes: 60, premium: true },
+  { mode: 'full', questionCount: 70, minutes: 240, premium: false },
+  { mode: 'area', questionCount: 25, minutes: 60, premium: false },
 ];
 
 interface AssessmentPayload {
