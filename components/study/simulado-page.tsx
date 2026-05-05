@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import type { Question, SimuladoConfig } from '@/lib/types';
+import { isClerkEnabledClient } from '@/lib/auth-config';
+import type { Question, SimuladoAttempt, SimuladoConfig } from '@/lib/types';
 
 const MODES: SimuladoConfig[] = [
   { mode: 'partial', questionCount: 20, minutes: 45, premium: false },
@@ -15,14 +16,25 @@ interface AssessmentPayload {
   recommendedNextTopics: string[];
 }
 
-interface SimuladoHistoryItem {
-  date: string;
-  accuracy: number;
-  correct: number;
-  total: number;
+interface SimuladoPageProps {
+  userId?: string;
+  userEmail?: string;
+  isPremiumUser?: boolean;
 }
 
-export function SimuladoPage() {
+function formatAttemptDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString('pt-BR');
+}
+
+function formatDuration(seconds: number | null) {
+  if (seconds === null || !Number.isFinite(seconds) || seconds < 0) return '—';
+  const mins = Math.floor(seconds / 60);
+  return `${mins} min`;
+}
+
+export function SimuladoPage({ userId, userEmail, isPremiumUser = false }: SimuladoPageProps) {
   const [selectedMode, setSelectedMode] = useState<SimuladoConfig>(MODES[0]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -30,18 +42,29 @@ export function SimuladoPage() {
   const [result, setResult] = useState<AssessmentPayload | null>(null);
   const [running, setRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState(selectedMode.minutes * 60);
-  const [history, setHistory] = useState<SimuladoHistoryItem[]>([]);
+  const [history, setHistory] = useState<SimuladoAttempt[]>([]);
+  const [sessionError, setSessionError] = useState<string | null>(null);
+
+  async function loadHistory() {
+    const query = !isClerkEnabledClient() && userId ? `?userId=${encodeURIComponent(userId)}&limit=5` : '?limit=5';
+    const response = await fetch(`/api/simulado/attempts${query}`, {
+      cache: 'no-store',
+      headers: {
+        ...(userId ? { 'x-user-id': userId } : {}),
+        ...(userEmail ? { 'x-user-email': userEmail } : {}),
+      },
+    });
+    if (!response.ok) return;
+
+    const payload = (await response.json()) as { items?: SimuladoAttempt[] };
+    setHistory(Array.isArray(payload.items) ? payload.items : []);
+  }
 
   useEffect(() => {
-    const raw = window.localStorage.getItem('study:simulado-history');
-    if (!raw) return;
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) setHistory(parsed);
-    } catch {
-      // ignore malformed local history
-    }
-  }, []);
+    void loadHistory();
+    // userId altera contexto de sessão em dev sem Clerk
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   useEffect(() => {
     if (!running) return;
@@ -62,9 +85,30 @@ export function SimuladoPage() {
   }, [timeLeft]);
 
   async function startSession() {
-    if (selectedMode.premium) return;
+    if (selectedMode.premium && !isPremiumUser) return;
+    setSessionError(null);
 
-    const response = await fetch(`/api/questions?macroArea=fundamentos&limit=${selectedMode.questionCount}`);
+    const response = await fetch('/api/simulado/session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(userId ? { 'x-user-id': userId } : {}),
+        ...(userEmail ? { 'x-user-email': userEmail } : {}),
+      },
+      body: JSON.stringify({
+        mode: selectedMode.mode,
+        userId,
+        email: userEmail,
+        macroArea: 'fundamentos',
+      }),
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      setSessionError(payload?.error || 'Não foi possível iniciar o simulado.');
+      return;
+    }
+
     const payload = (await response.json()) as { items: Question[] };
 
     setQuestions(Array.isArray(payload.items) ? payload.items.slice(0, selectedMode.questionCount) : []);
@@ -76,6 +120,9 @@ export function SimuladoPage() {
   }
 
   async function finishSession() {
+    const startedDurationSeconds = selectedMode.minutes * 60;
+    const elapsedSeconds = Math.max(0, startedDurationSeconds - timeLeft);
+
     const response = await fetch('/api/assessment/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -89,81 +136,171 @@ export function SimuladoPage() {
     setResult(payload);
     setRunning(false);
 
-    const nextHistory: SimuladoHistoryItem[] = [
-      {
-        date: new Date().toISOString(),
-        accuracy: payload.score.accuracy,
-        correct: payload.score.correct,
-        total: payload.score.total,
+    await fetch('/api/simulado/attempts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(userId ? { 'x-user-id': userId } : {}),
+        ...(userEmail ? { 'x-user-email': userEmail } : {}),
       },
-      ...history,
-    ].slice(0, 5);
+      body: JSON.stringify({
+        userId,
+        email: userEmail,
+        mode: selectedMode.mode,
+        total: payload.score.total,
+        correct: payload.score.correct,
+        accuracy: payload.score.accuracy,
+        durationSeconds: elapsedSeconds,
+        recommendedNextTopics: payload.recommendedNextTopics,
+      }),
+    }).catch(() => null);
 
-    setHistory(nextHistory);
-    window.localStorage.setItem('study:simulado-history', JSON.stringify(nextHistory));
+    await loadHistory();
+  }
+
+  const isTimerWarning = running && timeLeft <= 5 * 60;
+
+  function modeDetails(mode: SimuladoConfig) {
+    if (mode.mode === 'partial') {
+      return {
+        icon: '📝',
+        name: 'Simulado Parcial',
+        desc: `${mode.questionCount} questões em ${mode.minutes} min — calibração rápida.`,
+      };
+    }
+    if (mode.mode === 'full') {
+      return {
+        icon: '⏱️',
+        name: 'Simulado Completo',
+        desc: `${mode.questionCount} questões cronometradas em ${Math.round(mode.minutes / 60)} h — distribuição fiel ao edital.`,
+      };
+    }
+    return {
+      icon: '🎯',
+      name: 'Simulado por Área',
+      desc: `${mode.questionCount} questões em ${mode.minutes} min — foco em uma macro-área.`,
+    };
+  }
+
+  function attemptScoreTone(accuracy: number) {
+    if (accuracy >= 0.7) return 'tone-em';
+    if (accuracy >= 0.4) return 'tone-sap';
+    return 'tone-coral';
   }
 
   return (
     <>
-      <section className="section-card">
-        <h2 className="text-xl font-bold">Simulado POSCOMP</h2>
-        <p className="mt-1 text-sm text-slate-600">70 questões · 4 horas · distribuição fiel ao edital SBC.</p>
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">Simulado POSCOMP</h2>
+          <p className="page-sub">70 questões · 4 horas · distribuição fiel ao edital SBC.</p>
+        </div>
+      </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {MODES.map((mode) => (
-            <button
-              key={mode.mode}
-              type="button"
-              className={`rounded-xl border p-4 text-left ${selectedMode.mode === mode.mode ? 'border-blue-400 bg-blue-50' : 'border-slate-200 bg-white'}`}
-              onClick={() => setSelectedMode(mode)}
-            >
-              <strong className="block text-sm text-slate-900">
-                {mode.mode === 'partial' ? 'Simulado Parcial' : mode.mode === 'full' ? 'Simulado Completo' : 'Simulado por Área'}
-              </strong>
-              <span className="mt-1 block text-xs text-slate-600">
-                {mode.questionCount} questões · {mode.minutes} min {mode.premium ? '· Premium' : '· Free'}
-              </span>
-            </button>
-          ))}
+      <section className="section-card">
+        <p className="eyebrow" style={{ marginBottom: '0.8rem' }}>
+          Escolha a modalidade
+        </p>
+        <div className="sim-grid">
+          {MODES.map((mode) => {
+            const detail = modeDetails(mode);
+            const locked = mode.premium && !isPremiumUser;
+            const isSelected = selectedMode.mode === mode.mode;
+            return (
+              <button
+                key={mode.mode}
+                type="button"
+                className={`sim-option ${isSelected ? 'selected' : ''} ${locked ? 'locked' : ''}`}
+                onClick={() => {
+                  if (locked) return;
+                  setSelectedMode(mode);
+                }}
+                aria-pressed={isSelected}
+                aria-disabled={locked}
+              >
+                {locked ? <span className="sim-lock-badge">Premium</span> : null}
+                <span className="sim-icon" aria-hidden="true">
+                  {detail.icon}
+                </span>
+                <div className="sim-name">{detail.name}</div>
+                <p className="sim-desc">{detail.desc}</p>
+                <div className="sim-pills">
+                  <span className="sim-pill">{mode.questionCount}q</span>
+                  <span className="sim-pill">{mode.minutes} min</span>
+                  <span className="sim-pill">{mode.premium ? 'Premium' : 'Free'}</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="mt-4 flex items-center gap-2">
+        <div className="sim-action-row" style={{ marginTop: '1.1rem' }}>
           <button
             type="button"
             className="sim-action-btn sim-action-btn-primary"
             onClick={() => void startSession()}
-            disabled={selectedMode.premium}
+            disabled={selectedMode.premium && !isPremiumUser}
           >
             Iniciar simulado
           </button>
           {running ? (
-            <button type="button" className="sim-action-btn sim-action-btn-secondary" onClick={() => void finishSession()}>
+            <button
+              type="button"
+              className="sim-action-btn sim-action-btn-secondary"
+              onClick={() => void finishSession()}
+            >
               Encerrar e corrigir
             </button>
           ) : null}
-          <span className="text-sm text-slate-600">Timer: {timerLabel}</span>
+          {running ? (
+            <span className={`simulado-timer ${isTimerWarning ? 'is-warning' : ''}`}>⏱ {timerLabel}</span>
+          ) : null}
         </div>
+        {sessionError ? (
+          <p
+            style={{
+              marginTop: '0.8rem',
+              fontSize: '0.85rem',
+              color: 'var(--coral)',
+            }}
+          >
+            {sessionError}
+          </p>
+        ) : null}
       </section>
 
       {running && activeQuestion ? (
-        <section className="section-card">
-          <h3 className="text-base font-semibold">Questão {activeIndex + 1} de {questions.length}</h3>
-          <p className="mt-2 text-sm text-slate-700">{activeQuestion.stem}</p>
+        <article className="sim-active-card">
+          <div className="sim-progress-bar">
+            <div
+              className="sim-progress-fill"
+              style={{ width: `${((activeIndex + 1) / Math.max(1, questions.length)) * 100}%` }}
+            />
+          </div>
+          <p className="sim-question-num">
+            Questão {activeIndex + 1} de {questions.length}
+          </p>
+          <h3 className="sim-question-text">{activeQuestion.stem}</h3>
 
-          <div className="mt-3 grid gap-2">
-            {activeQuestion.options.map((option) => (
-              <button
-                key={option.key}
-                type="button"
-                className={`option-btn ${answers[activeQuestion.id] === option.key ? 'is-selected' : ''}`}
-                onClick={() => setAnswers((prev) => ({ ...prev, [activeQuestion.id]: option.key }))}
-              >
-                <strong>{option.key})</strong> {option.text}
-              </button>
-            ))}
+          <div className="sim-options-list">
+            {activeQuestion.options.map((option) => {
+              const selected = answers[activeQuestion.id] === option.key;
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  className={`sim-option-row ${selected ? 'selected' : ''}`}
+                  onClick={() =>
+                    setAnswers((prev) => ({ ...prev, [activeQuestion.id]: option.key }))
+                  }
+                >
+                  <strong>{option.key})</strong> {option.text}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="sim-action-row">
             <button
               type="button"
               className="sim-action-btn sim-action-btn-tertiary"
@@ -181,34 +318,55 @@ export function SimuladoPage() {
               Próxima
             </button>
           </div>
-        </section>
+        </article>
       ) : null}
 
       {result ? (
         <section className="section-card">
-          <h3 className="text-base font-semibold">Desempenho da sessão</h3>
-          <p className="mt-2 text-sm text-slate-700">
-            Acertos: {result.score.correct}/{result.score.total} · Acurácia: {Math.round(result.score.accuracy * 100)}%
+          <h3 className="page-title" style={{ fontSize: '1.05rem' }}>
+            Desempenho da sessão
+          </h3>
+          <p className="page-sub">
+            <span className="tabular">
+              {result.score.correct}/{result.score.total} · {Math.round(result.score.accuracy * 100)}%
+            </span>
+            {' — acertos e acurácia.'}
           </p>
-          <p className="mt-2 text-sm text-slate-700">
-            Revisões sugeridas: {result.recommendedNextTopics.length > 0 ? result.recommendedNextTopics.join(', ') : 'Nenhuma no momento.'}
+          <p className="page-sub" style={{ marginTop: '0.4rem' }}>
+            Revisões sugeridas:{' '}
+            {result.recommendedNextTopics.length > 0
+              ? result.recommendedNextTopics.join(', ')
+              : 'Nenhuma no momento.'}
           </p>
         </section>
       ) : null}
 
       <section className="section-card">
-        <h3 className="text-base font-semibold">Histórico recente</h3>
+        <p className="eyebrow" style={{ marginBottom: '0.8rem' }}>
+          Histórico recente
+        </p>
         {history.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">Sem simulados concluídos ainda.</p>
+          <p className="page-sub">Sem simulados concluídos ainda.</p>
         ) : (
-          <div className="mt-3 grid gap-2">
+          <div>
             {history.map((item, index) => (
-              <article key={`${item.date}-${index}`} className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
-                <strong className="text-slate-900">{new Date(item.date).toLocaleString('pt-BR')}</strong>
-                <p className="text-slate-600">
-                  {item.correct}/{item.total} · {Math.round(item.accuracy * 100)}%
-                </p>
-              </article>
+              <div key={`${item.id}-${index}`} className="sim-history-row">
+                <div className={`sim-history-score ${attemptScoreTone(item.accuracy)}`}>
+                  <span className="tabular">{Math.round(item.accuracy * 100)}</span>
+                </div>
+                <div className="sim-history-info">
+                  <p className="sim-history-name">{formatAttemptDate(item.createdAt)}</p>
+                  <p className="sim-history-meta">
+                    {item.correct}/{item.total} · {formatDuration(item.durationSeconds)}
+                  </p>
+                </div>
+                <div className="sim-history-detail">
+                  <p className={`sim-history-pct accent-sap`}>
+                    <span className="tabular">{Math.round(item.accuracy * 100)}%</span>
+                  </p>
+                  <p className="sim-history-time">{item.mode}</p>
+                </div>
+              </div>
             ))}
           </div>
         )}
