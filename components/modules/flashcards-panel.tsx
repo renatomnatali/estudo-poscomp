@@ -100,64 +100,163 @@ export function FlashcardsPanel({ userId }: FlashcardsPanelProps) {
     setFeedback(null);
   }
 
+  const totalCards = cards.length;
+  const currentLabel = totalCards > 0 ? Math.min(currentIndex + 1, totalCards) : 0;
+  const progressPct = totalCards > 0 ? (currentLabel / totalCards) * 100 : 0;
+
+  function deckTopicTone(index: number) {
+    if (index === 0) return 'var(--em)';
+    if (index === 1) return 'var(--sap)';
+    return 'var(--n300)';
+  }
+
   return (
-    <section className="section-card" aria-label="Sessão de flashcards">
-      <header>
-        <h2 className="text-xl font-bold">Flashcards</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Spaced repetition com avaliação por dificuldade para reforçar memorização.
-        </p>
-      </header>
+    <section aria-label="Sessão de flashcards">
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">Flashcards</h2>
+          <p className="page-sub">
+            Spaced repetition · revise no ritmo certo · nunca esqueça o que estudou.
+          </p>
+        </div>
+      </div>
 
       {loading ? (
-        <p className="mt-4 text-sm text-slate-500">Carregando fila de revisão...</p>
+        <p className="page-sub" style={{ marginTop: '1rem' }}>
+          Carregando fila de revisão...
+        </p>
       ) : (
-        <div className="mt-4 space-y-4">
-          <article className="rounded-2xl border border-slate-200 bg-slate-900 p-5 text-white">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginTop: '1.2rem' }}>
+          <article className="flash-review-card">
             {!currentCard || sessionDone ? (
-              <p className="text-sm text-white/80">Sem cartões para revisar neste momento.</p>
+              <p style={{ position: 'relative', color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem' }}>
+                Sem cartões para revisar neste momento.
+              </p>
             ) : (
               <>
-                <p className="text-xs uppercase tracking-wide text-white/60">
-                  Cartão {Math.min(currentIndex + 1, cards.length)} de {cards.length}
-                </p>
-                <h3 className="mt-2 text-xl font-bold">{revealed ? currentCard.back : currentCard.front}</h3>
-                {revealed ? <p className="mt-2 text-sm text-white/70">{currentCard.explanation}</p> : null}
-
-                {!revealed ? (
-                  <button
-                    type="button"
-                    className="sim-action-btn sim-action-btn-primary mt-4"
-                    onClick={revealAnswer}
-                  >
-                    Ver resposta
-                  </button>
-                ) : (
-                  <div className="flash-srs-row">
-                    <button type="button" className="flash-srs-btn flash-srs-again" onClick={() => void rateCard('again')}>Errei</button>
-                    <button type="button" className="flash-srs-btn flash-srs-hard" onClick={() => void rateCard('hard')}>Difícil</button>
-                    <button type="button" className="flash-srs-btn flash-srs-good" onClick={() => void rateCard('good')}>Bom</button>
-                    <button type="button" className="flash-srs-btn flash-srs-easy" onClick={() => void rateCard('easy')}>Fácil</button>
+                <div className="flash-review-top">
+                  <div>
+                    <p className="flash-review-meta">
+                      Cartão {currentLabel} de {totalCards}
+                    </p>
+                    <p className="flash-review-question">
+                      {revealed ? currentCard.back : currentCard.front}
+                    </p>
                   </div>
-                )}
+                  <span className="flash-review-tag">Spaced repetition</span>
+                </div>
+
+                <div className="flash-review-counter">
+                  <span className="flash-rc-num tabular">
+                    {currentLabel}/{totalCards}
+                  </span>
+                  <span className="flash-rc-bar-bg">
+                    <span
+                      className="flash-rc-bar-fill"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </span>
+                </div>
+
+                <div
+                  className={`flash-review-answer ${revealed ? 'is-revealed' : ''}`}
+                  onClick={revealed ? undefined : revealAnswer}
+                  role={revealed ? undefined : 'button'}
+                  tabIndex={revealed ? undefined : 0}
+                  onKeyDown={(event) => {
+                    if (revealed) return;
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      revealAnswer();
+                    }
+                  }}
+                >
+                  {revealed ? (
+                    <span className="flash-review-answer-text">{currentCard.explanation}</span>
+                  ) : (
+                    <span className="flash-review-answer-hint">Clique para ver a resposta…</span>
+                  )}
+                </div>
+
+                <div className="flash-review-actions">
+                  {!revealed ? (
+                    <button type="button" className="flash-btn-flip" onClick={revealAnswer}>
+                      Ver resposta
+                    </button>
+                  ) : (
+                    <div className="flash-srs-row">
+                      <button
+                        type="button"
+                        className="flash-srs-btn again"
+                        onClick={() => void rateCard('again')}
+                      >
+                        Errei
+                      </button>
+                      <button
+                        type="button"
+                        className="flash-srs-btn hard"
+                        onClick={() => void rateCard('hard')}
+                      >
+                        Difícil
+                      </button>
+                      <button
+                        type="button"
+                        className="flash-srs-btn good"
+                        onClick={() => void rateCard('good')}
+                      >
+                        Bom
+                      </button>
+                      <button
+                        type="button"
+                        className="flash-srs-btn easy"
+                        onClick={() => void rateCard('easy')}
+                      >
+                        Fácil
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </article>
 
-          {feedback ? <p className="text-sm text-slate-700">{feedback}</p> : null}
+          {feedback ? <p className="page-sub">{feedback}</p> : null}
 
           <section>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Todos os decks</h3>
-            <div className="mt-3 grid gap-3 md:grid-cols-3">
-              {decks.map((deck, index) => (
-                <article key={deck.id} className={`rounded-xl border p-4 ${index === 0 ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'}`}>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {index === 0 ? 'Free' : 'Premium'}
-                  </div>
-                  <h4 className="mt-1 text-sm font-semibold text-slate-900">{deck.title}</h4>
-                  <p className="mt-1 text-xs text-slate-600">{deck.cardsCount} cartões</p>
-                </article>
-              ))}
+            <p className="eyebrow" style={{ marginBottom: '0.7rem' }}>
+              Todos os decks
+            </p>
+            <div className="flash-deck-grid">
+              {decks.map((deck, index) => {
+                const isFree = index === 0;
+                return (
+                  <article
+                    key={deck.id}
+                    className={`flash-deck-card ${isFree ? 'is-selected' : 'is-locked'}`}
+                  >
+                    <div
+                      className="flash-deck-topic"
+                      style={{ background: deckTopicTone(index) }}
+                    >
+                      {deck.title.slice(0, 2).toUpperCase()}
+                    </div>
+                    <h4 className="flash-deck-name">{deck.title}</h4>
+                    <p className="flash-deck-count">
+                      <span className="tabular">{deck.cardsCount}</span> cartões · {isFree ? 'Free' : 'Premium'}
+                    </p>
+                    <div className="flash-deck-prog-bg">
+                      <div
+                        className="flash-deck-prog-fill"
+                        style={{ width: isFree ? '12%' : '0%' }}
+                      />
+                    </div>
+                    <div className="flash-deck-prog-label">
+                      <span>{isFree ? 'Em revisão' : 'Bloqueado'}</span>
+                      <span>{isFree ? '—' : '—'}</span>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
         </div>
