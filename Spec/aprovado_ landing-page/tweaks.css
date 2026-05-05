@@ -1,0 +1,232 @@
+/* ============================================================
+   DOMAIN STAMPS — reinforce aprovado.xyz without bloating logo
+   ============================================================ */
+.footer-domain {
+  font-family: var(--fm);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--em);
+  letter-spacing: 0.5px;
+  margin-top: -4px;
+  margin-bottom: 4px;
+}
+.final-cta-domain {
+  font-family: var(--fm);
+  font-size: 0.82rem;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 28px;
+  text-transform: lowercase;
+}
+.final-cta-domain::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  margin-right: 8px;
+  vertical-align: middle;
+}
+   Applied via [data-mood], [data-density] on <html> +
+   --play (0..1) CSS var driven by the playfulness slider.
+   ============================================================ */
+
+/* default --play if Tweaks panel is closed */
+:root { --play: 0.65; }
+
+/* ============================================================
+   MOOD — recolors brand axis + display weight
+   ------------------------------------------------------------
+   studio    (default) — sapphire primary + emerald accent
+   arcade    — coral primary, amber-warm secondary, heavier display
+   editorial — ink-only neutrals, emerald as ONLY accent, lighter display
+   ============================================================ */
+
+/* studio = default — uses tokens as-is */
+
+/* ── arcade ───────────────────────────────────────────────── */
+:root[data-mood="arcade"] {
+  /* swap sapphire role to coral; bump emerald to amber-warm secondary */
+  --sap:    #F04E37;
+  --sap-d:  #C73921;
+  --sap-l:  #FF7A5C;
+  --sap-bg: #FEE7E1;
+  --sap-bg-2: #FDD3C8;
+
+  --em:     #F59E0B;
+  --em-d:   #C77900;
+  --em-bg:  #FEF3C7;
+
+  /* heavier display, slightly tighter */
+  --grad-logo: linear-gradient(135deg, #F04E37, #F59E0B);
+  --grad-progress: linear-gradient(90deg, #FF7A5C, #F59E0B);
+}
+:root[data-mood="arcade"] h1,
+:root[data-mood="arcade"] h2 {
+  letter-spacing: -0.035em;
+  font-weight: 800;
+}
+:root[data-mood="arcade"] .hero h1 {
+  font-style: italic;
+}
+
+/* ── editorial ────────────────────────────────────────────── */
+:root[data-mood="editorial"] {
+  /* drop sapphire to ink — ONLY emerald survives as accent */
+  --sap:    #0A0F1E;
+  --sap-d:  #000000;
+  --sap-l:  #1C2333;
+  --sap-bg: #EFF1FB;
+  --sap-bg-2: #DDE0F0;
+
+  --grad-logo: linear-gradient(135deg, #0A0F1E, #00B37E);
+  --grad-progress: linear-gradient(90deg, #262A47, #00B37E);
+  --grad-hero-radial:
+    radial-gradient(ellipse 55% 60% at 75% 40%, rgba(0,179,126,.22) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 15% 70%, rgba(255,255,255,.04) 0%, transparent 55%);
+}
+:root[data-mood="editorial"] h1,
+:root[data-mood="editorial"] h2 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+:root[data-mood="editorial"] .hero h1 {
+  font-weight: 600;
+}
+/* swap a few sapphire tints to neutral so editorial reads sober */
+:root[data-mood="editorial"] .feat-card .icon-tile.sap,
+:root[data-mood="editorial"] .why-bullets .b:not(.em-tile):not(.amb-tile) .icon-tile {
+  background: var(--n-100);
+  color: var(--ink);
+}
+:root[data-mood="editorial"] .nav-cta,
+:root[data-mood="editorial"] .btn-primary {
+  background: var(--ink);
+}
+:root[data-mood="editorial"] .nav-cta:hover,
+:root[data-mood="editorial"] .btn-primary:hover {
+  background: #000;
+}
+
+/* ============================================================
+   DENSITY — scales spacing + section type
+   ============================================================ */
+:root[data-density="compact"] {
+  --d-scale: 0.78;
+}
+:root[data-density="comfort"] {
+  --d-scale: 1;
+}
+:root[data-density="cozy"] {
+  --d-scale: 1.18;
+}
+:root { --d-scale: 1; }  /* fallback */
+
+/* sections breathe more or less */
+.section,
+.hero-slab,
+.final-cta,
+.why-section,
+.tour-section,
+.pricing-section,
+.curriculum-section {
+  padding-top: calc(var(--sp-section, 96px) * var(--d-scale, 1));
+  padding-bottom: calc(var(--sp-section, 96px) * var(--d-scale, 1));
+}
+/* hero copy + h1 scale a touch with density */
+:root[data-density="compact"] .hero h1 { font-size: clamp(2rem, 3.6vw, 2.9rem); }
+:root[data-density="cozy"]    .hero h1 { font-size: clamp(2.6rem, 5vw, 4rem); }
+:root[data-density="compact"] .hero-sub { font-size: 0.98rem; }
+:root[data-density="cozy"]    .hero-sub { font-size: 1.18rem; }
+
+:root[data-density="compact"] h2 { font-size: clamp(1.6rem, 2.6vw, 2.1rem); }
+:root[data-density="cozy"]    h2 { font-size: clamp(2.2rem, 3.6vw, 3.2rem); }
+
+/* card padding scales */
+:root[data-density="compact"] .feat-card,
+:root[data-density="compact"] .plan { padding: 18px; }
+:root[data-density="cozy"]    .feat-card,
+:root[data-density="cozy"]    .plan { padding: 32px; }
+
+/* gaps between feature cards / plans */
+:root[data-density="compact"] .feat-grid { gap: 14px; }
+:root[data-density="cozy"]    .feat-grid { gap: 26px; }
+
+/* ============================================================
+   PLAYFULNESS — drives wobble, glow, pulse, tilts.
+   At 0: dead corporate. At 100: full toy-store.
+   ============================================================ */
+
+/* TRY ME tag — only visible above some threshold; fully animated up high */
+.try-me-wrap::before,
+.try-me-wrap::after {
+  opacity: clamp(0, calc(var(--play) * 2 - 0.4), 1);
+}
+.try-me-wrap::before {
+  /* wobble amplitude scales with play */
+  animation-duration: calc(2.4s - var(--play) * 0.9s);
+}
+@keyframes try-me-wobble {
+  0%, 100% {
+    transform:
+      translateX(-50%)
+      rotate(calc(-4deg * var(--play)))
+      translateY(0);
+  }
+  50% {
+    transform:
+      translateX(-50%)
+      rotate(calc(2deg * var(--play)))
+      translateY(calc(-3px * var(--play)));
+  }
+}
+
+/* primary-CTA glow ring scales with play */
+.aut-btn:not(.ghost):not(:disabled) {
+  animation-duration: calc(2.4s - var(--play) * 0.6s);
+}
+@keyframes btn-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(75, 107, 245, calc(0.4 * var(--play)));
+  }
+  50% {
+    box-shadow:
+      0 0 0 calc(8px * var(--play)) rgba(75, 107, 245, 0);
+  }
+}
+
+/* the green AO-VIVO dot pulse — already exists, scale via opacity */
+.live-dot {
+  opacity: var(--play);
+}
+
+/* dot-grid background opacity scales (more visible = more "tactile") */
+:root {
+  --grad-dotgrid: radial-gradient(
+    rgba(255,255,255, calc(0.04 + var(--play) * 0.06))
+    1px, transparent 1px);
+}
+
+/* tiny ambient tilts on cards at high play */
+.feat-card {
+  transition: transform .25s cubic-bezier(.4, 0, .2, 1), box-shadow .25s, border-color .25s;
+}
+.feat-card:nth-child(2n):hover {
+  transform: translateY(-2px) rotate(calc(0.6deg * var(--play)));
+}
+.feat-card:nth-child(2n+1):hover {
+  transform: translateY(-2px) rotate(calc(-0.6deg * var(--play)));
+}
+
+/* hero pill animated underline / pulse on the green dot */
+.hero-pill .dot {
+  animation: pill-dot-pulse calc(2.2s - var(--play) * 0.6s) ease-in-out infinite;
+}
+@keyframes pill-dot-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(calc(1 + var(--play) * 0.5)); }
+}
+
+/* When play is near zero, kill all the toy-ish stuff visually */
+:root:not([data-mood]):not([data-density]) {} /* noop, just for spec */

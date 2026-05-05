@@ -1,0 +1,26 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.aState{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:700;font-size:13px;color:#fff;flex-shrink:0;position:relative;}
+.aState.initial{background:rgba(27,63,216,.6);border:2px solid rgba(75,107,245,.85);}
+.aState.normal{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);}
+.aState.accept{background:rgba(0,179,126,.45);border:2px solid rgba(0,179,126,.75);}
+.aState.accept::after{content:'';position:absolute;width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,179,126,.55);}
+.aArrow{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.aLine{width:36px;height:1px;background:rgba(255,255,255,.25);position:relative;}
+.aLine::after{content:'▶';position:absolute;right:-4px;top:-7px;font-size:10px;color:rgba(255,255,255,.4);}
+.aLabel{font-family:var(--fm);font-size:10.5px;color:rgba(255,255,255,.5);}
+</style></head>
+<body><div class="card dark" style="background:var(--ink);background-image:var(--grad-dotgrid);background-size:var(--dotgrid-size);">
+  <span class="eyebrow" style="color:rgba(255,255,255,.45);">Brand motif · Autômato</span>
+  <div style="border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.04);border-radius:14px;padding:18px;">
+    <div style="font-family:var(--fm);font-size:11px;color:rgba(255,255,255,.45);margin-bottom:14px;">AFD — reconhece strings terminadas em "ab"</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <div class="aState initial">q₀</div>
+      <div class="aArrow"><div class="aLabel">a</div><div class="aLine"></div></div>
+      <div class="aState normal">q₁</div>
+      <div class="aArrow"><div class="aLabel">b</div><div class="aLine"></div></div>
+      <div class="aState accept">q₂</div>
+    </div>
+  </div>
+  <p style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.55;margin-top:auto;">The automaton is the brand's signature visual — q₀ initial (sap), q₁ normal (glass), q₂ accept (em with ringed border). Always shown on dark surface with subtle dot-grid.</p>
+</div></body></html>

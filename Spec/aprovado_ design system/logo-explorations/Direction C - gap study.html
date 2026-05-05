@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Aprovado — Direction C · gap study</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body, html { margin:0; padding:0; min-height:100%; background:#F4F5FB; font-family: var(--fb); color: var(--ink); }
+  .wrap{max-width:1100px;margin:0 auto;padding:48px 32px 80px;}
+  h1{font-family:var(--fd);font-weight:800;font-size:30px;letter-spacing:-.02em;margin:0 0 .25rem;}
+  .lede{color:var(--fg-2);font-size:15px;line-height:1.6;max-width:62ch;margin:0 0 32px;}
+  .row-h{font-family:var(--fm);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--n-400);margin:36px 0 12px;}
+
+  .ring{
+    position:relative;width:38px;height:38px;border-radius:50%;
+    background:var(--em);display:inline-flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-size:16px;flex-shrink:0;
+  }
+  .ring::before{
+    content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--em);opacity:.45;
+  }
+  .word{font-family:var(--fd);font-weight:800;letter-spacing:-.025em;color:var(--ink);font-size:38px;}
+  .word .a{color:var(--em);}
+
+  .compare{display:flex;flex-direction:column;gap:14px;}
+  .compare-row{background:#fff;border:1px solid var(--n-200);border-radius:14px;padding:22px 28px;display:grid;grid-template-columns:170px 1fr 1.1fr;align-items:center;gap:24px;}
+  .compare-row .label-col{font-family:var(--fb);font-weight:700;font-size:13.5px;color:var(--ink);}
+  .compare-row .label-col small{display:block;font-family:var(--fm);font-weight:500;font-size:10.5px;color:var(--n-400);text-transform:uppercase;letter-spacing:1.2px;margin-top:3px;}
+  .compare-row .verdict{font-size:13px;color:var(--fg-2);line-height:1.55;}
+  .compare-row .verdict strong{color:var(--ink);font-weight:600;}
+  .lockup{display:inline-flex;align-items:center;}
+
+  .recommend{background:var(--em-bg);border:1px solid #B8E5D6;border-radius:14px;padding:18px 22px;margin-top:32px;display:flex;gap:14px;align-items:flex-start;}
+  .recommend .tag{font-family:var(--fm);font-size:10.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:#006B50;background:#D7F5E9;padding:3px 9px;border-radius:9999px;flex-shrink:0;margin-top:2px;}
+  .recommend p{margin:0;font-size:14px;line-height:1.6;color:#0F4F3F;}
+  .recommend p strong{color:#003D2E;}
+
+  .ctx{background:#fff;border:1px solid var(--n-200);border-radius:14px;padding:22px 28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+  .ctx.dark{background:var(--ink);border-color:rgba(255,255,255,.08);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Direction C · "Justo" — estudo de gap</h1>
+  <p class="lede">Anel de 38px (cap-height) fixo. A pergunta é a distância entre o anel e a palavra. O anel inclui um ring externo de 4px de cada lado, então o "espaço óptico" parte de 4px antes do gap declarado.</p>
+
+  <div class="compare">
+
+    <div class="compare-row">
+      <div class="label-col">Atual <small>16px · 1rem</small></div>
+      <div class="lockup" style="gap:16px;"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+      <div class="verdict"><strong>Frouxo.</strong> Os dois elementos parecem flutuar separados — anel parece um ícone ao lado do texto, não parte do lockup.</div>
+    </div>
+
+    <div class="compare-row">
+      <div class="label-col">12px <small>0.75rem</small></div>
+      <div class="lockup" style="gap:12px;"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+      <div class="verdict"><strong>Ainda solto</strong>, mas começa a respirar como um par.</div>
+    </div>
+
+    <div class="compare-row">
+      <div class="label-col">10px</div>
+      <div class="lockup" style="gap:10px;"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+      <div class="verdict"><strong>Equilibrado.</strong> Anel e tipo lêem como uma unidade, com pausa visual clara.</div>
+    </div>
+
+    <div class="compare-row" style="background:#FAFBFF;outline:2px solid var(--em);outline-offset:-2px;">
+      <div class="label-col">8px <small>0.5rem · ★</small></div>
+      <div class="lockup" style="gap:8px;"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+      <div class="verdict"><strong>★ Recomendação.</strong> O anel encosta opticamente no "a" do início da palavra — vira sinal de leitura ("✓ aprovado"). Compacto sem grudar.</div>
+    </div>
+
+    <div class="compare-row">
+      <div class="label-col">6px</div>
+      <div class="lockup" style="gap:6px;"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+      <div class="verdict"><strong>Apertado.</strong> O ring externo de 45% opacity quase toca a primeira letra. Funciona em mark muito grande, fica sufocado em escala normal.</div>
+    </div>
+
+    <div class="compare-row">
+      <div class="label-col">4px</div>
+      <div class="lockup" style="gap:4px;"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+      <div class="verdict"><strong>Grudado.</strong> Vira uma forma só — perde a leitura "selo + palavra".</div>
+    </div>
+
+  </div>
+
+  <div class="recommend">
+    <span class="tag">Recomendação</span>
+    <p><strong>8px (0.5rem).</strong> Lê como pontuação — "<span style="font-family:var(--fd);font-weight:800;">✓ aprovado</span>" — que é exatamente o que o brand promete. 10px é o backup conservador se quiser mais ar; abaixo de 6px começa a competir com o ring externo do anel.</p>
+  </div>
+
+  <div class="row-h">Em contexto · header light</div>
+  <div class="ctx">
+    <div class="lockup" style="gap:8px;"><span class="ring">✓</span><span class="word">aprov<span class="a">a</span>do</span></div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;font-family:var(--fb);font-size:13px;color:var(--n-500);">
+      <span style="padding:.4rem .9rem;">Tópicos</span>
+      <span style="padding:.4rem .9rem;">Simulador</span>
+      <span style="padding:.4rem .9rem;">Flashcards</span>
+      <span style="background:var(--sap);color:#fff;border-radius:9999px;padding:.4rem 1rem;font-weight:700;font-size:12.5px;">Entrar</span>
+    </div>
+  </div>
+
+  <div class="row-h" style="margin-top:24px;">Em contexto · header dark</div>
+  <div class="ctx dark">
+    <div class="lockup" style="gap:8px;"><span class="ring">✓</span><span class="word" style="color:#fff;">aprov<span class="a">a</span>do</span></div>
+    <div style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-family:var(--fm);font-size:10.5px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1.5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:9999px;padding:.3rem .8rem;">F6 · Linguagens Formais</div>
+  </div>
+
+</div>
+</body>
+</html>

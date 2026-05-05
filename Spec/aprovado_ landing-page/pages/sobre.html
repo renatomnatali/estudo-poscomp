@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>aprovado.xyz · sobre</title>
+  <link rel="stylesheet" href="colors_and_type.css">
+  <link rel="stylesheet" href="pages.css">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body class="page-shell">
+  <div id="page-nav"></div>
+
+  <header class="page-hd">
+    <span class="eyebrow">Sobre</span>
+    <h1>Construí pra mim. Funcionou. Agora compartilho.</h1>
+    <p class="lead">
+      O aprovado.xyz começou como uma ferramenta pessoal pra estudar pro POSCOMP &mdash;
+      e como um experimento de até onde dá pra ir construindo software com IA hoje.
+    </p>
+  </header>
+
+  <article class="about-body">
+    <p>
+      Em 2025 me peguei de novo tentando estudar Linguagens Formais e Autômatos por PDF.
+      Tudo que eu encontrava era ou denso demais (livro acadêmico, em inglês, sem exercício),
+      ou raso demais (videoaula que cobre 30 minutos do edital em 2 horas), ou pago demais
+      (cursinho R$2.000 que ainda assim não tem visualização). Frustrante.
+    </p>
+
+    <p>
+      A teoria de autômatos é <strong>visualmente bonita</strong>. Estados, transições,
+      strings sendo lidas símbolo por símbolo &mdash; é praticamente uma animação esperando
+      pra acontecer. Mas todo mundo ensina como página de PDF. Não fazia sentido.
+    </p>
+
+    <p class="pull">
+      "Se eu construir o jeito que eu queria estudar, talvez ajude outras pessoas."
+    </p>
+
+    <p>
+      Comecei pequeno: um simulador de AFD em React, um quiz, um mapa do edital.
+      Em algumas semanas tinha 9 módulos completos de Linguagens Formais.
+      O processo me deixou óbvio que o produto que eu queria existir <em>tinha</em> que existir &mdash;
+      visual, em português, baseado no edital, com simulado real.
+    </p>
+
+    <p>
+      O nome <strong>aprovado</strong> é literal: o objetivo é só esse. E o
+      <strong> .xyz</strong> é piada de programador &mdash; quase um <code class="mono">.foo.bar</code> oficial.
+    </p>
+
+    <p>
+      Hoje a versão grátis cobre Linguagens Formais inteira, sem cartão.
+      Os outros 24 tópicos do edital chegam em ondas, e quem quer acesso antecipado
+      assina o premium. Sem fidelidade, sem investidor, sem rede social.
+      Vai bem assim.
+    </p>
+  </article>
+
+  <section class="credits">
+    <div class="credits-card">
+      <div class="credits-eyebrow">Equipe</div>
+      <div class="credits-title">Ficha técnica</div>
+
+      <!-- Headline credit: Renato no comando -->
+      <div class="credit-headline">
+        <div class="photo">
+          <img src="renato.jpg" alt="Renato Moraes Natali" />
+        </div>
+        <div>
+          <div class="role">Fundador · Direção criativa &amp; produto</div>
+          <div class="name">Renato Moraes Natali</div>
+          <div class="desc">
+            Define a visão, a curadoria do edital e a régua pedagógica.<br>
+            Decide o que entra, o que sai, e quando está pronto pra publicar.
+          </div>
+        </div>
+      </div>
+
+      <div class="credit-tools-label">Construído com</div>
+
+      <div class="credit-tools">
+        <div class="credit-tool">
+          <div class="logo tool-tc">
+            <img src="truecoding-logo.svg" alt="true-coding" />
+          </div>
+          <div class="info">
+            <div class="nm">true-coding</div>
+            <div class="role">
+              Metodologia &amp; product management ·
+              <a href="https://truecode.vercel.app" target="_blank" rel="noopener">truecode.vercel.app</a>
+            </div>
+          </div>
+          <div class="ver">framework próprio</div>
+        </div>
+
+        <div class="credit-tool">
+          <div class="logo tool-cc">
+            <!-- Claude Code mark: terminal-ish glyph in Anthropic clay -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 7 10 12 4 17"/>
+              <line x1="13" y1="18" x2="20" y2="18"/>
+            </svg>
+          </div>
+          <div class="info">
+            <div class="nm">Claude Code</div>
+            <div class="role">Engenharia · implementação dos simuladores e do app</div>
+          </div>
+          <div class="ver">Anthropic · Opus 4.6</div>
+        </div>
+
+        <div class="credit-tool">
+          <div class="logo tool-cd">
+            <!-- Claude Design mark: stylized 'C' arc + spark -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 7a7 7 0 1 0 0 10"/>
+              <circle cx="18.5" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <div class="info">
+            <div class="nm">Claude Design</div>
+            <div class="role">Direção visual · sistema, tipografia, layout</div>
+          </div>
+          <div class="ver">Anthropic</div>
+        </div>
+      </div>
+
+      <div class="credit-misc">
+        <div class="credit-misc-row">
+          <div class="k">Conteúdo</div>
+          <div class="v">
+            Edital SBC POSCOMP 2025
+            <small>Sipser · Cormen/CLRS · Tanenbaum · Hopcroft</small>
+          </div>
+        </div>
+        <div class="credit-misc-row">
+          <div class="k">Trilha sonora</div>
+          <div class="v">
+            Lo-fi · café preto · 2h da manhã
+            <small>não creditável</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="credits-foot">
+        <span>uma produção independente</span>
+        <span>2026 · aprovado.xyz</span>
+      </div>
+    </div>
+  </section>
+
+  <div id="page-foot"></div>
+
+  <script type="text/babel" src="page-shell.jsx"></script>
+  <script type="text/babel">
+    mountNav();
+    mountFoot();
+  </script>
+</body>
+</html>

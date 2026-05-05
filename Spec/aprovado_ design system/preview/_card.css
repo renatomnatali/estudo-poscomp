@@ -1,0 +1,52 @@
+/* Shared base for design-system preview cards.
+   Each card targets ~700×N (N usually 150–400) and has 0 chrome. */
+@import url('../colors_and_type.css');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg-1);
+  color: var(--fg-1);
+  font-family: var(--fb);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.card {
+  width: 100%;
+  height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.card.dark {
+  background: var(--ink);
+  color: var(--on-dark-1);
+}
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow {
+  font-family: var(--fm);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--fg-4);
+  font-weight: 500;
+}
+.dark .eyebrow { color: var(--on-dark-3); }
+.swatch {
+  position: relative;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-1);
+  overflow: hidden;
+  flex: 1;
+  min-height: 78px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 8px 10px;
+  color: var(--fg-1);
+}
+.swatch.has-text-dark { color: var(--on-dark-1); border-color: rgba(255,255,255,.08); }
+.swatch .name { font-family: var(--fb); font-weight: 600; font-size: 12px; }
+.swatch .hex  { font-family: var(--fm); font-size: 10.5px; opacity: .75; }

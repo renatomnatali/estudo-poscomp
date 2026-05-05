@@ -1,0 +1,78 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<style>
+  .icon-tile{ display:flex;flex-direction:column;align-items:center;gap:8px; }
+  .icon-box{
+    width:46px;height:46px;border-radius:11px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--white);border:1px solid var(--n-200);
+  }
+  .icon-box.tinted-sap   { background:var(--sap-bg);   border-color:var(--sap-bg-2); color:var(--sap); }
+  .icon-box.tinted-em    { background:var(--em-bg);    border-color:#C9F1E0;          color:var(--em-d); }
+  .icon-box.tinted-amb   { background:var(--amb-bg);   border-color:#FBE3A2;          color:#92400E; }
+  .icon-box.tinted-coral { background:var(--coral-bg); border-color:#FBC1B7;          color:#9F1F12; }
+  .icon-box svg{ width:22px; height:22px; stroke-width:1.75; }
+  .icon-tile small{ font-size:10.5px; color:var(--fg-3); font-family:var(--fb); font-weight:500; }
+  .stroke-row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .symbol-chip{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--sap-bg);border:1px solid var(--sap-bg-2); color:var(--sap-d);
+    font-family:var(--fm);font-size:14px;font-weight:500;
+    min-width:32px;height:32px;padding:0 10px;border-radius:8px;
+  }
+  .source-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--n-100);border:1px solid var(--n-200);
+    border-radius:9999px;padding:.25rem .7rem;
+    font-family:var(--fm);font-size:10.5px;font-weight:500;
+    color:var(--n-500);text-transform:uppercase;letter-spacing:1.2px;
+  }
+  .source-pill::before{
+    content:'';width:6px;height:6px;border-radius:50%;background:var(--em);
+  }
+</style></head>
+<body><div class="card">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="eyebrow">Brand · Iconography</span>
+    <span class="source-pill">Lucide v0.469</span>
+  </div>
+
+  <!-- Set 1 — product nav, on tinted boxes -->
+  <div class="stroke-row">
+    <div class="icon-tile"><div class="icon-box tinted-sap"><i data-lucide="route"></i></div><small>Trilhas</small></div>
+    <div class="icon-tile"><div class="icon-box tinted-em"><i data-lucide="workflow"></i></div><small>Visualizações</small></div>
+    <div class="icon-tile"><div class="icon-box tinted-amb"><i data-lucide="timer"></i></div><small>Simulado</small></div>
+    <div class="icon-tile"><div class="icon-box tinted-coral"><i data-lucide="layers"></i></div><small>Flashcards</small></div>
+    <div class="icon-tile"><div class="icon-box tinted-sap"><i data-lucide="trending-up"></i></div><small>Progresso</small></div>
+    <div class="icon-tile"><div class="icon-box tinted-em"><i data-lucide="trophy"></i></div><small>Conquistas</small></div>
+    <div class="icon-tile"><div class="icon-box tinted-amb"><i data-lucide="flame"></i></div><small>Streak</small></div>
+    <div class="icon-tile"><div class="icon-box"><i data-lucide="search"></i></div><small>Buscar</small></div>
+  </div>
+
+  <!-- Set 2 — neutral utilities -->
+  <div class="stroke-row" style="border-top:1px dashed var(--n-200);padding-top:14px;">
+    <div class="icon-tile"><div class="icon-box"><i data-lucide="file-text"></i></div><small>Edital</small></div>
+    <div class="icon-tile"><div class="icon-box"><i data-lucide="book-open"></i></div><small>Tópicos</small></div>
+    <div class="icon-tile"><div class="icon-box"><i data-lucide="user-round"></i></div><small>Conta</small></div>
+    <div class="icon-tile"><div class="icon-box"><i data-lucide="settings"></i></div><small>Config</small></div>
+    <div class="icon-tile"><div class="icon-box"><i data-lucide="sparkles"></i></div><small>Premium</small></div>
+    <div class="icon-tile"><div class="icon-box"><i data-lucide="circle-help"></i></div><small>Ajuda</small></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start;">
+    <p style="font-size:12px;color:var(--fg-3);line-height:1.55;margin:0;">
+      <strong style="color:var(--fg-1);">Sistema:</strong> usamos <strong style="color:var(--fg-1);">Lucide</strong> (lucide.dev) — biblioteca open-source com ~1500 ícones, MIT-licensed, mantida ativamente. Stroke 1.75, 24×24, cantos round. Caixa 46×46, raio 11. Cor semântica via tile (<code>tinted-sap</code>, <code>tinted-em</code>…) ou neutra (branco + borda <code>n-200</code>). <strong style="color:var(--fg-1);">Não desenhar à mão.</strong> Se um conceito não tiver ícone exato no Lucide, escolha o mais próximo conceitualmente — consistência &gt; precisão semântica.
+    </p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+      <span class="symbol-chip">δ</span>
+      <span class="symbol-chip">Σ</span>
+      <span class="symbol-chip">→</span>
+      <span class="symbol-chip">q₀</span>
+      <span class="symbol-chip">ε</span>
+      <span class="symbol-chip">∅</span>
+      <small style="display:block;width:100%;font-size:10.5px;color:var(--fg-4);font-family:var(--fm);text-transform:uppercase;letter-spacing:1.2px;margin-top:4px;">Símbolos formais — typeset, não ícone</small>
+    </div>
+  </div>
+</div>
+<script>lucide.createIcons();</script>
+</body></html>
