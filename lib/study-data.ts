@@ -323,6 +323,310 @@ const MODULE_TOPIC_MAP: Record<string, string> = {
 
 const MODULES: StudyModule[] = [
   {
+    slug: 'f1-1-analise-notacoes',
+    order: 1,
+    title: 'Algoritmos de Referência',
+    subtitle:
+      'Antes de medir a eficiência de algoritmos, você precisa vê-los funcionar. Este módulo constrói a intuição que F1.2 vai formalizar.',
+    trackCode: 'F1',
+    progressLabel: 'Módulo 1 de 3',
+    chapters: [
+      {
+        id: 'referencia',
+        title: 'Algoritmos de referência',
+        content: 'Busca linear/binária, bubble sort, merge sort e quicksort.',
+      },
+      {
+        id: 'comparacao',
+        title: 'Comparação prática',
+        content: 'Intuição de custo antes da formalização assintótica.',
+      },
+    ],
+    quiz: [
+      {
+        id: 'f1-1-q1',
+        prompt: 'Qual algoritmo descarta metade do espaço de busca a cada passo?',
+        options: [
+          { key: 'A', text: 'Busca linear' },
+          { key: 'B', text: 'Busca binária' },
+          { key: 'C', text: 'Bubble sort' },
+          { key: 'D', text: 'Selection sort' },
+          { key: 'E', text: 'Insertion sort' },
+        ],
+        answerKey: 'B',
+        explanation: 'A busca binária reduz o problema pela metade em cada iteração.',
+      },
+    ],
+    previousSlug: null,
+    nextSlug: 'f1-2-notacoes-assintoticas',
+  },
+  {
+    slug: 'f1-2-notacoes-assintoticas',
+    order: 2,
+    title: 'Notações Assintóticas',
+    subtitle:
+      'Como medir a eficiência de algoritmos independente do hardware — a linguagem universal da ciência da computação',
+    trackCode: 'F1',
+    progressLabel: 'Módulo 2 de 3',
+    chapters: [
+      {
+        id: 'notacoes',
+        title: 'Big-O, Ω e Θ',
+        content: 'Definições, intuição e comparação entre limites superior, inferior e exato.',
+      },
+      {
+        id: 'aplicacao',
+        title: 'Regras de análise',
+        content: 'Termo dominante, composição de loops e recorrências básicas.',
+      },
+    ],
+    quiz: [
+      {
+        id: 'f1-2-q1',
+        prompt: 'Qual notação representa limite assintótico superior?',
+        options: [
+          { key: 'A', text: 'Ω' },
+          { key: 'B', text: 'Θ' },
+          { key: 'C', text: 'O' },
+          { key: 'D', text: 'Δ' },
+          { key: 'E', text: 'Σ' },
+        ],
+        answerKey: 'C',
+        explanation: 'Big-O indica limite superior assintótico.',
+      },
+    ],
+    previousSlug: 'f1-1-analise-notacoes',
+    nextSlug: 'f1-3-analise-recorrencias',
+  },
+  {
+    slug: 'f1-3-analise-recorrencias',
+    order: 3,
+    title: 'Análise de Recorrências',
+    subtitle:
+      'Como calcular o custo de algoritmos recursivos com expansão, árvore de recorrência e Teorema Mestre.',
+    trackCode: 'F1',
+    progressLabel: 'Módulo 3 de 3',
+    chapters: [
+      {
+        id: 'expansao',
+        title: 'Método da expansão',
+        content: 'Substituições sucessivas para reconhecer padrões e obter fórmulas fechadas.',
+      },
+      {
+        id: 'mestre',
+        title: 'Teorema Mestre',
+        content: 'Identificação de casos e aplicação do resultado assintótico.',
+      },
+    ],
+    quiz: [
+      {
+        id: 'f1-3-q1',
+        prompt: 'Qual método resolve T(n)=2T(n/2)+n com resultado O(n log n)?',
+        options: [
+          { key: 'A', text: 'Substituição direta sem padrão' },
+          { key: 'B', text: 'Teorema Mestre (caso 2)' },
+          { key: 'C', text: 'Apenas indução fraca' },
+          { key: 'D', text: 'Busca linear' },
+          { key: 'E', text: 'Método de eliminação gaussiana' },
+        ],
+        answerKey: 'B',
+        explanation: 'Para a=2, b=2 e f(n)=n, vale o caso 2 do Teorema Mestre, resultando em O(n log n).',
+      },
+    ],
+    previousSlug: 'f1-2-notacoes-assintoticas',
+    nextSlug: null,
+  },
+  {
+    slug: 'f2-1-estruturas-lineares',
+    order: 1,
+    title: 'Estruturas de Dados Lineares',
+    subtitle:
+      'Arrays, listas encadeadas, pilhas, filas e deques — as estruturas que organizam dados sequencialmente e formam a base de quase todo algoritmo',
+    trackCode: 'F2',
+    progressLabel: 'Módulo 1 de 3',
+    chapters: [
+      {
+        id: 'estruturas',
+        title: 'Estruturas lineares',
+        content: 'Comparação de custo operacional para array, lista, pilha e fila.',
+      },
+      {
+        id: 'simuladores',
+        title: 'Simuladores',
+        content: 'Operações push/pop/enqueue/dequeue com feedback visual.',
+      },
+    ],
+    quiz: [
+      {
+        id: 'f2-1-q1',
+        prompt: 'Qual estrutura segue a política FIFO?',
+        options: [
+          { key: 'A', text: 'Pilha' },
+          { key: 'B', text: 'Fila' },
+          { key: 'C', text: 'Heap' },
+          { key: 'D', text: 'Árvore AVL' },
+          { key: 'E', text: 'Hash table' },
+        ],
+        answerKey: 'B',
+        explanation: 'Fila implementa First-In First-Out.',
+      },
+    ],
+    previousSlug: null,
+    nextSlug: 'f2-2-arvores-hashing',
+  },
+  {
+    slug: 'f2-2-arvores-hashing',
+    order: 2,
+    title: 'Árvores e Hashing',
+    subtitle:
+      'Da Árvore Binária de Busca ao AVL, passando por heaps e tabelas hash — as estruturas que tornam busca e inserção eficientes em qualquer escala',
+    trackCode: 'F2',
+    progressLabel: 'Módulo 2 de 3',
+    chapters: [
+      {
+        id: 'arvores',
+        title: 'Árvores balanceadas',
+        content: 'BST, AVL e heaps para busca e prioridade.',
+      },
+      {
+        id: 'hash',
+        title: 'Hashing',
+        content: 'Funções hash, colisões e fator de carga.',
+      },
+    ],
+    quiz: [
+      {
+        id: 'f2-2-q1',
+        prompt: 'Qual estrutura mantém a propriedade de balanceamento estrito por rotações?',
+        options: [
+          { key: 'A', text: 'Lista encadeada' },
+          { key: 'B', text: 'Fila' },
+          { key: 'C', text: 'Árvore AVL' },
+          { key: 'D', text: 'Pilha' },
+          { key: 'E', text: 'Grafo dirigido' },
+        ],
+        answerKey: 'C',
+        explanation: 'AVL usa rotações para manter altura balanceada.',
+      },
+    ],
+    previousSlug: 'f2-1-estruturas-lineares',
+    nextSlug: 'f2-3-grafos',
+  },
+  {
+    slug: 'f2-3-grafos',
+    order: 3,
+    title: 'Grafos',
+    subtitle:
+      'A estrutura que modela qualquer relação: redes sociais, mapas, dependências, fluxos — e os algoritmos que as percorrem e otimizam',
+    trackCode: 'F2',
+    progressLabel: 'Módulo 3 de 3',
+    chapters: [
+      {
+        id: 'percursos',
+        title: 'Percursos',
+        content: 'BFS e DFS para explorar conectividade e caminhos.',
+      },
+      {
+        id: 'otimizacao',
+        title: 'Caminhos e árvores geradoras',
+        content: 'Dijkstra, Prim e ordenação topológica.',
+      },
+    ],
+    quiz: [
+      {
+        id: 'f2-3-q1',
+        prompt: 'Qual algoritmo clássico resolve caminho mínimo com pesos não negativos?',
+        options: [
+          { key: 'A', text: 'Kruskal' },
+          { key: 'B', text: 'Prim' },
+          { key: 'C', text: 'Dijkstra' },
+          { key: 'D', text: 'Floyd-Warshall apenas sem pesos' },
+          { key: 'E', text: 'DFS' },
+        ],
+        answerKey: 'C',
+        explanation: 'Dijkstra é apropriado para pesos não negativos.',
+      },
+    ],
+    previousSlug: 'f2-2-arvores-hashing',
+    nextSlug: null,
+  },
+  {
+    slug: 'f3-1-paradigmas',
+    order: 1,
+    title: 'Paradigmas e Técnicas de Programação',
+    subtitle:
+      'Quatro estratégias universais para resolver qualquer problema algorítmico: saber qual usar é o que separa soluções O(2ⁿ) de O(n log n)',
+    trackCode: 'F3',
+    progressLabel: 'Módulo 1 de 1',
+    chapters: [
+      {
+        id: 'paradigmas',
+        title: 'Paradigmas centrais',
+        content: 'Divisão e conquista, programação dinâmica, guloso e backtracking.',
+      },
+      {
+        id: 'tradeoffs',
+        title: 'Escolha de estratégia',
+        content: 'Critérios para selecionar abordagem pelo tipo de problema.',
+      },
+    ],
+    quiz: [
+      {
+        id: 'f3-1-q1',
+        prompt: 'Qual técnica armazena subproblemas para evitar recomputação?',
+        options: [
+          { key: 'A', text: 'Busca em largura' },
+          { key: 'B', text: 'Programação dinâmica' },
+          { key: 'C', text: 'Hashing aberto' },
+          { key: 'D', text: 'Recursão ingênua' },
+          { key: 'E', text: 'Ordenação topológica' },
+        ],
+        answerKey: 'B',
+        explanation: 'Programação dinâmica usa memoização/tabulação.',
+      },
+    ],
+    previousSlug: null,
+    nextSlug: null,
+  },
+  {
+    slug: 'f4-1-linguagens-formais',
+    order: 1,
+    title: 'Linguagens Formais e Autômatos',
+    subtitle:
+      'A teoria que fundamenta compiladores, regex, protocolos e inteligência artificial — do autômato finito à Hierarquia de Chomsky',
+    trackCode: 'F4',
+    progressLabel: 'Módulo 1 de 1',
+    chapters: [
+      {
+        id: 'modelos',
+        title: 'Modelos formais',
+        content: 'AFD, AFN, gramáticas e expressões regulares.',
+      },
+      {
+        id: 'hierarquia',
+        title: 'Hierarquia de Chomsky',
+        content: 'Classes de linguagens e limites de reconhecimento.',
+      },
+    ],
+    quiz: [
+      {
+        id: 'f4-1-q1',
+        prompt: 'Qual modelo reconhece linguagens regulares de forma determinística?',
+        options: [
+          { key: 'A', text: 'AFD' },
+          { key: 'B', text: 'PDA' },
+          { key: 'C', text: 'Máquina de Turing' },
+          { key: 'D', text: 'Gramática sensível ao contexto' },
+          { key: 'E', text: 'LBA' },
+        ],
+        answerKey: 'A',
+        explanation: 'AFD é o modelo determinístico para linguagens regulares.',
+      },
+    ],
+    previousSlug: null,
+    nextSlug: null,
+  },
+  {
     slug: 'modulo-01',
     order: 1,
     title: 'Entendendo a Funcao de Transicao',
@@ -719,15 +1023,15 @@ export function getDashboardSummary(): DashboardSummary {
   return {
     greeting: {
       title: 'Bom dia, Renato',
-      subtitle: 'Linguagens Formais concluído · Próximo: Análise de Algoritmos',
-      cta: { label: '▶ Continuar estudando', href: '/trilhas/f6/modulo-01' },
+      subtitle: 'Você concluiu F6 — Linguagens Formais. Bora seguir?',
+      cta: { label: 'Retomar F6 · Módulo 9', href: '/trilhas/f6/modulo-01' },
     },
     hero: {
-      eyebrow: 'Linguagens Formais concluído · 9 módulos ✓',
-      title: 'Pronto para o próximo tópico?',
-      subtitle: 'F1 — Análise de Algoritmos · Big-O, recorrências, cotas inferiores',
+      eyebrow: 'Próximo passo do currículo',
+      title: 'F1 — Análise de Algoritmos',
+      subtitle: 'Big-O, recorrências, cotas inferiores · 2–3 módulos · ~4h',
       primaryCta: { label: 'Começar F1 →', href: '/trilhas' },
-      secondaryCta: { label: 'Ver currículo', href: '/trilhas' },
+      secondaryCta: { label: 'Ver todas as trilhas', href: '/trilhas' },
     },
     stats: [
       {
@@ -812,19 +1116,19 @@ export function getDashboardSummary(): DashboardSummary {
       },
     ],
     activity: {
-      title: 'Atividade — últimas 4 semanas',
-      subtitle: 'módulos estudados/dia',
+      title: 'Atividade — últimas 8 semanas',
+      subtitle: 'cada célula = 1 dia · cor = nº de módulos concluídos',
       days: [
-        { id: 'd1', label: 'S', levels: [0, 0, 0, 0, 1, 2, 0] },
-        { id: 'd2', label: 'T', levels: [0, 1, 0, 2, 3, 2, 0] },
-        { id: 'd3', label: 'Q', levels: [1, 0, 2, 3, 4, 3, 1] },
-        { id: 'd4', label: 'Q', levels: [0, 2, 1, 3, 4, 2, 0] },
-        { id: 'd5', label: 'S', levels: [2, 3, 4, 2, 3, 4, 2] },
-        { id: 'd6', label: 'S', levels: [1, 2, 3, 0, 2, 3, 4] },
-        { id: 'd7', label: 'D', levels: [0, 1, 0, 2, 0, 1, 3] },
+        { id: 'd1', label: 'S', levels: [0, 0, 0, 0, 1, 2, 0, 1] },
+        { id: 'd2', label: 'T', levels: [0, 1, 0, 2, 3, 2, 0, 1] },
+        { id: 'd3', label: 'Q', levels: [1, 0, 2, 3, 4, 3, 1, 2] },
+        { id: 'd4', label: 'Q', levels: [0, 2, 1, 3, 4, 2, 0, 3] },
+        { id: 'd5', label: 'S', levels: [2, 3, 4, 2, 3, 4, 2, 3] },
+        { id: 'd6', label: 'S', levels: [1, 2, 3, 0, 2, 3, 4, 2] },
+        { id: 'd7', label: 'D', levels: [0, 1, 0, 2, 0, 1, 3, 1] },
       ],
-      legendStart: 'Menos',
-      legendEnd: 'Mais',
+      legendStart: '0 módulos',
+      legendEnd: '4+ módulos',
     },
     coverage: {
       title: 'Cobertura por área',
@@ -855,7 +1159,7 @@ export function getDashboardSummary(): DashboardSummary {
     flashcards: {
       eyebrow: 'Flashcards',
       title: 'Linguagens Formais prontos para revisão',
-      subtitle: 'Spaced repetition ativado · ~15 min/dia',
+      subtitle: 'Cartões reagendados pela sua dificuldade — 15 min/dia bastam.',
       cta: { label: 'Revisar agora →', href: '/flashcards' },
       count: 47,
       countLabel: 'cartões',
