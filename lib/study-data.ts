@@ -4,6 +4,7 @@ import type {
   StudyTrackCard,
   ModuleQuiz,
 } from '@/lib/types';
+import { buildDashboardHeader, classifyDashboardState } from '@/lib/dashboard-state';
 
 const TRACK_CARDS: StudyTrackCard[] = [
   {
@@ -17,6 +18,7 @@ const TRACK_CARDS: StudyTrackCard[] = [
     status: 'locked',
     free: false,
     progressPercent: 0,
+    pedagogicalOrder: 2,
   },
   {
     id: 'track-f2',
@@ -29,6 +31,7 @@ const TRACK_CARDS: StudyTrackCard[] = [
     status: 'locked',
     free: false,
     progressPercent: 0,
+    pedagogicalOrder: 3,
   },
   {
     id: 'track-f3',
@@ -41,6 +44,7 @@ const TRACK_CARDS: StudyTrackCard[] = [
     status: 'locked',
     free: false,
     progressPercent: 0,
+    pedagogicalOrder: 4,
   },
   {
     id: 'track-f4',
@@ -78,6 +82,8 @@ const TRACK_CARDS: StudyTrackCard[] = [
     free: true,
     progressPercent: 100,
     href: '/trilhas/f6/modulo-01',
+    isOnboarding: true,
+    pedagogicalOrder: 1,
   },
   {
     id: 'track-f7',
@@ -1019,36 +1025,89 @@ export function getStudyTrackCards() {
   return TRACK_CARDS;
 }
 
+/**
+ * Trilha que serve de porta de entrada para iniciantes. Decisão de
+ * produto, não dedução automática — exatamente UMA trilha em
+ * `TRACK_CARDS` deve ter `isOnboarding: true`. Toda copy de "primeira
+ * trilha" / "trilha atual do iniciante" no dashboard parte daqui, então
+ * trocar a trilha de boas-vindas é um change set de uma linha.
+ */
+export function getOnboardingTrack(): StudyTrackCard {
+  const candidates = TRACK_CARDS.filter((track) => track.isOnboarding);
+  if (candidates.length !== 1) {
+    throw new Error(
+      `Esperava exatamente 1 trilha com isOnboarding=true; encontrei ${candidates.length}.`,
+    );
+  }
+  return candidates[0]!;
+}
+
+/**
+ * Próxima trilha na sequência pedagógica após a trilha de código `code`.
+ * Retorna a trilha com menor `pedagogicalOrder` estritamente maior que
+ * o da trilha referência. `null` se não existir uma "próxima".
+ */
+export function getNextTrackAfter(code: string): StudyTrackCard | null {
+  const current = TRACK_CARDS.find((track) => track.code === code);
+  if (!current?.pedagogicalOrder) return null;
+
+  const candidates = TRACK_CARDS.filter(
+    (track) =>
+      typeof track.pedagogicalOrder === 'number' &&
+      track.pedagogicalOrder > current.pedagogicalOrder!,
+  ).sort((a, b) => a.pedagogicalOrder! - b.pedagogicalOrder!);
+
+  return candidates[0] ?? null;
+}
+
 export function getDashboardSummary(): DashboardSummary {
+  // A fixture sem-banco simula o estado **onboarding-in-progress**, que
+  // é o cenário mais comum (e o mais informativo para conferência
+  // visual). Para demonstrar outros estados, alterne os parâmetros
+  // abaixo conforme `lib/dashboard-state.ts`.
+  const onboarding = getOnboardingTrack();
+  const next = getNextTrackAfter(onboarding.code);
+  const completedModules = 4;
+  const totalModules = onboarding.estimatedModules;
+  const nextModule = { order: 5, title: 'Funções de Transição', slug: 'modulo-05' };
+
+  const state = classifyDashboardState({
+    completedModules,
+    totalModules,
+    isPremium: false,
+    hasNextTrack: Boolean(next),
+  });
+
+  const { greeting, hero } = buildDashboardHeader({
+    state,
+    onboarding,
+    next,
+    completedModules,
+    totalModules,
+    nextModule,
+    greetingTitle: 'Bom dia, Renato',
+    flashDueCount: 12,
+  });
+
   return {
-    greeting: {
-      title: 'Bom dia, Renato',
-      subtitle: 'Você concluiu F6 — Linguagens Formais. Bora seguir?',
-      cta: { label: 'Retomar F6 · Módulo 9', href: '/trilhas/f6/modulo-01' },
-    },
-    hero: {
-      eyebrow: 'Próximo passo do currículo',
-      title: 'F1 — Análise de Algoritmos',
-      subtitle: 'Big-O, recorrências, cotas inferiores · 2–3 módulos · ~4h',
-      primaryCta: { label: 'Começar F1 →', href: '/trilhas' },
-      secondaryCta: { label: 'Ver todas as trilhas', href: '/trilhas' },
-    },
+    greeting,
+    hero,
     stats: [
       {
         id: 'modules',
         label: 'Módulos concluídos',
-        value: '9',
-        helper: 'de ~200 no currículo',
-        delta: '↑ +9 este mês',
+        value: String(completedModules),
+        helper: `de ${totalModules} em ${onboarding.code}`,
+        delta: `↑ ${completedModules} este mês`,
         tone: 'default',
         deltaTone: 'up',
       },
       {
         id: 'coverage',
         label: 'Currículo coberto',
-        value: '4%',
-        helper: '1 de 25 tópicos',
-        delta: '24 tópicos restantes',
+        value: '0%',
+        helper: '0 de 25 tópicos',
+        delta: '25 tópicos restantes',
         tone: 'sap',
         deltaTone: 'warn',
       },
@@ -1057,7 +1116,7 @@ export function getDashboardSummary(): DashboardSummary {
         label: 'Simulados realizados',
         value: '0',
         helper: 'Nenhum ainda',
-        delta: 'Disponível após F1',
+        delta: `Disponível após ${onboarding.code}`,
         tone: 'em',
         deltaTone: 'muted',
       },
@@ -1076,12 +1135,12 @@ export function getDashboardSummary(): DashboardSummary {
         id: 'f6',
         code: 'F6',
         title: 'Ling. Formais e Autômatos',
-        subtitle: '9 módulos · ~6h de estudo',
-        progressPercent: 100,
-        tagLabel: 'Completo',
-        tagTone: 'done',
-        href: '/trilhas/f6/modulo-01',
-        iconTone: 'em',
+        subtitle: `${totalModules} módulos · ~${onboarding.estimatedHours}h de estudo`,
+        progressPercent: Math.round((completedModules / totalModules) * 100),
+        tagLabel: 'Em progresso',
+        tagTone: 'progress',
+        href: `/trilhas/${onboarding.code.toLowerCase()}/${nextModule.slug}`,
+        iconTone: 'sap',
       },
       {
         id: 'f1',
@@ -1089,10 +1148,10 @@ export function getDashboardSummary(): DashboardSummary {
         title: 'Análise de Algoritmos',
         subtitle: 'Big-O, recorrências · 2–3 módulos',
         progressPercent: 0,
-        tagLabel: 'Próximo',
-        tagTone: 'next',
-        href: '/trilhas',
-        iconTone: 'sap',
+        tagLabel: 'Premium',
+        tagTone: 'locked',
+        href: '/premium',
+        iconTone: 'muted',
       },
       {
         id: 'f2',
@@ -1158,35 +1217,35 @@ export function getDashboardSummary(): DashboardSummary {
     },
     flashcards: {
       eyebrow: 'Flashcards',
-      title: 'Linguagens Formais prontos para revisão',
+      title: `12 cartões para revisar hoje`,
       subtitle: 'Cartões reagendados pela sua dificuldade — 15 min/dia bastam.',
       cta: { label: 'Revisar agora →', href: '/flashcards' },
-      count: 47,
-      countLabel: 'cartões',
+      count: 12,
+      countLabel: 'pendentes',
     },
     upcoming: [
       {
-        id: 'start-f1',
+        id: 'continue-onboarding',
         iconKey: 'book-open',
-        title: 'Começar F1 — Análise',
-        subtitle: 'Módulo 1 de 3 · ~35 min',
-        actionLabel: 'Iniciar →',
-        href: '/trilhas',
+        title: `Continuar ${onboarding.code} — Módulo ${nextModule.order}`,
+        subtitle: `${nextModule.title} · ${completedModules} de ${totalModules} concluídos`,
+        actionLabel: 'Continuar →',
+        href: `/trilhas/${onboarding.code.toLowerCase()}/${nextModule.slug}`,
         tone: 'sap',
       },
       {
-        id: 'review-f6',
+        id: 'review-flashcards',
         iconKey: 'layers',
-        title: 'Revisar flashcards F6',
-        subtitle: '47 cartões · ~15 min',
+        title: 'Revisar flashcards pendentes',
+        subtitle: '12 cartões · ~15 min',
         actionLabel: 'Revisar →',
         href: '/flashcards',
         tone: 'em',
       },
       {
-        id: 'mock-f6',
+        id: 'simulado-parcial',
         iconKey: 'timer',
-        title: 'Simulado parcial F6',
+        title: 'Fazer simulado parcial',
         subtitle: '20 questões · ~45 min',
         actionLabel: 'Fazer →',
         href: '/simulado',

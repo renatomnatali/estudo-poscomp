@@ -100,6 +100,19 @@ export interface StudyTrackCard {
   free: boolean;
   progressPercent: number;
   href?: string;
+  /**
+   * Marca a trilha que serve de porta de entrada do app (decisão de
+   * produto, não dedução automática). Exatamente UMA trilha deve ter
+   * `isOnboarding: true`. O dashboard usa isto para todos os cálculos
+   * de "primeira trilha", "trilha atual do iniciante" etc.
+   */
+  isOnboarding?: boolean;
+  /**
+   * Sequência canônica de progressão pedagógica, usada para responder
+   * "qual a próxima trilha após esta?". Onboarding tipicamente tem o
+   * menor número, mas isto é independente de `isOnboarding`.
+   */
+  pedagogicalOrder?: number;
 }
 
 export interface DashboardStat {
@@ -116,7 +129,13 @@ export interface DashboardSummary {
   greeting: {
     title: string;
     subtitle: string;
-    cta: { label: string; href: string };
+    /**
+     * Greeting bar é uma faixa informativa (saudação + status).
+     * O CTA primário do dashboard fica no hero card; este campo só é
+     * usado em payloads legados / fixtures e é renderizado apenas se
+     * existir.
+     */
+    cta?: { label: string; href: string };
   };
   hero: {
     eyebrow: string;

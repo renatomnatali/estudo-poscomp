@@ -96,9 +96,11 @@ function DashboardContent({ summary, displayName }: { summary: DashboardSummary;
           </h2>
           <p className="dash-page-sub">{summary.greeting.subtitle}</p>
         </div>
-        <Link href={summary.greeting.cta.href} className="dash-btn-primary">
-          {summary.greeting.cta.label}
-        </Link>
+        {summary.greeting.cta ? (
+          <Link href={summary.greeting.cta.href} className="dash-btn-primary">
+            {summary.greeting.cta.label}
+          </Link>
+        ) : null}
       </div>
 
       <div className="dash-hero-card">
