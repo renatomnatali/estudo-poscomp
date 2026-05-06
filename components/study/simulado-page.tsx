@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { ClipboardList, Target, Timer } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 import { isClerkEnabledClient } from '@/lib/auth-config';
 import type { Question, SimuladoAttempt, SimuladoConfig } from '@/lib/types';
@@ -160,23 +162,23 @@ export function SimuladoPage({ userId, userEmail, isPremiumUser = false }: Simul
 
   const isTimerWarning = running && timeLeft <= 5 * 60;
 
-  function modeDetails(mode: SimuladoConfig) {
+  function modeDetails(mode: SimuladoConfig): { Icon: LucideIcon; name: string; desc: string } {
     if (mode.mode === 'partial') {
       return {
-        icon: '📝',
+        Icon: ClipboardList,
         name: 'Simulado Parcial',
         desc: `${mode.questionCount} questões em ${mode.minutes} min — calibração rápida.`,
       };
     }
     if (mode.mode === 'full') {
       return {
-        icon: '⏱️',
+        Icon: Timer,
         name: 'Simulado Completo',
         desc: `${mode.questionCount} questões cronometradas em ${Math.round(mode.minutes / 60)} h — distribuição fiel ao edital.`,
       };
     }
     return {
-      icon: '🎯',
+      Icon: Target,
       name: 'Simulado por Área',
       desc: `${mode.questionCount} questões em ${mode.minutes} min — foco em uma macro-área.`,
     };
@@ -192,7 +194,9 @@ export function SimuladoPage({ userId, userEmail, isPremiumUser = false }: Simul
     <>
       <div className="page-header">
         <div>
-          <h2 className="page-title">Simulado POSCOMP</h2>
+          <h2 className="page-title">
+            <span className="accent-em">Simule</span> a prova oficial do POSCOMP
+          </h2>
           <p className="page-sub">70 questões · 4 horas · distribuição fiel ao edital SBC.</p>
         </div>
       </div>
@@ -204,6 +208,7 @@ export function SimuladoPage({ userId, userEmail, isPremiumUser = false }: Simul
         <div className="sim-grid">
           {MODES.map((mode) => {
             const detail = modeDetails(mode);
+            const ModeIcon = detail.Icon;
             const locked = mode.premium && !isPremiumUser;
             const isSelected = selectedMode.mode === mode.mode;
             return (
@@ -220,7 +225,7 @@ export function SimuladoPage({ userId, userEmail, isPremiumUser = false }: Simul
               >
                 {locked ? <span className="sim-lock-badge">Premium</span> : null}
                 <span className="sim-icon" aria-hidden="true">
-                  {detail.icon}
+                  <ModeIcon width={28} height={28} strokeWidth={1.75} />
                 </span>
                 <div className="sim-name">{detail.name}</div>
                 <p className="sim-desc">{detail.desc}</p>
@@ -253,7 +258,10 @@ export function SimuladoPage({ userId, userEmail, isPremiumUser = false }: Simul
             </button>
           ) : null}
           {running ? (
-            <span className={`simulado-timer ${isTimerWarning ? 'is-warning' : ''}`}>⏱ {timerLabel}</span>
+            <span className={`simulado-timer ${isTimerWarning ? 'is-warning' : ''}`}>
+              <Timer width={14} height={14} strokeWidth={2} aria-hidden="true" />
+              <span className="tabular">{timerLabel}</span>
+            </span>
           ) : null}
         </div>
         {sessionError ? (

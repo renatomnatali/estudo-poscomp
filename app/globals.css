@@ -30,6 +30,10 @@
   --sap-bg2: var(--sap-bg-2);
   --ink2: var(--ink-2);
 
+  /* ── Cores de texto sobre tints (par solid+tint do DS) ── */
+  --amb-d: var(--amb-d);
+  --coral-d: var(--coral-d);
+
   /* ── Layout shell (exclusivo da área logada) ── */
   --sidebar-w: 240px;
   --sidebar-c: 64px;
@@ -104,6 +108,28 @@ body {
   border-radius: var(--r-sm);
   font-family: var(--fm);
   font-size: 0.85em;
+}
+
+/* ── Focus state DS — inputs / select / textarea da área logada ──
+   1.5px sap border + 3px outer ring rgba(sap,.12) conforme
+   Spec/aprovado_ design system/preview/inputs.html.
+   Escopos .marketing e .module-import-body têm seus próprios estilos
+   e ficam de fora. */
+.study-wrap input:focus-visible,
+.study-wrap select:focus-visible,
+.study-wrap textarea:focus-visible {
+  outline: none;
+  border-color: var(--sap);
+  box-shadow: 0 0 0 3px rgba(27, 63, 216, 0.12);
+}
+
+.study-wrap .module-import-body input:focus-visible,
+.study-wrap .module-import-body select:focus-visible,
+.study-wrap .module-import-body textarea:focus-visible {
+  /* O conteúdo importado tem seus próprios padrões de foco —
+     desativa o do shell para não pisar em cima. */
+  border-color: revert;
+  box-shadow: revert;
 }
 
 .module-inline-stub {
@@ -1389,7 +1415,7 @@ body {
 
 .flash-srs-again {
   background: var(--coral-bg);
-  color: #9f1f12;
+  color: var(--coral-d);
 }
 
 .flash-srs-again:hover {
@@ -1398,7 +1424,7 @@ body {
 
 .flash-srs-hard {
   background: var(--amb-bg);
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .flash-srs-hard:hover {
@@ -1970,7 +1996,7 @@ body {
 
 .badge-amber {
   background: var(--amb-bg);
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .study-sidebar.collapsed .sb-nav-section {
@@ -4481,7 +4507,7 @@ body {
 }
 
 .module-import-body .g-nlogn {
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .module-import-body .g-quad {
@@ -4927,7 +4953,7 @@ body {
 }
 
 .module-import-body .quiz-box .quiz-feedback.fail {
-  color: #9f1f12;
+  color: var(--coral-d);
   border: 1px solid rgba(240, 78, 55, 0.45);
   background: var(--coral-bg);
 }
@@ -5222,7 +5248,7 @@ body {
 }
 
 .dash-s-delta.warn {
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .dash-s-delta.muted {
@@ -5384,7 +5410,7 @@ body {
 
 .dash-module-tag.tag-prog {
   background: var(--amb-bg);
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .dash-activity-subtitle {
@@ -5507,11 +5533,11 @@ body {
 }
 
 .dash-area-pct.tone-amb {
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .dash-area-pct.tone-coral {
-  color: #9f1f12;
+  color: var(--coral-d);
 }
 
 .dash-area-bar-bg {
@@ -5664,7 +5690,7 @@ body {
 
 .dash-upcoming-icon.tone-amb {
   background: var(--amb-bg);
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .dash-upcoming-info {
@@ -5819,7 +5845,7 @@ body {
 
 .tracks-sum-icon.tone-amb {
   background: var(--amb-bg);
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .tracks-sum-val {
@@ -5953,11 +5979,11 @@ body {
 }
 
 .tracks-area-pct.tone-amb {
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .tracks-area-pct.tone-coral {
-  color: #9f1f12;
+  color: var(--coral-d);
 }
 
 .tracks-topic-grid {
@@ -6587,7 +6613,7 @@ body {
 
 .simulado-timer.is-warning {
   background: var(--amb-bg);
-  color: #92400e;
+  color: var(--amb-d);
 }
 
 .sim-progress-bar {
@@ -6659,7 +6685,7 @@ body {
 .sim-option-row.wrong {
   background: var(--coral-bg);
   border-color: var(--coral);
-  color: #9f1f12;
+  color: var(--coral-d);
 }
 
 .sim-action-row {
@@ -6717,7 +6743,7 @@ body {
 
 .sim-history-score.tone-coral {
   background: var(--coral-bg);
-  color: #9f1f12;
+  color: var(--coral-d);
 }
 
 .sim-history-info {
