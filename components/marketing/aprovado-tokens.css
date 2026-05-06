@@ -187,14 +187,9 @@
 .marketing {
   /* min-height + background cobrem 100vh para que o body global do app
      (bg-slate-100 / text-slate-900 vindos do Tailwind preflight em
-     globals.css) não vaze por trás do nav sticky semi-transparente. */
+     globals.css) não vaze por trás do nav sticky semi-transparente.
+     Tipografia (Geist) já vem do :root global em app/globals.css. */
   min-height: 100vh;
-  /* A landing usa Geist (display + body) e Geist Mono. Sobrescreve as
-     fontes do :root global (Syne/DM Sans/DM Mono da área logada) em
-     escopo local. */
-  --fd: var(--font-geist, 'Geist'), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --fb: var(--font-geist, 'Geist'), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --fm: var(--font-geist-mono, 'Geist Mono'), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-family: var(--fb);
   color: var(--fg-1);
   background: var(--bg-1);

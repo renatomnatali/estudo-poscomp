@@ -3,70 +3,45 @@
 @tailwind utilities;
 
 /* ============================================================
-   Tokens canônicos do design system (área logada)
-   Fonte de verdade: Spec/mockup/dashboard.html (idêntico em todos os
-   mockups da área logada). A landing usa Geist e sobrescreve --fd/--fb/--fm
-   no escopo .marketing (ver components/marketing/aprovado-tokens.css).
+   Design system aprovado — fonte de verdade:
+   Spec/aprovado_ design system/README.md + colors_and_type.css.
+   Os tokens canônicos (--ink, --sap*, --em*, --n-50..n-700, --fg-*,
+   --bg-*, --fd/--fb/--fm em Geist + Geist Mono, --r-*, --sh-*, --sp-*)
+   vêm de components/marketing/aprovado-tokens.css (importado em
+   app/layout.tsx logo após este arquivo).
+
+   Aqui só ficam: aliases para tokens com nomenclatura "sem hífen"
+   herdada dos mockups antigos (já em uso pelas classes da área logada),
+   aliases legacy do app v1 (--primary/--card/--border/--muted) e
+   variáveis exclusivas do shell (--sidebar-w, --topbar-h, --transition).
    ============================================================ */
 :root {
   color-scheme: light;
 
-  /* ── Cores ── */
-  --ink: #0a0f1e;
-  --ink2: #1c2333;
-  --sap: #1b3fd8;
-  --sap-d: #1230a8;
-  --sap-l: #4b6bf5;
-  --sap-bg: #eef1ff;
-  --sap-bg2: #e4e9ff;
-  --em: #00b37e;
-  --em-d: #009968;
-  --em-bg: #e6fbf4;
-  --amb: #f59e0b;
-  --amb-bg: #fef3c7;
-  --coral: #f04e37;
-  --coral-bg: #fee2e2;
-  --n50: #f8f9ff;
-  --n100: #eff1fb;
-  --n200: #dde0f0;
-  --n300: #b8bdd8;
-  --n400: #8a90b0;
-  --n500: #5c6180;
-  --n600: #3e4260;
-  --n700: #262a47;
-  --white: #ffffff;
+  /* ── Aliases sem hífen → canônicos com hífen (do design system aprovado) ── */
+  --n50: var(--n-50);
+  --n100: var(--n-100);
+  --n200: var(--n-200);
+  --n300: var(--n-300);
+  --n400: var(--n-400);
+  --n500: var(--n-500);
+  --n600: var(--n-600);
+  --n700: var(--n-700);
+  --sap-bg2: var(--sap-bg-2);
+  --ink2: var(--ink-2);
 
-  /* ── Tipografia (área logada) ── */
-  --fd: var(--font-syne, 'Syne'), sans-serif;
-  --fb: var(--font-dm-sans, 'DM Sans'), sans-serif;
-  --fm: var(--font-dm-mono, 'DM Mono'), ui-monospace, monospace;
-
-  /* ── Raios ── */
-  --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
-  --r-xl: 20px;
-  --r-pill: 9999px;
-
-  /* ── Sombras ── */
-  --sh-xs: 0 1px 2px rgba(10, 15, 30, 0.06);
-  --sh-sm: 0 1px 4px rgba(10, 15, 30, 0.08), 0 1px 2px rgba(10, 15, 30, 0.04);
-  --sh-md: 0 4px 16px rgba(10, 15, 30, 0.09), 0 1px 4px rgba(10, 15, 30, 0.05);
-  --sh-cta: 0 2px 8px rgba(27, 63, 216, 0.25);
-  --sh-cta-hover: 0 4px 14px rgba(27, 63, 216, 0.3);
-
-  /* ── Layout shell ── */
+  /* ── Layout shell (exclusivo da área logada) ── */
   --sidebar-w: 240px;
   --sidebar-c: 64px;
   --topbar-h: 52px;
   --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* ── Aliases legacy (não quebrar .button, .section-card, .algo-card etc.) ── */
+  /* ── Aliases legacy (.button, .section-card, .algo-card, .module-import-body) ── */
   --primary: var(--sap);
   --primary-fg: #ffffff;
   --card: var(--white);
-  --border: var(--n200);
-  --muted: var(--n500);
+  --border: var(--n-200);
+  --muted: var(--n-500);
 }
 
 body {
@@ -1798,6 +1773,7 @@ body {
 }
 
 .study-sidebar.collapsed .sb-logo-text,
+.study-sidebar.collapsed .sb-logo .aprovado-word,
 .study-sidebar.collapsed .sb-item-text,
 .study-sidebar.collapsed .sb-item-badge,
 .study-sidebar.collapsed .sb-progress-strip,
