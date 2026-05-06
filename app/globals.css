@@ -7259,7 +7259,15 @@ body {
 .plans-section {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1.5rem;
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.plans-section > .premium-hero {
+  width: 100%;
 }
 
 .plans-grid {

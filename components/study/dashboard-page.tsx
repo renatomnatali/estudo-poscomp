@@ -66,12 +66,22 @@ function extractDisplayNameFromGreeting(greetingTitle: string) {
   return firstChunk.trim() || 'Estudante';
 }
 
+function getGreetingPrefix(date: Date = new Date()) {
+  const hour = date.getHours();
+  if (hour >= 5 && hour < 12) return 'Bom dia';
+  if (hour >= 12 && hour < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
 function DashboardContent({ summary, displayName }: { summary: DashboardSummary; displayName: string }) {
+  const greetingPrefix = getGreetingPrefix();
   return (
     <div className="dash-view">
       <div className="dash-page-header">
         <div>
-          <h2 className="dash-page-title">Bom dia, {displayName}</h2>
+          <h2 className="dash-page-title">
+            {greetingPrefix}, {displayName}
+          </h2>
           <p className="dash-page-sub">{summary.greeting.subtitle}</p>
         </div>
         <Link href={summary.greeting.cta.href} className="dash-btn-primary">
@@ -243,21 +253,72 @@ function DashboardPageWithUser({ summary }: { summary: DashboardSummary }) {
   return <DashboardContent summary={summary} displayName={displayName} />;
 }
 
-export function DashboardPage() {
+interface DashboardPageProps {
+  userId?: string;
+}
+
+export function DashboardPage({ userId }: DashboardPageProps) {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     async function loadSummary() {
-      const response = await fetch('/api/study/dashboard/summary');
-      const payload = (await response.json()) as DashboardSummary;
-      setSummary(payload);
+      setLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const query = !isClerkEnabledClient() && userId ? `?userId=${encodeURIComponent(userId)}` : '';
+        const response = await fetch(`/api/study/dashboard/summary${query}`, {
+          cache: 'no-store',
+          headers: userId ? { 'x-user-id': userId } : undefined,
+        });
+
+        if (!response.ok) {
+          const errorPayload = (await response.json().catch(() => null)) as { error?: string } | null;
+          setSummary(null);
+          setErrorMessage(
+            errorPayload?.error?.trim() || 'Não foi possível carregar o dashboard. Tente novamente.'
+          );
+          return;
+        }
+
+        const payload = (await response.json()) as DashboardSummary;
+        setSummary(payload);
+      } catch {
+        setSummary(null);
+        setErrorMessage('Erro de rede ao carregar o dashboard. Tente novamente.');
+      } finally {
+        setLoading(false);
+      }
     }
 
     void loadSummary();
-  }, []);
+  }, [reloadToken, userId]);
+
+  if (loading) {
+    return <section className="section-card">Carregando dashboard...</section>;
+  }
+
+  if (errorMessage) {
+    return (
+      <section className="section-card">
+        <h2 className="text-lg font-semibold">Não foi possível carregar o dashboard.</h2>
+        <p className="mt-2 text-sm text-slate-600">{errorMessage}</p>
+        <button
+          type="button"
+          className="sim-action-btn sim-action-btn-secondary mt-4"
+          onClick={() => setReloadToken((value) => value + 1)}
+        >
+          Tentar novamente
+        </button>
+      </section>
+    );
+  }
 
   if (!summary) {
-    return <section className="section-card">Carregando dashboard...</section>;
+    return <section className="section-card">Não há dados disponíveis para este dashboard.</section>;
   }
 
   if (!isClerkEnabledClient()) {

@@ -88,6 +88,8 @@ const DASHBOARD_PAYLOAD = {
 
 describe('dashboard autenticado usa nome da sessão', () => {
   beforeEach(() => {
+    // Saudação dinâmica depende do horário; fixa em 9h para "Bom dia"
+    vi.spyOn(Date.prototype, 'getHours').mockReturnValue(9);
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => ({

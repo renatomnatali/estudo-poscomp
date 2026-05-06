@@ -88,6 +88,8 @@ const DASHBOARD_PAYLOAD = {
 
 describe('dashboard no padrão do mockup', () => {
   beforeEach(() => {
+    // Fixa hora em 9h para a saudação dinâmica retornar "Bom dia"
+    vi.spyOn(Date.prototype, 'getHours').mockReturnValue(9);
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => ({
