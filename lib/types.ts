@@ -128,7 +128,12 @@ export interface DashboardStat {
 export interface DashboardSummary {
   greeting: {
     title: string;
-    subtitle: string;
+    /**
+     * Status factual curto. Opcional — se não há informação útil
+     * (status redundante com o hero ou ausência de progresso), o
+     * componente omite o `<p>` em vez de renderizar texto genérico.
+     */
+    subtitle?: string;
     /**
      * Greeting bar é uma faixa informativa (saudação + status).
      * O CTA primário do dashboard fica no hero card; este campo só é
