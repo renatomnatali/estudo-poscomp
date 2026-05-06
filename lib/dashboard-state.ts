@@ -64,11 +64,10 @@ export function buildDashboardHeader(ctx: DashboardHeaderContext): {
 
   switch (state) {
     case 'first-visit':
+      // Sem subtitle: greeting fica só com a saudação. Tudo que precisa
+      // ser dito sobre "começar" está no hero.
       return {
-        greeting: {
-          title: greetingTitle,
-          subtitle: `Primeira vez aqui? A trilha ${onboarding.code} te leva pelo essencial em ~${onboarding.estimatedHours}h.`,
-        },
+        greeting: { title: greetingTitle },
         hero: {
           eyebrow: 'Comece sua jornada',
           title: `${onboarding.code} — ${onboarding.title}`,
@@ -85,8 +84,8 @@ export function buildDashboardHeader(ctx: DashboardHeaderContext): {
           title: greetingTitle,
           subtitle:
             remaining === 1
-              ? `Você está quase terminando ${onboarding.code}. Falta 1 módulo.`
-              : `Você está no meio de ${onboarding.code}. Faltam ${remaining} módulos.`,
+              ? `Falta 1 módulo para concluir ${onboarding.code}.`
+              : `Faltam ${remaining} módulos para concluir ${onboarding.code}.`,
         },
         hero: {
           eyebrow: 'Continue de onde parou',
@@ -105,10 +104,7 @@ export function buildDashboardHeader(ctx: DashboardHeaderContext): {
 
     case 'onboarding-done-free':
       return {
-        greeting: {
-          title: greetingTitle,
-          subtitle: `${onboarding.code} concluído. Hora de fixar.`,
-        },
+        greeting: { title: greetingTitle },
         hero: {
           eyebrow: `${onboarding.code} concluído · ${onboarding.estimatedModules} módulos`,
           title: 'Fixe o que aprendeu',
@@ -125,10 +121,7 @@ export function buildDashboardHeader(ctx: DashboardHeaderContext): {
       const target = next!;
       const nextHrefBase = `/trilhas/${target.code.toLowerCase()}`;
       return {
-        greeting: {
-          title: greetingTitle,
-          subtitle: `${onboarding.code} concluído · próxima trilha desbloqueada.`,
-        },
+        greeting: { title: greetingTitle },
         hero: {
           eyebrow: `${onboarding.code} concluído · vamos para ${target.code}`,
           title: `${target.code} — ${target.title}`,
@@ -141,10 +134,7 @@ export function buildDashboardHeader(ctx: DashboardHeaderContext): {
 
     case 'onboarding-done-premium-no-next':
       return {
-        greeting: {
-          title: greetingTitle,
-          subtitle: `Você concluiu todas as trilhas disponíveis. Hora do simulado completo.`,
-        },
+        greeting: { title: greetingTitle },
         hero: {
           eyebrow: 'Trilhas completas',
           title: 'Pronto para o POSCOMP',
