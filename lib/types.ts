@@ -168,7 +168,14 @@ export interface DashboardSummary {
   };
   upcoming: Array<{
     id: string;
-    icon: string;
+    /** Chave canônica para o ícone Lucide (ex.: 'book-open', 'layers', 'timer'). */
+    iconKey?: 'book-open' | 'layers' | 'timer' | 'route' | 'target' | 'trending-up' | 'sparkles';
+    /**
+     * Mantido por compatibilidade com payloads antigos que ainda mandam um
+     * emoji. Novos clientes devem usar `iconKey`. Quando ambos vierem, o
+     * `iconKey` ganha.
+     */
+    icon?: string;
     title: string;
     subtitle: string;
     actionLabel: string;
@@ -209,11 +216,40 @@ export interface StudyModule {
   nextSlug: string | null;
 }
 
+export type SimuladoMode = 'partial' | 'full' | 'area';
+
 export interface SimuladoConfig {
-  mode: 'partial' | 'full' | 'area';
+  mode: SimuladoMode;
   questionCount: number;
   minutes: number;
   premium: boolean;
+}
+
+export interface SimuladoAttempt {
+  id: string;
+  userId: string;
+  mode: SimuladoMode;
+  total: number;
+  correct: number;
+  accuracy: number;
+  durationSeconds: number | null;
+  recommendedNextTopics: string[];
+  createdAt: string;
+}
+
+export interface SimuladoAttemptInput {
+  userId: string;
+  mode: SimuladoMode;
+  total: number;
+  correct: number;
+  accuracy: number;
+  durationSeconds?: number | null;
+  recommendedNextTopics: string[];
+}
+
+export interface SimuladoAttemptsSummary {
+  userId: string;
+  items: SimuladoAttempt[];
 }
 
 export interface TopicMaterial {

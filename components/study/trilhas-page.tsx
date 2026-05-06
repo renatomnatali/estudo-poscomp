@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { BookOpen, CircleCheck, Lock, Target } from 'lucide-react';
 
 import type { StudyTrackCard } from '@/lib/types';
 
@@ -57,16 +58,16 @@ function toCodeSortValue(code: string) {
 
 function getVisualStatus(item: StudyTrackCard): VisualStatus {
   if (item.status === 'done') return 'done';
-  if (item.code === 'F7') return 'next';
   if (item.status === 'in_progress') return 'progress';
+  if (item.status === 'free') return 'next';
   return 'locked';
 }
 
 function getStatusLabel(item: StudyTrackCard) {
   const visualStatus = getVisualStatus(item);
-  if (visualStatus === 'done') return '✓ Concluído';
-  if (visualStatus === 'next') return '→ Próximo';
-  if (visualStatus === 'progress') return 'Em progresso';
+  if (visualStatus === 'done') return 'Concluído';
+  if (visualStatus === 'next') return 'Não iniciado';
+  if (visualStatus === 'progress') return 'Em andamento';
   return 'Premium';
 }
 
@@ -106,6 +107,10 @@ function getProgressToneClass(item: StudyTrackCard) {
 
 function formatHours(hours: number) {
   return Number.isInteger(hours) ? `${hours}h` : `${hours}h`;
+}
+
+function formatModules(modules: number) {
+  return `${modules} módulo${modules === 1 ? '' : 's'}`;
 }
 
 function matchesFilter(item: StudyTrackCard, filter: FilterId) {
@@ -178,9 +183,11 @@ export function TrilhasPage() {
     <div className="tracks-view">
       <section className="tracks-page-header">
         <div>
-          <h2 className="tracks-page-title">Trilhas de Estudo</h2>
+          <h2 className="tracks-page-title">
+            Trilhas para você <span className="accent-em">dominar</span> o POSCOMP
+          </h2>
           <p className="tracks-page-sub">
-            25 tópicos do edital SBC organizados em trilhas sequenciais
+            25 tópicos do edital SBC organizados em trilhas sequenciais.
           </p>
         </div>
 
@@ -202,30 +209,38 @@ export function TrilhasPage() {
 
       <section className="tracks-summary-strip" aria-label="Resumo geral">
         <article className="tracks-sum-card">
-          <div className="tracks-sum-icon tone-em">✅</div>
+          <div className="tracks-sum-icon tone-em">
+            <CircleCheck width={20} height={20} strokeWidth={1.75} aria-hidden="true" />
+          </div>
           <div>
-            <p className="tracks-sum-val tone-em">{globalSummary.done}</p>
+            <p className="tracks-sum-val tone-em tabular">{globalSummary.done}</p>
             <p className="tracks-sum-label">Tópico concluído</p>
           </div>
         </article>
         <article className="tracks-sum-card">
-          <div className="tracks-sum-icon tone-sap">📖</div>
+          <div className="tracks-sum-icon tone-sap">
+            <BookOpen width={20} height={20} strokeWidth={1.75} aria-hidden="true" />
+          </div>
           <div>
-            <p className="tracks-sum-val tone-sap">{globalSummary.inProgress}</p>
+            <p className="tracks-sum-val tone-sap tabular">{globalSummary.inProgress}</p>
             <p className="tracks-sum-label">Em progresso</p>
           </div>
         </article>
         <article className="tracks-sum-card">
-          <div className="tracks-sum-icon tone-muted">🔒</div>
+          <div className="tracks-sum-icon tone-muted">
+            <Lock width={20} height={20} strokeWidth={1.75} aria-hidden="true" />
+          </div>
           <div>
-            <p className="tracks-sum-val tone-muted">{globalSummary.locked}</p>
+            <p className="tracks-sum-val tone-muted tabular">{globalSummary.locked}</p>
             <p className="tracks-sum-label">Bloqueados</p>
           </div>
         </article>
         <article className="tracks-sum-card">
-          <div className="tracks-sum-icon tone-amb">🎯</div>
+          <div className="tracks-sum-icon tone-amb">
+            <Target width={20} height={20} strokeWidth={1.75} aria-hidden="true" />
+          </div>
           <div>
-            <p className="tracks-sum-val tone-amb">{globalSummary.coveragePercent}%</p>
+            <p className="tracks-sum-val tone-amb tabular">{globalSummary.coveragePercent}%</p>
             <p className="tracks-sum-label">Currículo coberto</p>
           </div>
         </article>
@@ -267,14 +282,17 @@ export function TrilhasPage() {
 
                   <div className="tracks-topic-meta">
                     <span className="tracks-meta-pill">
-                      {item.code === 'F6' ? `${item.estimatedModules} módulos` : `~${item.estimatedModules} módulos`}
+                      {formatModules(item.estimatedModules)}
                     </span>
                     <span className="tracks-meta-pill">~{formatHours(item.estimatedHours)}</span>
                     {LEVEL_BY_CODE[item.code] ? (
                       <span className="tracks-meta-pill">{LEVEL_BY_CODE[item.code]}</span>
                     ) : null}
                     {item.free ? (
-                      <span className="tracks-meta-pill free">Free ✓</span>
+                      <span className="tracks-meta-pill free">
+                        <CircleCheck width={11} height={11} strokeWidth={2.5} aria-hidden="true" />
+                        Free
+                      </span>
                     ) : null}
                   </div>
 
@@ -285,11 +303,15 @@ export function TrilhasPage() {
                     />
                   </div>
 
-                  {visualStatus !== 'done' ? <div className="tracks-lock-overlay">🔒</div> : null}
+                  {visualStatus === 'locked' ? (
+                    <div className="tracks-lock-overlay" aria-label="Bloqueado">
+                      <Lock width={14} height={14} strokeWidth={2} aria-hidden="true" />
+                    </div>
+                  ) : null}
                 </article>
               );
 
-              if (item.href && visualStatus === 'done') {
+              if (item.href && visualStatus !== 'locked') {
                 return (
                   <Link key={item.id} href={item.href} className="tracks-topic-link">
                     {cardContent}

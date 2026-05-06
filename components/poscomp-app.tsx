@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import {
+  BookOpen,
+  ClipboardList,
+  Layers,
+  LayoutDashboard,
+  Sparkles,
+  Workflow,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 import { AfdSimulator } from '@/components/modules/afd-simulator';
 import { AfnConversionPanel } from '@/components/modules/afn-conversion-panel';
@@ -15,13 +24,13 @@ import { TopicsPanel } from '@/components/modules/topics-panel';
 type SimulatorTabId = 'afd' | 'min' | 'conv';
 type MenuId = 'dashboard' | 'topics' | 'simulator' | 'flashcards' | 'exercises' | 'premium';
 
-const MENU_ITEMS: Array<{ id: MenuId; label: string; icon: string }> = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { id: 'topics', label: 'Tópicos', icon: '📚' },
-  { id: 'simulator', label: 'Simulador', icon: '🎮' },
-  { id: 'flashcards', label: 'Flashcards', icon: '🃏' },
-  { id: 'exercises', label: 'Exercícios', icon: '📝' },
-  { id: 'premium', label: 'Premium', icon: '⭐' },
+const MENU_ITEMS: Array<{ id: MenuId; label: string; Icon: LucideIcon }> = [
+  { id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+  { id: 'topics', label: 'Tópicos', Icon: BookOpen },
+  { id: 'simulator', label: 'Simulador', Icon: Workflow },
+  { id: 'flashcards', label: 'Flashcards', Icon: Layers },
+  { id: 'exercises', label: 'Exercícios', Icon: ClipboardList },
+  { id: 'premium', label: 'Premium', Icon: Sparkles },
 ];
 
 const MOBILE_MENU_ITEMS: Array<{ id: MenuId; label: string }> = [
@@ -212,17 +221,22 @@ export function PoscompApp({ auth }: PoscompAppProps) {
           </div>
 
           <nav aria-label="Menu principal">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`nav-link ${activeMenu === item.id ? 'active' : ''}`}
-                onClick={() => activateMenu(item.id)}
-              >
-                <span className="nav-link-label">{item.label}</span>
-                <span className="nav-link-icon" aria-hidden="true">{item.icon}</span>
-              </button>
-            ))}
+            {menuItems.map((item) => {
+              const ItemIcon = item.Icon;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`nav-link ${activeMenu === item.id ? 'active' : ''}`}
+                  onClick={() => activateMenu(item.id)}
+                >
+                  <span className="nav-link-label">{item.label}</span>
+                  <span className="nav-link-icon" aria-hidden="true">
+                    <ItemIcon width={16} height={16} strokeWidth={1.75} />
+                  </span>
+                </button>
+              );
+            })}
           </nav>
 
           <div className="sidebar-footer">

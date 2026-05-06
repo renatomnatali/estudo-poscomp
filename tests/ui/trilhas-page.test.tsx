@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import React from 'react';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -17,9 +17,10 @@ const TRACKS_PAYLOAD = {
       summary: 'Big-O, Theta, Omega · recorrências · cotas inferiores · algoritmos ótimos',
       estimatedModules: 3,
       estimatedHours: 2,
-      status: 'locked',
-      free: false,
+      status: 'free',
+      free: true,
       progressPercent: 0,
+      href: '/trilhas/f1/f1-1-analise-notacoes',
     },
     {
       id: 'track-f6',
@@ -94,7 +95,7 @@ describe('trilhas no padrão do mockup', () => {
   it('renderiza estrutura principal com filtros, resumo e seções', async () => {
     render(<TrilhasPage />);
 
-    expect(await screen.findByRole('heading', { name: /trilhas de estudo/i })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /trilhas.*dominar/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^todos$/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^free$/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^concluídos$/i })).toBeInTheDocument();
@@ -103,7 +104,7 @@ describe('trilhas no padrão do mockup', () => {
     expect(screen.getByRole('button', { name: /^tecnologia$/i })).toBeInTheDocument();
 
     expect(screen.getByText(/tópico concluído/i)).toBeInTheDocument();
-    expect(screen.getByText(/em progresso/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/em progresso/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/bloqueados/i)).toBeInTheDocument();
     expect(screen.getByText(/currículo coberto/i)).toBeInTheDocument();
 
@@ -111,9 +112,20 @@ describe('trilhas no padrão do mockup', () => {
     expect(screen.getByText(/matemática para computação/i)).toBeInTheDocument();
     expect(screen.getByText(/tecnologia da computação/i)).toBeInTheDocument();
 
-    expect(screen.getByText(/✓ concluído/i)).toBeInTheDocument();
-    expect(screen.getByText(/→ próximo/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^concluído$/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/não iniciado/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/premium/i).length).toBeGreaterThan(0);
+
+    const f1Card = screen.getByText(/análise de algoritmos/i).closest('.tracks-topic-card');
+    expect(f1Card).toBeTruthy();
+    expect(within(f1Card as HTMLElement).getByText(/não iniciado/i)).toBeInTheDocument();
+    expect(within(f1Card as HTMLElement).getByText(/^3 módulos$/i)).toBeInTheDocument();
+    expect(within(f1Card as HTMLElement).queryByText(/^~3 módulos$/i)).not.toBeInTheDocument();
+    expect(within(f1Card as HTMLElement).queryByText('🔒')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /análise de algoritmos/i })).toHaveAttribute(
+      'href',
+      '/trilhas/f1/f1-1-analise-notacoes'
+    );
 
     expect(screen.getByRole('link', { name: /assinar premium/i })).toBeInTheDocument();
   });

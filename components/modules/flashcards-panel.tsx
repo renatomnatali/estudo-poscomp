@@ -114,9 +114,11 @@ export function FlashcardsPanel({ userId }: FlashcardsPanelProps) {
     <section aria-label="Sessão de flashcards">
       <div className="page-header">
         <div>
-          <h2 className="page-title">Flashcards</h2>
+          <h2 className="page-title">
+            <span className="accent-em">Revise</span> no ritmo certo
+          </h2>
           <p className="page-sub">
-            Spaced repetition · revise no ritmo certo · nunca esqueça o que estudou.
+            Spaced repetition · cartões reagendados pela sua dificuldade · nunca esqueça o que estudou.
           </p>
         </div>
       </div>

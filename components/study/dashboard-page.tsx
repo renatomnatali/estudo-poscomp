@@ -3,9 +3,21 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
+import { BookOpen, Layers, Route, Sparkles, Target, Timer, TrendingUp } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 import { isClerkEnabledClient } from '@/lib/auth-config';
 import type { DashboardStat, DashboardSummary } from '@/lib/types';
+
+const UPCOMING_ICON: Record<NonNullable<DashboardSummary['upcoming'][number]['iconKey']>, LucideIcon> = {
+  'book-open': BookOpen,
+  layers: Layers,
+  timer: Timer,
+  route: Route,
+  target: Target,
+  'trending-up': TrendingUp,
+  sparkles: Sparkles,
+};
 
 const ACTIVITY_LEVEL_CLASS: Record<0 | 1 | 2 | 3 | 4, string> = {
   0: '',
@@ -217,18 +229,27 @@ function DashboardContent({ summary, displayName }: { summary: DashboardSummary;
               <h4 className="dash-card-title">Próximas ações</h4>
             </div>
 
-            {summary.upcoming.map((item) => (
-              <div key={item.id} className="dash-upcoming-row">
-                <div className={`dash-upcoming-icon ${UPCOMING_TONE_CLASS[item.tone]}`}>{item.icon}</div>
-                <div className="dash-upcoming-info">
-                  <p className="dash-upcoming-name">{item.title}</p>
-                  <p className="dash-upcoming-sub">{item.subtitle}</p>
+            {summary.upcoming.map((item) => {
+              const ItemIcon = item.iconKey ? UPCOMING_ICON[item.iconKey] : null;
+              return (
+                <div key={item.id} className="dash-upcoming-row">
+                  <div className={`dash-upcoming-icon ${UPCOMING_TONE_CLASS[item.tone]}`} aria-hidden="true">
+                    {ItemIcon ? (
+                      <ItemIcon width={18} height={18} strokeWidth={1.75} />
+                    ) : (
+                      <span>{item.icon}</span>
+                    )}
+                  </div>
+                  <div className="dash-upcoming-info">
+                    <p className="dash-upcoming-name">{item.title}</p>
+                    <p className="dash-upcoming-sub">{item.subtitle}</p>
+                  </div>
+                  <Link href={item.href} className="dash-upcoming-action">
+                    {item.actionLabel}
+                  </Link>
                 </div>
-                <Link href={item.href} className="dash-upcoming-action">
-                  {item.actionLabel}
-                </Link>
-              </div>
-            ))}
+              );
+            })}
           </article>
         </div>
       </div>

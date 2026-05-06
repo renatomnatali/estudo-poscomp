@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { Check, Sparkles, X } from 'lucide-react';
 
 interface PlanFeature {
   label: string;
@@ -63,9 +64,12 @@ export function PremiumPage() {
   return (
     <div className="plans-section">
       <header className="premium-hero">
-        <span className="ph-badge">⭐ Premium · plano completo</span>
+        <span className="ph-badge">
+          <Sparkles width={12} height={12} strokeWidth={2} aria-hidden="true" />
+          Premium · plano completo
+        </span>
         <h2 className="ph-title">
-          Vá além com o currículo <span className="em">completo</span> do POSCOMP
+          <span className="em">Vá além</span> com o currículo completo do POSCOMP
         </h2>
         <p className="ph-sub">
           25 tópicos, 400+ flashcards, simulado completo cronometrado e analytics detalhado.
@@ -118,7 +122,11 @@ export function PremiumPage() {
             {FREE_FEATURES.map((feat) => (
               <li key={feat.label} className="plan-feature-row">
                 <span className={feat.available ? 'pf-check' : 'pf-lock'} aria-hidden="true">
-                  {feat.available ? '✓' : '✕'}
+                  {feat.available ? (
+                    <Check width={14} height={14} strokeWidth={2.5} />
+                  ) : (
+                    <X width={14} height={14} strokeWidth={2.5} />
+                  )}
                 </span>
                 <span>{feat.label}</span>
               </li>
@@ -145,7 +153,7 @@ export function PremiumPage() {
             {PREMIUM_FEATURES.map((feat) => (
               <li key={feat.label} className="plan-feature-row">
                 <span className="pf-check" aria-hidden="true">
-                  ✓
+                  <Check width={14} height={14} strokeWidth={2.5} />
                 </span>
                 <span>{feat.label}</span>
               </li>
@@ -170,7 +178,7 @@ export function PremiumPage() {
             {ANNUAL_FEATURES.map((feat) => (
               <li key={feat.label} className="plan-feature-row">
                 <span className="pf-check" aria-hidden="true">
-                  ✓
+                  <Check width={14} height={14} strokeWidth={2.5} />
                 </span>
                 <span>{feat.label}</span>
               </li>
