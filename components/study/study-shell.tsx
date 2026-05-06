@@ -284,11 +284,14 @@ export function StudyShell({
           className={`study-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'open' : ''}`}
         >
           <div className="sb-logo">
-            <div className="sb-logo-icon">PV</div>
-            <div className="sb-logo-text">
-              <strong className="sb-logo-name">POSCOMP</strong>
-              <span className="sb-logo-sub">Visual Lab</span>
-            </div>
+            <Link href="/dashboard" className="aprovado-lockup is-sm" aria-label="aprovado.xyz — ir para o Dashboard">
+              <span className="aprovado-ring" aria-hidden="true">
+                ✓
+              </span>
+              <span className="aprovado-word">
+                aprov<span className="a">a</span>do
+              </span>
+            </Link>
             <button
               type="button"
               aria-label="Alternar menu lateral"
