@@ -773,6 +773,205 @@
           "order": 1
         }
       ]
+    },
+    {
+      "id": "topic-f1-1-analise-notacoes",
+      "slug": "f1-1-analise-notacoes",
+      "title": "Algoritmos de Referência (F1.1)",
+      "macroArea": "fundamentos",
+      "subTopic": "analise_algoritmos",
+      "difficulty": "easy",
+      "incidence": "high",
+      "estimatedMinutes": 35,
+      "prerequisites": [],
+      "learningObjectives": [
+        "Identificar algoritmos clássicos: busca linear, busca binária, bubble sort, merge sort.",
+        "Comparar intuitivamente custo entre algoritmos antes de formalizar notação assintótica."
+      ],
+      "sourceLessons": [],
+      "sections": [
+        {
+          "id": "f1-1-essential",
+          "kind": "essential",
+          "title": "Visão essencial",
+          "content": "O módulo F1.1 (Algoritmos de Referência) constrói a intuição visual sobre como busca linear/binária e ordenações se comportam, antes de F1.2 formalizar custo.",
+          "order": 1
+        },
+        {
+          "id": "f1-1-advanced",
+          "kind": "advanced",
+          "title": "Aprofundamento",
+          "content": "Após esta aula, F1.2 introduz notações Big-O / Theta / Omega e F1.3 trata recorrências.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-f1-1-1",
+          "title": "Busca linear vs binária",
+          "problem": "Para encontrar um valor em vetor ordenado de 1 milhão de elementos, qual estratégia é mais rápida?",
+          "strategy": "Compare o número de comparações em cada algoritmo no pior caso.",
+          "solution": "Binária faz ~20 comparações; linear pode fazer até 1 milhão.",
+          "takeaway": "O ganho de busca binária só vale quando o vetor está ordenado.",
+          "order": 1
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-f1-1-1",
+          "title": "Índices de busca em bibliotecas",
+          "context": "Bancos de dados e estruturas de busca em produção usam variações de busca binária e ordenação.",
+          "howItApplies": "Reconhecer o algoritmo certo para um cenário evita custo O(n) onde O(log n) seria possível.",
+          "order": 1
+        }
+      ],
+      "references": [],
+      "quickChecks": [
+        {
+          "id": "qc-f1-1-1",
+          "prompt": "Busca binária pode ser aplicada em vetor não ordenado?",
+          "options": [
+            { "key": "A", "text": "Sim, sempre" },
+            { "key": "B", "text": "Não, requer entrada ordenada" }
+          ],
+          "answerKey": "B",
+          "explanation": "Sem ordenação, dividir o intervalo no meio não preserva a propriedade necessária para a busca convergir.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-f1-2-notacoes-assintoticas",
+      "slug": "f1-2-notacoes-assintoticas",
+      "title": "Notações Assintóticas (F1.2)",
+      "macroArea": "fundamentos",
+      "subTopic": "analise_algoritmos",
+      "difficulty": "medium",
+      "incidence": "high",
+      "estimatedMinutes": 45,
+      "prerequisites": ["f1-1-analise-notacoes"],
+      "learningObjectives": [
+        "Definir Big-O, Theta e Omega como cotas assintóticas.",
+        "Classificar funções de custo em ordem de crescimento."
+      ],
+      "sourceLessons": [],
+      "sections": [
+        {
+          "id": "f1-2-essential",
+          "kind": "essential",
+          "title": "Visão essencial",
+          "content": "Big-O é cota superior, Omega é cota inferior, Theta é cota apertada. No POSCOMP, leitura correta de notação resolve a maioria das questões.",
+          "order": 1
+        },
+        {
+          "id": "f1-2-advanced",
+          "kind": "advanced",
+          "title": "Aprofundamento",
+          "content": "Notações o (small-o) e ω (small-omega) são cotas estritas. Crescimento polinomial vs logarítmico vs exponencial define classes inteiras de algoritmos.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-f1-2-1",
+          "title": "Comparar O(n log n) e O(n²)",
+          "problem": "Para n = 10⁶, quantas operações cada custo demanda aproximadamente?",
+          "strategy": "Calcular cada expressão diretamente.",
+          "solution": "n log n ≈ 2·10⁷; n² = 10¹². Diferença de 5 ordens de grandeza.",
+          "takeaway": "Em entradas grandes, escolher merge sort (n log n) sobre bubble sort (n²) muda execução de minutos para anos.",
+          "order": 1
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-f1-2-1",
+          "title": "Decisão de arquitetura",
+          "context": "Sistemas que processam grandes volumes precisam estimar custo antes de implementar.",
+          "howItApplies": "Estimar Big-O do caminho crítico evita gargalos invisíveis em produção.",
+          "order": 1
+        }
+      ],
+      "references": [],
+      "quickChecks": [
+        {
+          "id": "qc-f1-2-1",
+          "prompt": "Se f(n) = O(g(n)), f cresce no máximo tão rápido quanto g?",
+          "options": [
+            { "key": "A", "text": "Sim" },
+            { "key": "B", "text": "Não" }
+          ],
+          "answerKey": "A",
+          "explanation": "Big-O é cota superior — f não ultrapassa g (a menos de constante) para n suficientemente grande.",
+          "order": 1
+        }
+      ]
+    },
+    {
+      "id": "topic-f1-3-analise-recorrencias",
+      "slug": "f1-3-analise-recorrencias",
+      "title": "Análise de Recorrências (F1.3)",
+      "macroArea": "fundamentos",
+      "subTopic": "analise_algoritmos",
+      "difficulty": "medium",
+      "incidence": "high",
+      "estimatedMinutes": 50,
+      "prerequisites": ["f1-2-notacoes-assintoticas"],
+      "learningObjectives": [
+        "Aplicar o Teorema Mestre para resolver recorrências comuns.",
+        "Resolver recorrências por substituição e árvore de recursão."
+      ],
+      "sourceLessons": [],
+      "sections": [
+        {
+          "id": "f1-3-essential",
+          "kind": "essential",
+          "title": "Visão essencial",
+          "content": "Algoritmos divide-and-conquer geram recorrências do tipo T(n) = aT(n/b) + f(n). O Teorema Mestre resolve a maioria dos casos sem cálculo manual.",
+          "order": 1
+        },
+        {
+          "id": "f1-3-advanced",
+          "kind": "advanced",
+          "title": "Aprofundamento",
+          "content": "Para casos fora do Teorema Mestre, expansão por substituição ou árvore de recursão dão a resposta. Cota inferior merece atenção em provas formais.",
+          "order": 2
+        }
+      ],
+      "examples": [
+        {
+          "id": "ex-f1-3-1",
+          "title": "Teorema Mestre em merge sort",
+          "problem": "T(n) = 2T(n/2) + O(n). Qual a complexidade?",
+          "strategy": "Identificar a, b, f(n) e aplicar caso 2 do Teorema Mestre.",
+          "solution": "a=2, b=2, f(n)=Θ(n). Como n^log_b a = n, recai no caso 2: T(n) = Θ(n log n).",
+          "takeaway": "Teorema Mestre fecha a análise de merge sort em segundos.",
+          "order": 1
+        }
+      ],
+      "applications": [
+        {
+          "id": "app-f1-3-1",
+          "title": "Algoritmos recursivos em produção",
+          "context": "Implementações de quicksort, FFT e Strassen têm custo descrito por recorrências.",
+          "howItApplies": "Estimar custo antes de paralelizar guia decisões de arquitetura.",
+          "order": 1
+        }
+      ],
+      "references": [],
+      "quickChecks": [
+        {
+          "id": "qc-f1-3-1",
+          "prompt": "Para T(n) = 4T(n/2) + n, qual a complexidade?",
+          "options": [
+            { "key": "A", "text": "Θ(n log n)" },
+            { "key": "B", "text": "Θ(n²)" },
+            { "key": "C", "text": "Θ(n³)" }
+          ],
+          "answerKey": "B",
+          "explanation": "a=4, b=2 → n^log_b a = n². Como f(n)=n é menor, recai no caso 1: T(n) = Θ(n²).",
+          "order": 1
+        }
+      ]
     }
   ]
 }
