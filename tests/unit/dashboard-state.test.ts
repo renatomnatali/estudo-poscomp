@@ -21,6 +21,14 @@ describe('design system — invariante de onboarding', () => {
     const unique = new Set(orders);
     expect(unique.size).toBe(orders.length);
   });
+
+  it('a onboarding efetiva sempre tem contentReady=true (com fallback)', () => {
+    // getOnboardingTrack pode aplicar fallback se a marcada não tem
+    // contentReady. Em qualquer caso, a trilha retornada tem que estar
+    // pronta para o usuário estudar de fato.
+    const effective = getOnboardingTrack();
+    expect(effective.contentReady).toBe(true);
+  });
 });
 
 describe('classifyDashboardState', () => {
