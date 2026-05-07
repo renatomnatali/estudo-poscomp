@@ -18,7 +18,14 @@ const TRACK_CARDS: StudyTrackCard[] = [
     status: 'free',
     free: true,
     progressPercent: 0,
-    pedagogicalOrder: 2,
+    href: '/trilhas/f1/f1-1-analise-notacoes',
+    isOnboarding: true,
+    pedagogicalOrder: 1,
+    /* Conteúdo dos módulos existe (data/study/modules/f1-*.source.json),
+       mas os topics correspondentes ainda não foram ingeridos em
+       data/topics/. Marcado como `false` para o motor cair no fallback
+       (F6) até a ingestão entrar. */
+    contentReady: false,
   },
   {
     id: 'track-f2',
@@ -31,7 +38,7 @@ const TRACK_CARDS: StudyTrackCard[] = [
     status: 'free',
     free: true,
     progressPercent: 0,
-    pedagogicalOrder: 3,
+    pedagogicalOrder: 2,
   },
   {
     id: 'track-f3',
@@ -44,7 +51,7 @@ const TRACK_CARDS: StudyTrackCard[] = [
     status: 'free',
     free: true,
     progressPercent: 0,
-    pedagogicalOrder: 4,
+    pedagogicalOrder: 3,
   },
   {
     id: 'track-f4',
@@ -57,7 +64,7 @@ const TRACK_CARDS: StudyTrackCard[] = [
     status: 'free',
     free: true,
     progressPercent: 0,
-    pedagogicalOrder: 5,
+    pedagogicalOrder: 4,
   },
   {
     id: 'track-f5',
@@ -70,7 +77,7 @@ const TRACK_CARDS: StudyTrackCard[] = [
     status: 'free',
     free: true,
     progressPercent: 0,
-    pedagogicalOrder: 6,
+    pedagogicalOrder: 5,
   },
   {
     id: 'track-f6',
@@ -80,12 +87,12 @@ const TRACK_CARDS: StudyTrackCard[] = [
     summary: 'AFD, AFN, Gramáticas, PDA, MT · Hierarquia de Chomsky · P vs NP · Gödel',
     estimatedModules: 9,
     estimatedHours: 6,
-    status: 'done',
+    status: 'free',
     free: true,
-    progressPercent: 100,
+    progressPercent: 0,
     href: '/trilhas/f6/modulo-01',
-    isOnboarding: true,
-    pedagogicalOrder: 1,
+    pedagogicalOrder: 6,
+    contentReady: true,
   },
   {
     id: 'track-f7',
@@ -324,6 +331,8 @@ const TRACK_CARDS: StudyTrackCard[] = [
 ];
 
 const MODULE_TOPIC_MAP: Record<string, string> = {
+  // F6 — Linguagens Formais e Autômatos (módulos legados, slugs genéricos
+  // não revelam a trilha, por isso o map explícito).
   'modulo-01': 'linguagens-formais-e-operacoes',
   'modulo-02': 'automatos-finitos-afd',
   'modulo-03': 'afn-com-epsilon',
@@ -333,6 +342,18 @@ const MODULE_TOPIC_MAP: Record<string, string> = {
   'modulo-07': 'gramaticas-e-derivacao',
   'modulo-08': 'glc-e-automatos-com-pilha',
   'modulo-09': 'maquinas-de-turing-e-decidibilidade',
+  // F1 — Análise de Algoritmos (slug do módulo já carrega o tópico).
+  'f1-1-analise-notacoes': 'f1-1-analise-notacoes',
+  'f1-2-notacoes-assintoticas': 'f1-2-notacoes-assintoticas',
+  'f1-3-analise-recorrencias': 'f1-3-analise-recorrencias',
+  // F2 — Algoritmos e Estruturas de Dados.
+  'f2-1-estruturas-lineares': 'f2-1-estruturas-lineares',
+  'f2-2-arvores-hashing': 'f2-2-arvores-hashing',
+  'f2-3-grafos': 'f2-3-grafos',
+  // F3 — Arquitetura de Computadores.
+  'f3-1-paradigmas': 'f3-1-paradigmas',
+  // F4 — Circuitos Digitais.
+  'f4-1-linguagens-formais': 'f4-1-linguagens-formais',
 };
 
 const MODULES: StudyModule[] = [
@@ -1034,20 +1055,40 @@ export function getStudyTrackCards() {
 }
 
 /**
- * Trilha que serve de porta de entrada para iniciantes. Decisão de
- * produto, não dedução automática — exatamente UMA trilha em
- * `TRACK_CARDS` deve ter `isOnboarding: true`. Toda copy de "primeira
- * trilha" / "trilha atual do iniciante" no dashboard parte daqui, então
- * trocar a trilha de boas-vindas é um change set de uma linha.
+ * Trilha que serve de porta de entrada para iniciantes. Lógica:
+ *
+ * 1. Decisão de produto: exatamente UMA trilha tem `isOnboarding: true`.
+ * 2. Se essa trilha tem `contentReady: true`, é a onboarding efetiva.
+ * 3. Se a trilha marcada não tem conteúdo pronto, cai em fallback:
+ *    a trilha com menor `pedagogicalOrder` que tenha `contentReady: true`.
+ *    Isto evita levar o usuário para conteúdo vazio enquanto a ingestão
+ *    de uma trilha futura é preparada.
+ *
+ * Trocar a trilha de boas-vindas (quando o conteúdo de F1 estiver
+ * pronto, por exemplo) = mudar `contentReady: true` no card. Sem
+ * mexer em mais nada.
  */
 export function getOnboardingTrack(): StudyTrackCard {
-  const candidates = TRACK_CARDS.filter((track) => track.isOnboarding);
-  if (candidates.length !== 1) {
+  const flagged = TRACK_CARDS.filter((track) => track.isOnboarding);
+  if (flagged.length !== 1) {
     throw new Error(
-      `Esperava exatamente 1 trilha com isOnboarding=true; encontrei ${candidates.length}.`,
+      `Esperava exatamente 1 trilha com isOnboarding=true; encontrei ${flagged.length}.`,
     );
   }
-  return candidates[0]!;
+
+  const target = flagged[0]!;
+  if (target.contentReady) return target;
+
+  const fallback = TRACK_CARDS.filter((track) => track.contentReady)
+    .sort((a, b) => (a.pedagogicalOrder ?? Infinity) - (b.pedagogicalOrder ?? Infinity))[0];
+
+  if (!fallback) {
+    throw new Error(
+      `Trilha de onboarding (${target.code}) não tem conteúdo pronto e nenhuma outra trilha está marcada com contentReady=true.`,
+    );
+  }
+
+  return fallback;
 }
 
 /**
@@ -1077,6 +1118,8 @@ export function getDashboardSummary(): DashboardSummary {
   const next = getNextTrackAfter(onboarding.code);
   const completedModules = 4;
   const totalModules = onboarding.estimatedModules;
+  // Próximo módulo na trilha de onboarding efetiva. Quando a onboarding
+  // for F1 (após contentReady=true), trocar para o próximo de F1.
   const nextModule = { order: 5, title: 'Funções de Transição', slug: 'modulo-05' };
 
   const state = classifyDashboardState({
@@ -1140,9 +1183,9 @@ export function getDashboardSummary(): DashboardSummary {
     ],
     tracks: [
       {
-        id: 'f6',
-        code: 'F6',
-        title: 'Ling. Formais e Autômatos',
+        id: onboarding.id,
+        code: onboarding.code,
+        title: onboarding.title,
         subtitle: `${totalModules} módulos · ~${onboarding.estimatedHours}h de estudo`,
         progressPercent: Math.round((completedModules / totalModules) * 100),
         tagLabel: 'Em progresso',
@@ -1150,36 +1193,42 @@ export function getDashboardSummary(): DashboardSummary {
         href: `/trilhas/${onboarding.code.toLowerCase()}/${nextModule.slug}`,
         iconTone: 'sap',
       },
+      ...(next
+        ? [
+            {
+              id: next.id,
+              code: next.code,
+              title: next.title,
+              subtitle: next.summary,
+              progressPercent: 0,
+              tagLabel: next.free ? 'Próximo' : 'Premium',
+              tagTone: (next.free ? 'next' : 'locked') as 'next' | 'locked',
+              href: next.free ? `/trilhas/${next.code.toLowerCase()}/modulo-01` : '/premium',
+              iconTone: (next.free ? 'sap' : 'muted') as 'sap' | 'muted',
+            },
+          ]
+        : []),
       {
-        id: 'f1',
-        code: 'F1',
-        title: 'Análise de Algoritmos',
-        subtitle: 'Big-O, recorrências · 2–3 módulos',
+        id: 'track-m1',
+        code: 'M1',
+        title: 'Análise Combinatória',
+        subtitle: 'Permutações, combinações, arranjos',
         progressPercent: 0,
-        tagLabel: 'Premium',
-        tagTone: 'locked',
-        href: '/premium',
-        iconTone: 'muted',
+        tagLabel: 'Free',
+        tagTone: 'next',
+        href: '/trilhas/m1/modulo-01',
+        iconTone: 'sap',
       },
       {
-        id: 'f2',
-        code: 'F2',
-        title: 'Algoritmos e Est. de Dados',
-        subtitle: 'Árvores, hash, ordenação',
-        tagLabel: 'Premium',
-        tagTone: 'locked',
-        href: '/premium',
-        iconTone: 'muted',
-      },
-      {
-        id: 'f3',
-        code: 'F3',
-        title: 'Arquitetura de Computadores',
-        subtitle: 'Pipeline, cache, memória',
-        tagLabel: 'Premium',
-        tagTone: 'locked',
-        href: '/premium',
-        iconTone: 'muted',
+        id: 'track-t1',
+        code: 'T1',
+        title: 'Banco de Dados',
+        subtitle: 'Modelo relacional, SQL, normalização',
+        progressPercent: 0,
+        tagLabel: 'Free',
+        tagTone: 'next',
+        href: '/trilhas/t1/modulo-01',
+        iconTone: 'sap',
       },
     ],
     activity: {

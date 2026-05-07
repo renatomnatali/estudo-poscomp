@@ -113,6 +113,16 @@ export interface StudyTrackCard {
    * menor número, mas isto é independente de `isOnboarding`.
    */
   pedagogicalOrder?: number;
+  /**
+   * Trilha tem conteúdo (módulos + topics no banco) ingerido a ponto
+   * do usuário poder estudar de fato. Trilhas marcadas como
+   * `isOnboarding` mas sem conteúdo pronto NÃO são escolhidas como
+   * onboarding efetivo — o motor usa fallback para a trilha
+   * `contentReady: true` com menor `pedagogicalOrder`. Isto permite
+   * marcar antecipadamente uma trilha como destino pedagógico sem
+   * quebrar a UX enquanto o conteúdo é preparado.
+   */
+  contentReady?: boolean;
 }
 
 export interface DashboardStat {
