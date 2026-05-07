@@ -21,11 +21,7 @@ const TRACK_CARDS: StudyTrackCard[] = [
     href: '/trilhas/f1/f1-1-analise-notacoes',
     isOnboarding: true,
     pedagogicalOrder: 1,
-    /* Conteúdo dos módulos existe (data/study/modules/f1-*.source.json),
-       mas os topics correspondentes ainda não foram ingeridos em
-       data/topics/. Marcado como `false` para o motor cair no fallback
-       (F6) até a ingestão entrar. */
-    contentReady: false,
+    contentReady: true,
   },
   {
     id: 'track-f2',
@@ -1116,11 +1112,14 @@ export function getDashboardSummary(): DashboardSummary {
   // abaixo conforme `lib/dashboard-state.ts`.
   const onboarding = getOnboardingTrack();
   const next = getNextTrackAfter(onboarding.code);
-  const completedModules = 4;
+  const completedModules = 1;
   const totalModules = onboarding.estimatedModules;
-  // Próximo módulo na trilha de onboarding efetiva. Quando a onboarding
-  // for F1 (após contentReady=true), trocar para o próximo de F1.
-  const nextModule = { order: 5, title: 'Funções de Transição', slug: 'modulo-05' };
+  // Próximo módulo na trilha de onboarding efetiva. F1 hoje, com 3 módulos.
+  const nextModule = {
+    order: 2,
+    title: 'Notações Assintóticas',
+    slug: 'f1-2-notacoes-assintoticas',
+  };
 
   const state = classifyDashboardState({
     completedModules,

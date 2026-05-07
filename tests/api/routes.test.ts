@@ -23,10 +23,10 @@ describe('api routes de estudo', () => {
   });
 
   it('retorna resumo do dashboard de estudo', async () => {
-    // Usa um módulo da trilha de onboarding *efetiva* (atualmente F6
-    // via fallback, porque F1 ainda não tem topics ingeridos no banco).
+    // Usa o primeiro módulo da trilha de onboarding atual (F1 — Análise
+    // de Algoritmos). Se a trilha de onboarding mudar, atualize este slug.
     await postModuleProgress(
-      new Request('http://localhost/api/study/modules/modulo-01/progress', {
+      new Request('http://localhost/api/study/modules/f1-1-analise-notacoes/progress', {
         method: 'POST',
         body: JSON.stringify({
           userId: 'user-summary-1',
@@ -34,7 +34,7 @@ describe('api routes de estudo', () => {
           score: 1,
         }),
       }),
-      { params: Promise.resolve({ slug: 'modulo-01' }) }
+      { params: Promise.resolve({ slug: 'f1-1-analise-notacoes' }) }
     );
 
     const response = await getDashboardSummary(
