@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F1.1 — Algoritmos de Referência · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:50%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500)}.topbar-icon-btn:hover{background:var(--n100)}
+
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#1a6bcc 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--r-pill);padding:3px 14px;font-family:var(--fm);font-size:.72rem;letter-spacing:1px;margin-bottom:.8rem}
+.hero-title{font-family:var(--fd);font-size:1.8rem;font-weight:800;margin-bottom:.5rem;position:relative;z-index:1}
+.hero-formula{font-family:var(--fm);font-size:1rem;background:rgba(255,255,255,.12);border-radius:var(--r-md);padding:.5rem 1.4rem;display:inline-block;margin:.6rem 0;letter-spacing:1px}
+.hero-sub{opacity:.8;font-size:.9rem;max-width:540px;margin:.4rem auto 0;position:relative;z-index:1}
+
+/* SECTION NAV */
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover{background:rgba(255,255,255,.15);color:white}.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+
+/* CONTENT */
+.lesson-content{max-width:900px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.3rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.75}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--fm);font-size:.88rem}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0;font-size:.92rem;line-height:1.7}
+.callout{border-left:4px solid var(--accent);background:#e8f0fe;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem}.callout.warning{border-color:var(--accent2);background:#fff3e0}.callout.success{border-color:var(--green);background:#e8f5ee}.callout strong{color:var(--primary)}
+
+/* ALGO CARDS */
+.algo-overview{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin:1.2rem 0}
+.algo-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;cursor:pointer;transition:border-color .15s,box-shadow .15s;text-decoration:none;display:block}
+.algo-card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(26,107,204,.12)}
+.algo-card-tag{font-family:var(--fm);font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:.3rem}
+.algo-card-name{font-weight:700;color:var(--primary);font-size:.95rem;margin-bottom:.4rem}
+.algo-card-cost{font-family:var(--fm);font-size:1.1rem;font-weight:700;margin-bottom:.4rem}
+.algo-card-desc{font-size:.82rem;color:var(--muted);line-height:1.5}
+.cost-const{color:#15803d}.cost-log{color:#0369a1}.cost-n{color:#6d28d9}.cost-nlogn{color:#92400e}.cost-n2{color:#dc2626}
+
+/* ANIM BOX */
+.anim-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.5rem 0}
+.anim-box h4{color:var(--primary);font-size:.9rem;margin-bottom:.6rem}
+.anim-controls{display:flex;align-items:center;gap:.8rem;margin-top:.8rem;flex-wrap:wrap}
+.anim-btn{padding:.35rem .9rem;border-radius:var(--r-pill);border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:.8rem;font-family:var(--fb);color:var(--primary);font-weight:600}
+.anim-btn:hover,.anim-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.anim-select{padding:.35rem .6rem;border-radius:var(--r-sm);border:1px solid var(--border);font-family:var(--fb);font-size:.82rem;color:var(--primary);background:var(--card);cursor:pointer}
+.anim-status{font-size:.82rem;color:var(--muted);padding:.3rem .6rem;background:var(--bg);border-radius:var(--r-sm);font-family:var(--fm)}
+
+/* STEP LOG */
+.step-log{background:#0d1a36;border-radius:10px;padding:1rem;margin-top:.8rem;min-height:60px;max-height:140px;overflow-y:auto}
+.step-log::-webkit-scrollbar{width:3px}.step-log::-webkit-scrollbar-thumb{background:#334}
+.log-entry{font-family:var(--fm);font-size:.8rem;color:#c8d4f0;padding:.15rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.log-entry.highlight{color:#7ef0c0}
+.log-entry.found{color:#ffd580;font-weight:700}
+.log-entry.rejected{color:#ff8a80}
+
+/* COUNT BADGE */
+.count-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-pill);padding:.25rem .8rem;font-family:var(--fm);font-size:.82rem;font-weight:700}
+
+/* COMPARISON TABLE */
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+th{background:var(--primary);color:white;padding:.65rem 1rem;text-align:left}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+tr:nth-child(even) td{background:#f5f8ff}
+tr:hover td{background:#e8f0fe}
+.hl-row td{background:#fff3cd!important;font-weight:600}
+
+/* TREE */
+.tree-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.5rem 0}
+.tree-box h4{color:var(--primary);font-size:.9rem;margin-bottom:.8rem}
+.tree-level{display:flex;justify-content:center;gap:.5rem;margin:.5rem 0;flex-wrap:wrap}
+.tree-node{border-radius:8px;padding:.4rem .7rem;font-family:var(--fm);font-size:.8rem;font-weight:700;text-align:center;min-width:36px;transition:all .4s ease}
+.tree-node.n-blue{background:#1a3d6e;color:#7acdf0;border:1px solid #2a5090}
+.tree-node.n-green{background:#1a3d1a;color:#7ef0a0;border:1px solid #2a6030}
+.tree-node.n-hidden{opacity:0;pointer-events:none}
+.tree-level-label{font-size:.75rem;color:var(--muted);margin:.1rem 0 .1rem 8px;display:flex;justify-content:space-between;padding:0 4px}
+.tree-total-bar{background:#0d2d6b;color:white;border-radius:8px;padding:.5rem 1rem;display:flex;justify-content:space-between;align-items:center;margin-top:.5rem;font-size:.85rem}
+.tree-total-bar .ttb-sum{font-family:var(--fm);font-size:1rem;font-weight:700;color:#ffd580}
+
+/* PROOF STEPS */
+.proof-steps{margin:1rem 0}
+.proof-step{display:flex;gap:1rem;padding:.8rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:.4rem 0;font-size:.9rem;align-items:flex-start}
+.proof-step .ps-num{background:var(--accent);color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;font-family:var(--fm)}
+.proof-step .ps-body{line-height:1.6}
+
+/* QUIZ */
+.quiz-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.5rem 0}
+.quiz-q{font-weight:600;color:var(--primary);margin-bottom:1rem;font-size:.95rem;line-height:1.5}
+.quiz-option{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f8faff;margin:.4rem 0;font-size:.9rem}.quiz-option:hover{background:#e8f0fe;border-color:var(--accent)}
+.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+.quiz-feedback{margin-top:.8rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;display:none}
+.quiz-feedback.show{display:block}.quiz-feedback.ok{background:#e8f5ee;color:#15803d;border:1px solid #86efac}.quiz-feedback.fail{background:#fde8e8;color:var(--red);border:1px solid #fca5a5}
+
+/* SUMMARY */
+.summary-box{background:var(--primary);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}
+.summary-box h3{color:white;margin-bottom:1rem;font-size:1.1rem}
+.summary-row{display:flex;gap:.5rem;margin:.4rem 0;align-items:flex-start;font-size:.9rem}
+.summary-row::before{content:'✓';color:#7ef0a0;flex-shrink:0;font-weight:700}
+
+/* LESSON NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05)}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:33%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap)}.btn-nav.next:hover{background:var(--sap-d)}
+
+/* SPOILER */
+.deep-dive{background:var(--bg);border:1px dashed var(--border);border-radius:12px;padding:1.2rem;margin:1rem 0}
+.deep-dive summary{font-weight:600;color:var(--muted);cursor:pointer;font-size:.88rem}
+.deep-dive summary:hover{color:var(--primary)}
+.deep-dive[open] summary{color:var(--primary);margin-bottom:.8rem}
+
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .algo-overview{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">1 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div>
+        <a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas de Estudo</span></a>
+        <a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div>
+        <a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado POSCOMP</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Seja Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Análise de Algoritmos</a><span class="sep">›</span>
+        <span class="current">F1.1 — Algoritmos de Referência</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+
+    <div class="lesson-area" id="lessonArea">
+      <!-- HERO -->
+      <div class="lesson-header">
+        <div class="hero-tag">ANÁLISE DE ALGORITMOS · F1.1</div>
+        <div class="hero-title">Algoritmos de Referência</div>
+        <div class="hero-formula">Busca · Ordenação · Divisão e Conquista</div>
+        <div class="hero-sub">Antes de medir a eficiência de algoritmos, você precisa vê-los funcionar. Este módulo constrói a intuição que F1.2 vai formalizar.</div>
+      </div>
+
+      <!-- SECTION NAV -->
+      <nav class="section-nav" id="sectionNav">
+        <a href="#porque">1. Por que ver antes?</a>
+        <a href="#busca-linear">2. Busca Linear</a>
+        <a href="#busca-binaria">3. Busca Binária</a>
+        <a href="#bubble">4. Bubble Sort</a>
+        <a href="#merge">5. Merge Sort</a>
+        <a href="#quicksort">6. Quicksort</a>
+        <a href="#comparacao">7. Comparação</a>
+      </nav>
+
+      <div class="lesson-content">
+
+        <!-- 1. POR QUE -->
+        <section id="porque">
+          <h2><span class="num">1</span> Por que ver os algoritmos antes da análise?</h2>
+          <p>F1.2 vai te mostrar que busca binária custa O(log n) e Merge Sort custa O(n log n). Mas esses rótulos só fazem sentido se você <em>já sabe o que esses algoritmos fazem</em>. Sem isso, a análise é só manipulação de símbolos sem significado.</p>
+
+          <div class="card" style="padding:1.2rem">
+            <p style="margin-bottom:.6rem;font-weight:600;color:var(--primary)">A diferença entre entender e decorar:</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;font-size:.88rem">
+              <div style="background:#fde8e8;border-radius:8px;padding:.8rem">
+                <strong style="color:var(--red)">Decorar ✗</strong><br>
+                "Busca binária é O(log n) porque divide por 2."<br>
+                <span style="color:var(--muted)">— Você passa na questão de múltipla escolha, mas não sabe por quê divide por 2 nem o que "log n" tem a ver com isso.</span>
+              </div>
+              <div style="background:#e8f5ee;border-radius:8px;padding:.8rem">
+                <strong style="color:var(--green)">Entender ✓</strong><br>
+                "Busca binária descarta metade a cada passo. Para n=1.000.000, são ~20 passos. Isso é log₂(n)."<br>
+                <span style="color:var(--muted)">— O número aparece naturalmente a partir do comportamento.</span>
+              </div>
+            </div>
+          </div>
+
+          <p>Neste módulo você vai <strong>ver os algoritmos funcionando</strong> — com animação, contagem de passos e comparação concreta. Não há notação O aqui. Os rótulos vêm em F1.2, depois que a intuição estiver formada.</p>
+
+          <h3>Os cinco algoritmos deste módulo</h3>
+          <div class="algo-overview" style="grid-template-columns:repeat(3,1fr)">
+            <a class="algo-card" href="#busca-linear">
+              <div class="algo-card-tag">Seção 2 · Busca</div>
+              <div class="algo-card-name">Busca Linear</div>
+              <div class="algo-card-cost cost-n">Cresce com n</div>
+              <div class="algo-card-desc">Percorre a lista do início ao fim. Simples, mas lento para listas grandes.</div>
+            </a>
+            <a class="algo-card" href="#busca-binaria">
+              <div class="algo-card-tag">Seção 3 · Busca</div>
+              <div class="algo-card-name">Busca Binária</div>
+              <div class="algo-card-cost cost-log">Cresce muito devagar</div>
+              <div class="algo-card-desc">Descarta metade a cada passo. Para 1 milhão de itens, faz ~20 comparações.</div>
+            </a>
+            <a class="algo-card" href="#bubble">
+              <div class="algo-card-tag">Seção 4 · Ordenação</div>
+              <div class="algo-card-name">Bubble Sort</div>
+              <div class="algo-card-cost cost-n2">Cresce com n²</div>
+              <div class="algo-card-desc">Compara pares adjacentes e troca. Intuitivo, mas fica impraticável para n grande.</div>
+            </a>
+            <a class="algo-card" href="#merge">
+              <div class="algo-card-tag">Seção 5 · Ordenação</div>
+              <div class="algo-card-name">Merge Sort</div>
+              <div class="algo-card-cost cost-nlogn">Cresce com n·log n</div>
+              <div class="algo-card-desc">Divide, ordena as metades, junta. O custo aparece numa árvore de chamadas.</div>
+            </a>
+            <a class="algo-card" href="#quicksort">
+              <div class="algo-card-tag">Seção 6 · Ordenação</div>
+              <div class="algo-card-name">Quicksort</div>
+              <div class="algo-card-cost cost-nlogn">n·log n (médio) / n² (pior)</div>
+              <div class="algo-card-desc">Escolhe um pivô e particiona ao redor dele. Rápido na prática — mas o custo depende da sorte.</div>
+            </a>
+          </div>
+
+          <div class="callout warning">
+            <strong>→ Próximo passo (seção 2):</strong> começamos pelo mais simples — a busca linear. Você vai ver exatamente quantas comparações ela faz para diferentes tamanhos de lista, e por que isso é um problema quando a lista cresce.
+          </div>
+        </section>
+
+        <!-- 2. BUSCA LINEAR -->
+        <section id="busca-linear">
+          <h2><span class="num">2</span> Busca Linear</h2>
+
+          <p><strong>O problema:</strong> você tem uma lista de n números e quer saber se um valor alvo está nela — e se estiver, em qual posição.</p>
+          <p><strong>A ideia:</strong> olhar para cada elemento, um por um, da esquerda para a direita. Se o elemento for o alvo, parou. Se acabar a lista sem achar, não está.</p>
+
+          <div class="anim-box">
+            <h4>Animação — Busca Linear</h4>
+            <canvas id="linearCanvas" style="width:100%;height:100px;display:block;border-radius:8px;background:#0d1a36"></canvas>
+            <div class="step-log" id="linearLog"><div class="log-entry" style="color:#5a6a8a">Escolha um alvo e clique em Iniciar.</div></div>
+            <div class="anim-controls">
+              <label style="font-size:.82rem;font-weight:600;color:var(--primary)">Alvo:</label>
+              <select class="anim-select" id="linearTarget">
+                <option value="7">7 (início)</option>
+                <option value="42" selected>42 (meio)</option>
+                <option value="91">91 (fim)</option>
+                <option value="99">99 (não existe)</option>
+              </select>
+              <button class="anim-btn" id="linearPlayBtn" onclick="linearStart()">▶ Iniciar</button>
+              <button class="anim-btn" onclick="linearReset()">↺ Reiniciar</button>
+              <span class="anim-status" id="linearStatus">—</span>
+            </div>
+          </div>
+
+          <h3>Contando os passos</h3>
+          <div class="card">
+            <p>Para uma lista de n elementos:</p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:.8rem 0;text-align:center;font-size:.88rem">
+              <div style="background:#e8f0fe;border-radius:8px;padding:.8rem">
+                <div style="font-weight:700;color:var(--primary);margin-bottom:.3rem">Melhor caso</div>
+                <div style="font-size:1.3rem;font-family:var(--fm);color:var(--accent)">1</div>
+                <div style="color:var(--muted)">Alvo é o 1º elemento</div>
+              </div>
+              <div style="background:#f5f5f5;border-radius:8px;padding:.8rem">
+                <div style="font-weight:700;color:var(--primary);margin-bottom:.3rem">Caso médio</div>
+                <div style="font-size:1.3rem;font-family:var(--fm);color:var(--muted)">n/2</div>
+                <div style="color:var(--muted)">Alvo está no meio</div>
+              </div>
+              <div style="background:#fde8e8;border-radius:8px;padding:.8rem">
+                <div style="font-weight:700;color:var(--primary);margin-bottom:.3rem">Pior caso</div>
+                <div style="font-size:1.3rem;font-family:var(--fm);color:var(--red)">n</div>
+                <div style="color:var(--muted)">Alvo não existe ou é o último</div>
+              </div>
+            </div>
+            <p style="font-size:.88rem">Na análise de algoritmos, quase sempre nos importamos com o <strong>pior caso</strong> — ele garante que o algoritmo nunca vai pior do que isso, independente dos dados.</p>
+          </div>
+
+          <div class="callout warning">
+            <strong>O problema de escala:</strong> dobrar o tamanho da lista dobra o número de comparações no pior caso. Para n = 1.000.000, você pode fazer até 1 milhão de comparações só para descobrir que o elemento não está lá.
+          </div>
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 3):</strong> e se a lista estivesse ordenada? Poderíamos usar essa informação para buscar muito mais rápido — sem olhar para a maioria dos elementos.
+          </div>
+        </section>
+
+        <!-- 3. BUSCA BINÁRIA -->
+        <section id="busca-binaria">
+          <h2><span class="num">3</span> Busca Binária</h2>
+
+          <p><strong>Pré-requisito:</strong> a lista precisa estar <em>ordenada</em>. Sem isso, o truque não funciona.</p>
+          <p><strong>A ideia:</strong> em vez de olhar do início, olhe para o elemento do meio. Se o alvo for menor que o meio, ele só pode estar na metade esquerda — <em>descarte a metade direita inteira</em>. Repita no que sobrou.</p>
+
+          <div class="card" style="padding:1.2rem">
+            <p style="font-weight:600;color:var(--primary);margin-bottom:.6rem">Exemplo com 16 elementos, buscando 73:</p>
+            <div class="proof-steps">
+              <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">Lista: [3, 7, 12, 18, 24, 31, 42, 55, <strong>63</strong>, 73, 81, 88, 91, 95, 97, 99] → meio = posição 8 → valor 63<br>73 > 63 → descarta metade esquerda. Sobram 8 elementos.</div></div>
+              <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">[73, 81, 88, 91, 95, 97, 99] → meio = posição 4 → valor 91<br>73 < 91 → descarta metade direita. Sobram 4 elementos.</div></div>
+              <div class="proof-step"><span class="ps-num">3</span><div class="ps-body">[73, 81, 88] → meio = posição 2 → valor 81<br>73 < 81 → descarta metade direita. Sobra 1 elemento.</div></div>
+              <div class="proof-step"><span class="ps-num">4</span><div class="ps-body">[73] → meio = posição 1 → valor 73 = alvo ✓<br><strong>Encontrado em 4 passos</strong> para uma lista de 16 elementos.</div></div>
+            </div>
+            <div class="callout" style="margin-top:.8rem">
+              <strong>Padrão:</strong> 16 → 8 → 4 → 2 → 1. Isso é exatamente quantas vezes você divide 16 por 2 até chegar em 1: <strong>4 vezes</strong>. Para n=1024 seriam 10 passos. Para n=1.000.000 seriam ~20 passos.
+            </div>
+          </div>
+
+          <div class="anim-box">
+            <h4>Animação — Busca Binária</h4>
+            <canvas id="binaryCanvas" style="width:100%;height:120px;display:block;border-radius:8px;background:#0d1a36"></canvas>
+            <div class="step-log" id="binaryLog"><div class="log-entry" style="color:#5a6a8a">Escolha o tamanho da lista e o alvo, depois clique em Iniciar.</div></div>
+            <div class="anim-controls">
+              <label style="font-size:.82rem;font-weight:600;color:var(--primary)">Tamanho:</label>
+              <select class="anim-select" id="binarySize" onchange="binaryReset()">
+                <option value="8">8</option>
+                <option value="16" selected>16</option>
+                <option value="32">32</option>
+              </select>
+              <label style="font-size:.82rem;font-weight:600;color:var(--primary)">Alvo:</label>
+              <select class="anim-select" id="binaryTarget">
+                <option value="found-start">Início (melhor caso)</option>
+                <option value="found-end" selected>Fim (pior caso)</option>
+                <option value="not-found">Não existe</option>
+              </select>
+              <button class="anim-btn" id="binaryPlayBtn" onclick="binaryStart()">▶ Iniciar</button>
+              <button class="anim-btn" onclick="binaryReset()">↺ Reiniciar</button>
+              <span class="anim-status" id="binaryStatus">—</span>
+            </div>
+          </div>
+
+          <h3>A diferença na prática</h3>
+          <table>
+            <thead><tr><th>n (tamanho)</th><th>Busca Linear (pior caso)</th><th>Busca Binária (pior caso)</th><th>Fator de melhora</th></tr></thead>
+            <tbody>
+              <tr><td>100</td><td>100</td><td>7</td><td>~14×</td></tr>
+              <tr><td>10.000</td><td>10.000</td><td>14</td><td>~714×</td></tr>
+              <tr><td>1.000.000</td><td>1.000.000</td><td>20</td><td>~50.000×</td></tr>
+              <tr class="hl-row"><td>1.000.000.000</td><td>1.000.000.000</td><td>30</td><td>~33 milhões ×</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:.84rem;color:var(--muted)">A busca binária fica 33 milhões de vezes mais rápida que a linear para 1 bilhão de elementos. A diferença cresce com n — é o que F1.2 vai formalizar como O(n) vs O(log n).</p>
+
+          <div class="callout warning">
+            <strong>Custo oculto:</strong> busca binária exige que a lista esteja ordenada. Se você precisar ordenar antes de buscar, esse custo extra precisa ser considerado. Para uma única busca em lista desordenada, pode ser mais simples usar busca linear.
+          </div>
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 4):</strong> agora que você entende busca, vamos para ordenação — como colocar uma lista bagunçada em ordem. O primeiro algoritmo é o mais intuitivo, mas também o mais lento.
+          </div>
+        </section>
+
+        <!-- 4. BUBBLE SORT -->
+        <section id="bubble">
+          <h2><span class="num">4</span> Bubble Sort</h2>
+
+          <p><strong>O problema:</strong> dado um array desordenado, colocá-lo em ordem crescente.</p>
+          <p><strong>A ideia:</strong> compare pares de elementos adjacentes. Se estiverem na ordem errada, troque-os. Repita até não haver mais trocas. O nome vem do fato de que os elementos maiores "sobem" para o final como bolhas.</p>
+
+          <div class="card" style="padding:1.2rem">
+            <p style="font-weight:600;color:var(--primary);margin-bottom:.6rem">Trace: ordenar [5, 3, 8, 1, 4]</p>
+            <div style="font-size:.86rem;font-family:var(--fm)">
+              <div style="padding:.4rem .6rem;background:#0d1a36;border-radius:6px;margin:.3rem 0;color:#c8d4f0"><span style="color:#7acdf0">Passagem 1:</span> [5,3,8,1,4] → troca(5,3) → [3,5,8,1,4] → ok(5,8) → troca(8,1) → [3,5,1,8,4] → troca(8,4) → [<strong style="color:#ffd580">3,5,1,4,8</strong>] — o 8 chegou ao fim ✓</div>
+              <div style="padding:.4rem .6rem;background:#0d1a36;border-radius:6px;margin:.3rem 0;color:#c8d4f0"><span style="color:#7acdf0">Passagem 2:</span> [3,5,1,4,8] → ok(3,5) → troca(5,1) → [3,1,5,4,8] → troca(5,4) → [<strong style="color:#ffd580">3,1,4,5,8</strong>] — o 5 chegou ao lugar ✓</div>
+              <div style="padding:.4rem .6rem;background:#0d1a36;border-radius:6px;margin:.3rem 0;color:#c8d4f0"><span style="color:#7acdf0">Passagem 3:</span> [3,1,4,5,8] → troca(3,1) → [<strong style="color:#ffd580">1,3,4,5,8</strong>] — o 3 chegou ao lugar ✓</div>
+              <div style="padding:.4rem .6rem;background:#1a3d1a;border-radius:6px;margin:.3rem 0;color:#7ef0a0"><span style="color:#7ef0c0">Passagem 4:</span> [1,3,4,5,8] — nenhuma troca → ORDENADO ✓</div>
+            </div>
+          </div>
+
+          <div class="anim-box">
+            <h4>Animação — Bubble Sort (passo a passo)</h4>
+            <canvas id="bubbleCanvas" style="width:100%;height:160px;display:block;border-radius:8px;background:#0d1a36"></canvas>
+            <div class="step-log" id="bubbleLog"><div class="log-entry" style="color:#5a6a8a">Clique em "Próximo passo" para avançar uma comparação por vez.</div></div>
+            <div class="anim-controls">
+              <label style="font-size:.82rem;font-weight:600;color:var(--primary)">Tamanho:</label>
+              <select class="anim-select" id="bubbleSize" onchange="bubbleReset()">
+                <option value="8" selected>8</option>
+                <option value="12">12</option>
+              </select>
+              <button class="anim-btn" onclick="bubbleStep()">▶ Próximo passo</button>
+              <button class="anim-btn" onclick="bubbleRunAll()">⏭ Executar tudo</button>
+              <button class="anim-btn" onclick="bubbleReset()">↺ Reiniciar</button>
+              <span class="anim-status" id="bubbleStatus">—</span>
+            </div>
+          </div>
+
+          <h3>Por que fica lento?</h3>
+          <div class="card">
+            <p>Para ordenar n elementos, o Bubble Sort faz no máximo esta quantidade de comparações:</p>
+            <div style="background:#0d1a36;border-radius:8px;padding:1rem;font-family:var(--fm);font-size:.9rem;color:#c8d4f0;margin:.8rem 0;text-align:center">
+              Passagem 1: n−1 comparações<br>
+              Passagem 2: n−2 comparações<br>
+              Passagem 3: n−3 comparações<br>
+              ...<br>
+              Passagem n−1: 1 comparação<br><br>
+              <span style="color:#ffd580;font-size:1rem">Total = (n−1) + (n−2) + ... + 1 = n(n−1)/2 ≈ n²/2 comparações</span>
+            </div>
+            <p style="font-size:.88rem">Para n=1000: cerca de 500.000 comparações. Para n=10.000: cerca de 50.000.000. <strong>Dobrar n quadruplica o trabalho</strong> — esse é o sinal de que algo cresce com n².</p>
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 5):</strong> existe uma forma muito mais inteligente de ordenar. Em vez de comparar pares adjacentes, o Merge Sort usa uma estratégia chamada "dividir e conquistar" — e faz muito menos trabalho.
+          </div>
+        </section>
+
+        <!-- 5. MERGE SORT -->
+        <section id="merge">
+          <h2><span class="num">5</span> Merge Sort</h2>
+
+          <p><strong>A ideia central:</strong> dividir o problema em partes menores, resolver cada parte separadamente, depois juntar os resultados. Essa estratégia tem um nome: <em>divisão e conquista</em>.</p>
+
+          <div class="card" style="padding:1.2rem">
+            <p style="font-weight:600;color:var(--primary);margin-bottom:.6rem">O algoritmo em 3 linhas:</p>
+            <div style="display:grid;gap:.5rem;font-size:.88rem">
+              <div style="padding:.6rem .8rem;background:#e8f0fe;border-radius:6px"><strong style="color:var(--accent)">1. Dividir:</strong> corte o array ao meio. Agora você tem dois arrays menores.</div>
+              <div style="padding:.6rem .8rem;background:#e8f5ee;border-radius:6px"><strong style="color:var(--green)">2. Conquistar:</strong> aplique o mesmo algoritmo recursivamente em cada metade, até sobrar arrays de 1 elemento (que já estão "ordenados").</div>
+              <div style="padding:.6rem .8rem;background:#fff3e0;border-radius:6px"><strong style="color:var(--accent2)">3. Combinar (Merge):</strong> junte duas metades ordenadas numa única lista ordenada — compare o primeiro de cada metade e escolha o menor, repetindo até esvaziar as duas.</div>
+            </div>
+          </div>
+
+          <h3>Veja o trabalho por nível — árvore de chamadas</h3>
+          <p>A chave para entender o custo do Merge Sort é visualizar quantas chamadas acontecem e quanto cada nível da árvore trabalha.</p>
+
+          <div class="tree-box">
+            <h4>Construção da árvore de chamadas (n = <span id="treeSizeLabel">8</span>)</h4>
+            <div id="treeContainer"></div>
+            <div class="anim-controls" style="margin-top:1rem">
+              <label style="font-size:.82rem;font-weight:600;color:var(--primary)">Tamanho:</label>
+              <select class="anim-select" id="treeSize" onchange="treeReset()">
+                <option value="4">4</option>
+                <option value="8" selected>8</option>
+                <option value="16">16</option>
+                <option value="32">32</option>
+              </select>
+              <button class="anim-btn" onclick="treeStep()">▶ Próximo nível</button>
+              <button class="anim-btn" onclick="treeRunAll()">⏭ Mostrar tudo</button>
+              <button class="anim-btn" onclick="treeReset()">↺ Reiniciar</button>
+            </div>
+          </div>
+
+          <h3>A conta que explica o custo</h3>
+          <div class="card">
+            <p>Observe o padrão que a árvore revela:</p>
+            <div style="display:grid;gap:.5rem;font-size:.88rem;margin:.8rem 0">
+              <div style="display:grid;grid-template-columns:100px 1fr;gap:1rem;background:#e8f0fe;padding:.6rem .8rem;border-radius:6px;align-items:center">
+                <strong>Nível 0</strong><span>1 lista de n elementos → merge custa <strong>n</strong> operações</span>
+              </div>
+              <div style="display:grid;grid-template-columns:100px 1fr;gap:1rem;background:#e8f0fe;padding:.6rem .8rem;border-radius:6px;align-items:center">
+                <strong>Nível 1</strong><span>2 listas de n/2 → cada merge custa n/2 → total <strong>n</strong> operações</span>
+              </div>
+              <div style="display:grid;grid-template-columns:100px 1fr;gap:1rem;background:#e8f0fe;padding:.6rem .8rem;border-radius:6px;align-items:center">
+                <strong>Nível 2</strong><span>4 listas de n/4 → cada merge custa n/4 → total <strong>n</strong> operações</span>
+              </div>
+              <div style="display:grid;grid-template-columns:100px 1fr;gap:1rem;background:#f5f5f5;padding:.6rem .8rem;border-radius:6px;align-items:center">
+                <strong>...</strong><span>Cada nível sempre faz exatamente <strong>n</strong> operações no total</span>
+              </div>
+            </div>
+            <div style="background:#0d2d6b;color:white;border-radius:8px;padding:1rem 1.2rem;margin-top:.8rem;font-size:.9rem">
+              <strong>Quantos níveis existem?</strong> A cada nível dividimos por 2. Para n=8: 8→4→2→1 são <strong>3 níveis</strong> (= log₂(8)).<br>
+              Para n=1024: <strong>10 níveis</strong>. Para n=1.000.000: <strong>~20 níveis</strong>.<br><br>
+              <strong style="color:#ffd580">Custo total = n operações × log₂(n) níveis</strong>
+            </div>
+          </div>
+
+          <div class="callout success">
+            <strong>Comparação concreta:</strong> para n = 1.000:
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.6rem 0;font-size:.86rem">
+              <div style="background:#fde8e8;border-radius:6px;padding:.6rem .8rem"><strong>Bubble Sort:</strong> ~500.000 comparações</div>
+              <div style="background:#e8f5ee;border-radius:6px;padding:.6rem .8rem"><strong>Merge Sort:</strong> ~10.000 comparações (50× menos)</div>
+            </div>
+            Para n = 1.000.000: Bubble Sort faz ~500 bilhões de comparações. Merge Sort faz ~20 milhões. A diferença é de 25.000×.
+          </div>
+
+          <div class="callout" style="margin-top:1rem;border-color:var(--accent2);background:#fff3e0">
+            <strong>📖 Continuação em F1.3:</strong> aqui você viu o Merge Sort de forma conceitual — a árvore de chamadas e a contagem de trabalho por nível. Em F1.3 (Recorrências) você vai voltar a esse mesmo algoritmo e aprender a derivar a mesma conta matematicamente, usando a equação T(n) = 2T(n/2) + n. O que você viu aqui vai fazer aquela equação ter sentido imediato.
+          </div>
+
+          <div class="callout success" style="margin-top:.8rem">
+            <strong>→ Próximo passo (seção 6 — Quicksort):</strong> o Merge Sort sempre divide o array em duas metades exatamente iguais. E se a divisão não for igual? O Quicksort usa essa mesma ideia com uma variação que introduz um conceito novo: o custo depende do pivô escolhido.
+          </div>
+        </section>
+
+        <!-- 5. QUICKSORT -->
+        <section id="quicksort">
+          <h2><span class="num">6</span> Quicksort</h2>
+
+          <p>O Quicksort é o algoritmo de ordenação mais usado na prática — Python, Java e C++ o usam internamente. Como o Merge Sort, é divisão e conquista. A diferença está em <em>como</em> divide.</p>
+
+          <p><strong>A ideia:</strong> escolha um elemento como <em>pivô</em>. Reorganize o array para que todos os menores que o pivô fiquem à esquerda e os maiores à direita. Agora o pivô está na sua posição final definitiva. Repita para cada metade.</p>
+
+          <div class="card" style="padding:1.2rem">
+            <p style="font-weight:600;color:var(--primary);margin-bottom:.6rem">Trace: [5, 3, 8, 1, 4, 9, 2, 7] · pivô = 5 (primeiro elemento)</p>
+            <div style="font-size:.85rem;font-family:var(--fm);background:#0d1a36;border-radius:8px;padding:1rem;color:#c8d4f0;line-height:2">
+              <span style="color:#7acdf0">Array:</span>    [5, 3, 8, 1, 4, 9, 2, 7]  pivô = <span style="color:#ffd580">5</span><br>
+              <span style="color:#7acdf0">Menores:</span>  [3, 1, 4, 2]  →  <span style="color:#ffd580">[5]</span>  ←  [8, 9, 7] :maiores<br>
+              <span style="color:#7acdf0">Recursão esq:</span> ordenar [3, 1, 4, 2] → [1, 2, 3, 4]<br>
+              <span style="color:#7acdf0">Recursão dir:</span> ordenar [8, 9, 7] → [7, 8, 9]<br>
+              <span style="color:#7ef0a0">Resultado: [1, 2, 3, 4, <strong>5</strong>, 7, 8, 9] ✓</span>
+            </div>
+          </div>
+
+          <div class="anim-box">
+            <h4>Animação — Quicksort (particionamento passo a passo)</h4>
+            <canvas id="quickCanvas" style="width:100%;height:160px;display:block;border-radius:8px;background:#0d1a36"></canvas>
+            <div class="step-log" id="quickLog"><div class="log-entry" style="color:#5a6a8a">Clique "Próximo passo" para ver o particionamento. O pivô (laranja) vai para sua posição final.</div></div>
+            <div class="anim-controls">
+              <label style="font-size:.82rem;font-weight:600;color:var(--primary)">Pivô:</label>
+              <select class="anim-select" id="quickPivotMode" onchange="quickReset()">
+                <option value="first">Primeiro (pode ser ruim)</option>
+                <option value="middle" selected>Meio (geralmente bom)</option>
+                <option value="worst">Pior caso (já ordenado)</option>
+              </select>
+              <button class="anim-btn" onclick="quickStep()">▶ Próximo passo</button>
+              <button class="anim-btn" onclick="quickRunAll()">⏭ Executar tudo</button>
+              <button class="anim-btn" onclick="quickReset()">↺ Reiniciar</button>
+              <span class="anim-status" id="quickStatus">—</span>
+            </div>
+          </div>
+
+          <h3>O que muda quando o pivô é ruim</h3>
+          <div class="card">
+            <p>Observe o que acontece com a <em>forma</em> da árvore de chamadas dependendo do pivô:</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.8rem 0;font-size:.86rem">
+              <div style="background:#e8f5ee;border-radius:8px;padding:.8rem">
+                <strong style="color:var(--green)">✓ Pivô bom (divide ao meio)</strong><br>
+                n → n/2 e n/2 → árvore balanceada com log₂(n) níveis<br>
+                <div style="font-family:var(--fm);margin-top:.4rem;color:#2d7a50">Custo: n × log n (igual ao Merge Sort)</div>
+              </div>
+              <div style="background:#fde8e8;border-radius:8px;padding:.8rem">
+                <strong style="color:var(--red)">✗ Pivô ruim (divide em 0 e n−1)</strong><br>
+                n → 0 e n−1 → árvore degenerada com n níveis<br>
+                <div style="font-family:var(--fm);margin-top:.4rem;color:#991b1b">Custo: n² (igual ao Bubble Sort)</div>
+              </div>
+            </div>
+            <div style="background:#0d2d6b;color:white;border-radius:8px;padding:1rem;margin-top:.8rem;font-size:.88rem">
+              <strong style="color:#ffd580">Intuição-chave para F1.2:</strong> o Quicksort é o primeiro algoritmo onde pior caso e caso médio têm custos fundamentalmente diferentes. Em F1.2 você vai ver que O (pior caso) e Θ (comportamento típico) são notações distintas exatamente para capturar essa diferença.
+            </div>
+          </div>
+
+          <div class="callout warning">
+            <strong>Por que as linguagens usam Quicksort e não Merge Sort?</strong> Merge Sort precisa de memória extra para a etapa de mesclagem — O(n) espaço adicional. Quicksort ordena <em>no próprio array</em>. Na prática, com pivô escolhido como mediana de 3 elementos, o pior caso raramente ocorre.
+          </div>
+          <div class="callout success" style="margin-top:.8rem">
+            <strong>→ Próximo passo (seção 7):</strong> agora que você viu todos os cinco algoritmos funcionando, vamos colocá-los lado a lado com os números reais — e ver por que a diferença de custo importa tanto quanto n cresce.
+          </div>
+        </section>
+
+        <!-- 6. COMPARAÇÃO -->
+        <section id="comparacao">
+          <h2><span class="num">7</span> Comparação: os cinco algoritmos</h2>
+
+          <p>Com todos os cinco algoritmos na memória, veja o que acontece com os números quando n cresce. Não há notação O ainda — só contagens.</p>
+
+          <table>
+            <thead>
+              <tr><th>Algoritmo</th><th>n = 100</th><th>n = 1.000</th><th>n = 10.000</th><th>n = 1.000.000</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong style="color:#0369a1">Busca Binária</strong></td><td>7</td><td>10</td><td>14</td><td class="cost-log"><strong>20</strong></td></tr>
+              <tr><td><strong style="color:#15803d">Busca Linear</strong></td><td>100</td><td>1.000</td><td>10.000</td><td class="cost-n"><strong>1.000.000</strong></td></tr>
+              <tr><td><strong style="color:#92400e">Merge Sort</strong></td><td>664</td><td>9.966</td><td>132.877</td><td class="cost-nlogn"><strong>~20.000.000</strong></td></tr>
+              <tr><td><strong style="color:#5b21b6">Quicksort (médio)</strong></td><td>~664</td><td>~9.966</td><td>~132.877</td><td class="cost-nlogn"><strong>~20.000.000</strong></td></tr>
+              <tr><td><strong style="color:#991b1b">Quicksort (pior)</strong></td><td>4.950</td><td>499.500</td><td>49.995.000</td><td class="cost-n2"><strong>~500.000.000.000</strong></td></tr>
+              <tr><td><strong style="color:#dc2626">Bubble Sort</strong></td><td>4.950</td><td>499.500</td><td>49.995.000</td><td class="cost-n2"><strong>~500.000.000.000</strong></td></tr>
+            </tbody>
+          </table>
+
+          <p>Três observações que vão fazer sentido em F1.2:</p>
+
+          <div class="proof-steps">
+            <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Busca Binária cresce quase imperceptivelmente.</strong> De n=100 para n=1.000.000 (fator 10.000×), os passos vão de 7 para 20. Adicionar zeros ao tamanho do problema adiciona passos contados. Em F1.2 isso se chama O(log n).</div></div>
+            <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Busca Linear e tamanho do problema crescem juntos.</strong> 10× mais elementos → 10× mais comparações. Em F1.2 isso se chama O(n).</div></div>
+            <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Merge Sort e Quicksort (caso médio) têm números quase idênticos.</strong> Ambos crescem como n×log n — a diferença é que o Quicksort usa menos memória e costuma ser mais rápido na prática pelas constantes ocultas.</div></div>
+            <div class="proof-step"><span class="ps-num">4</span><div class="ps-body"><strong>Quicksort (pior caso) e Bubble Sort têm o mesmo custo.</strong> Um pivô péssimo transforma o Quicksort num algoritmo quadrático. Isso é o que F1.2 vai formalizar: O (pior caso) ≠ Θ (comportamento típico).</div></div>
+            <div class="proof-step"><span class="ps-num">5</span><div class="ps-body"><strong>Bubble Sort explode.</strong> De n=1.000 para n=10.000 (fator 10×), as comparações vão de ~500 mil para ~50 milhões (fator 100×). Dobrar n quadruplica o trabalho. Em F1.2 isso se chama O(n²).</div></div>
+          </div>
+
+          <div class="callout">
+            <strong>O que você vai fazer em F1.2:</strong> aprender a escrever formalmente "cresce como n²" ou "cresce como log n" usando a notação O, Ω e Θ. Mas o seu entendimento de <em>o que está acontecendo</em> você já tem — construído aqui, com números concretos.
+          </div>
+        </section>
+
+                <!-- RESUMO -->
+        <section id="resumo">
+          <h2><span class="num">✓</span> Resumo</h2>
+          <div class="summary-box">
+            <h3>🎯 O que você precisa carregar para F1.2</h3>
+            <div class="summary-row">Busca linear percorre tudo — dobrar a lista dobra o trabalho (proporcional a n)</div>
+            <div class="summary-row">Busca binária descarta metade a cada passo — para n=1.000.000 faz só ~20 comparações</div>
+            <div class="summary-row">Bubble Sort compara pares adjacentes — dobrar a lista quadruplica o trabalho (proporcional a n²)</div>
+            <div class="summary-row">Merge Sort divide, ordena metades, junta — cada nível da árvore faz n trabalho, e há log₂(n) níveis</div>
+            <div class="summary-row">Quicksort tem custo que depende do pivô: ótimo no caso médio (n log n), ruim no pior caso (n²) — introduz a distinção O vs Θ</div>
+            <div class="summary-row">Você vai voltar ao Merge Sort em F1.3 para derivar seu custo matematicamente com equações de recorrência</div>
+          </div>
+
+          <table>
+            <thead><tr><th>Algoritmo</th><th>O que faz</th><th>Cresce como</th><th>Referência em F1.2</th></tr></thead>
+            <tbody>
+              <tr><td>Busca Linear</td><td>Percorre do início ao fim</td><td>proporcional a n</td><td>O(n)</td></tr>
+              <tr><td>Busca Binária</td><td>Descarta metade a cada passo</td><td>logarítmico</td><td>O(log n)</td></tr>
+              <tr><td>Bubble Sort</td><td>Troca pares adjacentes</td><td>proporcional a n²</td><td>O(n²)</td></tr>
+              <tr><td>Merge Sort</td><td>Divide e conquista</td><td>n × log n</td><td>O(n log n)</td></tr>
+              <tr><td>Quicksort</td><td>Particiona pelo pivô</td><td>n log n (médio) / n² (pior)</td><td>O(n²) / Θ(n log n)</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+      </div><!-- /lesson-content -->
+
+      <!-- BOTTOM NAV -->
+      <div class="lesson-nav">
+        <button class="btn-nav prev" disabled style="opacity:.4;cursor:default">← Módulo anterior</button>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico F1</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 1 de 3</div>
+        </div>
+        <a class="btn-nav next" href="f1-2-notacoes-assintoticas.html">Próximo: F1.2 Notações →</a>
+      </div>
+    </div><!-- /lesson-area -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ─────────────────────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────────────────────
+const sidebar = document.getElementById('sidebar');
+const progressLine = document.getElementById('progressLine');
+const overlay = document.getElementById('sbOverlay');
+const isMobile = () => window.innerWidth < 768;
+const saved = localStorage.getItem('sb-state');
+if (saved === 'collapsed' && !isMobile()) { sidebar.classList.add('collapsed'); progressLine.classList.add('visible'); }
+function toggleSidebar() {
+  if (isMobile()) { const o = sidebar.classList.toggle('open'); overlay.classList.toggle('visible', o); return; }
+  const c = sidebar.classList.toggle('collapsed');
+  progressLine.classList.toggle('visible', c);
+  localStorage.setItem('sb-state', c ? 'collapsed' : 'expanded');
+}
+
+// SECTION NAV SCROLL SPY
+const la = document.getElementById('lessonArea');
+const secIds = [...document.querySelectorAll('section[id]')].map(s => s.id);
+document.querySelectorAll('.section-nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const el = document.getElementById(a.getAttribute('href').slice(1));
+    if (el) la.scrollTo({ top: el.offsetTop - 48, behavior: 'smooth' });
+  });
+});
+la.addEventListener('scroll', () => {
+  const st = la.scrollTop + 60; let cur = secIds[0];
+  secIds.forEach(id => { const el = document.getElementById(id); if (el && el.offsetTop <= st) cur = id; });
+  document.querySelectorAll('.section-nav a').forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + cur); });
+});
+
+// ─────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────
+function addLog(logId, msg, cls = '') {
+  const log = document.getElementById(logId);
+  const d = document.createElement('div');
+  d.className = 'log-entry ' + cls;
+  d.textContent = msg;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+function clearLog(logId) { document.getElementById(logId).innerHTML = ''; }
+
+// ─────────────────────────────────────────────────────────
+// LINEAR SEARCH ANIMATION
+// ─────────────────────────────────────────────────────────
+const LINEAR_ARR = [7, 12, 18, 24, 31, 42, 55, 63, 73, 81, 88, 91];
+let linStep = -1, linTarget = 42, linRunning = false, linTimer = null;
+
+function getLinearCanvas() { return document.getElementById('linearCanvas'); }
+
+function drawLinear(highlightIdx = -1, foundIdx = -1) {
+  const canvas = getLinearCanvas();
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+  const n = LINEAR_ARR.length;
+  const cellW = (W - 20) / n, cellH = 52, startY = (H - cellH) / 2;
+  LINEAR_ARR.forEach((val, i) => {
+    const x = 10 + i * cellW;
+    let bg = '#1a2a4d';
+    if (i === foundIdx) bg = '#1a4d1a';
+    else if (i === highlightIdx) bg = '#4d2a00';
+    else if (i < highlightIdx) bg = '#12192e';
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.roundRect(x + 2, startY, cellW - 4, cellH, 6); ctx.fill();
+    ctx.strokeStyle = i === foundIdx ? '#7ef0a0' : i === highlightIdx ? '#ffd580' : '#2a4070';
+    ctx.lineWidth = i === highlightIdx || i === foundIdx ? 2 : 1;
+    ctx.beginPath(); ctx.roundRect(x + 2, startY, cellW - 4, cellH, 6); ctx.stroke();
+    ctx.fillStyle = i === foundIdx ? '#7ef0a0' : i === highlightIdx ? '#ffd580' : '#7a9ad0';
+    ctx.font = `bold ${Math.min(13, cellW * 0.4)}px DM Mono, monospace`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(val, x + cellW / 2, startY + cellH / 2);
+    ctx.fillStyle = '#445';
+    ctx.font = `${9}px DM Mono, monospace`;
+    ctx.fillText(i, x + cellW / 2, startY + cellH + 10);
+  });
+  if (highlightIdx >= 0 && highlightIdx < n) {
+    ctx.fillStyle = '#ffd580';
+    ctx.font = 'bold 10px DM Sans, sans-serif';
+    ctx.textAlign = 'center';
+    const ax = 10 + highlightIdx * cellW + cellW / 2;
+    ctx.fillText('▲', ax, startY - 8);
+  }
+}
+
+function linearStart() {
+  const t = parseInt(document.getElementById('linearTarget').value);
+  linTarget = t; linStep = -1;
+  clearLog('linearLog');
+  drawLinear();
+  document.getElementById('linearStatus').textContent = 'Buscando ' + t + '...';
+  addLog('linearLog', 'Iniciando busca por ' + t + ' em lista de ' + LINEAR_ARR.length + ' elementos.');
+  linRunning = true;
+  document.getElementById('linearPlayBtn').textContent = '⏸ Pausar';
+  linearTick();
+}
+
+function linearTick() {
+  if (!linRunning) return;
+  linStep++;
+  if (linStep >= LINEAR_ARR.length) {
+    drawLinear(linStep - 1);
+    addLog('linearLog', '✗ Elemento ' + linTarget + ' não encontrado. Passos: ' + LINEAR_ARR.length, 'rejected');
+    document.getElementById('linearStatus').textContent = linStep + ' comparações — NÃO ENCONTRADO';
+    linRunning = false;
+    document.getElementById('linearPlayBtn').textContent = '▶ Reiniciar';
+    return;
+  }
+  const val = LINEAR_ARR[linStep];
+  if (val === linTarget) {
+    drawLinear(-1, linStep);
+    addLog('linearLog', '✓ Encontrado ' + val + ' na posição ' + linStep + '. Passos: ' + (linStep + 1), 'found');
+    document.getElementById('linearStatus').textContent = (linStep + 1) + ' comparações — ENCONTRADO ✓';
+    linRunning = false;
+    document.getElementById('linearPlayBtn').textContent = '▶ Reiniciar';
+    return;
+  }
+  drawLinear(linStep);
+  addLog('linearLog', 'Passo ' + (linStep + 1) + ': comparando ' + val + ' com ' + linTarget + ' → diferente, continua');
+  linTimer = setTimeout(linearTick, 500);
+}
+
+function linearReset() {
+  linRunning = false; linStep = -1;
+  clearTimeout(linTimer);
+  clearLog('linearLog');
+  addLog('linearLog', 'Escolha um alvo e clique em Iniciar.');
+  document.getElementById('linearStatus').textContent = '—';
+  document.getElementById('linearPlayBtn').textContent = '▶ Iniciar';
+  setTimeout(() => drawLinear(), 50);
+}
+
+// ─────────────────────────────────────────────────────────
+// BINARY SEARCH ANIMATION
+// ─────────────────────────────────────────────────────────
+let binArr = [], binLo = 0, binHi = 0, binTarget = 0, binStep = 0, binRunning = false, binTimer = null;
+
+function buildBinArr(size) {
+  const arr = [];
+  let v = 3;
+  for (let i = 0; i < size; i++) { arr.push(v); v += Math.floor(Math.random() * 8) + 3; }
+  return arr;
+}
+
+function binaryReset() {
+  binRunning = false; clearTimeout(binTimer);
+  const size = parseInt(document.getElementById('binarySize').value);
+  binArr = buildBinArr(size);
+  binLo = 0; binHi = size - 1; binStep = 0;
+  clearLog('binaryLog');
+  addLog('binaryLog', 'Lista de ' + size + ' elementos gerada. Escolha o alvo e clique em Iniciar.');
+  document.getElementById('binaryStatus').textContent = '—';
+  document.getElementById('binaryPlayBtn').textContent = '▶ Iniciar';
+  setTimeout(() => drawBinary(0, binArr.length - 1, -1, -1), 50);
+}
+
+function drawBinary(lo, hi, mid, foundIdx) {
+  const canvas = document.getElementById('binaryCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+  const n = binArr.length;
+  const cellW = (W - 20) / n, cellH = 48, startY = (H - cellH - 20) / 2;
+  binArr.forEach((val, i) => {
+    const x = 10 + i * cellW;
+    let bg = '#12192e', border = '#1a2a4d';
+    if (i === foundIdx) { bg = '#1a4d1a'; border = '#7ef0a0'; }
+    else if (i === mid) { bg = '#4d2a00'; border = '#ffd580'; }
+    else if (i < lo || i > hi) { bg = '#0a0f1e'; border = '#111'; }
+    else { bg = '#1a2a4d'; border = '#2a4070'; }
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.roundRect(x + 1, startY, cellW - 2, cellH, 4); ctx.fill();
+    ctx.strokeStyle = border;
+    ctx.lineWidth = i === mid || i === foundIdx ? 2 : 1;
+    ctx.beginPath(); ctx.roundRect(x + 1, startY, cellW - 2, cellH, 4); ctx.stroke();
+    if (i >= lo && i <= hi || i === foundIdx) {
+      ctx.fillStyle = i === foundIdx ? '#7ef0a0' : i === mid ? '#ffd580' : '#6a8ac0';
+      ctx.font = `bold ${Math.min(11, cellW * 0.42)}px DM Mono, monospace`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(val > 99 ? '…' : val, x + cellW / 2, startY + cellH / 2);
+    }
+  });
+  // Labels
+  if (mid >= 0 && mid < n) {
+    ctx.fillStyle = '#ffd580'; ctx.font = 'bold 9px DM Sans, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('meio', 10 + mid * cellW + cellW / 2, startY + cellH + 12);
+  }
+}
+
+function binaryStart() {
+  const size = parseInt(document.getElementById('binarySize').value);
+  const tType = document.getElementById('binaryTarget').value;
+  let target;
+  if (tType === 'found-start') target = binArr[0];
+  else if (tType === 'found-end') target = binArr[binArr.length - 1];
+  else target = binArr[binArr.length - 1] + 5;
+  binTarget = target; binLo = 0; binHi = binArr.length - 1; binStep = 0;
+  clearLog('binaryLog');
+  addLog('binaryLog', 'Buscando ' + target + ' em lista de ' + size + ' elementos.');
+  document.getElementById('binaryStatus').textContent = 'Buscando ' + target + '...';
+  binRunning = true;
+  document.getElementById('binaryPlayBtn').textContent = '⏸ Pausar';
+  binTimer = setTimeout(binaryTick, 600);
+}
+
+function binaryTick() {
+  if (!binRunning) return;
+  if (binLo > binHi) {
+    drawBinary(binLo, binHi, -1, -1);
+    addLog('binaryLog', '✗ ' + binTarget + ' não encontrado. Total de passos: ' + binStep, 'rejected');
+    document.getElementById('binaryStatus').textContent = binStep + ' passos — NÃO ENCONTRADO';
+    binRunning = false; document.getElementById('binaryPlayBtn').textContent = '▶ Reiniciar'; return;
+  }
+  const mid = Math.floor((binLo + binHi) / 2);
+  binStep++;
+  drawBinary(binLo, binHi, mid, -1);
+  if (binArr[mid] === binTarget) {
+    drawBinary(binLo, binHi, -1, mid);
+    addLog('binaryLog', '✓ Encontrado na posição ' + mid + '. Total: ' + binStep + ' passo(s)', 'found');
+    document.getElementById('binaryStatus').textContent = binStep + ' passo(s) — ENCONTRADO ✓';
+    binRunning = false; document.getElementById('binaryPlayBtn').textContent = '▶ Reiniciar'; return;
+  }
+  if (binArr[mid] < binTarget) {
+    addLog('binaryLog', 'Passo ' + binStep + ': meio[' + mid + ']=' + binArr[mid] + ' < ' + binTarget + ' → descarta metade esquerda');
+    binLo = mid + 1;
+  } else {
+    addLog('binaryLog', 'Passo ' + binStep + ': meio[' + mid + ']=' + binArr[mid] + ' > ' + binTarget + ' → descarta metade direita');
+    binHi = mid - 1;
+  }
+  binTimer = setTimeout(binaryTick, 700);
+}
+
+// ─────────────────────────────────────────────────────────
+// BUBBLE SORT ANIMATION
+// ─────────────────────────────────────────────────────────
+let bArr = [], bI = 0, bJ = 0, bSwaps = 0, bComps = 0, bDone = false, bRunTimer = null;
+
+function shuffleArr(n) {
+  const a = Array.from({length: n}, (_, i) => (i + 1) * Math.floor(100 / n));
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function bubbleReset() {
+  clearTimeout(bRunTimer);
+  const n = parseInt(document.getElementById('bubbleSize').value);
+  bArr = shuffleArr(n); bI = 0; bJ = 0; bSwaps = 0; bComps = 0; bDone = false;
+  clearLog('bubbleLog');
+  addLog('bubbleLog', 'Array de ' + n + ' elementos gerado. Clique "Próximo passo" para iniciar.');
+  document.getElementById('bubbleStatus').textContent = '—';
+  setTimeout(() => drawBubble(-1, -1, bArr.length), 50);
+}
+
+function drawBubble(j1, j2, sortedFrom) {
+  const canvas = document.getElementById('bubbleCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+  const n = bArr.length;
+  const maxVal = Math.max(...bArr);
+  const barW = (W - 20) / n;
+  const maxH = H - 36;
+  bArr.forEach((val, i) => {
+    const bh = (val / maxVal) * maxH;
+    const x = 10 + i * barW;
+    const y = H - bh - 18;
+    let color = '#1a3a6e';
+    if (i >= sortedFrom) color = '#1a4d2a';
+    else if (i === j1 || i === j2) color = '#6e2a00';
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.roundRect(x + 1, y, barW - 2, bh, 3); ctx.fill();
+    if (i === j1 || i === j2) {
+      ctx.strokeStyle = '#ffd580'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect(x + 1, y, barW - 2, bh, 3); ctx.stroke();
+    }
+    ctx.fillStyle = i >= sortedFrom ? '#7ef0a0' : i === j1 || i === j2 ? '#ffd580' : '#4a6a9a';
+    ctx.font = `${Math.min(10, barW * 0.6)}px DM Mono, monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(val, x + barW / 2, H - 5);
+  });
+}
+
+function bubbleStep() {
+  if (bDone) { bubbleReset(); return; }
+  if (bArr.length === 0) { bubbleReset(); return; }
+  const n = bArr.length;
+  if (bI >= n - 1) {
+    drawBubble(-1, -1, 0);
+    addLog('bubbleLog', '✓ Ordenado! Total: ' + bComps + ' comparações, ' + bSwaps + ' trocas.', 'found');
+    document.getElementById('bubbleStatus').textContent = bComps + ' comparações · ' + bSwaps + ' trocas';
+    bDone = true; return;
+  }
+  if (bJ >= n - 1 - bI) { bI++; bJ = 0; }
+  if (bI >= n - 1) { bubbleStep(); return; }
+  const sortedFrom = n - bI;
+  bComps++;
+  if (bArr[bJ] > bArr[bJ + 1]) {
+    [bArr[bJ], bArr[bJ + 1]] = [bArr[bJ + 1], bArr[bJ]];
+    bSwaps++;
+    addLog('bubbleLog', 'Passo ' + bComps + ': trocou ' + bArr[bJ + 1] + '↔' + bArr[bJ] + ' (posições ' + bJ + ' e ' + (bJ + 1) + ')');
+  } else {
+    addLog('bubbleLog', 'Passo ' + bComps + ': ' + bArr[bJ] + '≤' + bArr[bJ + 1] + ' — sem troca');
+  }
+  drawBubble(bJ, bJ + 1, sortedFrom);
+  document.getElementById('bubbleStatus').textContent = bComps + ' comps · ' + bSwaps + ' trocas · passagem ' + (bI + 1);
+  bJ++;
+}
+
+function bubbleRunAll() {
+  if (bDone) { bubbleReset(); return; }
+  const maxSteps = 500;
+  let steps = 0;
+  while (!bDone && steps < maxSteps) { bubbleStep(); steps++; }
+}
+
+// ─────────────────────────────────────────────────────────
+// MERGE SORT TREE VISUALIZATION
+// ─────────────────────────────────────────────────────────
+let treeLevel = -1, treeN = 8;
+
+function treeReset() {
+  treeN = parseInt(document.getElementById('treeSize').value);
+  document.getElementById('treeSizeLabel').textContent = treeN;
+  treeLevel = -1;
+  renderTree();
+}
+
+function treeStep() {
+  const maxLevels = Math.log2(treeN);
+  if (treeLevel < maxLevels) { treeLevel++; renderTree(); }
+}
+
+function treeRunAll() {
+  treeLevel = Math.log2(treeN);
+  renderTree();
+}
+
+function renderTree() {
+  const container = document.getElementById('treeContainer');
+  if (!container) return;
+  // log2(n) = número de vezes que dividimos por 2 até chegar em 1
+  // Ex: n=16 → 16,8,4,2,1 = 4 divisões = log2(16) = 4
+  // Níveis que fazem MERGE: 0..log2(n)-1 (cada um custa n operações)
+  // Nível base (log2(n)): arrays de 1 elemento — nada a mergear, custo 0
+  const mergeLevels = Math.log2(treeN); // quantas divisões até chegar em 1
+  const totalLevels = mergeLevels + 1;  // +1 para o nível base (tamanho 1)
+  let html = '';
+  let cumulativeWork = 0;
+
+  for (let level = 0; level < totalLevels; level++) {
+    const nodesAtLevel = Math.pow(2, level);
+    const sizeAtLevel = treeN / nodesAtLevel;
+    const isBase = level === mergeLevels;
+    const workAtLevel = isBase ? 0 : treeN; // base não faz merge
+    const visible = level <= treeLevel;
+
+    const workLabel = isBase
+      ? (visible ? '0 (caso base — sem merge)' : '—')
+      : (visible ? treeN + ' operações' : '—');
+    const labelColor = isBase ? '#7ef0a0' : '#ffd580';
+
+    html += `<div class="tree-level-label" style="opacity:${visible ? 1 : 0.2}">
+      <span>Nível ${level}: ${nodesAtLevel} ${nodesAtLevel === 1 ? 'lista' : 'listas'} de ${sizeAtLevel} ${sizeAtLevel === 1 ? 'elemento (base)' : 'elementos'}</span>
+      <span style="font-family:var(--fm);color:${labelColor}">${workLabel}</span>
+    </div>`;
+    html += '<div class="tree-level">';
+    for (let i = 0; i < nodesAtLevel; i++) {
+      const cls = isBase ? 'n-green' : 'n-blue';
+      html += `<div class="tree-node ${cls}" style="opacity:${visible ? 1 : 0.15}">${sizeAtLevel}</div>`;
+    }
+    html += '</div>';
+    if (visible) cumulativeWork += workAtLevel;
+  }
+
+  if (treeLevel >= 0) {
+    const isComplete = treeLevel >= mergeLevels;
+    const levelsWithWork = Math.min(treeLevel, mergeLevels); // só conta os que fazem merge
+    html += `<div class="tree-total-bar" style="opacity:1">
+      <span>${isComplete ? '✓ Total completo' : (treeLevel + 1) + ' de ' + totalLevels + ' níveis'}</span>
+      <span>${cumulativeWork} operações${isComplete ? ' = <strong>' + treeN + ' × ' + mergeLevels + ' = ' + cumulativeWork + '</strong>' : ''}</span>
+    </div>`;
+    if (isComplete) {
+      html += `<div class="callout success" style="margin-top:.8rem">
+        <strong>De onde vem o ${mergeLevels}?</strong>
+        Para n=${treeN}, dividimos por 2 até chegar em 1:
+        ${Array.from({length: mergeLevels + 1}, (_, i) => treeN / Math.pow(2, i)).join(' → ')}
+        — são <strong>${mergeLevels} divisões</strong>, ou seja, log₂(${treeN}) = ${mergeLevels}.<br><br>
+        Cada um dos ${mergeLevels} níveis de merge faz exatamente <strong>${treeN} operações</strong> no total.<br>
+        <strong>Custo total = ${treeN} operações × ${mergeLevels} níveis = ${cumulativeWork}</strong><br><br>
+        Em F1.3 você vai ver a equação T(n) = 2T(n/2) + n que descreve exatamente esse padrão — e chegará a n·log₂(n) formalmente.
+      </div>`;
+    }
+  }
+
+  container.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────
+// QUICKSORT ANIMATION (partition step-by-step)
+// ─────────────────────────────────────────────────────────
+let qArr = [], qPivotIdx = -1, qLo = 0, qHi = 0, qI = -1, qJ = 0;
+let qDone = false, qComps = 0, qSwaps = 0, qPhase = 'start';
+// qPhase: 'start' | 'partition' | 'recurse' | 'done'
+let qStack = []; // stack of [lo, hi] sub-arrays to process
+let qSorted = new Set();
+let qCurrentPivot = -1;
+
+function buildQuickArr(mode) {
+  if (mode === 'worst') return [2, 4, 6, 8, 10, 12, 14, 16]; // already sorted → pivot first = worst case
+  if (mode === 'first') return [14, 3, 9, 1, 7, 11, 5, 16];
+  return [7, 14, 3, 11, 1, 9, 5, 16]; // middle pivot tends to be good
+}
+
+function quickReset() {
+  const mode = document.getElementById('quickPivotMode').value;
+  qArr = buildQuickArr(mode);
+  qSorted = new Set(); qDone = false; qComps = 0; qSwaps = 0;
+  qCurrentPivot = -1;
+  // Initialize stack with full array
+  qStack = [[0, qArr.length - 1]];
+  qPhase = 'start';
+  clearLog('quickLog');
+  const modeLabel = mode === 'worst' ? 'pior caso (lista já ordenada, pivô = primeiro)' :
+                    mode === 'first' ? 'pivô = primeiro elemento' : 'pivô = elemento do meio';
+  addLog('quickLog', 'Array: [' + qArr.join(', ') + '] · modo: ' + modeLabel);
+  addLog('quickLog', 'Clique "Próximo passo" para ver o particionamento.');
+  document.getElementById('quickStatus').textContent = '—';
+  setTimeout(() => drawQuick(-1, -1, -1), 50);
+}
+
+function drawQuick(lo, hi, pivotIdx) {
+  const canvas = document.getElementById('quickCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+  const n = qArr.length;
+  const maxVal = Math.max(...qArr);
+  const barW = (W - 20) / n;
+  const maxH = H - 36;
+  qArr.forEach((val, i) => {
+    const bh = (val / maxVal) * maxH;
+    const x = 10 + i * barW;
+    const y = H - bh - 18;
+    let color = '#1a2a4d';
+    if (qSorted.has(i)) color = '#1a4d2a';
+    else if (i === pivotIdx) color = '#5a2a00';
+    else if (lo >= 0 && i >= lo && i <= hi) color = '#1a3060';
+    else if (lo >= 0) color = '#0e1628';
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.roundRect(x + 1, y, barW - 2, bh, 3); ctx.fill();
+    let stroke = qSorted.has(i) ? '#7ef0a0' : i === pivotIdx ? '#ffd580' :
+                 (lo >= 0 && i >= lo && i <= hi) ? '#2a4a90' : '#151e30';
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = (i === pivotIdx || qSorted.has(i)) ? 2 : 1;
+    ctx.beginPath(); ctx.roundRect(x + 1, y, barW - 2, bh, 3); ctx.stroke();
+    ctx.fillStyle = qSorted.has(i) ? '#7ef0a0' : i === pivotIdx ? '#ffd580' :
+                    (lo >= 0 && i >= lo && i <= hi) ? '#6a8ac0' : '#2a3a5a';
+    ctx.font = `${Math.min(11, barW * 0.55)}px DM Mono, monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(val, x + barW / 2, H - 5);
+  });
+  // Pivot label
+  if (pivotIdx >= 0 && pivotIdx < n) {
+    ctx.fillStyle = '#ffd580';
+    ctx.font = 'bold 9px DM Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('pivô', 10 + pivotIdx * barW + barW / 2, H - bh_forLabel(pivotIdx, maxVal, maxH, H) - 22);
+  }
+}
+function bh_forLabel(i, maxVal, maxH, H) { return (qArr[i] / maxVal) * maxH; }
+
+function partitionStep() {
+  // Single partition: pick pivot, do full partition, push sub-arrays to stack
+  if (qStack.length === 0) {
+    // all done
+    for (let i = 0; i < qArr.length; i++) qSorted.add(i);
+    drawQuick(-1, -1, -1);
+    addLog('quickLog', '✓ Array ordenado! ' + qComps + ' comparações, ' + qSwaps + ' trocas.', 'found');
+    document.getElementById('quickStatus').textContent = qComps + ' comps · ' + qSwaps + ' trocas · ORDENADO ✓';
+    qDone = true; return;
+  }
+  const [lo, hi] = qStack.pop();
+  if (lo >= hi) {
+    if (lo === hi) qSorted.add(lo);
+    partitionStep(); return;
+  }
+  const mode = document.getElementById('quickPivotMode').value;
+  let pivotIdx;
+  if (mode === 'worst' || mode === 'first') pivotIdx = lo;
+  else pivotIdx = Math.floor((lo + hi) / 2);
+
+  // Move pivot to end
+  [qArr[pivotIdx], qArr[hi]] = [qArr[hi], qArr[pivotIdx]]; qSwaps++;
+  const pivotVal = qArr[hi];
+
+  addLog('quickLog', '── Particionando [' + lo + '…' + hi + '] · pivô = ' + pivotVal);
+  drawQuick(lo, hi, hi);
+
+  // Partition in place
+  let storeIdx = lo;
+  for (let k = lo; k < hi; k++) {
+    qComps++;
+    if (qArr[k] <= pivotVal) {
+      [qArr[k], qArr[storeIdx]] = [qArr[storeIdx], qArr[k]]; qSwaps++;
+      storeIdx++;
+    }
+  }
+  [qArr[storeIdx], qArr[hi]] = [qArr[hi], qArr[storeIdx]]; qSwaps++;
+  qSorted.add(storeIdx);
+  addLog('quickLog', '   Pivô ' + pivotVal + ' → posição ' + storeIdx + ' · menores: [' + lo + '…' + (storeIdx-1) + '] · maiores: [' + (storeIdx+1) + '…' + hi + ']');
+
+  drawQuick(lo, hi, storeIdx);
+
+  // Push sub-problems
+  if (storeIdx - 1 > lo) qStack.push([lo, storeIdx - 1]);
+  else if (storeIdx - 1 === lo) qSorted.add(lo);
+  if (storeIdx + 1 < hi) qStack.push([storeIdx + 1, hi]);
+  else if (storeIdx + 1 === hi) qSorted.add(hi);
+
+  document.getElementById('quickStatus').textContent = qComps + ' comps · ' + qSwaps + ' trocas · ' + qStack.length + ' sub-array(s) restante(s)';
+}
+
+function quickStep() {
+  if (qDone) { quickReset(); return; }
+  if (qArr.length === 0) { quickReset(); return; }
+  partitionStep();
+}
+
+function quickRunAll() {
+  if (qDone) { quickReset(); return; }
+  const max = 200;
+  let i = 0;
+  while (!qDone && i++ < max) partitionStep();
+}
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    drawLinear();
+    binaryReset();
+    bubbleReset();
+    treeReset();
+    quickReset();
+  }, 150);
+});
+window.addEventListener('resize', () => {
+  drawLinear(linStep >= 0 ? linStep : -1);
+  drawBinary(binLo, binHi, -1, -1);
+  drawBubble(bJ, bJ + 1, bArr.length - bI);
+  drawQuick(-1, -1, qCurrentPivot);
+});
+</script>
+</body>
+</html>

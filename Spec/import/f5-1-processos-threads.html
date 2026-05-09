@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F5.1 — Processos e Threads · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0F1E;--sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;--n300:#B8BDD8;
+  --n400:#8A90B0;--n500:#5C6180;--white:#fff;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-pill:9999px;
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  --bg:#e6f7f9;--card:#fff;--primary:#0d3d4d;--accent:#0891b2;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#b8e0e8;--code-bg:#d4f1f6;
+  --text:#1a1a2e;--muted:#5a6a8a;--blue:#1a6bcc;--blue-bg:#e8f0fe;
+  --teal:#0891b2;--teal-bg:#cff5fa;--orange-bg:#fff3e0;
+  --purple:#7c3aed;--purple-bg:#ede9fe;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}
+.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}
+.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}
+.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}
+.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--teal-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}
+.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}
+.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--accent)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}
+.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));border-radius:var(--r-pill);width:25%}
+.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden}
+.sb-nav-section{width:100%;padding:0 .6rem}
+.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}
+.sb-item:hover{background:var(--n100);color:var(--ink)}
+.sb-item.active{background:var(--teal-bg);color:var(--accent);font-weight:600}
+.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 3px 3px 0}
+.sb-item.premium{color:#92400E;background:#FEF3C7}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}
+.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}
+.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}
+.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}
+.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}
+.sb-user:hover{background:var(--n50)}
+.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),#0c5e74);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}
+.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}
+.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}
+.sb-overlay.visible{display:block}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}
+.topbar-progress-line.visible{display:block}
+.topbar-progress-fill{height:100%;width:25%;background:linear-gradient(90deg,var(--accent),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}
+.topbar-breadcrumb .sep{color:var(--n300)}
+.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;text-decoration:none}
+
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}
+.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d3d4d 0%,#0891b2 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--r-pill);padding:3px 14px;font-family:var(--fm);font-size:.72rem;letter-spacing:1px;margin-bottom:.8rem}
+.hero-title{font-family:var(--fd);font-size:1.8rem;font-weight:800;margin-bottom:.5rem;position:relative;z-index:1}
+.hero-sub{opacity:.85;font-size:.9rem;max-width:600px;margin:.4rem auto 0;position:relative;z-index:1}
+.hero-chips{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;margin-top:1rem;position:relative;z-index:1}
+.hero-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-pill);padding:4px 14px;font-size:.8rem;font-family:var(--fm)}
+
+/* SECTION NAV */
+.section-nav{background:#0d3d4d;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}
+.section-nav a:hover,.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+
+/* CONTENT */
+.lesson-content{max-width:920px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3.2rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.3rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.3rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.5rem 0 .6rem;font-weight:700}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.8}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--fm);font-size:.88rem}
+
+/* CARDS, CALLOUTS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0}
+.callout{border-left:4px solid var(--accent);background:var(--teal-bg);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem;line-height:1.7}
+.callout.warning{border-color:var(--accent2);background:var(--orange-bg)}
+.callout.success{border-color:var(--green);background:#e8f5ee}
+.callout.blue{border-color:var(--blue);background:var(--blue-bg)}
+.callout.purple{border-color:var(--purple);background:var(--purple-bg)}
+.callout strong{color:var(--primary)}
+
+/* ANALOGY */
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.2rem 0}
+.analogy .side{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}
+.analogy .side h4{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;font-weight:600}
+.analogy .side .val{font-size:1rem;font-weight:600;color:var(--primary);margin-bottom:.4rem}
+.analogy .side p{font-size:.84rem;color:var(--muted);margin:0}
+
+/* SYM DICT */
+.sym-dict{display:grid;gap:.5rem;margin:1rem 0}
+.sym-row{display:grid;grid-template-columns:140px 1fr;gap:1rem;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem}
+.sym-row.highlight{border-color:var(--accent);background:var(--teal-bg)}
+.sym-sym{font-family:var(--fm);font-size:.92rem;color:var(--accent);text-align:left;line-height:1.4;font-weight:700}
+.sym-body{font-size:.88rem;line-height:1.6}
+.sym-body strong{color:var(--primary)}
+.sym-body .eg{margin-top:.3rem;font-family:var(--fm);font-size:.82rem;background:var(--code-bg);padding:2px 8px;border-radius:4px;display:inline-block}
+
+/* PROCESS STATE DIAGRAM */
+.state-diagram{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:1.6rem 1rem;margin:1.4rem 0;position:relative}
+.state-diagram h4{color:var(--primary);font-weight:700;font-size:.95rem;margin-bottom:1rem;text-align:center}
+.state-svg{width:100%;height:340px;display:block}
+.state-node{cursor:pointer;transition:all .2s}
+.state-node:hover .state-circle{stroke-width:4}
+.state-node.active .state-circle{fill:var(--accent);stroke:var(--accent)}
+.state-node.active .state-label{fill:white;font-weight:700}
+.state-circle{fill:white;stroke:var(--n300);stroke-width:2;transition:all .2s}
+.state-label{fill:var(--primary);font-family:var(--fb);font-size:13px;font-weight:600;text-anchor:middle;pointer-events:none}
+.state-arrow{stroke:var(--n400);stroke-width:1.6;fill:none;marker-end:url(#arrow);transition:stroke .2s}
+.state-arrow:hover,.state-arrow.active{stroke:var(--accent);stroke-width:2.5}
+.state-arrow-label{fill:var(--muted);font-family:var(--fm);font-size:11px;cursor:pointer;pointer-events:none}
+.state-arrow-label.active{fill:var(--accent);font-weight:700}
+.state-info-box{background:var(--teal-bg);border:1px solid var(--accent);border-radius:8px;padding:.7rem 1rem;margin-top:1rem;font-size:.86rem;min-height:3.5rem;line-height:1.6}
+.state-info-box strong{color:var(--primary)}
+.state-info-empty{color:var(--muted);font-style:italic}
+
+/* PCB CARD */
+.pcb-card{background:linear-gradient(135deg,#0d3d4d,#0891b2);color:white;border-radius:12px;padding:1.4rem 1.6rem;margin:1.2rem 0;font-family:var(--fm);font-size:.85rem;line-height:1.8;box-shadow:var(--sh-sm)}
+.pcb-card h4{color:white;font-family:var(--fb);font-size:.85rem;text-transform:uppercase;letter-spacing:.8px;margin-bottom:.7rem;opacity:.7;font-weight:600}
+.pcb-row{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.12);padding:.3rem 0;font-size:.85rem}
+.pcb-row:last-child{border-bottom:none}
+.pcb-row .lbl{color:rgba(255,255,255,.65)}
+.pcb-row .val{color:white;font-weight:600}
+
+/* MEMORY LAYOUT */
+.mem-layout{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.2rem 0}
+.mem-process{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:1rem;text-align:center}
+.mem-process h4{color:var(--primary);font-size:.88rem;margin-bottom:.7rem}
+.mem-block{margin:.3rem 0;padding:.6rem .8rem;border-radius:6px;font-family:var(--fm);font-size:.82rem;font-weight:600;color:var(--primary);background:var(--n50);border:1px solid var(--n200)}
+.mem-block.shared{background:var(--em-bg);border-color:var(--em);color:var(--em-d)}
+.mem-block.unique{background:var(--orange-bg);border-color:var(--accent2);color:#a04500}
+.mem-process.proc-a .mem-block{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.mem-process.proc-b .mem-block{background:var(--purple-bg);border-color:var(--purple);color:var(--purple)}
+.mem-thread-box{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem}
+.mem-tlabel{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:.5rem;text-align:left}
+
+/* CODE ANNOTATOR */
+.code-ann{background:#1a1a2e;border-radius:10px;padding:1.2rem;margin:1rem 0;position:relative}
+.code-line{display:flex;gap:.5rem;padding:.15rem .2rem;border-radius:4px;cursor:pointer;transition:background .1s}
+.code-line:hover{background:rgba(255,255,255,.07)}
+.code-line.active{background:rgba(255,255,255,.1)}
+.cl-num{font-family:var(--fm);font-size:.78rem;color:#555;width:22px;text-align:right;flex-shrink:0;user-select:none}
+.cl-code{font-family:var(--fm);font-size:.83rem;color:#e8e8f0;flex:1;white-space:pre}
+.cl-badge{font-family:var(--fm);font-size:.72rem;padding:1px 6px;border-radius:3px;flex-shrink:0;align-self:center}
+.cl-explain{background:rgba(255,255,255,.06);border-left:3px solid var(--accent);padding:.5rem .8rem;border-radius:0 6px 6px 0;font-size:.82rem;color:#c8d4f0;margin:.2rem 0 .4rem 30px;display:none;line-height:1.6}
+.cl-explain.show{display:block}
+.cb-fork{background:#1a3d4d;color:#7aceeb}
+.cb-exec{background:#3d2a1a;color:#f0c87a}
+.cb-wait{background:#1a3d2a;color:#7af0a0}
+.cb-sys{background:#2d1a3d;color:#c87af0}
+.cb-out{background:#3d1a1a;color:#f07a7a}
+
+/* COMPARISON 2 cards */
+.compare2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.2rem 0}
+.compare2 .compare-card{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:1rem 1.2rem}
+.compare2 .compare-card.proc{border-color:var(--blue);background:var(--blue-bg)}
+.compare2 .compare-card.thr{border-color:var(--accent);background:var(--teal-bg)}
+.compare-name{font-weight:700;font-size:.95rem;margin-bottom:.6rem}
+.compare2 .compare-card.proc .compare-name{color:var(--blue)}
+.compare2 .compare-card.thr .compare-name{color:var(--accent)}
+.compare-list{font-size:.84rem;color:var(--text);line-height:1.7;list-style:none;padding-left:0}
+.compare-list li{padding:.18rem 0 .18rem 1.4rem;position:relative}
+.compare-list li::before{content:'•';position:absolute;left:.4rem;color:var(--muted);font-weight:700}
+
+/* MODELS TABLE for thread models */
+.models-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1.2rem 0}
+.model-card{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:1rem;text-align:center}
+.model-card.m1{border-color:var(--purple);background:var(--purple-bg)}
+.model-card.m11{border-color:var(--blue);background:var(--blue-bg)}
+.model-card.mn{border-color:var(--accent);background:var(--teal-bg)}
+.model-name{font-family:var(--fd);font-weight:700;font-size:1rem;margin-bottom:.3rem}
+.model-card.m1 .model-name{color:var(--purple)}
+.model-card.m11 .model-name{color:var(--blue)}
+.model-card.mn .model-name{color:var(--accent)}
+.model-tag{font-family:var(--fm);font-size:.74rem;color:var(--muted);margin-bottom:.6rem}
+.model-pros{font-size:.78rem;color:var(--green);text-align:left;line-height:1.5;margin-bottom:.4rem}
+.model-pros strong{color:var(--green);display:block;margin-bottom:.2rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+.model-cons{font-size:.78rem;color:var(--red);text-align:left;line-height:1.5}
+.model-cons strong{color:var(--red);display:block;margin-bottom:.2rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+
+/* IPC TABLE */
+.ipc-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.86rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.ipc-table th{background:var(--primary);color:white;padding:.6rem 1rem;text-align:left;font-weight:600}
+.ipc-table td{padding:.55rem 1rem;border-bottom:1px solid var(--border);background:var(--card)}
+.ipc-table tr:hover td{background:var(--teal-bg)}
+.ipc-table td:first-child{font-weight:700;color:var(--accent);font-family:var(--fm)}
+
+/* CONTEXT SWITCH ANIM */
+.ctx-anim-box{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.2rem 0}
+.ctx-anim-box h4{color:var(--primary);font-weight:700;font-size:.95rem;margin-bottom:.8rem}
+.ctx-canvas{width:100%;height:200px;display:block;border-radius:8px;background:#0d3d4d}
+.ctx-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;align-items:center}
+.ctx-btn{padding:.38rem .9rem;border-radius:var(--r-pill);border:1px solid var(--accent);background:var(--white);color:var(--accent);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s}
+.ctx-btn:hover{background:var(--teal-bg)}
+.ctx-btn.active{background:var(--accent);color:white}
+.ctx-legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.8rem;margin-top:.6rem;color:var(--muted)}
+.leg-dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:.3rem;vertical-align:middle}
+
+/* DETAILS TOGGLE */
+.details-toggle{margin:.8rem 0;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.dt-trigger{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--accent);background:var(--teal-bg);user-select:none;transition:background .15s}
+.dt-trigger:hover{background:#bfeef5}
+.dt-arrow{font-size:.7rem;transition:transform .2s;display:inline-block}
+.dt-trigger.open .dt-arrow{transform:rotate(90deg)}
+.dt-content{display:none;background:var(--card);padding:.8rem 1rem}
+.dt-content.show{display:block}
+
+/* PROOF/TRACE STEPS */
+.proof-steps{margin:1rem 0}
+.proof-step{display:flex;gap:1rem;padding:.8rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:.5rem 0;font-size:.9rem;align-items:flex-start;line-height:1.6}
+.proof-step .ps-num{background:var(--accent);color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;font-family:var(--fm)}
+.proof-step .ps-body code{background:var(--code-bg);padding:1px 6px;border-radius:4px}
+
+/* QUIZ */
+.quiz-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.quiz-q{font-weight:600;color:var(--primary);margin-bottom:1rem;font-size:.95rem;line-height:1.5}
+.quiz-q code{background:var(--code-bg);padding:1px 6px;border-radius:3px;font-size:.85rem}
+.quiz-option{display:flex;align-items:flex-start;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f0fafd;margin:.4rem 0;font-size:.9rem;line-height:1.5}
+.quiz-option:hover{background:var(--teal-bg);border-color:var(--accent)}
+.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}
+.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+.quiz-option code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;font-size:.84rem}
+.quiz-feedback{margin-top:.8rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;display:none;line-height:1.6}
+.quiz-feedback.show{display:block}
+.quiz-feedback.ok{background:#e8f5ee;color:#15803d;border:1px solid #86efac}
+.quiz-feedback.fail{background:#fde8e8;color:var(--red);border:1px solid #fca5a5}
+
+/* SUMMARY */
+.summary-box{background:linear-gradient(135deg,#0d3d4d,#0891b2);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}
+.summary-box h3{color:white;margin-bottom:1rem;font-size:1.05rem}
+.summary-row{display:flex;gap:.6rem;margin:.45rem 0;align-items:flex-start;font-size:.9rem;line-height:1.5}
+.summary-row::before{content:'✓';color:#7eedf7;flex-shrink:0;font-weight:700;margin-top:.05rem}
+.ref-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.84rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.ref-table th{background:rgba(255,255,255,.15);color:white;padding:.5rem .8rem;text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(255,255,255,.2)}
+.ref-table td{padding:.48rem .8rem;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.88)}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table td:first-child{font-family:var(--fm);font-weight:700;color:#7eedf7}
+
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05)}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}
+.lnp-label{font-size:.7rem;color:var(--n400)}
+.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}
+.lnp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));width:25%}
+.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}
+.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--accent);color:white;border-color:var(--accent)}
+.btn-nav.next:hover{background:#076d8b}
+
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}
+  .sidebar.open{transform:translateX(0)}
+  .analogy{grid-template-columns:1fr}
+  .mem-layout{grid-template-columns:1fr}
+  .compare2{grid-template-columns:1fr}
+  .models-grid{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+  .sym-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip">
+      <div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">25%</span></div>
+      <div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div>
+      <div class="sb-ps-caption">13 de 25 sub-áreas iniciadas</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section">
+        <div class="sb-nav-label">Início</div>
+        <a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section">
+        <div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas de Estudo</span></a>
+        <a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section">
+        <div class="sb-nav-label">Praticar</div>
+        <a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado POSCOMP</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item" href="curriculo.html"><div class="sb-item-icon">📊</div><span class="sb-item-text">Currículo Completo</span><span class="sb-tooltip">Currículo Completo</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Seja Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar">RN</div>
+        <div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Sistemas Operacionais</a><span class="sep">›</span>
+        <span class="current">F5.1 — Processos e Threads</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+
+    <div class="lesson-area" id="lessonArea">
+      <!-- HERO -->
+      <div class="lesson-header">
+        <div class="hero-tag">SISTEMAS OPERACIONAIS · F5.1</div>
+        <div class="hero-title">Processos e Threads</div>
+        <div class="hero-chips">
+          <span class="hero-chip">Processo · PCB · Estados</span>
+          <span class="hero-chip">fork · exec · wait</span>
+          <span class="hero-chip">Threads · IPC · Context Switch</span>
+        </div>
+        <div class="hero-sub">A unidade fundamental de execução do SO — como vários programas convivem em uma CPU sem se atropelarem</div>
+      </div>
+
+      <!-- SECTION NAV -->
+      <nav class="section-nav" id="sectionNav">
+        <a href="#motivacao">1. Por que processos?</a>
+        <a href="#processo">2. Processo vs programa</a>
+        <a href="#pcb">3. PCB</a>
+        <a href="#estados">4. Estados</a>
+        <a href="#fork">5. Criação</a>
+        <a href="#threads">6. Threads</a>
+        <a href="#ipc">7. IPC</a>
+        <a href="#ctxsw">8. Context switch</a>
+        <a href="#quiz">9. Quiz</a>
+        <a href="#resumo">10. Resumo</a>
+      </nav>
+
+      <div class="lesson-content">
+        <!-- 1. MOTIVAÇÃO -->
+        <section id="motivacao">
+          <h2><span class="num">1</span> Por que precisamos do conceito de "processo"?</h2>
+
+          <p>Abra o gerenciador de tarefas do seu computador agora. Você vai ver dezenas de programas rodando ao mesmo tempo: navegador, editor de texto, música, antivírus, sistema operacional. Mas seu processador tem só alguns núcleos — talvez 4, talvez 8. Como 200 programas conseguem rodar em 4 núcleos?</p>
+
+          <p>A resposta curta: <strong>eles não rodam simultaneamente</strong>. O sistema operacional alterna entre eles tão rápido (milhares de vezes por segundo) que parece simultâneo. Mas para alternar, o SO precisa lembrar onde cada programa parou — qual instrução ele estava executando, quais valores tinha nos registradores, qual memória estava usando.</p>
+
+          <div class="analogy">
+            <div class="side">
+              <h4>🍽️ Analogia: garçom servindo várias mesas</h4>
+              <div class="val">Sem o conceito de "comanda"</div>
+              <p>O garçom esquece quem pediu o quê assim que vira de costas. Caos — ninguém é servido corretamente.</p>
+            </div>
+            <div class="side">
+              <h4>📋 Com comanda por mesa</h4>
+              <div class="val">"Comanda" = processo</div>
+              <p>Cada mesa tem sua comanda com pedido, status (esperando, comendo, esperando conta), histórico. O garçom alterna entre mesas mas nunca se perde.</p>
+            </div>
+          </div>
+
+          <p>Um <strong>processo</strong> é exatamente isso: a "comanda" que o SO mantém para cada programa em execução. Toda vez que o SO interrompe um programa para rodar outro, ele atualiza a comanda — e quando volta a rodar aquele programa, lê a comanda para saber onde parou.</p>
+
+          <div class="callout">
+            <strong>Insight central:</strong> "processo" é a unidade básica que o sistema operacional gerencia. Sem essa abstração, multitasking seria impossível. Tudo neste módulo é sobre como os processos são representados, criados, transitam entre estados e se comunicam.
+          </div>
+
+          <h3>O que faz parte do processo?</h3>
+          <p>Antes de entrar no formal, pense no que o SO precisa lembrar para "retomar" um programa que foi pausado:</p>
+
+          <div class="card">
+            <ul style="list-style:none;padding-left:0;font-size:.9rem;line-height:2">
+              <li><strong>1.</strong> <strong>Qual instrução vai ser executada a seguir.</strong> Sem isso, o programa não sabe onde continuar.</li>
+              <li><strong>2.</strong> <strong>Os valores dos registradores da CPU.</strong> Variáveis em uso no meio de um cálculo.</li>
+              <li><strong>3.</strong> <strong>A memória que o programa está usando.</strong> Variáveis, pilha de chamadas, dados.</li>
+              <li><strong>4.</strong> <strong>Quais arquivos estão abertos.</strong> Posição de leitura, modo de acesso.</li>
+              <li><strong>5.</strong> <strong>Em que estado está.</strong> Rodando? Esperando teclado? Esperando disco?</li>
+            </ul>
+          </div>
+
+          <p>Cada um desses itens vai ganhar nome técnico nas próximas seções. Agora você já tem a intuição: <em>processo é tudo aquilo que o SO precisa saber sobre um programa em execução para conseguir pausar e retomar sem perder nada</em>.</p>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 2):</strong> antes de mergulhar na estrutura técnica, precisamos esclarecer uma confusão muito comum — qual a diferença entre <em>programa</em> (o que você baixa, instala) e <em>processo</em> (o que está rodando)?
+          </div>
+        </section>
+
+        <!-- 2. PROCESSO VS PROGRAMA -->
+        <section id="processo">
+          <h2><span class="num">2</span> Processo vs. programa — não são a mesma coisa</h2>
+
+          <p>"Programa" e "processo" são frequentemente usados como sinônimos no dia a dia, mas em sistemas operacionais essa distinção é crítica e cai em prova.</p>
+
+          <div class="analogy">
+            <div class="side" style="border-left:4px solid var(--blue)">
+              <h4 style="color:var(--blue)">📄 Programa</h4>
+              <div class="val">Receita de bolo</div>
+              <p>É o arquivo no disco. Estático. Inerte. Nunca executou nada. <code>chrome.exe</code>, <code>python</code>, <code>ls</code>.</p>
+            </div>
+            <div class="side" style="border-left:4px solid var(--accent)">
+              <h4 style="color:var(--accent)">⚡ Processo</h4>
+              <div class="val">Bolo sendo feito agora</div>
+              <p>É a execução do programa. Dinâmico. Tem estado em mudança. Consome CPU e memória <em>agora</em>.</p>
+            </div>
+          </div>
+
+          <p>Implicação importante: o mesmo programa pode dar origem a <strong>vários processos rodando ao mesmo tempo</strong>. Você pode abrir três janelas do navegador — três processos do mesmo programa <code>chrome.exe</code>. Eles não compartilham memória, têm PIDs diferentes, podem estar em estados diferentes.</p>
+
+          <div class="card">
+            <p style="font-weight:600;color:var(--primary);margin-bottom:.6rem">Exemplo concreto</p>
+            <p>Você executa <code>python script.py</code> três vezes em três terminais. Resultado:</p>
+            <ul style="list-style:disc;padding-left:1.5rem;font-size:.88rem;line-height:1.8;margin:.5rem 0">
+              <li><strong>1 programa</strong>: <code>/usr/bin/python</code> (mesmo arquivo binário no disco)</li>
+              <li><strong>1 script</strong>: <code>script.py</code> (mesmo código sendo executado)</li>
+              <li><strong>3 processos</strong>: cada um com PID distinto, memória própria, conjunto de variáveis independente</li>
+            </ul>
+            <p style="margin-top:.5rem">Se um processo trava, os outros dois continuam rodando — eles são totalmente isolados.</p>
+          </div>
+
+          <h3>Anatomia do espaço de endereçamento de um processo</h3>
+
+          <p>Quando o SO carrega um programa para a memória e cria o processo, ele organiza essa memória em regiões. Saber essa organização é fundamental — em <strong>F5.3 Memória Virtual</strong> vamos detalhar cada uma.</p>
+
+          <div class="card" style="background:#0d3d4d;color:white;font-family:var(--fm);padding:0;overflow:hidden">
+            <div style="background:rgba(0,0,0,.2);padding:.4rem 1rem;font-size:.78rem;color:#7eedf7;letter-spacing:.5px">ENDEREÇOS ALTOS ↑</div>
+            <div style="padding:.6rem 1rem;border-bottom:1px dashed rgba(255,255,255,.2)"><strong style="color:#7eedf7">Stack</strong> — variáveis locais, parâmetros de função, endereço de retorno. Cresce ↓</div>
+            <div style="padding:.6rem 1rem;border-bottom:1px dashed rgba(255,255,255,.2);font-size:.78rem;color:rgba(255,255,255,.5);text-align:center;font-style:italic">(espaço livre no meio)</div>
+            <div style="padding:.6rem 1rem;border-bottom:1px dashed rgba(255,255,255,.2)"><strong style="color:#f0c87a">Heap</strong> — memória alocada dinamicamente (<code style="background:rgba(255,255,255,.15);color:#f0c87a;padding:1px 5px;border-radius:3px">malloc</code>, <code style="background:rgba(255,255,255,.15);color:#f0c87a;padding:1px 5px;border-radius:3px">new</code>). Cresce ↑</div>
+            <div style="padding:.6rem 1rem;border-bottom:1px dashed rgba(255,255,255,.2)"><strong style="color:#7af0a0">Data</strong> — variáveis globais e estáticas (<code style="background:rgba(255,255,255,.15);color:#7af0a0;padding:1px 5px;border-radius:3px">int counter = 0</code>)</div>
+            <div style="padding:.6rem 1rem"><strong style="color:#c87af0">Text (Code)</strong> — instruções do programa. Read-only, compartilhável.</div>
+            <div style="background:rgba(0,0,0,.2);padding:.4rem 1rem;font-size:.78rem;color:#7eedf7;letter-spacing:.5px">ENDEREÇOS BAIXOS ↓</div>
+          </div>
+
+          <p style="margin-top:1rem;font-size:.86rem;color:var(--muted)">Stack e Heap crescem em direções opostas para aproveitar o espaço livre no meio. Se um invade o outro: <em>stack overflow</em> (o erro famoso) ou <em>out of memory</em>.</p>
+
+          <div class="callout warning">
+            <strong>Erro comum:</strong> "se o programa não está rodando, ele não tem memória alocada". Verdade — programa no disco ocupa só espaço em disco, não em RAM. A alocação de memória RAM acontece <em>quando o processo é criado</em>, não quando o programa é instalado.
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 3):</strong> agora que você entende que processo = execução com estado, vamos ver onde o SO armazena esse estado. Toda essa informação (PC, registradores, memória, arquivos) precisa ficar em algum lugar — esse lugar tem nome.
+          </div>
+        </section>
+
+        <!-- 3. PCB -->
+        <section id="pcb">
+          <h2><span class="num">3</span> PCB — onde mora o estado do processo</h2>
+
+          <p>O sistema operacional precisa armazenar tudo o que vimos na seção 1 (PC, registradores, memória, arquivos abertos, estado) em algum lugar. Esse "lugar" é uma <strong>estrutura de dados</strong> chamada <strong>Process Control Block</strong> — abreviado <strong>PCB</strong>.</p>
+
+          <p>É só isso: um registro/struct que o kernel mantém para cada processo. Quando o SO precisa pausar o processo P1 e rodar P2, ele:</p>
+
+          <ol style="padding-left:1.5rem;font-size:.9rem;line-height:1.9;margin:.5rem 0">
+            <li>Lê os registradores atuais da CPU e <strong>grava no PCB de P1</strong></li>
+            <li>Pega os valores do <strong>PCB de P2</strong> e carrega nos registradores</li>
+            <li>P2 retoma exatamente de onde tinha parado</li>
+          </ol>
+
+          <p>Sem o PCB, essa troca seria impossível. Toda a "memória" que o SO tem sobre cada processo está no PCB.</p>
+
+          <h3>Conteúdo do PCB</h3>
+
+          <p>O PCB tem campos padronizados que aparecem em qualquer SO moderno (Linux, Windows, macOS):</p>
+
+          <div class="pcb-card">
+            <h4>📋 Process Control Block — Exemplo</h4>
+            <div class="pcb-row"><span class="lbl">PID (Process Identifier)</span><span class="val">2847</span></div>
+            <div class="pcb-row"><span class="lbl">Estado atual</span><span class="val">Pronto</span></div>
+            <div class="pcb-row"><span class="lbl">Program Counter (PC)</span><span class="val">0x4000A120</span></div>
+            <div class="pcb-row"><span class="lbl">Registradores da CPU</span><span class="val">{R0..R15: ...}</span></div>
+            <div class="pcb-row"><span class="lbl">Stack pointer (SP)</span><span class="val">0x7FFE3A00</span></div>
+            <div class="pcb-row"><span class="lbl">Limite de memória</span><span class="val">0x4000–0x9000</span></div>
+            <div class="pcb-row"><span class="lbl">Tabela de páginas</span><span class="val">→ ptr 0xC4FF...</span></div>
+            <div class="pcb-row"><span class="lbl">Arquivos abertos</span><span class="val">[stdin, stdout, log.txt]</span></div>
+            <div class="pcb-row"><span class="lbl">Prioridade</span><span class="val">5</span></div>
+            <div class="pcb-row"><span class="lbl">PID do pai</span><span class="val">2840</span></div>
+            <div class="pcb-row"><span class="lbl">Tempo de CPU usado</span><span class="val">142 ms</span></div>
+          </div>
+
+          <p>Note que o PCB referencia (mas não contém) as <strong>tabelas de páginas</strong> e a memória do processo — essas são estruturas separadas. O PCB tem <em>ponteiros</em> para elas.</p>
+
+          <h3>Onde fica o PCB?</h3>
+
+          <p>O PCB fica em <strong>memória do kernel</strong> — área protegida, inacessível ao processo de usuário. Você não consegue, do seu programa, ler ou modificar o próprio PCB diretamente. Toda manipulação é feita por chamadas de sistema (syscalls).</p>
+
+          <div class="callout">
+            <strong>Por que protegido?</strong> Se um processo pudesse modificar seu próprio PCB livremente, ele poderia, por exemplo, mudar sua prioridade para máxima e travar a CPU para si. A separação kernel/usuário é a primeira camada de segurança do SO.
+          </div>
+
+          <p>O kernel mantém uma <strong>tabela de processos</strong> — basicamente um array (ou lista) de PCBs. Quando você roda <code>ps</code> ou <code>Task Manager</code>, está percorrendo essa tabela.</p>
+
+          <h3>Exemplo real: Linux</h3>
+
+          <p>No kernel do Linux, o PCB é a struct <code>task_struct</code> em <code>include/linux/sched.h</code>. Tem mais de 100 campos. Os principais:</p>
+
+          <div class="details-toggle">
+            <div class="dt-trigger" onclick="toggleDetails(this)"><span class="dt-arrow">▸</span> Ver campos do task_struct (Linux real)</div>
+            <div class="dt-content">
+              <pre style="font-family:var(--fm);font-size:.78rem;line-height:1.6;color:var(--text);background:var(--n50);padding:.8rem;border-radius:6px;overflow-x:auto;margin:0">struct task_struct {
+    pid_t              pid;            // identificador do processo
+    pid_t              tgid;           // thread group id
+    long               state;          // -1, 0, ou >0 (estado)
+    void              *stack;          // ponteiro para a pilha do kernel
+    struct mm_struct  *mm;             // mapa de memória
+    struct files_struct *files;        // arquivos abertos
+    struct task_struct *parent;        // processo pai
+    struct list_head   children;       // lista de filhos
+    int                prio;           // prioridade dinâmica
+    int                static_prio;    // prioridade estática
+    u64                utime, stime;   // tempo em user/kernel mode
+    sigset_t           blocked;        // sinais bloqueados
+    // ... +90 outros campos
+};</pre>
+              <p style="font-size:.8rem;color:var(--muted);margin-top:.5rem">Fonte: <code>linux/include/linux/sched.h</code> (resumido)</p>
+            </div>
+          </div>
+
+          <div class="callout warning">
+            <strong>Erro comum em prova:</strong> "código fonte do programa faz parte do PCB". Não — código fica em uma região da <em>memória do processo</em> (Text/Code, vista na seção 2). O PCB tem só <em>metadados sobre</em> o processo, não o código em si.
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 4):</strong> um dos campos do PCB é "estado atual". Mas que estados existem? Por que um processo às vezes está "rodando", às vezes "esperando"? Vamos ao diagrama de transição.
+          </div>
+        </section>
+
+        <!-- 4. ESTADOS DE UM PROCESSO -->
+        <section id="estados">
+          <h2><span class="num">4</span> Estados de um processo</h2>
+
+          <p>Um processo passa por vários "estados" ao longo de sua vida. Em cada momento, ele está em <em>exatamente um</em> estado. As transições entre estados acontecem por eventos: o SO escalonando, o processo pedindo I/O, etc.</p>
+
+          <p>O modelo mais ensinado e cobrado em prova tem <strong>5 estados</strong>:</p>
+
+          <div class="sym-dict">
+            <div class="sym-row">
+              <div class="sym-sym">Novo</div>
+              <div class="sym-body"><strong>Acabou de ser criado.</strong> O SO está alocando recursos (PCB, memória inicial). Ainda não está pronto para rodar.<br>
+              <span class="eg">processo recém-criado por fork(), antes de ser admitido na fila de prontos</span></div>
+            </div>
+            <div class="sym-row highlight">
+              <div class="sym-sym">Pronto</div>
+              <div class="sym-body"><strong>Pode rodar, mas a CPU está ocupada com outro.</strong> Está na fila esperando o escalonador escolher.<br>
+              <span class="eg">tem tudo o que precisa para rodar — só falta a CPU ficar disponível</span></div>
+            </div>
+            <div class="sym-row highlight">
+              <div class="sym-sym">Executando</div>
+              <div class="sym-body"><strong>Está com a CPU agora.</strong> Em qualquer instante, no máximo um processo por núcleo está aqui.<br>
+              <span class="eg">CPU executando suas instruções; PC e registradores são "dele"</span></div>
+            </div>
+            <div class="sym-row highlight">
+              <div class="sym-sym">Bloqueado</div>
+              <div class="sym-body"><strong>Esperando algo que ainda não aconteceu.</strong> Pediu I/O, está esperando dados; ou esperando um lock; ou em sleep().<br>
+              <span class="eg">processo chamou read() do disco — fica bloqueado até o dado chegar</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">Terminado</div>
+              <div class="sym-body"><strong>Acabou.</strong> Já executou exit() ou foi morto. PCB ainda existe brevemente para o pai poder recuperar o status (zombie).<br>
+              <span class="eg">processo terminou normalmente (exit 0) ou abortou (sigsegv)</span></div>
+            </div>
+          </div>
+
+          <h3>Diagrama de transições — clique nos estados e setas</h3>
+
+          <p>O diagrama abaixo mostra os 5 estados e as transições possíveis. Clique em cada estado ou seta para ver o que ela significa:</p>
+
+          <div class="state-diagram">
+            <h4>Ciclo de vida de um processo</h4>
+            <svg class="state-svg" viewBox="0 0 800 320" id="stateDiagram">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--n400)"/>
+                </marker>
+                <marker id="arrowAcc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+                </marker>
+              </defs>
+
+              <!-- Arrows (drawn first so circles cover the ends nicely) -->
+              <!-- Novo -> Pronto (admit) -->
+              <path id="arr-admit" class="state-arrow" d="M 130 70 Q 220 70 290 130" data-info="admit"/>
+              <text class="state-arrow-label" id="lbl-admit" x="200" y="60" data-info="admit">admit</text>
+
+              <!-- Pronto -> Executando (dispatch) -->
+              <path id="arr-dispatch" class="state-arrow" d="M 380 155 L 480 155" data-info="dispatch"/>
+              <text class="state-arrow-label" id="lbl-dispatch" x="395" y="145" data-info="dispatch">dispatch</text>
+
+              <!-- Executando -> Pronto (preempt/timeout) -->
+              <path id="arr-preempt" class="state-arrow" d="M 480 175 L 380 175" data-info="preempt"/>
+              <text class="state-arrow-label" id="lbl-preempt" x="395" y="195" data-info="preempt">timeout / preempt</text>
+
+              <!-- Executando -> Bloqueado (wait IO) -->
+              <path id="arr-block" class="state-arrow" d="M 540 195 Q 540 250 440 250" data-info="block"/>
+              <text class="state-arrow-label" id="lbl-block" x="450" y="270" data-info="block">wait I/O / lock</text>
+
+              <!-- Bloqueado -> Pronto (event) -->
+              <path id="arr-wakeup" class="state-arrow" d="M 360 230 Q 280 200 320 175" data-info="wakeup"/>
+              <text class="state-arrow-label" id="lbl-wakeup" x="270" y="220" data-info="wakeup">event done</text>
+
+              <!-- Executando -> Terminado (exit) -->
+              <path id="arr-exit" class="state-arrow" d="M 600 145 Q 660 130 700 130" data-info="exit"/>
+              <text class="state-arrow-label" id="lbl-exit" x="630" y="115" data-info="exit">exit</text>
+
+              <!-- States -->
+              <g class="state-node" data-state="novo" tabindex="0">
+                <circle class="state-circle" cx="80" cy="70" r="42"/>
+                <text class="state-label" x="80" y="75">Novo</text>
+              </g>
+
+              <g class="state-node" data-state="pronto" tabindex="0">
+                <circle class="state-circle" cx="330" cy="165" r="50"/>
+                <text class="state-label" x="330" y="170">Pronto</text>
+              </g>
+
+              <g class="state-node" data-state="executando" tabindex="0">
+                <circle class="state-circle" cx="540" cy="165" r="58"/>
+                <text class="state-label" x="540" y="170">Executando</text>
+              </g>
+
+              <g class="state-node" data-state="bloqueado" tabindex="0">
+                <circle class="state-circle" cx="400" cy="260" r="48"/>
+                <text class="state-label" x="400" y="265">Bloqueado</text>
+              </g>
+
+              <g class="state-node" data-state="terminado" tabindex="0">
+                <circle class="state-circle" cx="730" cy="130" r="42"/>
+                <text class="state-label" x="730" y="135">Terminado</text>
+              </g>
+            </svg>
+            <div class="state-info-box" id="stateInfoBox">
+              <span class="state-info-empty">👆 Clique em um estado ou seta para ver a explicação</span>
+            </div>
+          </div>
+
+          <h3>Quem causa cada transição?</h3>
+
+          <p>Um detalhe importante: nem todas as transições são iguais. Algumas são causadas pelo SO, outras pelo próprio processo, outras por hardware externo. Entender isso ajuda a responder questões de prova:</p>
+
+          <table class="ipc-table">
+            <thead><tr><th>Transição</th><th>Quem causa</th><th>Exemplo</th></tr></thead>
+            <tbody>
+              <tr><td>Novo → Pronto</td><td>SO (escalonador de longo prazo)</td><td>fork() concluído, PCB pronto</td></tr>
+              <tr><td>Pronto → Executando</td><td>SO (escalonador de curto prazo)</td><td>"chegou tua vez" (dispatch)</td></tr>
+              <tr><td>Executando → Pronto</td><td>SO (timer / processo de prioridade maior)</td><td>quantum expirou — preempção</td></tr>
+              <tr><td>Executando → Bloqueado</td><td><strong>Próprio processo</strong></td><td>chamou read() — espera I/O</td></tr>
+              <tr><td>Bloqueado → Pronto</td><td>Hardware / outro processo</td><td>disco respondeu, lock liberado</td></tr>
+              <tr><td>Executando → Terminado</td><td><strong>Próprio processo ou SO</strong></td><td>exit() voluntário; ou kill -9</td></tr>
+            </tbody>
+          </table>
+
+          <p style="margin-top:1rem"><strong>Observação chave:</strong> só o estado <em>Executando</em> pode ir para <em>Bloqueado</em>. Um processo no estado Pronto não pode pedir I/O — ele nem está rodando, então não tem como "chamar read()". Esse detalhe cai em prova (transições impossíveis).</p>
+
+          <h3>Caso-limite: transições impossíveis</h3>
+
+          <p>Algumas transições <em>não existem</em> nesse modelo. Saber por quê reforça o entendimento:</p>
+
+          <div class="card">
+            <ul style="list-style:none;padding:0;font-size:.9rem;line-height:2">
+              <li><strong style="color:var(--red)">Pronto → Bloqueado:</strong> impossível. Para se bloquear, o processo precisa <em>executar</em> a chamada de sistema que pede I/O. Pronto não está executando.</li>
+              <li><strong style="color:var(--red)">Bloqueado → Executando:</strong> impossível. Quando o evento esperado acontece, o processo vai para <em>Pronto</em> primeiro. Para chegar a Executando ele precisa esperar o escalonador escolher.</li>
+              <li><strong style="color:var(--red)">Novo → Executando:</strong> impossível pelo mesmo motivo. Tem que passar por Pronto.</li>
+            </ul>
+            <p style="margin-top:.6rem">Regra geral: para ir parar em <em>Executando</em>, é obrigatório passar por <em>Pronto</em> (e ser escolhido pelo escalonador).</p>
+          </div>
+
+          <div class="callout warning">
+            <strong>Variação que cai em prova:</strong> alguns livros incluem dois estados extras — <strong>Suspenso-Pronto</strong> e <strong>Suspenso-Bloqueado</strong> (quando o processo é movido da RAM para o swap em disco). Isso aparece quando se discute memória virtual em F5.3. O modelo de 5 estados é o "default"; o de 7 estados é uma extensão.
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 5):</strong> agora você sabe os estados. Mas como o estado "Novo" surge em primeiro lugar? Quem cria os processos? Vamos ver as syscalls fundamentais — fork, exec, wait, exit.
+          </div>
+        </section>
+
+        <!-- 5. CRIAÇÃO E TERMINAÇÃO -->
+        <section id="fork">
+          <h2><span class="num">5</span> Criação e terminação de processos</h2>
+
+          <p>Você acabou de ver que o estado "Novo" existe — mas como um processo chega a esse estado? Em sistemas Unix-like (Linux, macOS, BSD), todo processo é criado por outro processo, formando uma <strong>árvore de processos</strong>. A raiz é o processo <code>init</code> (ou <code>systemd</code>) com PID 1, criado pelo kernel na inicialização.</p>
+
+          <p>O Unix tem 4 chamadas de sistema fundamentais para gerenciar processos:</p>
+
+          <div class="sym-dict">
+            <div class="sym-row">
+              <div class="sym-sym">fork()</div>
+              <div class="sym-body"><strong>Cria um processo filho copiando o pai.</strong> Retorna 2 vezes: 0 no filho, PID do filho no pai. É o único jeito de criar processos no Unix.<br>
+              <span class="eg">if (fork() == 0) { /* filho */ } else { /* pai */ }</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">exec()</div>
+              <div class="sym-body"><strong>Substitui o programa atual por outro.</strong> Não cria processo novo — reaproveita o PCB e troca a memória/código. Família: execv, execvp, execve...<br>
+              <span class="eg">execvp("ls", ["ls", "-l", NULL]) — esse processo agora "é" o ls</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">wait()</div>
+              <div class="sym-body"><strong>Pai espera filho terminar.</strong> Bloqueia até algum filho fazer exit. Retorna o PID do filho que terminou + status.<br>
+              <span class="eg">int status; pid_t pid = wait(&status); — bloqueia aqui até ter filho morto</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">exit(code)</div>
+              <div class="sym-body"><strong>Termina o processo atual.</strong> Libera quase tudo, mantém o PCB com status até o pai chamar wait. <code>code</code> é o "valor de retorno" para o shell.<br>
+              <span class="eg">exit(0) — sucesso. exit(1) — erro genérico. echo $? mostra o último.</span></div>
+            </div>
+          </div>
+
+          <h3>O padrão fork-exec — como o shell roda comandos</h3>
+
+          <p>Quando você digita <code>ls</code> no terminal, o que acontece? O shell <em>não vira</em> o ls — ele <em>cria um filho</em> que vira o ls. Esse padrão é onipresente:</p>
+
+          <div class="code-ann" id="codeAnn1">
+            <div class="code-line" onclick="toggleLine('cl1', 0)"><span class="cl-num">1</span><span class="cl-code">// shell vê comando "ls -l" digitado pelo usuário</span><span class="cl-badge cb-out">início</span></div>
+            <div class="cl-explain" id="cl1-0">Shell tem PID = 4000 (digamos). Ele leu a linha de comando e identificou que precisa rodar o programa <code>ls</code> com argumento <code>-l</code>.</div>
+
+            <div class="code-line" onclick="toggleLine('cl1', 1)"><span class="cl-num">2</span><span class="cl-code">pid_t pid = fork();              </span><span class="cl-badge cb-fork">fork</span></div>
+            <div class="cl-explain" id="cl1-1">Aqui é o ponto mágico. <code>fork()</code> faz uma cópia EXATA do shell. Agora existem 2 processos: pai (PID 4000) e filho (PID 4001, digamos). Os dois retornam de fork() — mas com valores diferentes. No pai, <code>pid = 4001</code>. No filho, <code>pid = 0</code>. Mesmo código, dois fluxos.</div>
+
+            <div class="code-line" onclick="toggleLine('cl1', 2)"><span class="cl-num">3</span><span class="cl-code">if (pid == 0) {                  </span><span class="cl-badge cb-fork">filho</span></div>
+            <div class="cl-explain" id="cl1-2">Esse <code>if</code> só é verdadeiro no filho, porque fork() retornou 0 lá. No pai, pid = 4001 (não-zero), então o else é executado.</div>
+
+            <div class="code-line" onclick="toggleLine('cl1', 3)"><span class="cl-num">4</span><span class="cl-code">    execvp("ls", argv);          </span><span class="cl-badge cb-exec">exec</span></div>
+            <div class="cl-explain" id="cl1-3">O filho substitui sua memória pelo programa <code>ls</code>. O PID continua 4001 (mesmo PCB), mas o código, dados, heap, stack são todos trocados. A partir daqui, o processo 4001 "é" o ls, não mais uma cópia do shell. Se exec() bem-sucedido, esta linha não retorna.</div>
+
+            <div class="code-line" onclick="toggleLine('cl1', 4)"><span class="cl-num">5</span><span class="cl-code">    perror("exec failed");       </span><span class="cl-badge cb-out">erro</span></div>
+            <div class="cl-explain" id="cl1-4">Esta linha só executa se exec() falhar (programa não existe, sem permissão). Caso contrário, o controle nunca volta para cá.</div>
+
+            <div class="code-line" onclick="toggleLine('cl1', 5)"><span class="cl-num">6</span><span class="cl-code">    exit(1);</span><span class="cl-badge cb-out">erro</span></div>
+            <div class="cl-explain" id="cl1-5">Termina o filho com código de erro 1.</div>
+
+            <div class="code-line" onclick="toggleLine('cl1', 6)"><span class="cl-num">7</span><span class="cl-code">} else {                          </span><span class="cl-badge cb-fork">pai</span></div>
+            <div class="cl-explain" id="cl1-6">Branch do pai (shell). pid = 4001 — sabe quem é o filho.</div>
+
+            <div class="code-line" onclick="toggleLine('cl1', 7)"><span class="cl-num">8</span><span class="cl-code">    int status;</span><span class="cl-badge cb-out">var</span></div>
+            <div class="cl-explain" id="cl1-7">Variável para receber o status de saída do filho.</div>
+
+            <div class="code-line" onclick="toggleLine('cl1', 8)"><span class="cl-num">9</span><span class="cl-code">    waitpid(pid, &status, 0);    </span><span class="cl-badge cb-wait">wait</span></div>
+            <div class="cl-explain" id="cl1-8">Pai bloqueia (estado Bloqueado!) até o filho terminar. Quando o ls terminar, o kernel desbloqueia o shell e coloca o status em <code>status</code>. É por isso que o terminal "espera" o ls antes de mostrar o prompt de novo.</div>
+
+            <div class="code-line" onclick="toggleLine('cl1', 9)"><span class="cl-num">10</span><span class="cl-code">    printf("ls terminou: %d\n", status);</span><span class="cl-badge cb-out">final</span></div>
+            <div class="cl-explain" id="cl1-9">Shell mostra o prompt novamente. Loop volta para ler o próximo comando.</div>
+          </div>
+
+          <p><em>Clique em qualquer linha acima para ver a explicação.</em></p>
+
+          <h3>Trace passo a passo</h3>
+
+          <div class="proof-steps">
+            <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Antes do fork:</strong> 1 processo (shell, PID 4000) em estado Executando.</div></div>
+            <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>fork() executado:</strong> kernel cria PCB novo (4001), copia memória do shell. Filho fica em estado Pronto. Pai continua Executando, recebe pid=4001 de volta.</div></div>
+            <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Pai chama wait:</strong> shell vai para estado Bloqueado, esperando filho. Escalonador escolhe outro processo para rodar.</div></div>
+            <div class="proof-step"><span class="ps-num">4</span><div class="ps-body"><strong>Filho roda:</strong> escalonador escolhe o filho (4001). Estado Executando. Filho chama exec("ls"). Memória do filho é trocada pelo binário do ls. PID continua 4001.</div></div>
+            <div class="proof-step"><span class="ps-num">5</span><div class="ps-body"><strong>ls executa:</strong> lista o diretório. Quando termina, chama exit(0). Filho fica em estado Terminado (zumbi temporário).</div></div>
+            <div class="proof-step"><span class="ps-num">6</span><div class="ps-body"><strong>Pai desbloqueia:</strong> kernel notifica o shell. Shell sai de Bloqueado para Pronto, eventualmente roda, recupera o status do filho via wait(), libera o PCB do filho. Loop continua para próximo comando.</div></div>
+          </div>
+
+          <h3>Por que separar fork de exec?</h3>
+
+          <p>Pode parecer estranho criar um clone só para imediatamente substituí-lo por outro programa. Por que não uma chamada única "criar+executar"? Razões:</p>
+
+          <div class="card">
+            <ul style="list-style:disc;padding-left:1.5rem;font-size:.9rem;line-height:1.9">
+              <li><strong>Flexibilidade:</strong> entre fork e exec, o filho pode <em>configurar coisas</em>: redirecionar stdout para um arquivo, fechar arquivos, mudar diretório, definir variáveis de ambiente. É assim que <code>ls &gt; output.txt</code> funciona.</li>
+              <li><strong>Pipes:</strong> a famosa pipe <code>cat file | grep foo</code> requer fork-exec separados — entre eles, o shell conecta os file descriptors dos dois filhos.</li>
+              <li><strong>Segurança:</strong> filho pode largar privilégios (passar de root para usuário comum) antes de executar o programa. Isso é como servidores web rodam scripts CGI com segurança.</li>
+            </ul>
+          </div>
+
+          <h3>Estados especiais: zumbi e órfão</h3>
+
+          <p>Dois conceitos que aparecem em prova:</p>
+
+          <table class="ipc-table">
+            <thead><tr><th>Estado</th><th>Quando ocorre</th><th>Problema?</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Zumbi</td>
+                <td>Filho terminou, mas pai ainda não chamou wait(). PCB persiste para que o pai possa ler o status.</td>
+                <td>Sim — se acumular muitos zumbis, esgota a tabela de processos. Programadores devem sempre fazer wait() ou usar SIGCHLD.</td>
+              </tr>
+              <tr>
+                <td>Órfão</td>
+                <td>Pai terminou antes do filho. Filho continua rodando sem pai original.</td>
+                <td>Não — kernel automaticamente "adota" o órfão para o init (PID 1), que faz wait() periodicamente. Sem vazamento.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout warning">
+            <strong>Pegadinha clássica em prova:</strong> "Um processo pai termina antes do filho. O filho..." — alternativa errada típica é "também termina automaticamente". Não termina. Vira órfão e é adotado pelo init. Continua rodando até terminar sozinho.
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 6):</strong> fork copia tudo. PCB inteiro, memória, arquivos. Para um web server que precisa atender 10.000 conexões, isso é caro demais. Existe um caminho mais leve — threads.
+          </div>
+        </section>
+
+        <!-- 6. THREADS -->
+        <section id="threads">
+          <h2><span class="num">6</span> Threads — execução leve dentro do processo</h2>
+
+          <p>Imagine um web server que atende 10.000 conexões simultâneas. Se cada conexão é um processo (criado por fork), o SO precisa manter 10.000 PCBs, 10.000 espaços de memória completos, 10.000 tabelas de páginas. O custo é proibitivo: criar um processo leva milissegundos, e cada um ocupa megabytes de memória.</p>
+
+          <p>A solução: <strong>threads</strong>. Uma thread é um <em>fluxo de execução</em> dentro de um processo. Múltiplas threads dentro do mesmo processo <strong>compartilham memória</strong>. Você pode ter milhares de threads em um único processo, com custo muito menor.</p>
+
+          <div class="analogy">
+            <div class="side" style="border-left:4px solid var(--blue)">
+              <h4 style="color:var(--blue)">🏠 Processo</h4>
+              <div class="val">Casa inteira</div>
+              <p>Todos os móveis (memória), endereço próprio (espaço de endereçamento). Se você quer outra "casa", constrói uma cópia inteira (fork).</p>
+            </div>
+            <div class="side" style="border-left:4px solid var(--accent)">
+              <h4 style="color:var(--accent)">🛏️ Thread</h4>
+              <div class="val">Quarto na casa</div>
+              <p>Mesma casa, mesmos móveis (memória compartilhada). Cada quarto tem seu próprio ocupante, mas todos usam a mesma cozinha. Adicionar quarto é barato.</p>
+            </div>
+          </div>
+
+          <h3>O que threads compartilham vs. não compartilham</h3>
+
+          <p>Esse é o ponto que mais cai em prova. Decore o que está em qual coluna:</p>
+
+          <div class="compare2">
+            <div class="compare-card thr">
+              <div class="compare-name">✅ Compartilhado entre threads do mesmo processo</div>
+              <ul class="compare-list">
+                <li><strong>Code (Text)</strong> — instruções do programa</li>
+                <li><strong>Data</strong> — variáveis globais e estáticas</li>
+                <li><strong>Heap</strong> — memória alocada com malloc/new</li>
+                <li><strong>Arquivos abertos</strong> — file descriptors</li>
+                <li><strong>Espaço de endereçamento virtual</strong></li>
+                <li><strong>Handlers de sinais</strong> — o que fazer ao receber cada sinal</li>
+              </ul>
+            </div>
+            <div class="compare-card proc">
+              <div class="compare-name">❌ Privado a cada thread</div>
+              <ul class="compare-list">
+                <li><strong>Stack</strong> — pilha de chamadas (variáveis locais)</li>
+                <li><strong>Registradores da CPU</strong></li>
+                <li><strong>Program Counter (PC)</strong></li>
+                <li><strong>Thread ID (TID)</strong></li>
+                <li><strong>Signal mask</strong> — quais sinais cada thread bloqueia</li>
+                <li><strong>Estado de escalonamento</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <p><strong>Regra prática:</strong> threads compartilham tudo o que pertence ao "ambiente do programa" (código, dados, recursos), mas têm execução independente (cada uma com seu PC e pilha).</p>
+
+          <h3>Visualização: memória de processo único com 2 threads</h3>
+
+          <div class="card" style="background:#0d3d4d;color:white;font-family:var(--fm);padding:0;overflow:hidden">
+            <div style="background:rgba(0,0,0,.2);padding:.4rem 1rem;font-size:.78rem;color:#7eedf7;letter-spacing:.5px;text-align:center">PROCESSO P (1 espaço de endereçamento)</div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+              <div style="padding:.55rem 1rem;border-right:2px dashed rgba(255,255,255,.3);background:rgba(255,138,101,.18)">
+                <div style="color:#ff9d70;font-weight:700;font-size:.78rem;margin-bottom:.2rem">Thread 1: Stack</div>
+                <div style="font-size:.78rem;color:rgba(255,255,255,.7)">PC, registradores, variáveis locais</div>
+              </div>
+              <div style="padding:.55rem 1rem;background:rgba(124,237,247,.18)">
+                <div style="color:#7eedf7;font-weight:700;font-size:.78rem;margin-bottom:.2rem">Thread 2: Stack</div>
+                <div style="font-size:.78rem;color:rgba(255,255,255,.7)">PC, registradores, variáveis locais</div>
+              </div>
+            </div>
+
+            <div style="padding:.55rem 1rem;border-top:1px solid rgba(255,255,255,.2);text-align:center;font-size:.78rem;color:rgba(255,255,255,.4);font-style:italic">↕ memória livre ↕</div>
+
+            <div style="padding:.55rem 1rem;border-top:1px solid rgba(255,255,255,.2);background:rgba(124,237,170,.15)">
+              <div style="color:#7af0aa;font-weight:700;font-size:.78rem;margin-bottom:.2rem">Heap (compartilhado)</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.7)">malloc, new — qualquer thread pode acessar</div>
+            </div>
+            <div style="padding:.55rem 1rem;background:rgba(124,237,170,.15);border-top:1px dashed rgba(255,255,255,.2)">
+              <div style="color:#7af0aa;font-weight:700;font-size:.78rem;margin-bottom:.2rem">Data (compartilhado)</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.7)">variáveis globais, vistas por todas as threads</div>
+            </div>
+            <div style="padding:.55rem 1rem;background:rgba(124,237,170,.15);border-top:1px dashed rgba(255,255,255,.2)">
+              <div style="color:#7af0aa;font-weight:700;font-size:.78rem;margin-bottom:.2rem">Code/Text (compartilhado)</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.7)">mesmas funções executadas pelas duas threads</div>
+            </div>
+          </div>
+
+          <p style="margin-top:1rem">Note como cada thread tem sua <em>própria stack</em> (laranja vs azul-claro), mas o resto da memória (verde) é compartilhado. Variável global declarada no código pode ser lida e escrita por qualquer thread — e é exatamente isso que abre a porta para <strong>race conditions</strong> (assunto de F5.2).</p>
+
+          <h3>Modelos de implementação de threads</h3>
+
+          <p>Como o SO percebe e gerencia threads? Há três modelos clássicos. Eles se diferenciam pela <em>razão</em> entre threads de usuário e threads de kernel:</p>
+
+          <div class="models-grid">
+            <div class="model-card m1">
+              <div class="model-name">M:1</div>
+              <div class="model-tag">user-level threads</div>
+              <p style="font-size:.82rem;color:var(--text);margin-bottom:.6rem">Várias threads de usuário mapeadas em <strong>uma</strong> thread do kernel. SO só vê o processo.</p>
+              <div class="model-pros"><strong>Vantagens</strong>Criação extremamente rápida (sem syscall). Switch barato. Funciona em qualquer SO.</div>
+              <div class="model-cons"><strong>Desvantagens</strong>Se uma thread bloqueia (I/O), <em>todas</em> bloqueiam. Sem paralelismo real em multi-core.</div>
+            </div>
+            <div class="model-card m11">
+              <div class="model-name">1:1</div>
+              <div class="model-tag">kernel-level threads</div>
+              <p style="font-size:.82rem;color:var(--text);margin-bottom:.6rem">Cada thread de usuário corresponde a uma thread do kernel. SO vê e escalona cada thread individualmente.</p>
+              <div class="model-pros"><strong>Vantagens</strong>Paralelismo real em multi-core. Bloqueio em uma thread não afeta as outras.</div>
+              <div class="model-cons"><strong>Desvantagens</strong>Criação envolve syscall (mais cara). Cada thread consome recursos do kernel.</div>
+            </div>
+            <div class="model-card mn">
+              <div class="model-name">M:N</div>
+              <div class="model-tag">híbrido</div>
+              <p style="font-size:.82rem;color:var(--text);margin-bottom:.6rem">M threads de usuário multiplexadas sobre N threads de kernel (M ≥ N). Combina os dois.</p>
+              <div class="model-pros"><strong>Vantagens</strong>Compromisso: paralelismo real + criação rápida. Boa escalabilidade.</div>
+              <div class="model-cons"><strong>Desvantagens</strong>Implementação complexa. Difícil afinar. Quase abandonado na prática moderna.</div>
+            </div>
+          </div>
+
+          <p><strong>Hoje em dia (Linux, Windows, macOS modernos):</strong> usam o modelo <strong>1:1</strong>. Linux Threads, NPTL, Windows Threads — cada thread de usuário tem sua thread de kernel correspondente.</p>
+
+          <h3>Qual o ganho prático?</h3>
+
+          <table class="ipc-table">
+            <thead><tr><th>Operação</th><th>Processo (fork)</th><th>Thread (pthread_create)</th></tr></thead>
+            <tbody>
+              <tr><td>Tempo típico de criação</td><td>~1 ms</td><td>~10–100 µs</td></tr>
+              <tr><td>Memória inicial</td><td>~MB (cópia da memória do pai)</td><td>~KB (só nova stack)</td></tr>
+              <tr><td>Comunicação interna</td><td>IPC (pipe, msgqueue, shm) — caro</td><td>Memória compartilhada direta — grátis</td></tr>
+              <tr><td>Isolamento</td><td>Total — crash não afeta outros</td><td>Nenhum — crash em uma derruba o processo</td></tr>
+            </tbody>
+          </table>
+
+          <p>Esse último ponto é importante: threads são <em>mais rápidas e leves</em>, mas <em>menos seguras</em>. Um segfault em uma thread mata o processo inteiro (e todas as outras threads junto). Por isso navegadores modernos como o Chrome usam <em>processos separados</em> para cada aba, mesmo que mais caros — se uma aba travar, as outras continuam.</p>
+
+          <div class="callout warning">
+            <strong>Erro comum:</strong> "thread = processo leve, fundamentalmente igual". Não. Threads compartilham memória — uma altera variável global e a outra vê na hora. Processos não. Essa diferença muda completamente o modelo de programação (sincronização vira fundamental para threads, irrelevante para processos isolados).
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 7):</strong> processos não compartilham memória. Mas frequentemente precisam trocar dados (shell envia comando para o filho; pipes entre comandos). Como isso funciona? IPC.
+          </div>
+        </section>
+
+        <!-- 7. IPC -->
+        <section id="ipc">
+          <h2><span class="num">7</span> IPC — Comunicação entre processos</h2>
+
+          <p>Processos têm espaços de endereçamento isolados — esse é seu <em>recurso de segurança</em> mais importante. Mas frequentemente precisam trocar informações: o shell precisa receber stdout do <code>ls</code>; o navegador precisa enviar URLs para o processo de rede; o seu programa precisa logar em um arquivo lido por outro processo.</p>
+
+          <p><strong>IPC (Inter-Process Communication)</strong> é o conjunto de mecanismos que o SO oferece para essa comunicação <em>controlada</em> entre processos isolados.</p>
+
+          <h3>Mecanismos de IPC</h3>
+
+          <p>Existem 4 famílias principais. Cada uma tem trade-offs e cenários de uso:</p>
+
+          <table class="ipc-table">
+            <thead>
+              <tr><th>Mecanismo</th><th>Modelo</th><th>Velocidade</th><th>Usar quando...</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Pipe</td>
+                <td>fluxo unidirecional</td>
+                <td>média</td>
+                <td>Pai e filho relacionados precisam de comunicação simples (stdin/stdout encadeado)</td>
+              </tr>
+              <tr>
+                <td>Named Pipe (FIFO)</td>
+                <td>fluxo unidirecional</td>
+                <td>média</td>
+                <td>Processos não-relacionados precisam se comunicar — mas no mesmo computador</td>
+              </tr>
+              <tr>
+                <td>Fila de mensagens</td>
+                <td>mensagens discretas</td>
+                <td>média</td>
+                <td>Múltiplos remetentes/destinatários, mensagens com tipos/prioridades</td>
+              </tr>
+              <tr>
+                <td>Memória compartilhada</td>
+                <td>região de memória comum</td>
+                <td><strong>altíssima</strong></td>
+                <td>Volume grande de dados, baixa latência crítica (acesso direto à memória)</td>
+              </tr>
+              <tr>
+                <td>Sockets</td>
+                <td>fluxo ou datagrama</td>
+                <td>variável</td>
+                <td>Comunicação em rede; ou processos locais via Unix sockets</td>
+              </tr>
+              <tr>
+                <td>Sinais</td>
+                <td>notificação assíncrona</td>
+                <td>rápido (sem dado)</td>
+                <td>Avisar evento (Ctrl+C → SIGINT, processo morrer → SIGCHLD); não para transferir dados</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Pipe — o mecanismo do shell</h3>
+
+          <p>Quando você escreve <code>cat arquivo.txt | grep erro</code>, o shell:</p>
+
+          <ol style="padding-left:1.5rem;font-size:.9rem;line-height:1.9">
+            <li>Cria um <strong>pipe</strong> (canal unidirecional com duas pontas: leitura e escrita)</li>
+            <li>fork → cria <code>cat</code>, redireciona stdout para a ponta de escrita</li>
+            <li>fork → cria <code>grep</code>, redireciona stdin para a ponta de leitura</li>
+            <li>cat escreve no pipe → grep lê do pipe → fluxo encadeado</li>
+          </ol>
+
+          <p>É o IPC mais antigo do Unix. Ainda muito usado por ser simples e eficiente.</p>
+
+          <h3>Memória compartilhada — o mais rápido</h3>
+
+          <p>Os outros mecanismos passam pelo kernel: o processo A chama write(), kernel copia os dados para um buffer, processo B chama read(), kernel copia do buffer para B. Duas cópias, duas syscalls.</p>
+
+          <p>Memória compartilhada elimina isso: kernel mapeia <em>a mesma página de memória física</em> em ambos os processos. A escreve diretamente, B lê diretamente. Sem cópia, sem syscall na operação. Velocidade comparável a acesso à memória normal.</p>
+
+          <div class="callout warning">
+            <strong>O preço:</strong> velocidade vem com responsabilidade. Sem coordenação, A e B podem escrever simultaneamente, lendo lixo um do outro. <em>Race conditions</em> precisam ser gerenciadas com semáforos, mutexes etc — assunto principal do <strong>F5.2 Sincronização</strong>.
+          </div>
+
+          <h3>Modelo de troca de mensagens vs. memória compartilhada</h3>
+
+          <p>Em um nível mais abstrato, todos os mecanismos de IPC se reduzem a duas filosofias:</p>
+
+          <div class="compare2">
+            <div class="compare-card proc">
+              <div class="compare-name">📨 Troca de mensagens</div>
+              <ul class="compare-list">
+                <li>Processos enviam/recebem mensagens</li>
+                <li>Kernel media a comunicação</li>
+                <li>Funciona local <em>e em rede</em></li>
+                <li>Sincronização implícita (recv bloqueia)</li>
+                <li>Mais lento, mais seguro</li>
+                <li>Ex: pipes, filas, sockets</li>
+              </ul>
+            </div>
+            <div class="compare-card thr">
+              <div class="compare-name">🧠 Memória compartilhada</div>
+              <ul class="compare-list">
+                <li>Processos veem mesma região de memória</li>
+                <li>Kernel só configura no início; depois sai do caminho</li>
+                <li>Só funciona local (mesma máquina)</li>
+                <li>Sincronização <em>explícita</em> obrigatória</li>
+                <li>Mais rápido, mais perigoso</li>
+                <li>Ex: shm, mmap, threads (de graça)</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>Sinais — uma família à parte</h3>
+
+          <p>Sinais não são para transmitir dados — são para <em>notificar eventos</em>. Cada sinal é um número/nome. Lista famosa:</p>
+
+          <table class="ipc-table">
+            <thead><tr><th>Sinal</th><th>Causa</th><th>Default</th></tr></thead>
+            <tbody>
+              <tr><td>SIGINT</td><td>Ctrl+C no terminal</td><td>Termina o processo</td></tr>
+              <tr><td>SIGTERM</td><td>kill PID — pedido educado para terminar</td><td>Termina o processo (programa pode capturar para limpar)</td></tr>
+              <tr><td>SIGKILL</td><td>kill -9 PID — não pode ser ignorado</td><td>Termina imediatamente, sem cleanup</td></tr>
+              <tr><td>SIGSEGV</td><td>Acesso a memória inválida</td><td>Termina + core dump</td></tr>
+              <tr><td>SIGCHLD</td><td>Filho terminou</td><td>Ignorado (mas notifica o pai)</td></tr>
+            </tbody>
+          </table>
+
+          <p>O programador pode capturar quase qualquer sinal e definir o que fazer (SIGKILL e SIGSTOP são as únicas exceções absolutas — kernel sempre obedece). Isso permite servidores fazerem cleanup gracioso ao receber SIGTERM, por exemplo.</p>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 8):</strong> falamos várias vezes em "alternar entre processos" — quando o SO troca de quem está rodando. Esse mecanismo tem nome e tem custo. Vamos fechar o módulo entendendo o context switch.
+          </div>
+        </section>
+
+        <!-- 8. CONTEXT SWITCH -->
+        <section id="ctxsw">
+          <h2><span class="num">8</span> Context Switch — o custo de alternar</h2>
+
+          <p>Você viu na motivação que o SO alterna entre processos para criar a ilusão de simultaneidade. Esse "alternar" tem nome técnico: <strong>context switch</strong>. É o conjunto de operações que o kernel faz para tirar um processo da CPU e colocar outro.</p>
+
+          <h3>O que acontece em um context switch</h3>
+
+          <p>Suponha que P1 está rodando e o escalonador decide trocar para P2. Os passos:</p>
+
+          <div class="proof-steps">
+            <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Interrupção entra</strong> (timer, syscall, I/O completed). CPU para o que está fazendo e salta para o handler do kernel.</div></div>
+            <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Kernel salva o contexto de P1:</strong> grava todos os registradores da CPU (PC, SP, R0..R15, flags) no PCB de P1.</div></div>
+            <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Kernel decide quem rodar a seguir</strong> (escalonador — assunto de F5.2). Suponha que escolheu P2.</div></div>
+            <div class="proof-step"><span class="ps-num">4</span><div class="ps-body"><strong>Kernel troca contexto de memória:</strong> aponta a MMU para a tabela de páginas de P2. Isso pode invalidar a TLB (cache de tradução de endereços).</div></div>
+            <div class="proof-step"><span class="ps-num">5</span><div class="ps-body"><strong>Kernel restaura o contexto de P2:</strong> lê os registradores do PCB de P2, carrega na CPU.</div></div>
+            <div class="proof-step"><span class="ps-num">6</span><div class="ps-body"><strong>CPU retoma execução de P2</strong> a partir do PC restaurado. P2 continua exatamente de onde tinha parado.</div></div>
+          </div>
+
+          <h3>Por que custa caro?</h3>
+
+          <p>Um context switch demora tipicamente entre <strong>1 e 10 microssegundos</strong>. Pode parecer pouco, mas se o SO faz mil switches por segundo, são até 10 milissegundos só de overhead — 1% da CPU "perdido" em troca de contexto.</p>
+
+          <p>Os custos vêm de:</p>
+
+          <table class="ipc-table">
+            <thead><tr><th>Componente</th><th>Custo direto</th><th>Custo indireto (cache)</th></tr></thead>
+            <tbody>
+              <tr><td>Salvar/restaurar registradores</td><td>~30 cycles</td><td>—</td></tr>
+              <tr><td>Trocar tabela de páginas (MMU)</td><td>~100 cycles</td><td>TLB invalidada → faltas de página subsequentes (centenas de cycles cada)</td></tr>
+              <tr><td>Mudança kernel ↔ user mode</td><td>~100 cycles</td><td>—</td></tr>
+              <tr><td>Cache da CPU (L1, L2)</td><td>—</td><td>P2 acessa dados que não estão em cache → cache miss explosivo nos primeiros milhares de instruções</td></tr>
+            </tbody>
+          </table>
+
+          <p>O custo <em>indireto</em> (cache, TLB) é normalmente maior que o direto. Pode levar centenas de microssegundos para o cache "esquentar" de novo.</p>
+
+          <h3>Thread context switch é mais barato</h3>
+
+          <p>Se o SO troca entre duas threads do <strong>mesmo</strong> processo:</p>
+
+          <ul style="list-style:disc;padding-left:1.5rem;font-size:.9rem;line-height:1.9">
+            <li>Salva e restaura registradores: <strong>sim</strong> (igual a process switch)</li>
+            <li>Troca tabela de páginas: <strong>não</strong> (mesmo processo, mesma tabela)</li>
+            <li>TLB e cache: <strong>preservados</strong> (mesmo espaço de endereçamento)</li>
+          </ul>
+
+          <p>Resultado: thread switch é tipicamente <strong>2 a 10 vezes mais rápido</strong> que process switch. Um dos motivos pelos quais threads são preferidas em servidores de alta performance.</p>
+
+          <h3>Trade-off: quão rápido alternar?</h3>
+
+          <p>Se o SO alterna processos a cada 1 ms (quantum curto): processos têm resposta rápida (bom para interatividade), mas overhead de switch é grande.</p>
+
+          <p>Se o SO alterna a cada 100 ms (quantum longo): pouco overhead, alta vazão (throughput) total. Mas processos ficam "presos" esperando quando outro está rodando — péssimo para sistemas interativos.</p>
+
+          <p>Diferentes SOs e diferentes contextos escolhem trade-offs diferentes. Sistemas de tempo real usam quanta extremamente curtos. Sistemas batch usam quanta longos. Sistemas desktop ficam no meio (5–20 ms é típico no Linux).</p>
+
+          <div class="callout warning">
+            <strong>Erro comum:</strong> "context switch ocorre só quando o quantum termina". Falso. Ocorre em <em>qualquer</em> momento que o SO precise tirar o processo: quantum expirou, processo bloqueou (chamou read), processo de prioridade maior ficou pronto, processo voluntariamente cedeu (yield), etc.
+          </div>
+
+          <h3>Como contar context switches no Linux</h3>
+
+          <p>Comando: <code>cat /proc/PID/status | grep ctxt</code>. Mostra quantos voluntários (processo bloqueou em I/O) e involuntários (preempção).</p>
+
+          <p>Em sistemas com muitos context switches involuntários: sinal de "thrashing" — escalonador está alternando demais, normalmente porque há mais processos prontos que núcleos disponíveis e quanta muito curtos.</p>
+
+          <div class="callout">
+            <strong>Conexão com escalonamento (próximo módulo):</strong> a <em>política</em> que decide <em>quando</em> trocar processos e <em>qual</em> escolher se chama escalonamento. F5.2 cobre os algoritmos clássicos: FCFS, SJF, Round Robin, Priority, MLFQ. Cada um faz trade-offs diferentes entre throughput, fairness e response time.
+          </div>
+
+          <div class="callout success">
+            <strong>→ Resumo do que você dominou:</strong> agora você sabe o que é processo, como ele é representado (PCB), em que estados pode estar, como nasce (fork/exec), como morre (exit/wait), como threads diferem, como processos se comunicam (IPC), e o que custa alternar entre eles. Hora de testar com o quiz.
+          </div>
+        </section>
+
+        <!-- 9. QUIZ -->
+        <section id="quiz">
+          <h2><span class="num">9</span> Quiz — estilo POSCOMP</h2>
+          <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem">Após cada resposta você verá uma explicação detalhada — inclusive o motivo pelo qual cada opção errada está errada.</p>
+
+          <div class="quiz-box" id="q1">
+            <div class="quiz-q">Qual a diferença fundamental entre programa e processo?</div>
+            <div class="quiz-option" data-q="q1" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Programa é compilado, processo é interpretado</div>
+            <div class="quiz-option" data-q="q1" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Programa é uma entidade estática armazenada em disco; processo é a execução do programa em andamento, com estado próprio</div>
+            <div class="quiz-option" data-q="q1" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Não há diferença prática — são sinônimos</div>
+            <div class="quiz-option" data-q="q1" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Programa é um conceito de hardware; processo é um conceito de software</div>
+            <div class="quiz-feedback" id="q1-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q2">
+            <div class="quiz-q">Qual das seguintes informações <strong>NÃO</strong> faz parte do PCB?</div>
+            <div class="quiz-option" data-q="q2" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) PID e estado atual do processo</div>
+            <div class="quiz-option" data-q="q2" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Valor do Program Counter</div>
+            <div class="quiz-option" data-q="q2" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) O código-fonte (texto) do programa em execução</div>
+            <div class="quiz-option" data-q="q2" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Lista de arquivos abertos pelo processo</div>
+            <div class="quiz-feedback" id="q2-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q3">
+            <div class="quiz-q">Qual das seguintes transições de estado é <strong>impossível</strong> no modelo clássico de 5 estados?</div>
+            <div class="quiz-option" data-q="q3" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Executando → Pronto (preempção)</div>
+            <div class="quiz-option" data-q="q3" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Bloqueado → Executando (direta)</div>
+            <div class="quiz-option" data-q="q3" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Executando → Bloqueado (chamou read)</div>
+            <div class="quiz-option" data-q="q3" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Pronto → Executando (dispatch)</div>
+            <div class="quiz-feedback" id="q3-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q4">
+            <div class="quiz-q"><strong>[Questão difícil]</strong> Considere o trecho de código a seguir:<br>
+              <pre style="font-family:var(--fm);font-size:.84rem;background:var(--n50);padding:.7rem;border-radius:6px;margin:.4rem 0;line-height:1.5">int main() {
+    fork();
+    fork();
+    fork();
+    printf("Hello\n");
+}</pre>
+              Considerando que cada fork() é bem-sucedido, quantas vezes a string "Hello" será impressa no terminal?</div>
+            <div class="quiz-option" data-q="q4" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) 3</div>
+            <div class="quiz-option" data-q="q4" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) 4</div>
+            <div class="quiz-option" data-q="q4" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) 7</div>
+            <div class="quiz-option" data-q="q4" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) 8</div>
+            <div class="quiz-feedback" id="q4-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q5">
+            <div class="quiz-q">Sobre threads em um mesmo processo, qual afirmação está <strong>correta</strong>?</div>
+            <div class="quiz-option" data-q="q5" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Cada thread tem seu próprio espaço de endereçamento isolado</div>
+            <div class="quiz-option" data-q="q5" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Threads compartilham heap, dados globais e arquivos abertos, mas têm pilha (stack) e registradores próprios</div>
+            <div class="quiz-option" data-q="q5" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Variáveis globais não podem ser acessadas por threads — só pelo "main"</div>
+            <div class="quiz-option" data-q="q5" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Crash em uma thread não afeta as outras threads do processo</div>
+            <div class="quiz-feedback" id="q5-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q6">
+            <div class="quiz-q">Em um sistema Unix, dois processos não relacionados (P1 e P2) precisam trocar grandes volumes de dados a alta velocidade no mesmo computador. Qual mecanismo de IPC é o <strong>mais adequado</strong>?</div>
+            <div class="quiz-option" data-q="q6" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Pipe anônimo (criado com pipe())</div>
+            <div class="quiz-option" data-q="q6" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Memória compartilhada</div>
+            <div class="quiz-option" data-q="q6" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Sinais (kill/signal)</div>
+            <div class="quiz-option" data-q="q6" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Sockets TCP</div>
+            <div class="quiz-feedback" id="q6-fb"></div>
+          </div>
+        </section>
+
+        <!-- 10. RESUMO -->
+        <section id="resumo">
+          <h2><span class="num">10</span> Resumo</h2>
+
+          <div class="summary-box">
+            <h3>🎯 O que você precisa dominar deste módulo</h3>
+            <div class="summary-row"><strong>Programa</strong> é arquivo estático no disco; <strong>processo</strong> é a execução em andamento, com PID, estado e memória próprios</div>
+            <div class="summary-row"><strong>PCB (Process Control Block)</strong> guarda PID, estado, PC, registradores, memória, arquivos abertos — tudo necessário para pausar/retomar</div>
+            <div class="summary-row">Memória do processo dividida em <strong>Text, Data, Heap, Stack</strong>. Stack e Heap crescem em direções opostas</div>
+            <div class="summary-row">5 estados clássicos: <strong>Novo → Pronto ↔ Executando → Terminado</strong>, com Bloqueado para esperar I/O</div>
+            <div class="summary-row">Para chegar a Executando, é obrigatório passar por Pronto (escalonador escolhe)</div>
+            <div class="summary-row"><strong>fork()</strong> cria filho copiando pai; <strong>exec()</strong> substitui programa do processo atual; <strong>wait()</strong> faz pai esperar filho; <strong>exit()</strong> termina</div>
+            <div class="summary-row">Padrão fork-exec é como o shell roda comandos. <strong>Zumbi</strong>: filho terminou mas pai não fez wait. <strong>Órfão</strong>: pai terminou primeiro — adotado pelo init</div>
+            <div class="summary-row"><strong>Threads</strong> compartilham Code/Data/Heap/arquivos do processo, mas têm Stack/registradores/PC próprios</div>
+            <div class="summary-row">Modelos: M:1 (user-level, rápido mas serial), <strong>1:1 (kernel-level, padrão moderno)</strong>, M:N (híbrido, complexo)</div>
+            <div class="summary-row">IPC: <strong>pipe</strong> (pai-filho), <strong>FIFO</strong> (não relacionados), <strong>memória compartilhada</strong> (mais rápido), <strong>sockets</strong> (rede), <strong>sinais</strong> (notificação sem dado)</div>
+            <div class="summary-row"><strong>Context switch</strong> custa ~1–10 µs. Trocar entre threads do mesmo processo é mais barato que entre processos (sem trocar tabela de páginas/TLB)</div>
+
+            <h3 style="margin-top:1.6rem">📚 Tabela de referência rápida</h3>
+            <table class="ref-table">
+              <thead><tr><th>Conceito</th><th>Propriedade chave</th><th>Exemplo</th></tr></thead>
+              <tbody>
+                <tr><td>Processo</td><td>Espaço de endereçamento isolado</td><td>chrome.exe e firefox.exe rodando</td></tr>
+                <tr><td>Thread</td><td>Compartilha endereçamento com outras do mesmo processo</td><td>uma aba do Chrome com várias threads (UI, rede, JS)</td></tr>
+                <tr><td>PCB</td><td>Estrutura no kernel com estado de cada processo</td><td>task_struct no Linux</td></tr>
+                <tr><td>fork</td><td>Cria filho cópia do pai; retorna 0 no filho, PID no pai</td><td>shell criando subprocesso</td></tr>
+                <tr><td>exec</td><td>Substitui programa atual; PID e PCB persistem</td><td>shell virando ls após fork</td></tr>
+                <tr><td>Estado Bloqueado</td><td>Esperando evento externo (I/O, lock, sleep)</td><td>processo chamou read() do disco</td></tr>
+                <tr><td>Pipe</td><td>Comunicação unidirecional pai-filho</td><td>cat file | grep err</td></tr>
+                <tr><td>Memória compartilhada</td><td>Region mapeada nos dois processos — mais rápido IPC</td><td>shmget em alta performance</td></tr>
+                <tr><td>Context switch</td><td>Salva PCB do atual, carrega do próximo</td><td>1–10 µs em hardware moderno</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout">
+            <strong>📍 No próximo módulo (F5.2):</strong> agora que você entende processos e estados, vamos focar no escalonador — quem decide qual processo Pronto vira Executando, e em que ordem? Algoritmos clássicos: FCFS, SJF, Round Robin, Priority, MLFQ. E o que acontece quando processos compartilham recursos (race conditions e sincronização — semáforos, monitores, problemas clássicos).
+          </div>
+        </section>
+      </div><!-- /lesson-content -->
+
+      <!-- BOTTOM NAV -->
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="trilhas.html">← Voltar para Trilhas</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso na trilha F5</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 1 de 4</div>
+        </div>
+        <a class="btn-nav next" href="f5-2-escalonamento-sincronizacao.html">F5.2 Escalonamento →</a>
+      </div>
+    </div><!-- /lesson-area -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ─────────────────────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────────────────────
+const sidebar = document.getElementById('sidebar');
+const progressLine = document.getElementById('progressLine');
+const overlay = document.getElementById('sbOverlay');
+const isMobile = () => window.innerWidth < 768;
+const saved = localStorage.getItem('sb-state');
+if (saved === 'collapsed' && !isMobile()) {
+  sidebar.classList.add('collapsed');
+  progressLine.classList.add('visible');
+}
+function toggleSidebar() {
+  if (isMobile()) {
+    const o = sidebar.classList.toggle('open');
+    overlay.classList.toggle('visible', o);
+    return;
+  }
+  const c = sidebar.classList.toggle('collapsed');
+  progressLine.classList.toggle('visible', c);
+  localStorage.setItem('sb-state', c ? 'collapsed' : 'expanded');
+}
+
+// ─────────────────────────────────────────────────────────
+// SECTION NAV ACTIVE TRACKING
+// ─────────────────────────────────────────────────────────
+const lessonArea = document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) lessonArea.scrollTo({ top: el.offsetTop - 48, behavior: 'smooth' });
+  });
+});
+const secIds = [...document.querySelectorAll('section[id]')].map(s => s.id);
+lessonArea.addEventListener('scroll', () => {
+  const st = lessonArea.scrollTop + 60;
+  let cur = secIds[0];
+  secIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= st) cur = id;
+  });
+  document.querySelectorAll('.section-nav a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+  });
+});
+
+// ─────────────────────────────────────────────────────────
+// DETAILS TOGGLE
+// ─────────────────────────────────────────────────────────
+function toggleDetails(trigger) {
+  const content = trigger.parentElement.querySelector('.dt-content');
+  const isOpen = content.classList.toggle('show');
+  trigger.classList.toggle('open', isOpen);
+  trigger.querySelector('.dt-arrow').textContent = isOpen ? '▾' : '▸';
+}
+
+// ─────────────────────────────────────────────────────────
+// CODE ANNOTATOR (escoped to specific containers)
+// ─────────────────────────────────────────────────────────
+function toggleLine(blockId, idx) {
+  const block = document.getElementById('codeAnn1');
+  if (!block) return;
+  const lines = block.querySelectorAll('.code-line');
+  const explains = block.querySelectorAll('.cl-explain');
+  const target = document.getElementById(blockId + '-' + idx);
+  if (!target) return;
+  const showing = target.classList.contains('show');
+  // Reset all
+  explains.forEach(e => e.classList.remove('show'));
+  lines.forEach(l => l.classList.remove('active'));
+  if (!showing) {
+    target.classList.add('show');
+    if (lines[idx]) lines[idx].classList.add('active');
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// STATE DIAGRAM INTERACTION
+// ─────────────────────────────────────────────────────────
+const STATE_INFO = {
+  novo: {
+    title: 'Estado: Novo',
+    body: 'Processo recém-criado por <code>fork()</code>. SO está alocando o PCB, inicializando estruturas de dados, mapeando memória. Ainda não está pronto para rodar — falta o escalonador admiti-lo na fila de prontos.'
+  },
+  pronto: {
+    title: 'Estado: Pronto',
+    body: 'Tem tudo o que precisa para rodar — <em>só falta a CPU ficar disponível</em>. Em qualquer instante, normalmente vários processos estão neste estado, formando uma fila. O escalonador escolhe um deles para virar Executando.'
+  },
+  executando: {
+    title: 'Estado: Executando',
+    body: 'Está com a CPU agora. Em uma máquina com 4 núcleos, no máximo 4 processos simultaneamente neste estado. Daqui pode ir para 3 destinos: Pronto (preempção), Bloqueado (pediu I/O), ou Terminado (acabou).'
+  },
+  bloqueado: {
+    title: 'Estado: Bloqueado',
+    body: 'Esperando algo que ainda não aconteceu — leitura de disco, dado da rede, lock que outro processo tem. SO sabe que não adianta colocá-lo na CPU porque ele não tem o que precisa. Vai para Pronto quando o evento acontecer.'
+  },
+  terminado: {
+    title: 'Estado: Terminado',
+    body: 'Processo executou <code>exit()</code> ou foi morto. PCB persiste brevemente em estado "zumbi" para que o pai possa recuperar o status via <code>wait()</code>. Depois disso, o PCB é liberado e o PID pode ser reutilizado.'
+  },
+  admit: {
+    title: 'Transição: admit (Novo → Pronto)',
+    body: 'SO terminou de inicializar o processo e o admite na fila de prontos. Causada pelo escalonador de longo prazo (job scheduler).'
+  },
+  dispatch: {
+    title: 'Transição: dispatch (Pronto → Executando)',
+    body: 'Escalonador de curto prazo escolhe este processo entre os prontos e carrega seu contexto na CPU. Esse é o evento que <em>realmente</em> faz o processo rodar.'
+  },
+  preempt: {
+    title: 'Transição: preempt/timeout (Executando → Pronto)',
+    body: 'O quantum do processo expirou (timer disparou) ou um processo de prioridade maior ficou pronto. Causada pelo SO — não pelo processo.'
+  },
+  block: {
+    title: 'Transição: wait I/O (Executando → Bloqueado)',
+    body: 'Causada <em>pelo próprio processo</em>: chamou <code>read()</code> esperando dados, tentou pegar um lock que está ocupado, chamou <code>sleep()</code>. Processo voluntariamente sai da CPU.'
+  },
+  wakeup: {
+    title: 'Transição: event done (Bloqueado → Pronto)',
+    body: 'O evento esperado ocorreu — disco respondeu, lock liberado, timer de sleep estourou. Causada por hardware ou outro processo. Note: vai para Pronto, não Executando direto — precisa esperar o escalonador escolher.'
+  },
+  exit: {
+    title: 'Transição: exit (Executando → Terminado)',
+    body: 'Processo terminou — voluntariamente (chamou <code>exit()</code>) ou foi morto (recebeu SIGKILL). PCB vira zumbi até o pai chamar <code>wait()</code>.'
+  }
+};
+
+const stateBox = document.getElementById('stateInfoBox');
+const allNodes = document.querySelectorAll('.state-node');
+const allArrows = document.querySelectorAll('.state-arrow, .state-arrow-label');
+
+function showStateInfo(key) {
+  const info = STATE_INFO[key];
+  if (!info) return;
+  stateBox.innerHTML = '<strong>' + info.title + '</strong><br>' + info.body;
+}
+
+allNodes.forEach(node => {
+  node.addEventListener('click', () => {
+    const key = node.dataset.state;
+    allNodes.forEach(n => n.classList.remove('active'));
+    allArrows.forEach(a => a.classList.remove('active'));
+    node.classList.add('active');
+    showStateInfo(key);
+  });
+});
+
+allArrows.forEach(arrow => {
+  arrow.addEventListener('click', () => {
+    const key = arrow.dataset.info;
+    allNodes.forEach(n => n.classList.remove('active'));
+    allArrows.forEach(a => a.classList.remove('active'));
+    // Highlight matching arrow + label
+    document.querySelectorAll('[data-info="' + key + '"]').forEach(el => el.classList.add('active'));
+    showStateInfo(key);
+  });
+});
+
+// ─────────────────────────────────────────────────────────
+// QUIZ
+// ─────────────────────────────────────────────────────────
+const QUIZ = {
+  q1: {
+    correct: 'B',
+    ok: 'Programa é o arquivo binário no disco — estático, inerte. Processo é a execução desse programa em andamento, com PID, estado, memória alocada, arquivos abertos. Um mesmo programa pode dar origem a vários processos simultâneos (Chrome com 5 abas = 5 processos do mesmo programa).',
+    why: {
+      A: 'Programa pode ser compilado ou interpretado — isso não muda o que ele é. O Python é um programa interpretado e quando você roda <code>python script.py</code> existe um processo igual a qualquer outro. A diferença não está em compilação/interpretação.',
+      C: 'Ainda que o uso coloquial misture os termos, em SO eles são distintos e essa distinção cai em prova. O mesmo programa pode estar parado no disco (não é processo) e gerar múltiplos processos (cada execução).',
+      D: 'Ambos são conceitos de software. Hardware é CPU, memória, disco — coisas físicas. Programa e processo são abstrações que o SO mantém em software.'
+    }
+  },
+  q2: {
+    correct: 'C',
+    ok: 'PCB tem METADADOS sobre o processo — PID, estado, registradores, ponteiros para tabelas de páginas, lista de arquivos abertos. O código-fonte (na verdade o binário compilado) fica na região <em>Text/Code</em> da memória do processo, não no PCB. PCB é pequeno (centenas de bytes/KB); código pode ter MB.',
+    why: {
+      A: 'PID e estado são dois dos campos mais fundamentais do PCB. Sem eles o SO não sabe quem é o processo nem o que fazer com ele.',
+      B: 'PC é fundamental — sem salvar o PC no PCB, depois de uma troca de contexto o processo não saberia em qual instrução continuar.',
+      D: 'Lista de arquivos abertos faz parte do PCB. No Linux é o campo <code>files</code> do task_struct. Permite que o SO feche tudo automaticamente quando o processo termina.'
+    }
+  },
+  q3: {
+    correct: 'B',
+    ok: 'Bloqueado → Executando direto é impossível no modelo clássico. Quando um processo Bloqueado recebe o evento esperado, ele vai para Pronto — precisa entrar na fila e esperar o escalonador escolhê-lo. Não há "atalho" direto.',
+    why: {
+      A: 'Executando → Pronto é a preempção. SO interrompe o processo (timer expirou, prioridade maior chegou) e o devolve para a fila de prontos. Transição válida e comum.',
+      C: 'Executando → Bloqueado acontece toda vez que o processo chama uma syscall de I/O bloqueante (read de disco/rede), tenta pegar um lock ocupado, ou chama sleep. Transição válida.',
+      D: 'Pronto → Executando é o dispatch — o coração do escalonamento. Escalonador escolhe um processo da fila de prontos e o coloca na CPU.'
+    }
+  },
+  q4: {
+    correct: 'D',
+    ok: 'Cada fork() <em>duplica</em> os processos existentes. Antes do primeiro fork: 1 processo. Depois do 1º: 2. Depois do 2º: 4. Depois do 3º: 8. Todos os 8 chegam ao printf. Resposta: 2³ = 8.',
+    why: {
+      A: '3 seria a resposta se cada fork criasse só um processo novo (1+1+1+1=4) E os filhos não chegassem ao printf. Mas todos os processos (pais e filhos) executam todas as linhas após o fork — eles compartilham o código.',
+      B: '4 seria 1+1+2 (parou no segundo fork). Mas o terceiro fork também duplica todos os 4 existentes, gerando 8.',
+      C: '7 não tem interpretação direta. Talvez confundindo com 2³−1 = 7 se você pensar que o pai original "não conta", mas todos os 8 processos rodam o printf.'
+    }
+  },
+  q5: {
+    correct: 'B',
+    ok: 'Esse é o ponto mais cobrado em prova. Threads do mesmo processo compartilham heap, dados globais, código e arquivos abertos — mas cada uma tem sua pilha própria (variáveis locais), seus registradores e seu PC (porque cada uma executa instruções independentemente).',
+    why: {
+      A: 'Falso — threads do mesmo processo compartilham o espaço de endereçamento. Endereçamento isolado é característica de processos diferentes, não de threads.',
+      C: 'Falso — exatamente o contrário. Variáveis globais ficam na região Data, que é compartilhada por todas as threads. Qualquer thread pode ler e escrever — e por isso precisamos de sincronização (mutex, semáforos).',
+      D: 'Falso — crash em uma thread (ex: segfault) derruba o processo inteiro, junto com todas as outras threads. É justamente uma das razões pelas quais alguns sistemas (Chrome) preferem processos separados a threads.'
+    }
+  },
+  q6: {
+    correct: 'B',
+    ok: 'Memória compartilhada é o IPC mais rápido — kernel mapeia a mesma região física em ambos processos, e depois sai do caminho. Acesso direto, sem syscalls, sem cópia. Funciona para processos não relacionados (cada um abre a região por nome, ex: shmget). Ideal para grandes volumes a alta velocidade.',
+    why: {
+      A: 'Pipe anônimo (criado com pipe()) só funciona entre processos relacionados (pai e filho que herdaram os file descriptors). P1 e P2 não relacionados não podem usá-lo. FIFO (named pipe) já funcionaria, mas ainda passa pelo kernel.',
+      C: 'Sinais são para notificar eventos, não para transferir dados. Não há como mandar "grande volume de dados" via sinal.',
+      D: 'Sockets TCP funcionam, mas são <em>mais lentos</em> que memória compartilhada — passam pelo stack de rede mesmo sendo localhost. Para alta performance no mesmo computador, memória compartilhada é o mecanismo padrão.'
+    }
+  }
+};
+
+function ansQ(el) {
+  const qid = el.dataset.q;
+  const chosen = el.dataset.opt;
+  const box = document.getElementById(qid);
+  if (box.dataset.answered) return;
+  box.dataset.answered = '1';
+
+  const correct = QUIZ[qid].correct;
+  const ok = chosen === correct;
+
+  box.querySelectorAll('.quiz-option').forEach(o => {
+    o.style.pointerEvents = 'none';
+    if (o.dataset.opt === correct) o.classList.add('correct');
+  });
+  if (!ok) el.classList.add('wrong');
+
+  const fb = document.getElementById(qid + '-fb');
+  let html = '';
+  if (ok) {
+    html = '<strong>✓ Correto!</strong> ' + QUIZ[qid].ok;
+    fb.className = 'quiz-feedback show ok';
+  } else {
+    const whyWrong = QUIZ[qid].why[chosen] || '';
+    html = '<strong>✗ Incorreto.</strong><br><br>'
+      + '<strong>Por que ' + chosen + ' está errada:</strong> ' + whyWrong + '<br><br>'
+      + '<strong>Por que ' + correct + ' está certa:</strong> ' + QUIZ[qid].ok;
+    fb.className = 'quiz-feedback show fail';
+  }
+  fb.innerHTML = html;
+}
+</script>
+</body>
+</html>

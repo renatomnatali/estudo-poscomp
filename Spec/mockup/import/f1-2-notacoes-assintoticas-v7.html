@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F1.2 — Notações Assintóticas · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:4%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:50%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500)}.topbar-icon-btn:hover{background:var(--n100)}
+
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#1a6bcc 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--r-pill);padding:3px 14px;font-family:var(--fm);font-size:.72rem;letter-spacing:1px;margin-bottom:.8rem}
+.hero-title{font-family:var(--fd);font-size:1.8rem;font-weight:800;margin-bottom:.5rem;position:relative;z-index:1}
+.hero-formula{font-family:var(--fm);font-size:1.1rem;background:rgba(255,255,255,.12);border-radius:var(--r-md);padding:.5rem 1.4rem;display:inline-block;margin:.6rem 0;letter-spacing:1px}
+.hero-sub{opacity:.8;font-size:.9rem;max-width:520px;margin:.4rem auto 0;position:relative;z-index:1}
+
+/* SECTION NAV */
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover{background:rgba(255,255,255,.15);color:white}.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+
+/* CONTENT */
+.lesson-content{max-width:900px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.3rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.75}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--fm);font-size:.88rem}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0;font-size:.92rem;line-height:1.7}
+.callout{border-left:4px solid var(--accent);background:#e8f0fe;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem}.callout.warning{border-color:var(--accent2);background:#fff3e0}.callout.success{border-color:var(--green);background:#e8f5ee}.callout strong{color:var(--primary)}
+.formula-box{background:var(--primary);color:white;border-radius:12px;padding:1.4rem 2rem;text-align:center;margin:1.5rem 0}
+.formula-box .f-title{font-size:.75rem;opacity:.65;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;font-family:var(--fb)}
+.formula-box .f-main{font-size:1.4rem;font-family:Georgia,serif;margin-bottom:.4rem}
+.formula-box .f-sub{font-size:.84rem;opacity:.8}
+
+/* NOTAÇÃO CARDS */
+.notation-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.2rem 0}
+.notation-card{border-radius:12px;padding:1.2rem;text-align:center}
+.nc-big-o{background:#e8f0fe;border:2px solid var(--accent)}
+.nc-omega{background:#e8f5ee;border:2px solid var(--green)}
+.nc-theta{background:#fff3e0;border:2px solid var(--accent2)}
+.notation-symbol{font-size:2.2rem;font-family:Georgia,serif;font-weight:700;margin-bottom:.4rem}
+.nc-big-o .notation-symbol{color:var(--accent)}
+.nc-omega .notation-symbol{color:var(--green)}
+.nc-theta .notation-symbol{color:var(--accent2)}
+.notation-name{font-weight:700;font-size:.88rem;margin-bottom:.3rem;color:var(--primary)}
+.notation-meaning{font-size:.8rem;color:var(--muted);line-height:1.5}
+
+/* GROWTH TABLE */
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+th{background:var(--primary);color:white;padding:.65rem 1rem;text-align:left}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--border)}
+tr:nth-child(even) td{background:#f5f8ff}
+tr:hover td{background:#e8f0fe}
+.highlight-row td{background:#fff3cd!important;font-weight:600}
+.growth-cell{font-family:var(--fm);font-weight:600}
+.g-const{color:#15803d}.g-log{color:#0369a1}.g-linear{color:#6d28d9}.g-nlogn{color:#92400e}.g-quad{color:var(--coral)}.g-exp{color:#991b1b;font-weight:800}
+
+/* COMPLEXITY BARS */
+.complexity-chart{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.complexity-chart h4{color:var(--primary);font-size:.9rem;margin-bottom:1rem}
+.bar-row{display:flex;align-items:center;gap:.8rem;margin:.5rem 0}
+.bar-label{width:80px;font-family:var(--fm);font-size:.8rem;color:var(--muted);text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:20px;background:var(--n100);border-radius:4px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:.4rem;font-size:.72rem;font-weight:700;color:white;transition:width 1s ease}
+.bar-note{font-size:.76rem;color:var(--muted);width:80px;flex-shrink:0}
+
+/* ANALOGY */
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+.analogy .side{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}
+.analogy .side h4{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.analogy .side .val{font-size:1rem;font-weight:600;color:var(--primary)}
+.analogy .side p{font-size:.84rem;color:var(--muted);margin:0}
+
+/* PROVA STEP */
+.proof-steps{margin:1rem 0}
+.proof-step{display:flex;gap:1rem;padding:.8rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:.4rem 0;font-size:.9rem;align-items:flex-start}
+.proof-step .ps-num{background:var(--accent);color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;font-family:var(--fm)}
+.proof-step .ps-body{line-height:1.6}
+.proof-step .ps-body code{background:var(--code-bg);padding:1px 6px;border-radius:4px;font-family:var(--fm);font-size:.86rem}
+
+/* QUIZ */
+.quiz-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.5rem 0}
+.quiz-q{font-weight:600;color:var(--primary);margin-bottom:1rem;font-size:.95rem;line-height:1.5}
+.quiz-option{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f8faff;margin:.4rem 0;font-size:.9rem}.quiz-option:hover{background:#e8f0fe;border-color:var(--accent)}
+.quiz-option.selected{background:#e8f0fe;border-color:var(--accent)}.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+.quiz-feedback{margin-top:.8rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;display:none}
+.quiz-feedback.show{display:block}.quiz-feedback.ok{background:#e8f5ee;color:#15803d;border:1px solid #86efac}.quiz-feedback.fail{background:#fde8e8;color:var(--red);border:1px solid #fca5a5}
+.quiz-btn{margin-top:.8rem;padding:.45rem 1.2rem;background:var(--accent);color:white;border:none;border-radius:var(--r-pill);cursor:pointer;font-size:.84rem;font-weight:600;font-family:var(--fb)}.quiz-btn:hover{background:var(--primary)}
+
+/* SUMMARY */
+.summary-box{background:var(--primary);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}
+.summary-box h3{color:white;margin-bottom:1rem;font-size:1.1rem}
+.summary-row{display:flex;gap:.5rem;margin:.4rem 0;align-items:flex-start;font-size:.9rem}
+.summary-row::before{content:'✓';color:#7ef0a0;flex-shrink:0;font-weight:700}
+
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05)}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:50%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap)}.btn-nav.next:hover{background:var(--sap-d)}
+
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .notation-grid{grid-template-columns:1fr}
+  .analogy{grid-template-columns:1fr}
+  .lesson-content{padding:1.5rem 1rem}
+}
+
+/* N EXAMPLES */
+.n-examples-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0}
+.n-ex-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center}
+.n-ex-icon{font-size:1.6rem;margin-bottom:.4rem}
+.n-ex-label{font-weight:600;font-size:.82rem;color:var(--primary);margin-bottom:.3rem}
+.n-ex-val{font-size:.82rem;color:var(--text);line-height:1.5}
+
+/* SYMBOL DICT */
+.sym-dict{display:grid;gap:.5rem;margin:1rem 0}
+.sym-row{display:grid;grid-template-columns:80px 1fr;gap:1rem;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem}
+.sym-row.highlight{border-color:var(--accent);background:#f0f4ff}
+.sym-sym{font-family:Georgia,serif;font-size:1.3rem;color:var(--accent);text-align:center;line-height:1}
+.sym-body{font-size:.88rem;line-height:1.6}
+.sym-body strong{color:var(--primary)}
+.sym-body .eg{margin-top:.3rem;font-family:var(--fm);font-size:.82rem;background:var(--code-bg);padding:2px 8px;border-radius:4px;display:inline-block}
+
+/* DETAILS TOGGLE — expandable symbol table */
+.details-toggle{margin:.8rem 0;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.dt-trigger{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--accent);background:var(--sap-bg);user-select:none;transition:background .15s}
+.dt-trigger:hover{background:#dde6ff}
+.dt-arrow{font-size:.7rem;transition:transform .2s;display:inline-block}
+.dt-trigger.open .dt-arrow{transform:rotate(90deg)}
+.dt-content{display:none;background:var(--card);color:var(--text)}
+.dt-content.show{display:block}
+.dt-table{width:100%;border-collapse:collapse;font-size:.88rem}
+.dt-table th{background:var(--primary);color:white;padding:.45rem .9rem;text-align:left;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px}
+.dt-table td{padding:.5rem .9rem;border-bottom:1px solid var(--border);vertical-align:top}
+.dt-table tr:last-child td{border-bottom:none}
+.dt-table td:first-child{font-family:Georgia,serif;font-size:1.1rem;color:var(--accent);width:80px;text-align:center;white-space:nowrap}
+.dt-table td:nth-child(2){font-family:var(--fm);font-size:.83rem;font-weight:600;color:var(--primary);width:160px}
+.dt-table tr:nth-child(even) td{background:#f5f8ff}
+
+/* ANIMATION CANVAS CONTAINER */
+.anim-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.5rem 0}
+.anim-box h4{color:var(--primary);font-size:.9rem;margin-bottom:.6rem}
+.anim-controls{display:flex;align-items:center;gap:.8rem;margin-top:.8rem;flex-wrap:wrap}
+.anim-btn{padding:.35rem .9rem;border-radius:var(--r-pill);border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:.8rem;font-family:var(--fb);color:var(--primary);font-weight:600}
+.anim-btn:hover,.anim-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.anim-legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.8rem;margin-top:.4rem}
+.leg-item{display:flex;align-items:center;gap:.4rem}
+.leg-dot{width:12px;height:4px;border-radius:2px;flex-shrink:0}
+
+/* SLIDER SECTION */
+.slider-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.2rem 0}
+.slider-box h4{color:var(--primary);font-size:.9rem;margin-bottom:.8rem}
+.slider-row{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.slider-row label{font-size:.85rem;font-weight:600;min-width:120px;color:var(--primary)}
+input[type=range]{flex:1;accent-color:var(--accent)}
+.slider-val{font-family:var(--fm);font-size:.88rem;font-weight:700;color:var(--accent);min-width:60px}
+.counts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem}
+.count-card{border-radius:8px;padding:.6rem .8rem;font-size:.82rem}
+.count-label{font-family:var(--fm);font-weight:700;margin-bottom:.1rem}
+.count-val{color:var(--text);font-weight:600}
+
+/* FORMAL FORMULA - annotated */
+.formula-annotated{position:relative;background:var(--primary);color:white;border-radius:12px;padding:1.6rem 2rem 2rem;text-align:center;margin:1.5rem 0}
+.fa-title{font-size:.72rem;opacity:.6;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.fa-line{font-size:1.25rem;font-family:Georgia,serif;margin-bottom:1.4rem;line-height:1.8}
+.fa-ann{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.4rem}
+.fa-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:.25rem .7rem;font-size:.76rem;cursor:default}
+.fa-chip:hover{background:rgba(255,255,255,.2)}
+.fa-chip strong{color:#7ef0c0}
+
+/* CODE ANNOTATOR */
+.code-ann{background:#1a1a2e;border-radius:10px;padding:1.2rem;margin:1rem 0;position:relative}
+.code-line{display:flex;gap:.5rem;padding:.15rem .2rem;border-radius:4px;cursor:pointer;transition:background .1s}
+.code-line:hover{background:rgba(255,255,255,.07)}
+.code-line.active{background:rgba(255,255,255,.1)}
+.cl-num{font-family:var(--fm);font-size:.78rem;color:#555;width:18px;text-align:right;flex-shrink:0;user-select:none}
+.cl-code{font-family:var(--fm);font-size:.83rem;color:#e8e8f0;flex:1;white-space:pre}
+.cl-badge{font-family:var(--fm);font-size:.72rem;padding:1px 6px;border-radius:3px;flex-shrink:0;align-self:center}
+.cl-explain{background:rgba(255,255,255,.06);border-left:3px solid var(--accent);padding:.5rem .8rem;border-radius:0 6px 6px 0;font-size:.82rem;color:#c8d4f0;margin:.2rem 0 .4rem 24px;display:none}
+.cl-explain.show{display:block}
+.cb-o1{background:#1a3d1a;color:#7ef0a0}
+.cb-on{background:#1a2a4d;color:#7acdf0}
+.cb-on2{background:#4d1a1a;color:#f07a7a}
+
+@media(max-width:768px){
+  .n-examples-grid{grid-template-columns:1fr}
+  .sym-row{grid-template-columns:50px 1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">4%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">1 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div>
+        <a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas de Estudo</span></a>
+        <a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div>
+        <a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado POSCOMP</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item" href="curriculo.html"><div class="sb-item-icon">📊</div><span class="sb-item-text">Currículo Completo</span><span class="sb-tooltip">Currículo Completo</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Seja Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Análise de Algoritmos</a><span class="sep">›</span>
+        <span class="current">F1.2 — Notações Assintóticas</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+
+    <div class="lesson-area" id="lessonArea">
+      <!-- HERO -->
+      <div class="lesson-header">
+        <div class="hero-tag">ANÁLISE DE ALGORITMOS · F1.2</div>
+        <div class="hero-title">Notações Assintóticas</div>
+        <div class="hero-formula">O(f(n)) · Ω(f(n)) · Θ(f(n))</div>
+        <div class="hero-sub">Como medir a eficiência de algoritmos independente do hardware — a linguagem universal da ciência da computação</div>
+      </div>
+
+      <!-- SECTION NAV -->
+      <nav class="section-nav" id="sectionNav">
+        <a href="#motivacao">1. Por que medir?</a>
+        <a href="#notacoes">2. As três notações</a>
+        <a href="#formal">3. Definição formal</a>
+        <a href="#crescimento">4. Tabela de crescimento</a>
+        <a href="#regras">5. Regras práticas</a>
+        <a href="#exemplos">6. Exemplos resolvidos</a>
+        <a href="#quiz">7. Quiz</a>
+        <a href="#resumo">8. Resumo</a>
+      </nav>
+
+      <div class="lesson-content">
+
+        <!-- 1. MOTIVAÇÃO -->
+        <section id="motivacao">
+          <h2><span class="num">1</span> Por que medir a eficiência?</h2>
+          <p>Imagine dois algoritmos que resolvem o mesmo problema. Como saber qual é melhor? Cronometrar em um computador específico é inútil: o resultado muda com o hardware, a linguagem de programação e os dados de entrada. Precisamos de uma medida <strong>independente de máquina</strong>.</p>
+          <div class="analogy">
+            <div class="side">
+              <h4>Abordagem errada ✗</h4>
+              <div class="val">Cronometrar a execução</div>
+              <p>Depende do CPU, RAM, compilador, carga do sistema. Não generaliza.</p>
+            </div>
+            <div class="side">
+              <h4>Abordagem certa ✓</h4>
+              <div class="val">Contar operações em função de n</div>
+              <p>Expressa o comportamento para <em>qualquer</em> tamanho de entrada n.</p>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>Insight central:</strong> nos interessa o comportamento quando n cresce — não o tempo exato para n = 100, mas o que acontece quando n vai para 1.000, 1.000.000, ∞.
+          </div>
+
+          <h3>O que é esse "n"?</h3>
+          <p><strong>n representa o tamanho da entrada do seu algoritmo</strong> — a "quantidade de dados" que ele precisa processar. O que exatamente é n depende do problema:</p>
+          <div class="n-examples-grid">
+            <div class="n-ex-card">
+              <div class="n-ex-icon">📋</div>
+              <div class="n-ex-label">Ordenar uma lista</div>
+              <div class="n-ex-val">n = quantidade de itens<br><span style="font-size:.8rem;color:var(--muted)">ex: ordenar 50 nomes vs 50.000 nomes</span></div>
+            </div>
+            <div class="n-ex-card">
+              <div class="n-ex-icon">🔍</div>
+              <div class="n-ex-label">Buscar em um arquivo</div>
+              <div class="n-ex-val">n = número de linhas<br><span style="font-size:.8rem;color:var(--muted)">ex: buscar em 200 registros vs 2.000.000</span></div>
+            </div>
+            <div class="n-ex-card">
+              <div class="n-ex-icon">🔗</div>
+              <div class="n-ex-label">Caminho em um grafo</div>
+              <div class="n-ex-val">n = número de nós (ou arestas)<br><span style="font-size:.8rem;color:var(--muted)">ex: rotear em 10 cidades vs 10.000</span></div>
+            </div>
+          </div>
+          <div class="callout success">
+            <strong>Regra prática:</strong> sempre que você ver "n" numa notação de complexidade, pergunte: "n é quantos quês?" — e a resposta define o que o algoritmo está processando.
+          </div>
+          <div class="callout warning" style="margin-top:1rem">
+            <strong>→ Próximo passo (seção 2):</strong> agora que você sabe o que é n, vamos entender as três formas de descrever como um algoritmo se comporta à medida que n cresce.
+          </div>
+        </section>
+
+        <!-- 2. AS TRÊS NOTAÇÕES -->
+        <section id="notacoes">
+          <h2><span class="num">2</span> As três notações</h2>
+
+          <p>Antes de ver as definições formais (seção 3), você precisa entender <em>para que serve</em> cada notação. Pense assim: você quer descrever o quão rápido seu algoritmo cresce. Mas "rápido" tem três sabores distintos.</p>
+
+          <div class="analogy" style="margin:1rem 0">
+            <div class="side" style="border-left:4px solid var(--accent)">
+              <h4 style="color:var(--accent)">🌧️ Analogia: previsão do tempo</h4>
+              <p>Um meteorologista pode dizer: <strong>"vai chover no máximo 50mm"</strong> (limite superior), <strong>"vai chover pelo menos 10mm"</strong> (limite inferior), ou <strong>"vai chover entre 20mm e 30mm"</strong> (intervalo exato). São três formas de descrever a mesma chuva — com precisões diferentes.</p>
+            </div>
+            <div class="side" style="border-left:4px solid var(--green)">
+              <h4 style="color:var(--green)">⏱️ Na análise de algoritmos</h4>
+              <p>Você pode dizer: <strong>"nunca piora além de n²"</strong> (Big-O), <strong>"nunca melhora além de n"</strong> (Ômega), ou <strong>"sempre fica entre n e n²"</strong> (Theta). São três formas de descrever o mesmo custo.</p>
+            </div>
+          </div>
+
+          <div class="notation-grid" style="margin-top:1.2rem">
+            <div class="notation-card nc-big-o">
+              <div class="notation-symbol">O</div>
+              <div class="notation-name">Big-O — "no máximo"</div>
+              <div class="notation-meaning">
+                <strong>Lê-se:</strong> "Ó grande de n" — lê-se sempre com a expressão dentro: O(n²) é "Ó grande de n ao quadrado", O(log n) é "Ó grande de log n".<br><br>
+                <strong>Significa:</strong> o algoritmo nunca é <em>mais lento</em> que isso. É o <strong>teto</strong>.<br><br>
+                <strong>Exemplo:</strong> busca linear em lista de n itens.<br>
+                No pior caso você percorre tudo: O(n).<br>
+                Se o item for o primeiro, termina em 1 passo — mas dizemos O(n) porque <em>no pior caso</em> é isso.<br><br>
+                <span style="font-size:.78rem;color:#5a7abf">É a notação mais usada em entrevistas e POSCOMP</span>
+              </div>
+            </div>
+            <div class="notation-card nc-omega">
+              <div class="notation-symbol">Ω</div>
+              <div class="notation-name">Ômega — "no mínimo"</div>
+              <div class="notation-meaning">
+                <strong>Lê-se:</strong> sempre com a expressão dentro: Ω(n) é "Ômega de n", Ω(n log n) é "Ômega de n log n".<br><br>
+                <strong>Significa:</strong> o algoritmo nunca é <em>mais rápido</em> que isso. É o <strong>piso</strong>.<br><br>
+                <strong>Exemplo:</strong> para ordenar n itens, você precisa no mínimo ler cada item uma vez: Ω(n). Não existe algoritmo de ordenação baseado em comparação mais rápido que Ω(n log n).<br><br>
+                <span style="font-size:.78rem;color:#2d7a50">Importante para provar que <em>nenhum</em> algoritmo pode fazer melhor</span>
+              </div>
+            </div>
+            <div class="notation-card nc-theta">
+              <div class="notation-symbol">Θ</div>
+              <div class="notation-name">Theta — "exatamente"</div>
+              <div class="notation-meaning">
+                <strong>Lê-se:</strong> "Teta de n log n"<br><br>
+                <strong>Significa:</strong> teto e piso são a mesma função. O custo fica <strong>preso entre dois múltiplos</strong> de g(n).<br><br>
+                <strong>Exemplo:</strong> Merge Sort é Θ(n log n) — melhor e pior caso crescem da mesma forma.<br><br>
+                <span style="font-size:.78rem;color:#8a5d00">É a descrição mais precisa, mas nem sempre existe (ex: busca linear não tem Theta único)</span>
+              </div>
+            </div>
+          </div>
+
+          <h3>Como as três se relacionam</h3>
+          <div class="card" style="padding:1.2rem">
+            <p style="margin-bottom:.8rem">Pense em Theta como a interseção de O e Ω:</p>
+            <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.88rem">
+              <div style="display:flex;align-items:center;gap:.8rem;padding:.5rem .8rem;background:#e8f0fe;border-radius:6px">
+                <span style="font-family:Georgia,serif;font-size:1.1rem;color:var(--accent);min-width:120px">f(n) = O(n²)</span>
+                <span>→ f(n) <strong>pode crescer até</strong> n². Também vale O(n³), O(2ⁿ)…</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.8rem;padding:.5rem .8rem;background:#e8f5ee;border-radius:6px">
+                <span style="font-family:Georgia,serif;font-size:1.1rem;color:var(--green);min-width:120px">f(n) = Ω(n)</span>
+                <span>→ f(n) <strong>cresce pelo menos</strong> como n. Também vale Ω(log n), Ω(1)…</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:.8rem;padding:.5rem .8rem;background:#fff3e0;border-radius:6px">
+                <span style="font-family:Georgia,serif;font-size:1.1rem;color:var(--accent2);min-width:120px">f(n) = Θ(n log n)</span>
+                <span>→ f(n) <strong>fica preso</strong> entre c₁·n log n e c₂·n log n. Implica O(n log n) <em>e</em> Ω(n log n).</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout warning">
+            <strong>Atenção — erro comum:</strong> "O(n²) significa que o algoritmo sempre faz n² operações." Errado. O significa <em>no máximo</em>. Um algoritmo O(n²) pode terminar em n operações para certas entradas — o que não pode é ultrapassar n² operações no pior caso.
+          </div>
+          <div class="callout" style="margin-top:1rem">
+            <strong>→ Próximo passo (seção 3):</strong> você já sabe o <em>que</em> cada notação significa. Agora vamos ver a definição matemática precisa — e descobrir que ela é mais simples do que parece quando você sabe o que cada símbolo representa.
+          </div>
+        </section>
+
+        <!-- 3. DEFINIÇÃO FORMAL -->
+        <section id="formal">
+          <h2><span class="num">3</span> Definição formal — entendendo cada peça</h2>
+
+          <p>Antes de qualquer fórmula, vamos traduzir cada símbolo para português. A confusão geralmente não é com a matemática em si — é porque ninguém explica o que cada letra <em>significa</em>.</p>
+
+          <div class="sym-dict">
+            <div class="sym-row">
+              <div class="sym-sym">n</div>
+              <div class="sym-body"><strong>O tamanho da entrada.</strong> É o único número que varia. Tudo mais na análise é em função de n.<br>
+              <span class="eg">n = 10 → lista com 10 itens &nbsp;|&nbsp; n = 10.000 → lista com 10 mil itens</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">f(n)</div>
+              <div class="sym-body"><strong>O custo real do seu algoritmo.</strong> Pode ser uma expressão feia, como 3n² + 5n − 2.<br>
+              <span class="eg">f(n) = 3n² + 5n → para n=10: custa 3(100)+5(10) = 350 operações</span></div>
+            </div>
+            <div class="sym-row highlight">
+              <div class="sym-sym">g(n)</div>
+              <div class="sym-body"><strong>A função de referência — mais simples.</strong> Você escolhe uma função "limpa" (n², n, log n…) para servir de régua de comparação. Não é o custo real — é o "molde".<br>
+              <span class="eg">g(n) = n² → "quero comparar meu algoritmo com n²"</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">c</div>
+              <div class="sym-body">
+                <strong>Uma constante que absorve coeficientes.</strong> Você escolhe o valor — só precisa existir algum c positivo que faça a desigualdade funcionar.<br>
+                <span class="eg">c = 8 → mostra que 3n² + 5n ≤ 8·n² para todo n ≥ 1</span>
+                <div style="margin-top:.5rem;font-size:.85rem;color:var(--text)">
+                  <strong style="color:var(--primary)">Por que c não é inútil?</strong> Sem ele, a definição exigiria f(n) ≤ g(n) — e aí <code>5n² = O(n²)</code> seria falso, porque 5n² nunca é ≤ n². O c é o "curinga" que diz: <em>"pode multiplicar g(n) pelo que precisar"</em>. Isso torna constantes multiplicativas irrelevantes na notação final — um computador 5× mais lento é só c = 5, e ainda é O(n²).
+                </div>
+              </div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">n₀</div>
+              <div class="sym-body">
+                <strong>O ponto de corte — "a partir daqui vale para sempre".</strong> Para n pequeno, a relação pode não valer. Mas a partir de n₀, vale para todo n maior.<br>
+                <span class="eg">n₀ = 1 → a partir de n=1, 3n²+5n ≤ 8n² vale eternamente</span>
+                <div style="margin-top:.5rem;font-size:.85rem;color:var(--text)">
+                  <strong style="color:var(--primary)">O que é "n grande"?</strong> É só uma forma de dizer "quando n já passou do n₀". Antes disso, constantes e termos menores ainda fazem barulho — por exemplo, <code>f(n) = 1000n + 5</code> pode ser maior que <code>n²</code> para n pequeno. Mas a partir de um certo ponto (n₀ ≈ 1001), n² passa 1000n e nunca mais perde. <em>"N grande"</em> é esse regime onde a classe de crescimento já revelou sua natureza real.
+                </div>
+              </div>
+            </div>
+            <div class="sym-row highlight">
+              <div class="sym-sym">O(g)</div>
+              <div class="sym-body"><strong>Como se lê:</strong> "Ó grande de g de n" ou "na ordem de g de n".<br>
+              <strong>O que significa:</strong> "meu algoritmo não cresce mais rápido que g(n), a partir de algum ponto".<br>
+              <span class="eg">O(n²) → "não cresce mais rápido que n²" — se n dobra, o custo no máximo quadruplica</span></div>
+            </div>
+          </div>
+
+          <h3>A intuição em uma frase</h3>
+          <div class="callout">
+            <strong>f(n) = O(g(n))</strong> significa: existe uma versão "inflada" de g(n) — ou seja, c·g(n) — que fica <em>sempre acima</em> de f(n) depois de um certo ponto n₀. Não importa quanto n cresça, f(n) nunca ultrapassa esse teto.
+          </div>
+
+          <h3>Veja no gráfico — f(n) = 3n² + 5n vs. g(n) = n²</h3>
+          <div class="anim-box">
+            <h4>Animação: por que 3n² + 5n = O(n²)?</h4>
+            <canvas id="bigOCanvas" style="width:100%;height:240px;display:block;border-radius:8px;background:#0d1a36"></canvas>
+            <div class="anim-legend">
+              <div class="leg-item"><div class="leg-dot" style="background:#64b5f6"></div><span>f(n) = 3n² + 5n (seu algoritmo)</span></div>
+              <div class="leg-item"><div class="leg-dot" style="background:#ff8a65;border-style:dashed"></div><span>c·g(n) = 8n² (teto — limite superior)</span></div>
+              <div class="leg-item"><div class="leg-dot" style="background:#81c784"></div><span>n₀ = ponto a partir do qual o teto nunca é ultrapassado</span></div>
+            </div>
+            <div class="anim-controls">
+              <button class="anim-btn active" id="animPlayBtn" onclick="toggleAnim()">▶ Animar</button>
+              <button class="anim-btn" onclick="resetAnim()">↺ Reiniciar</button>
+              <span style="font-size:.8rem;color:var(--muted)">Observe: f(n) azul fica sempre abaixo do teto laranja após n₀</span>
+            </div>
+          </div>
+
+          <h3>Agora a fórmula — cada parte já faz sentido</h3>
+          <div class="formula-annotated">
+            <div class="fa-title">Big-O — limite superior</div>
+            <div class="fa-line">f(n) = O(g(n)) &nbsp;⟺&nbsp; ∃ c &gt; 0, n₀ &nbsp;:&nbsp; f(n) ≤ c·g(n) &nbsp; ∀ n &gt; n₀</div>
+            <div class="fa-ann">
+              <div class="fa-chip">⟺ = <strong>"se e somente se"</strong> (as duas frases dizem a mesma coisa)</div>
+              <div class="fa-chip">∃ = "existe" (basta um funcionar)</div>
+              <div class="fa-chip">c &gt; 0 = <strong>constante livre</strong> que você escolhe</div>
+              <div class="fa-chip">n₀ = <strong>ponto de corte</strong></div>
+              <div class="fa-chip">≤ = f(n) não ultrapassa o teto c·g(n)</div>
+              <div class="fa-chip">∀ n &gt; n₀ = "para todo n maior que n₀"</div>
+            </div>
+            <div class="details-toggle" style="margin:1rem 0 0">
+              <div class="dt-trigger" onclick="toggleDetails(this)"><span class="dt-arrow">▸</span> Ver tradução símbolo a símbolo</div>
+              <div class="dt-content">
+                <table class="dt-table">
+                  <thead><tr><th>Símbolo</th><th>Lê-se</th><th>Significa</th></tr></thead>
+                  <tbody>
+                    <tr><td>⟺</td><td>"se e somente se"</td><td>As duas afirmações são equivalentes — uma implica a outra nos dois sentidos. É como "é exatamente a mesma coisa que dizer".</td></tr>
+                    <tr><td>∃</td><td>"existe"</td><td>Basta encontrar um valor que funcione. Não precisa ser o único, não precisa ser o menor — só precisa existir algum.</td></tr>
+                    <tr><td>c &gt; 0</td><td>"uma constante positiva c"</td><td>Um número qualquer maior que zero — você escolhe qual. É o "curinga" que absorve coeficientes como 5, 100, 1000.</td></tr>
+                    <tr><td>n₀</td><td>"n zero" (ponto de corte)</td><td>A partir daqui a desigualdade vale para sempre. Antes disso, pode valer qualquer coisa — isso não importa para o Big-O.</td></tr>
+                    <tr><td>:</td><td>"tal que"</td><td>O que vem depois é a condição que precisa ser satisfeita.</td></tr>
+                    <tr><td>≤</td><td>"menor ou igual"</td><td>f(n) não ultrapassa o teto c·g(n). É isso que "limite superior" significa.</td></tr>
+                    <tr><td>∀ n &gt; n₀</td><td>"para todo n maior que n₀"</td><td>A condição vale eternamente a partir do ponto de corte. "N grande" é esse regime.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="formula-annotated" style="background:#1a4d2e">
+            <div class="fa-title">Ômega — limite inferior</div>
+            <div class="fa-line">f(n) = Ω(g(n)) &nbsp;⟺&nbsp; ∃ c &gt; 0, n₀ &nbsp;:&nbsp; f(n) ≥ c·g(n) &nbsp; ∀ n &gt; n₀</div>
+            <div class="fa-ann">
+              <div class="fa-chip">≥ = f(n) nunca fica <strong>abaixo</strong> do piso c·g(n)</div>
+              <div class="fa-chip">"meu algoritmo nunca é mais rápido que isso"</div>
+            </div>
+            <div class="details-toggle" style="margin:1rem 0 0">
+              <div class="dt-trigger" onclick="toggleDetails(this)"><span class="dt-arrow">▸</span> Ver tradução símbolo a símbolo</div>
+              <div class="dt-content">
+                <table class="dt-table">
+                  <thead><tr><th>Símbolo</th><th>Lê-se</th><th>Significa</th></tr></thead>
+                  <tbody>
+                    <tr><td>⟺</td><td>"se e somente se"</td><td>Equivalência nos dois sentidos: Ω implica a desigualdade ≥ e vice-versa.</td></tr>
+                    <tr><td>∃</td><td>"existe"</td><td>Basta encontrar um c e um n₀ que funcionem — não precisa ser único.</td></tr>
+                    <tr><td>c &gt; 0</td><td>"uma constante positiva"</td><td>O "piso": você multiplica g(n) por c para cobrir f(n) por baixo.</td></tr>
+                    <tr><td>n₀</td><td>"n zero"</td><td>Ponto de corte. Para n &lt; n₀ a desigualdade pode não valer — e tudo bem.</td></tr>
+                    <tr><td>≥</td><td>"maior ou igual"</td><td>f(n) nunca cai abaixo de c·g(n). Ao contrário do Big-O (≤), aqui g(n) é o piso.</td></tr>
+                    <tr><td>∀ n &gt; n₀</td><td>"para todo n maior que n₀"</td><td>O piso vale permanentemente a partir desse ponto — para sempre.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="formula-annotated" style="background:#4a2800">
+            <div class="fa-title">Theta — limite exato (superior + inferior)</div>
+            <div class="fa-line">f(n) = Θ(g(n)) &nbsp;⟺&nbsp; ∃ c₁, c₂ &gt; 0, n₀ &nbsp;:&nbsp; c₁·g(n) ≤ f(n) ≤ c₂·g(n) &nbsp; ∀ n &gt; n₀</div>
+            <div class="fa-ann">
+              <div class="fa-chip">c₁·g(n) = <strong>piso</strong> (mínimo)</div>
+              <div class="fa-chip">c₂·g(n) = <strong>teto</strong> (máximo)</div>
+              <div class="fa-chip">f(n) fica <strong>entre</strong> os dois para sempre</div>
+            </div>
+            <div class="details-toggle" style="margin:1rem 0 0">
+              <div class="dt-trigger" onclick="toggleDetails(this)"><span class="dt-arrow">▸</span> Ver tradução símbolo a símbolo</div>
+              <div class="dt-content">
+                <table class="dt-table">
+                  <thead><tr><th>Símbolo</th><th>Lê-se</th><th>Significa</th></tr></thead>
+                  <tbody>
+                    <tr><td>⟺</td><td>"se e somente se"</td><td>Theta é definido como exatamente essa condição de sanduíche — nem mais, nem menos.</td></tr>
+                    <tr><td>∃ c₁, c₂</td><td>"existem c₁ e c₂"</td><td>Dois constantes independentes: c₁ define o piso, c₂ define o teto. Basta que existam quaisquer dois valores positivos.</td></tr>
+                    <tr><td>c₁·g(n)</td><td>"c₁ vezes g de n"</td><td>O piso — f(n) nunca cai abaixo disso. Como Ω(g) com constante c₁.</td></tr>
+                    <tr><td>c₂·g(n)</td><td>"c₂ vezes g de n"</td><td>O teto — f(n) nunca ultrapassa isso. Como O(g) com constante c₂.</td></tr>
+                    <tr><td>c₁·g ≤ f ≤ c₂·g</td><td>"sanduíche"</td><td>f(n) fica permanentemente espremida entre os dois múltiplos de g(n). É o que faz Theta ser o limite exato.</td></tr>
+                    <tr><td>∀ n &gt; n₀</td><td>"para todo n maior que n₀"</td><td>O sanduíche vale para sempre depois de n₀ — para qualquer entrada grande.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <h3>Prova passo a passo: 3n² + 5n = O(n²)</h3>
+          <p style="font-size:.88rem;color:var(--muted);margin-bottom:.5rem">Agora que você sabe o que cada símbolo significa, a prova é só "achar um c e um n₀ que funcionem":</p>
+          <div class="proof-steps">
+            <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>O que precisamos provar:</strong> que existe algum c onde <code>3n² + 5n ≤ c·n²</code> para n grande o suficiente. Não sabemos c ainda — vamos calcular.</div></div>
+            <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Substituição:</strong> para n ≥ 1, sabemos que n ≤ n² (qualquer número inteiro positivo é menor ou igual ao seu quadrado). Logo <code>5n ≤ 5n²</code>.<br><br>
+              Com isso, substituímos o termo <code>5n</code> por algo maior (<code>5n²</code>) na expressão original:<br><br>
+              <strong>Passo A (desigualdade):</strong> <code>3n² + 5n &nbsp;≤&nbsp; 3n² + 5n²</code><br>
+              <span style="font-size:.84rem;color:var(--muted)">Trocamos 5n por 5n², que é maior — então o lado direito só cresce. A desigualdade vale.</span><br><br>
+              <strong>Passo B (igualdade):</strong> <code>3n² + 5n² &nbsp;= &nbsp;8n²</code><br>
+              <span style="font-size:.84rem;color:var(--muted)">Álgebra simples: (3+5)n² = 8n². Igual a 3x + 5x = 8x.</span><br><br>
+              Juntando os dois passos: se A ≤ B e B = C, então A ≤ C.<br>
+              Conclusão: <code>3n² + 5n &nbsp;≤&nbsp; 8n²</code></div></div>
+            <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Identificamos c e n₀.</strong> A prova do Passo 2 usou a condição "para n ≥ 1". Esse "n ≥ 1" é exatamente o n₀ — ele não foi escolhido no ar, emergiu da condição que a própria substituição precisava. E o teto que encontramos foi 8n², então c = 8.<br><br>
+              Valores: <code>c = 8</code> e <code>n₀ = 1</code>. Para todo n ≥ 1: <code>3n² + 5n ≤ 8n²</code> ✓<br><br>
+              Teste: n=10 → 3(100)+5(10)=350 ≤ 8(100)=800 ✓ &nbsp; n=100 → 30.500 ≤ 80.000 ✓</div></div>
+            <div class="proof-step"><span class="ps-num">4</span><div class="ps-body"><strong>Conclusão:</strong> <code>3n² + 5n = O(n²)</code>.<br><br>
+              Note: c ≥ 8 e n ≥ 1. Não é qualquer c > 0 — c = 1 não funcionaria, pois <code>3n² + 5n ≤ 1·n²</code> é falso. O c precisa ser grande o suficiente para o teto cobrir f(n). Qualquer c ≥ 8 funciona porque o teto fica mais folgado ainda — o que a definição exige é apenas que exista pelo menos um.</div></div>
+            <div class="proof-step"><span class="ps-num">5</span><div class="ps-body"><strong>Por que não O(n)?</strong> Tente: seria <code>3n² + 5n ≤ c·n</code>. Para n grande, 3n²/n = 3n → cresce sem limite. Nenhum c fixo consegue cobrir isso. Logo O(n) não vale.</div></div>
+          </div>
+          <div class="callout" style="margin-top:1rem">
+            <strong>→ Próximo passo (seção 4):</strong> agora que você entende o que O(g(n)) significa formalmente, vamos ver quais são as classes de crescimento mais comuns e por que algumas são tão piores que outras.
+          </div>
+        </section>
+
+        <!-- 4. TABELA DE CRESCIMENTO -->
+        <section id="crescimento">
+          <h2><span class="num">4</span> Hierarquia de crescimento</h2>
+          <p>As classes de complexidade têm uma hierarquia bem definida. Da mais eficiente para a menos eficiente:</p>
+          <div class="complexity-chart">
+            <h4>Operações necessárias para n = 1.000</h4>
+            <div class="bar-row"><span class="bar-label">O(1)</span><div class="bar-track"><div class="bar-fill" style="width:1%;background:#15803d">1</div></div><span class="bar-note">1 op</span></div>
+            <div class="bar-row"><span class="bar-label">O(log n)</span><div class="bar-track"><div class="bar-fill" style="width:1%;background:#0369a1">~10</div></div><span class="bar-note">~10 ops</span></div>
+            <div class="bar-row"><span class="bar-label">O(n)</span><div class="bar-track"><div class="bar-fill" style="width:3%;background:#6d28d9">1K</div></div><span class="bar-note">1.000 ops</span></div>
+            <div class="bar-row"><span class="bar-label">O(n log n)</span><div class="bar-track"><div class="bar-fill" style="width:5%;background:#92400e">~10K</div></div><span class="bar-note">~10.000 ops</span></div>
+            <div class="bar-row"><span class="bar-label">O(n²)</span><div class="bar-track"><div class="bar-fill" style="width:15%;background:#b45309">1M</div></div><span class="bar-note">1.000.000 ops</span></div>
+            <div class="bar-row"><span class="bar-label">O(n³)</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:#dc2626">1B</div></div><span class="bar-note">10⁹ ops</span></div>
+            <div class="bar-row"><span class="bar-label">O(2ⁿ)</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#7f1d1d">∞</div></div><span class="bar-note">10³⁰¹ ops 🔥</span></div>
+          </div>
+          <table>
+            <thead><tr><th>Notação</th><th>Nome</th><th>n=10</th><th>n=100</th><th>n=1.000</th><th>Exemplo</th></tr></thead>
+            <tbody>
+              <tr><td class="growth-cell g-const">O(1)</td><td>Constante</td><td>1</td><td>1</td><td>1</td><td>Acesso a array por índice</td></tr>
+              <tr><td class="growth-cell g-log">O(log n)</td><td>Logarítmico</td><td>3</td><td>7</td><td>10</td><td>Busca binária</td></tr>
+              <tr><td class="growth-cell g-linear">O(n)</td><td>Linear</td><td>10</td><td>100</td><td>1.000</td><td>Busca linear</td></tr>
+              <tr class="highlight-row"><td class="growth-cell g-nlogn">O(n log n)</td><td>Linearítmico</td><td>33</td><td>664</td><td>9.966</td><td>Merge Sort, Heap Sort</td></tr>
+              <tr><td class="growth-cell g-quad">O(n²)</td><td>Quadrático</td><td>100</td><td>10.000</td><td>1.000.000</td><td>Bubble Sort, inserção</td></tr>
+              <tr><td class="growth-cell g-exp" style="color:#b45309;font-weight:800">O(n³)</td><td>Cúbico</td><td>1.000</td><td>1.000.000</td><td>10⁹</td><td>Multiplicação de matrizes ingênua</td></tr>
+              <tr><td class="growth-cell g-exp">O(2ⁿ)</td><td>Exponencial</td><td>1.024</td><td>10³⁰</td><td>10³⁰¹</td><td>Força bruta subsets</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Experimente: veja os números crescerem</h3>
+          <div class="slider-box">
+            <h4>Quantas operações para cada complexidade?</h4>
+            <div class="slider-row">
+              <label>Tamanho da entrada (n)</label>
+              <input type="range" min="1" max="5" value="2" id="nSlider" oninput="updateCounts(this.value)">
+              <span class="slider-val" id="nDisplay">n = 100</span>
+            </div>
+            <div class="counts-grid" id="countsGrid"></div>
+            <p style="font-size:.78rem;color:var(--muted);margin-top:.8rem">* operações acima de 10¹⁵ são consideradas inviáveis na prática (um computador faz ~10⁹ ops/segundo)</p>
+          </div>
+          <div class="callout" style="margin-top:1rem">
+            <strong>→ Próximo passo (seção 5):</strong> você já sabe interpretar uma complexidade. Agora aprenda a <em>calcular</em> — dada a estrutura de um código, como chegar ao Big-O sem precisar contar operações na mão.
+          </div>
+        </section>
+
+        <!-- 5. REGRAS PRÁTICAS -->
+        <section id="regras">
+          <h2><span class="num">5</span> Regras práticas para calcular Big-O</h2>
+
+          <p>Antes de listar as regras, veja o seguinte código. Você consegue estimar qual bloco domina o tempo total?</p>
+
+          <div class="code-ann" style="margin-bottom:1.2rem">
+            <div class="code-line"><span class="cl-num">1</span><span class="cl-code">for i in range(n):      </span><span class="cl-badge cb-on">O(n)</span></div>
+            <div class="code-line"><span class="cl-num">2</span><span class="cl-code">    print(i)</span></div>
+            <div style="height:.6rem"></div>
+            <div class="code-line"><span class="cl-num">3</span><span class="cl-code">for i in range(n):      </span><span class="cl-badge cb-on2">O(n²)</span></div>
+            <div class="code-line"><span class="cl-num">4</span><span class="cl-code">    for j in range(n):</span></div>
+            <div class="code-line"><span class="cl-num">5</span><span class="cl-code">        print(i, j)</span></div>
+          </div>
+
+          <p>Para n = 1.000: o bloco 1 faz 1.000 operações. O bloco 2 faz 1.000.000. A soma é 1.001.000 — que na prática é indistinguível de 1.000.000. O bloco menor desaparece.</p>
+
+          <p>Esse exemplo já mostra as três ideias centrais das regras a seguir: loops sequenciais somam, loops aninhados multiplicam, e o termo maior engole os menores. As regras são só formas precisas de aplicar esses três fatos.</p>
+
+          <h3>Regra 1 — Eliminar constantes multiplicativas</h3>
+          <div class="card">
+            <p>Pense em loops idênticos executados um após o outro:</p>
+            <pre style="font-family:var(--fm);font-size:.85rem;color:var(--text);line-height:2;background:#f5f8ff;padding:.8rem;border-radius:6px">for i in range(n): print(i)   <span style="color:var(--accent)">← O(n)</span>
+for i in range(n): print(i)   <span style="color:var(--accent)">← O(n)</span>
+for i in range(n): print(i)   <span style="color:var(--accent)">← O(n)</span>
+for i in range(n): print(i)   <span style="color:var(--accent)">← O(n)</span>
+for i in range(n): print(i)   <span style="color:var(--accent)">← O(n)</span>
+<span style="color:var(--muted)"># Total: 5n operações — mas o pior caso ainda cresce como n</span>
+<span style="color:var(--green)"># → O(n), não O(5n)</span></pre>
+            <p>Se n dobra, os cinco loops juntos ainda dobram. Se n quadruplica, os cinco juntos ainda quadruplicam. O <em>formato</em> do crescimento é n — não importa se são 5 loops ou 500.</p>
+            <p>O mesmo vale para qualquer expressão com coeficiente: <code>5n²</code>, <code>1000n</code>, <code>0.001·2ⁿ</code>. O coeficiente não muda a classe de crescimento.</p>
+            <div style="background:var(--code-bg);border-radius:8px;padding:.8rem 1rem;margin:.5rem 0;font-size:.88rem">
+              <strong>Por quê formalmente?</strong> Pela definição de Big-O, você escolhe qualquer c. Para <code>5n² = O(n²)</code>, escolhe c = 5 e n₀ = 1:<br>
+              5n² ≤ <strong>5</strong>·n² &nbsp;para todo n ≥ 1 &nbsp;✓<br>
+              <span style="font-size:.84rem;color:var(--muted)">O coeficiente 5 vira o parâmetro c — e c some da notação final.</span>
+            </div>
+          </div>
+
+          <h3>Regra 2 — O termo maior engole os menores</h3>
+          <div class="card">
+            <p>Você acabou de ver isso: o bloco O(n) desapareceu diante do O(n²). A mesma coisa acontece dentro de uma expressão com vários termos. Para n = 1.000, veja o quanto cada termo contribui para <code>n³ + n² + n + 1</code>:</p>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:.6rem 0;text-align:center;font-size:.82rem">
+              <div style="background:#e8f0fe;border-radius:6px;padding:.5rem">
+                <div style="font-family:var(--fm);font-weight:700;color:var(--primary)">n³</div>
+                <div style="font-size:1rem;font-weight:700">10⁹</div>
+                <div style="color:var(--muted)">99.9% do total</div>
+              </div>
+              <div style="background:#f5f5f5;border-radius:6px;padding:.5rem">
+                <div style="font-family:var(--fm);color:var(--muted)">n²</div>
+                <div>10⁶</div>
+                <div style="color:var(--muted)">0.1%</div>
+              </div>
+              <div style="background:#f5f5f5;border-radius:6px;padding:.5rem">
+                <div style="font-family:var(--fm);color:var(--muted)">n</div>
+                <div>10³</div>
+                <div style="color:var(--muted)">0.0001%</div>
+              </div>
+              <div style="background:#f5f5f5;border-radius:6px;padding:.5rem">
+                <div style="font-family:var(--fm);color:var(--muted)">1</div>
+                <div>1</div>
+                <div style="color:var(--muted)">ínfimo</div>
+              </div>
+            </div>
+            <p>n³ representa 99,9% do total. Os outros termos existem, mas são irrelevantes para n grande. Por isso <code>n³ + n² + n + 1 = O(n³)</code> — o enunciado formal do que você acabou de observar na tabela.</p>
+            <p><strong>Prova formal:</strong> n² ≤ n³ para n ≥ 1, então n³ + n² ≤ n³ + n³ = 2n³. Com mais dois termos, c = 4 cobre tudo: n³ + n² + n + 1 ≤ 4n³. ✓</p>
+          </div>
+
+          <h3>Regra 3 — Loops aninhados se multiplicam</h3>
+          <div class="card">
+            <p>O loop interno executa completamente para <em>cada</em> iteração do externo. É multiplicação, não soma.</p>
+            <pre style="font-family:var(--fm);font-size:.85rem;color:var(--text);line-height:2;background:#f5f8ff;padding:.8rem;border-radius:6px">for i in range(n):         <span style="color:var(--accent)">← executa n vezes</span>
+    for j in range(n):     <span style="color:var(--coral)">← executa n vezes POR iteração do externo</span>
+        print(i, j)        <span style="color:var(--muted)">← total: n × n = n² execuções</span></pre>
+            <p>Pense assim: loop externo percorre linhas, loop interno percorre colunas. Você percorre uma matriz inteira: n × n = n².</p>
+          </div>
+
+          <h3>Regra 4 — Loops sequenciais se somam (e o maior domina)</h3>
+          <div class="card">
+            <pre style="font-family:var(--fm);font-size:.85rem;color:var(--text);line-height:2;background:#f5f8ff;padding:.8rem;border-radius:6px">for i in range(n):         <span style="color:var(--accent)">← O(n)</span>
+    print(i)
+
+for i in range(n):         <span style="color:var(--coral)">← O(n²) (loop aninhado)</span>
+    for j in range(n):
+        print(i,j)
+
+<span style="color:var(--muted)"># Total: O(n) + O(n²)</span>
+<span style="color:var(--green)"># Como n² domina n para n grande: O(n²)</span></pre>
+            <p>Para n = 1.000: bloco 1 faz 1.000 ops; bloco 2 faz 1.000.000 ops. A soma é 1.001.000 ≈ 1.000.000 = n². O menor é irrelevante.</p>
+          </div>
+
+          <div class="callout warning" style="margin-top:1.2rem">
+            <strong>E quando o código chama a si mesmo?</strong> As quatro regras acima funcionam para código iterativo — loops. Quando uma função chama a si mesma (recursão), o custo não pode ser calculado diretamente: ele precisa ser descrito como uma equação que se refere a si mesma. Esse é o tema do próximo módulo.
+          </div>
+          <div class="callout success" style="margin-top:.6rem">
+            <strong>→ Próximo passo (seção 6):</strong> regras na mão, hora de resolver exemplos completos — do tipo que cai no POSCOMP.
+          </div>
+        </section>
+
+        <!-- 6. EXEMPLOS RESOLVIDOS -->
+        <section id="exemplos">
+          <h2><span class="num">6</span> Exemplos resolvidos</h2>
+          <h3>Exemplo A — Classificar a complexidade</h3>
+          <div class="card">
+            <p style="margin-bottom:.5rem;font-weight:600;color:var(--primary)">Qual a complexidade de: <code>f(n) = 7n³ + 4n² log n + 12n − 8</code>?</p>
+            <div class="proof-steps">
+              <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">Identificar todos os termos: <code>7n³</code>, <code>4n² log n</code>, <code>12n</code>, <code>8</code></div></div>
+              <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">Comparar crescimento: n³ &gt; n² log n &gt; n &gt; 1. O termo dominante é <code>7n³</code>.</div></div>
+              <div class="proof-step"><span class="ps-num">3</span><div class="ps-body">Eliminar constante multiplicativa: <code>7n³ → n³</code></div></div>
+              <div class="proof-step"><span class="ps-num">4</span><div class="ps-body">Resposta: <strong>f(n) = O(n³)</strong> e também Θ(n³)</div></div>
+            </div>
+          </div>
+          <h3>Exemplo B — Análise de código <span style="font-size:.75rem;font-weight:400;color:var(--muted)">(clique nas linhas para ver a explicação)</span></h3>
+          <div class="code-ann" id="codeAnn">
+            <div class="code-line" onclick="toggleLine(0)"><span class="cl-num">1</span><span class="cl-code">def exemplo(arr):</span><span class="cl-badge cb-o1">O(1)</span></div>
+            <div class="cl-explain" id="cl0">Definição da função — acontece uma vez só. Custo: O(1).</div>
+            <div class="code-line" onclick="toggleLine(1)"><span class="cl-num">2</span><span class="cl-code">    n = len(arr)</span><span class="cl-badge cb-o1">O(1)</span></div>
+            <div class="cl-explain" id="cl1">len() retorna o tamanho em tempo constante. Custo: O(1).</div>
+            <div class="code-line" onclick="toggleLine(2)"><span class="cl-num">3</span><span class="cl-code">    total = 0</span><span class="cl-badge cb-o1">O(1)</span></div>
+            <div class="cl-explain" id="cl2">Atribuição simples. Custo: O(1). Não importa o valor de n.</div>
+            <div class="code-line" onclick="toggleLine(3)"><span class="cl-num">4</span><span class="cl-code">    for i in range(n):         </span><span class="cl-badge cb-on">O(n)</span></div>
+            <div class="cl-explain" id="cl3">Loop que repete exatamente n vezes. O corpo (linha 5) custa O(1) cada iteração. Total do bloco: n × O(1) = O(n).</div>
+            <div class="code-line" onclick="toggleLine(4)"><span class="cl-num">5</span><span class="cl-code">        total += arr[i]        </span><span class="cl-badge cb-o1">O(1)</span></div>
+            <div class="cl-explain" id="cl4">Soma e acesso a array por índice. Custo: O(1) por execução. Mas executa n vezes (veja linha 4).</div>
+            <div class="code-line" onclick="toggleLine(5)"><span class="cl-num">6</span><span class="cl-code">    for i in range(n):         </span><span class="cl-badge cb-on2">O(n²)</span></div>
+            <div class="cl-explain" id="cl5">Loop externo: n iterações. O loop interno (linha 7) também roda ~n vezes. Resultado: n × n = O(n²). Este bloco domina tudo.</div>
+            <div class="code-line" onclick="toggleLine(6)"><span class="cl-num">7</span><span class="cl-code">        for j in range(i):     </span><span class="cl-badge cb-on2">O(n)</span></div>
+            <div class="cl-explain" id="cl6">Loop interno: roda i vezes. No pior caso i = n−1 ≈ n. Somando sobre todas as iterações do loop externo: 0+1+2+…+(n−1) = n(n−1)/2 ≈ n²/2 = O(n²).</div>
+            <div class="code-line" onclick="toggleLine(7)"><span class="cl-num">8</span><span class="cl-code">            print(arr[i], arr[j])</span><span class="cl-badge cb-o1">O(1)</span></div>
+            <div class="cl-explain" id="cl7">print() e dois acessos a array: O(1) por execução. Mas é chamado O(n²) vezes pelo par de loops aninhados.</div>
+            <div class="code-line" onclick="toggleLine(8)"><span class="cl-num">9</span><span class="cl-code">    return total               </span><span class="cl-badge cb-o1">O(1)</span></div>
+            <div class="cl-explain" id="cl8">Retorno simples. Custo: O(1).</div>
+          </div>
+          <div class="callout">
+            <strong>Análise final:</strong> <code>O(1)</code> + <code>O(n)</code> + <code>O(n²)</code> + <code>O(1)</code> = <strong>O(n²)</strong><br>
+            Loops sequenciais somam, mas o maior domina. O loop aninhado (linhas 6–8) engole todo o resto.
+          </div>
+          <h3>Exemplo C — Busca binária vale O(log n)?</h3>
+
+          <div class="callout" style="margin-bottom:1rem">
+            <strong>Primeiro: o que é log₂(n) na prática?</strong> É a quantidade de vezes que você consegue dividir n por 2 até chegar em 1.<br>
+            n = 16 → 16÷2=8 → 8÷2=4 → 4÷2=2 → 2÷2=1 &nbsp;→ <strong>4 divisões</strong> → log₂(16) = 4<br>
+            n = 1024 → <strong>10 divisões</strong> → log₂(1024) = 10<br>
+            n = 1.000.000 → <strong>~20 divisões</strong> → log₂(10⁶) ≈ 20<br><br>
+            <strong>Intuição:</strong> logaritmo cresce <em>muito</em> devagar. Dobrar n adiciona apenas 1 passo.
+          </div>
+
+          <div class="proof-steps">
+            <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">
+              <strong>O que a busca binária faz:</strong> a cada passo, compara o elemento do meio com o alvo. Se não achou, <em>descarta metade</em> do array e repete.<br>
+              n → n/2 → n/4 → n/8 → … → 1<br>
+              <span style="font-size:.84rem;color:var(--muted)">Exemplo: array de 16 itens → 8 → 4 → 2 → 1 → encontrou (ou não existe). Máximo 4 passos.</span>
+            </div></div>
+            <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">
+              <strong>Quantos passos até sobrar 1 elemento?</strong><br>
+              Depois de k divisões, sobram n/2ᵏ elementos. Queremos n/2ᵏ = 1:<br>
+              <code>n = 2ᵏ &nbsp;→&nbsp; k = log₂(n)</code><br>
+              Isso é só a definição de logaritmo: "k tal que 2ᵏ = n".
+            </div></div>
+            <div class="proof-step"><span class="ps-num">3</span><div class="ps-body">
+              <strong>Cada passo custa O(1)</strong> (uma comparação). São log₂(n) passos.<br>
+              Total: log₂(n) × O(1) = <strong>O(log n)</strong> ✓<br>
+              <span style="font-size:.84rem;color:var(--muted)">Nota: log₂ e log₁₀ diferem só por uma constante (log₂n = log₁₀n / log₁₀2 ≈ 3.32·log₁₀n). Como constantes somem no Big-O, escrevemos apenas O(log n).</span>
+            </div></div>
+            <div class="proof-step"><span class="ps-num">4</span><div class="ps-body">
+              <strong>Por que isso importa?</strong> Compare com busca linear O(n):<br>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.4rem 0;font-size:.84rem">
+                <div style="background:#e8f0fe;padding:.5rem .8rem;border-radius:6px"><strong>O(n) — linear</strong><br>n = 1.000.000 → até 1 milhão de passos</div>
+                <div style="background:#e8f5ee;padding:.5rem .8rem;border-radius:6px"><strong>O(log n) — binária</strong><br>n = 1.000.000 → até <strong>20 passos</strong></div>
+              </div>
+              Isso explica por que banco de dados usam índices (busca binária) em vez de varrer a tabela inteira.
+            </div></div>
+          </div>
+        </section>
+
+        <!-- 7. QUIZ -->
+        <section id="quiz">
+          <h2><span class="num">7</span> Quiz rápido</h2>
+          <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem">Após cada resposta você verá uma explicação detalhada — inclusive do motivo pelo qual as opções erradas estão erradas.</p>
+
+          <div class="quiz-box" id="q1">
+            <div class="quiz-q">Qual a complexidade de: f(n) = 3n² + 100n + 500?</div>
+            <div class="quiz-option" onclick="answer('q1',this,'A')">○ &nbsp; A) O(n)</div>
+            <div class="quiz-option" onclick="answer('q1',this,'B')">○ &nbsp; B) O(n²)</div>
+            <div class="quiz-option" onclick="answer('q1',this,'C')">○ &nbsp; C) O(n³)</div>
+            <div class="quiz-option" onclick="answer('q1',this,'D')">○ &nbsp; D) O(n² + n)</div>
+            <div class="quiz-feedback" id="q1-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q2">
+            <div class="quiz-q">Se f(n) = Θ(n log n), qual afirmação é verdadeira?</div>
+            <div class="quiz-option" onclick="answer('q2',this,'A')">○ &nbsp; A) f(n) = O(n) e f(n) = Ω(n log n)</div>
+            <div class="quiz-option" onclick="answer('q2',this,'B')">○ &nbsp; B) f(n) = O(n log n) e f(n) = Ω(n log n)</div>
+            <div class="quiz-option" onclick="answer('q2',this,'C')">○ &nbsp; C) f(n) = O(n²) apenas</div>
+            <div class="quiz-option" onclick="answer('q2',this,'D')">○ &nbsp; D) f(n) é necessariamente igual a n log n</div>
+            <div class="quiz-feedback" id="q2-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q3">
+            <div class="quiz-q">Um algoritmo tem um loop de n iterações, dentro do qual executa uma busca binária. Qual sua complexidade total?</div>
+            <div class="quiz-option" onclick="answer('q3',this,'A')">○ &nbsp; A) O(n)</div>
+            <div class="quiz-option" onclick="answer('q3',this,'B')">○ &nbsp; B) O(log n)</div>
+            <div class="quiz-option" onclick="answer('q3',this,'C')">○ &nbsp; C) O(n log n)</div>
+            <div class="quiz-option" onclick="answer('q3',this,'D')">○ &nbsp; D) O(n²)</div>
+            <div class="quiz-feedback" id="q3-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q4">
+            <div class="quiz-q">Um algoritmo A é O(n²). Isso significa que:</div>
+            <div class="quiz-option" onclick="answer('q4',this,'A')">○ &nbsp; A) A sempre executa exatamente n² operações</div>
+            <div class="quiz-option" onclick="answer('q4',this,'B')">○ &nbsp; B) A nunca pode ser mais rápido que n² operações</div>
+            <div class="quiz-option" onclick="answer('q4',this,'C')">○ &nbsp; C) Existe uma constante c tal que A executa no máximo c·n² operações para n grande</div>
+            <div class="quiz-option" onclick="answer('q4',this,'D')">○ &nbsp; D) A não pode ser O(n³)</div>
+            <div class="quiz-feedback" id="q4-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q5">
+            <div class="quiz-q">Por que descartamos constantes no Big-O? Ex: por que 1000n = O(n) e não O(1000n)?</div>
+            <div class="quiz-option" onclick="answer('q5',this,'A')">○ &nbsp; A) Porque 1000 é um número pequeno e não importa</div>
+            <div class="quiz-option" onclick="answer('q5',this,'B')">○ &nbsp; B) Porque a constante pode ser absorvida pelo parâmetro c da definição formal</div>
+            <div class="quiz-option" onclick="answer('q5',this,'C')">○ &nbsp; C) Porque Big-O só mede o pior caso</div>
+            <div class="quiz-option" onclick="answer('q5',this,'D')">○ &nbsp; D) Por convenção histórica sem justificativa matemática</div>
+            <div class="quiz-feedback" id="q5-fb"></div>
+          </div>
+        </section>
+
+        <!-- 8. RESUMO -->
+        <section id="resumo">
+          <h2><span class="num">8</span> Resumo</h2>
+          <div class="summary-box">
+            <h3>🎯 O que você precisa dominar</h3>
+            <div class="summary-row">O(f(n)) é o limite superior — "no máximo tão ruim quanto g(n)"</div>
+            <div class="summary-row">Ω(f(n)) é o limite inferior — "no mínimo tão bom quanto g(n)"</div>
+            <div class="summary-row">Θ(f(n)) é o limite exato — implica ambos O e Ω</div>
+            <div class="summary-row">Para calcular: elimine constantes e termos menores, fique com o dominante</div>
+            <div class="summary-row">Hierarquia: O(1) &lt; O(log n) &lt; O(n) &lt; O(n log n) &lt; O(n²) &lt; O(n³) &lt; O(2ⁿ)</div>
+            <div class="summary-row">Loops aninhados multiplicam complexidades; loops sequenciais somam (e o maior domina)</div>
+          </div>
+        </section>
+
+      </div><!-- /lesson-content -->
+
+      <!-- BOTTOM NAV -->
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="f1-1-algoritmos-referencia.html">← F1.1 Algoritmos de referência</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico F1</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 2 de 3</div>
+        </div>
+        <a class="btn-nav next" href="f1-3-analise-recorrencias.html">Próximo módulo →</a>
+      </div>
+    </div><!-- /lesson-area -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+
+// ─────────────────────────────────────────────────────────
+// BIG-O ANIMATION CANVAS
+// ─────────────────────────────────────────────────────────
+let animFrame = null, animProgress = 0, animRunning = false;
+
+function f_real(n) { return 3*n*n + 5*n; }
+function f_ceil(n) { return 8*n*n; }
+
+function drawBigOCanvas(progress) {
+  const canvas = document.getElementById('bigOCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+
+  const PAD_L = 50, PAD_R = 20, PAD_T = 20, PAD_B = 36;
+  const gW = W - PAD_L - PAD_R, gH = H - PAD_T - PAD_B;
+
+  const N_MAX = 20;  // show n from 0 to 20
+  const nCut = Math.floor(progress * N_MAX);
+  const yMax = f_ceil(N_MAX) * 1.05;
+
+  function xOf(n) { return PAD_L + (n / N_MAX) * gW; }
+  function yOf(v) { return PAD_T + gH - (v / yMax) * gH; }
+
+  // Background grid
+  ctx.strokeStyle = 'rgba(255,255,255,.06)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = PAD_T + (i / 4) * gH;
+    ctx.beginPath(); ctx.moveTo(PAD_L, y); ctx.lineTo(W - PAD_R, y); ctx.stroke();
+    const v = Math.round(yMax * (4-i) / 4);
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    ctx.font = `${9*dpr/dpr}px DM Mono, monospace`;
+    ctx.textAlign = 'right';
+    ctx.fillText(v > 1000 ? (v/1000).toFixed(1)+'K' : v, PAD_L - 5, y + 3);
+  }
+  for (let n = 0; n <= N_MAX; n += 5) {
+    const x = xOf(n);
+    ctx.beginPath(); ctx.moveTo(x, PAD_T); ctx.lineTo(x, PAD_T + gH); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.4)';
+    ctx.textAlign = 'center';
+    ctx.font = `${9*dpr/dpr}px DM Mono, monospace`;
+    ctx.fillText('n='+n, x, PAD_T + gH + 16);
+  }
+
+  // Axis labels
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.font = `${9*dpr/dpr}px DM Sans, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('operações', PAD_L - 38, PAD_T + gH/2);
+  ctx.fillText('n (tamanho da entrada)', PAD_L + gW/2, H - 4);
+
+  // Draw f_ceil (teto) as dashed orange
+  ctx.strokeStyle = '#ff8a65';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  for (let n = 0; n <= nCut; n++) {
+    const x = xOf(n), y = yOf(f_ceil(n));
+    n === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Draw f_real (blue solid)
+  ctx.strokeStyle = '#64b5f6';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let n = 0; n <= nCut; n++) {
+    const x = xOf(n), y = yOf(f_real(n));
+    n === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // n₀ marker at n=1
+  if (nCut >= 1) {
+    const x0 = xOf(1);
+    ctx.strokeStyle = '#81c784';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(x0, PAD_T); ctx.lineTo(x0, PAD_T + gH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#81c784';
+    ctx.font = `bold ${10*dpr/dpr}px DM Sans, sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText('n₀=1', x0 + 4, PAD_T + 14);
+  }
+
+  // Labels at end of curves
+  if (nCut >= N_MAX - 1) {
+    const xe = xOf(N_MAX - 1);
+    ctx.font = `${9*dpr/dpr}px DM Mono, monospace`;
+    ctx.fillStyle = '#ff8a65';
+    ctx.textAlign = 'left';
+    ctx.fillText('8n²', xe - 28, yOf(f_ceil(N_MAX-1)) - 6);
+    ctx.fillStyle = '#64b5f6';
+    ctx.fillText('3n²+5n', xe - 60, yOf(f_real(N_MAX-1)) + 14);
+  }
+}
+
+function animStep() {
+  animProgress = Math.min(1, animProgress + 0.008);
+  drawBigOCanvas(animProgress);
+  if (animProgress < 1 && animRunning) {
+    animFrame = requestAnimationFrame(animStep);
+  } else {
+    animRunning = false;
+    const btn = document.getElementById('animPlayBtn');
+    if (btn) { btn.textContent = '▶ Animar'; btn.classList.remove('active'); }
+  }
+}
+
+function toggleAnim() {
+  const btn = document.getElementById('animPlayBtn');
+  if (animRunning) {
+    animRunning = false;
+    if (animFrame) cancelAnimationFrame(animFrame);
+    btn.textContent = '▶ Animar'; btn.classList.remove('active');
+  } else {
+    animRunning = true;
+    btn.textContent = '⏸ Pausar'; btn.classList.add('active');
+    animFrame = requestAnimationFrame(animStep);
+  }
+}
+
+function resetAnim() {
+  animRunning = false;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animProgress = 0;
+  drawBigOCanvas(0);
+  const btn = document.getElementById('animPlayBtn');
+  if (btn) { btn.textContent = '▶ Animar'; btn.classList.remove('active'); }
+}
+
+// ─────────────────────────────────────────────────────────
+// N SLIDER — interactive counts
+// ─────────────────────────────────────────────────────────
+const N_STEPS = [10, 100, 1000, 10000, 100000];
+const COMPLEXITIES = [
+  { label:'O(1)', color:'#c8f0d8', bg:'#0a2d1a', fn: n => 1 },
+  { label:'O(log n)', color:'#bfd8ff', bg:'#0a1a36', fn: n => Math.round(Math.log2(n)*10)/10 },
+  { label:'O(n)', color:'#d4c4ff', bg:'#1a0a36', fn: n => n },
+  { label:'O(n log n)', color:'#ffe0b0', bg:'#301a00', fn: n => Math.round(n*Math.log2(n)) },
+  { label:'O(n²)', color:'#ffcccc', bg:'#2d0a0a', fn: n => n*n },
+  { label:'O(n³)', color:'#ffaaa8', bg:'#3d0505', fn: n => n*n*n },
+  { label:'O(2ⁿ)', color:'#ff8a80', bg:'#4a0000', fn: n => n <= 60 ? Math.pow(2,n) : Infinity },
+];
+
+function fmtNum(v) {
+  if (!isFinite(v) || v > 1e15) return '> 10¹⁵ 🔥';
+  if (v >= 1e12) return (v/1e12).toFixed(1) + ' trilhões';
+  if (v >= 1e9) return (v/1e9).toFixed(1) + ' bilhões';
+  if (v >= 1e6) return (v/1e6).toFixed(1) + ' milhões';
+  if (v >= 1e3) return (v/1e3).toFixed(1) + ' mil';
+  return v.toString();
+}
+
+function updateCounts(step) {
+  const n = N_STEPS[parseInt(step)-1] || 100;
+  document.getElementById('nDisplay').textContent = 'n = ' + n.toLocaleString('pt-BR');
+  const grid = document.getElementById('countsGrid');
+  if (!grid) return;
+  grid.innerHTML = COMPLEXITIES.map(c => {
+    const val = c.fn(n);
+    const infeasible = !isFinite(val) || val > 1e15;
+    return `<div class="count-card" style="background:${c.bg};border:1px solid rgba(255,255,255,.1)">
+      <div class="count-label" style="color:${c.color}">${c.label}</div>
+      <div class="count-val" style="color:${infeasible?'#ff6b6b':'white'}">${fmtNum(val)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────
+// CODE ANNOTATOR
+// ─────────────────────────────────────────────────────────
+function toggleLine(idx) {
+  const ex = document.getElementById('cl'+idx);
+  const ann = document.getElementById('codeAnn');
+  if (!ex || !ann) return;
+  const allLines = ann.querySelectorAll('.code-line');
+  const line = allLines[idx];
+  const showing = ex.classList.contains('show');
+  ann.querySelectorAll('.cl-explain').forEach(e => e.classList.remove('show'));
+  ann.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+  if (!showing) { ex.classList.add('show'); if (line) line.classList.add('active'); }
+}
+
+
+// ─────────────────────────────────────────────────────────
+// DETAILS TOGGLE
+// ─────────────────────────────────────────────────────────
+function toggleDetails(trigger) {
+  const content = trigger.parentElement.querySelector('.dt-content');
+  const isOpen = content.classList.toggle('show');
+  trigger.classList.toggle('open', isOpen);
+  trigger.querySelector('.dt-arrow').textContent = isOpen ? '▾' : '▸';
+}
+
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);localStorage.setItem('sb-state',c?'collapsed':'expanded')}
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+// Init slider
+updateCounts(2);
+// Init canvas
+const resizeCanvas = () => { drawBigOCanvas(animProgress); };
+window.addEventListener('resize', resizeCanvas);
+setTimeout(resizeCanvas, 100);
+
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+
+const FEEDBACKS = {
+  q1: {
+    correct: 'B',
+    ok: 'Correto! Passo 1: identificar o termo dominante — 3n² cresce mais rápido que 100n e 500. Passo 2: eliminar a constante 3 (vira o parâmetro c). Resultado: O(n²).',
+    why: {
+      A: 'O(n) estaria certo se 100n fosse o único termo. Mas 3n² cresce muito mais rápido: para n=1000, 3n²=3.000.000 vs 100n=100.000. O termo dominante é n², não n.',
+      C: 'O(n³) é tecnicamente correto (n² é menor que n³), mas nunca é a resposta certa — queremos o limite mais justo. Se o custo real é n², dizer n³ é como dizer "vai chover no máximo 500mm" quando vai chover 10mm.',
+      D: 'O(n² + n) parece mais "completo", mas pela Regra 2 os termos de menor ordem somem. n² domina n para n grande, então O(n² + n) = O(n²). Nunca deixe dois termos na resposta final.',
+    }
+  },
+  q2: {
+    correct: 'B',
+    ok: 'Correto! Theta é definido como O E Ω ao mesmo tempo para a mesma função. f(n) = Θ(n log n) implica: (1) f(n) = O(n log n) — não cresce mais rápido; (2) f(n) = Ω(n log n) — não cresce mais devagar.',
+    why: {
+      A: 'O(n) seria mais restritivo que O(n log n) — dizer O(n) implicaria que f cresce no máximo como n, mas Theta diz que f cresce PELO MENOS como n log n. Contradição.',
+      C: 'O(n²) sozinho seria um limite superior mais frouxo — tecnicamente verdadeiro, mas Theta exige tanto O quanto Ω para n log n especificamente.',
+      D: '"Necessariamente igual a n log n" confunde função assintótica com igualdade exata. f(n) pode ser 2n log n + 5n — não é "igual" a n log n, mas é Θ(n log n).',
+    }
+  },
+  q3: {
+    correct: 'C',
+    ok: 'Correto! Loops aninhados se multiplicam (Regra 3). Loop externo: O(n). Busca binária dentro: O(log n). Total: n × log n = O(n log n).',
+    why: {
+      A: 'O(n) ignoraria o custo da busca binária. Para cada uma das n iterações, você faz log n operações — não 1. Total: n × log n, não n × 1.',
+      B: 'O(log n) é o custo da busca binária SOZINHA. Mas ela roda dentro de um loop de n iterações. Cada repetição do loop paga o custo O(log n).',
+      D: 'O(n²) seria o custo se a operação interna fosse O(n) — ex: outro loop de n. Busca binária é O(log n), não O(n). n × log n < n × n.',
+    }
+  },
+  q4: {
+    correct: 'C',
+    ok: 'Correto! Esta é a definição exata de Big-O: existe c > 0 e n₀ tal que o custo ≤ c·n² para todo n > n₀. É um teto, não um valor fixo.',
+    why: {
+      A: '"Sempre executa exatamente n² operações" confunde O com Theta e com igualdade exata. Um algoritmo O(n²) pode terminar em n/2 operações para certas entradas — o que não pode é ultrapassar c·n² no pior caso.',
+      B: '"Nunca pode ser mais rápido que n²" é a definição de Ω(n²), não O(n²). Big-O é limite superior — o algoritmo PODE ser mais rápido, só não pode ser mais lento.',
+      D: 'Errado — se A é O(n²), automaticamente também é O(n³), O(n⁴), O(2ⁿ)… qualquer função que cresça mais rápido que n² é um limite superior válido (só não é o mais justo).',
+    }
+  },
+  q5: {
+    correct: 'B',
+    ok: 'Correto! A definição de O(g(n)) diz "existe ALGUM c > 0". Para 1000n, escolhemos c = 1000 e mostramos 1000n ≤ 1000·n para todo n ≥ 1. A constante 1000 se torna o parâmetro c e some da notação.',
+    why: {
+      A: '"1000 é pequeno" é falso — 1000 pode ser enorme. O motivo não é o tamanho da constante, mas a estrutura da definição formal que permite qualquer c.',
+      C: 'Big-O mede o pior caso SIM, mas isso não explica por que constantes somem. Você poderia definir uma notação de pior caso que mantém constantes — a razão é matemática, não sobre pior/melhor caso.',
+      D: 'Há sim justificativa matemática: a definição formal de Big-O com o parâmetro c livre é exatamente o que torna as constantes absorvíveis. Não é apenas convenção.',
+    }
+  },
+};
+
+function answer(qid, el, chosen) {
+  const box = document.getElementById(qid);
+  if (box.dataset.answered) return;
+  box.dataset.answered = '1';
+  const correct = FEEDBACKS[qid].correct;
+  const ok = chosen === correct;
+  box.querySelectorAll('.quiz-option').forEach(o => {
+    o.style.pointerEvents = 'none';
+    const val = o.getAttribute('onclick').match(/'([A-E])'\)/);
+    if (val && val[1] === correct) o.classList.add('correct');
+  });
+  if (!ok) el.classList.add('wrong');
+  const fb = document.getElementById(qid + '-fb');
+  let html = '';
+  if (ok) {
+    html = `<strong>✓ Correto!</strong> ${FEEDBACKS[qid].ok}`;
+    fb.className = 'quiz-feedback show ok';
+  } else {
+    const whyWrong = FEEDBACKS[qid].why[chosen] || '';
+    html = `<strong>✗ Incorreto.</strong><br><br>`
+      + `<strong>Por que ${chosen} está errada:</strong> ${whyWrong}<br><br>`
+      + `<strong>Por que ${correct} está certa:</strong> ${FEEDBACKS[qid].ok}`;
+    fb.className = 'quiz-feedback show fail';
+  }
+  fb.innerHTML = html;
+}
+</script>
+</body>
+</html>

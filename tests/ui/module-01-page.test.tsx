@@ -1,7 +1,11 @@
 /** @vitest-environment jsdom */
 
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ModulePage } from '@/components/study/module-page';
@@ -50,13 +54,31 @@ const MODULE_01_SOURCE_PAYLOAD = {
   navLinks: [
     { id: 'por-que', label: 'Por quê?' },
     { id: 'conjuntos', label: 'Conjuntos' },
+    { id: 'kleene-sim', label: 'Simulador Σ*' },
+    { id: 'quiz', label: 'Exercícios' },
     { id: 'resumo', label: 'Resumo' },
   ],
-  html: '<section id=\"por-que\"><h2><span class=\"num\">0</span> Por que estudar isso antes de autômatos?</h2></section><section id=\"resumo\"><h2><span class=\"num\">9</span> Resumo do módulo</h2></section>',
+  html: '<section id=\"por-que\"><h2><span class=\"num\">0</span> Por que estudar isso antes de autômatos?</h2></section><section id=\"kleene-sim\"><h2><span class=\"num\">8</span> Simulador — Explore o Fecho de Kleene Σ*</h2><div class=\"sim-box\"><div class=\"sim-controls\"><input class=\"sim-input\" id=\"sigmaInput\" value=\"a,b\" placeholder=\"a,b\"><input class=\"sim-input\" id=\"maxLen\" type=\"number\" value=\"3\" min=\"0\" max=\"5\"><button class=\"sim-btn go\">▶ Gerar Σ*</button><button class=\"sim-btn rst\">↺ Limpar</button></div><div id=\"kleeneOutput\"></div><div class=\"kleene-stats\" id=\"kleeneStats\" style=\"display:none\"></div></div></section><section id=\"quiz\"><h2><span class=\"num\">9</span> Exercícios</h2><div class=\"quiz\"><h3>Questão 1</h3><div class=\"quiz-q\"><p>Dado <code>A = {a, b, c}</code>, qual é o valor de <code>|2^A|</code>?</p><div class=\"options\" id=\"q1\"><label class=\"opt\"><input type=\"radio\" name=\"q1\" value=\"6\"> 6</label><label class=\"opt\"><input type=\"radio\" name=\"q1\" value=\"8\"> 8</label></div></div><button class=\"quiz-btn\" data-question-id=\"q1\" data-answer-key=\"8\" data-explanation=\"O conjunto das partes de um conjunto com n elementos tem 2ⁿ elementos.\">Verificar</button><div class=\"quiz-result\" id=\"q1-res\"></div></div></section><section id=\"resumo\"><h2><span class=\"num\">10</span> Resumo do módulo</h2></section>',
 };
 
+const MODULE_01_REAL_SOURCE_PAYLOAD = JSON.parse(
+  readFileSync(path.join(process.cwd(), 'data/study/modules/modulo-01.source.json'), 'utf8')
+);
+
+function clickButtonTextNode(button: HTMLButtonElement) {
+  const textNode = Array.from(button.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
+  if (!textNode) {
+    throw new Error('Botão sem nó de texto para simular clique.');
+  }
+  textNode.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+}
+
 describe('módulo 1 no padrão do mockup', () => {
+  let sourcePayload: typeof MODULE_01_SOURCE_PAYLOAD | typeof MODULE_01_REAL_SOURCE_PAYLOAD;
+
   beforeEach(() => {
+    sourcePayload = MODULE_01_SOURCE_PAYLOAD;
+
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: RequestInfo | URL) => {
@@ -65,7 +87,7 @@ describe('módulo 1 no padrão do mockup', () => {
           return {
             ok: true,
             status: 200,
-            json: async () => MODULE_01_SOURCE_PAYLOAD,
+            json: async () => sourcePayload,
           };
         }
 
@@ -107,5 +129,57 @@ describe('módulo 1 no padrão do mockup', () => {
       '/trilhas/f6/modulo-02'
     );
     expect(screen.getByRole('button', { name: /módulo anterior/i })).toBeDisabled();
+  });
+
+  it('corrige questão importada e exibe a explicação oficial do mockup', async () => {
+    const user = userEvent.setup();
+    render(<ModulePage moduleSlug="modulo-01" userId="user-local" />);
+
+    await screen.findByText(/questão 1/i);
+
+    await user.click(screen.getByLabelText('6'));
+    await user.click(screen.getByRole('button', { name: /verificar/i }));
+
+    expect(screen.getByText(/incorreta\./i)).toBeInTheDocument();
+    expect(screen.getByText(/resposta correta:\s*8/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/o conjunto das partes de um conjunto com n elementos tem 2ⁿ elementos\./i)
+    ).toBeInTheDocument();
+  });
+
+  it('executa o simulador Σ* do módulo importado e limpa o resultado', async () => {
+    sourcePayload = MODULE_01_REAL_SOURCE_PAYLOAD;
+
+    const user = userEvent.setup();
+    render(<ModulePage moduleSlug="modulo-01" userId="user-local" />);
+
+    await screen.findByRole('button', { name: /gerar σ\*/i });
+    await user.click(screen.getByRole('button', { name: /gerar σ\*/i }));
+
+    expect(screen.getByText(/n = 0/i)).toBeInTheDocument();
+    expect(screen.getByText(/n = 3/i)).toBeInTheDocument();
+    expect(screen.getByText(/strings geradas \(n=0 até 3\):/i)).toBeInTheDocument();
+
+    const statsEl = document.getElementById('kleeneStats');
+    expect(statsEl?.style.display).toBe('block');
+
+    await user.click(screen.getByRole('button', { name: /limpar/i }));
+    expect(screen.queryByText(/n = 0/i)).not.toBeInTheDocument();
+    expect(statsEl?.style.display).toBe('none');
+  });
+
+  it('executa ações do simulador mesmo quando o clique ocorre no texto do botão', async () => {
+    sourcePayload = MODULE_01_REAL_SOURCE_PAYLOAD;
+
+    render(<ModulePage moduleSlug="modulo-01" userId="user-local" />);
+
+    const generateButton = (await screen.findByRole('button', { name: /gerar σ\*/i })) as HTMLButtonElement;
+    const clearButton = screen.getByRole('button', { name: /limpar/i }) as HTMLButtonElement;
+
+    clickButtonTextNode(generateButton);
+    expect(screen.getByText(/n = 0/i)).toBeInTheDocument();
+
+    clickButtonTextNode(clearButton);
+    expect(screen.queryByText(/n = 0/i)).not.toBeInTheDocument();
   });
 });

@@ -1,7 +1,11 @@
 /** @vitest-environment jsdom */
 
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ModulePage } from '@/components/study/module-page';
@@ -33,20 +37,9 @@ const MODULE_03_PAYLOAD = {
   nextSlug: 'modulo-04',
 };
 
-const MODULE_03_SOURCE_PAYLOAD = {
-  header: {
-    badge: 'Módulo 3 de 8',
-    title: 'AFN e ε-Transições',
-    subtitle: 'Não-determinismo, ε-fecho e construção por subconjuntos.',
-    meta: ['⏱ ~55 min', '📐 Nível: Fundamental'],
-    progressLabel: 'Módulo 3 de 8 — AFN',
-  },
-  navLinks: [
-    { id: 'definicao-afn', label: 'Definição do AFN' },
-    { id: 'resumo', label: 'Resumo' },
-  ],
-  html: '<section id="definicao-afn"><h2><span class="num">1</span> O que é um AFN?</h2></section><section id="resumo"><h2><span class="num">2</span> Resumo do módulo</h2></section>',
-};
+const MODULE_03_REAL_SOURCE_PAYLOAD = JSON.parse(
+  readFileSync(path.join(process.cwd(), 'data/study/modules/modulo-03.source.json'), 'utf8')
+);
 
 describe('módulo 3 importado no padrão do mockup', () => {
   beforeEach(() => {
@@ -58,7 +51,7 @@ describe('módulo 3 importado no padrão do mockup', () => {
           return {
             ok: true,
             status: 200,
-            json: async () => MODULE_03_SOURCE_PAYLOAD,
+            json: async () => MODULE_03_REAL_SOURCE_PAYLOAD,
           };
         }
 
@@ -93,5 +86,51 @@ describe('módulo 3 importado no padrão do mockup', () => {
       'href',
       '/trilhas/f6/modulo-04'
     );
+  });
+
+  it('executa simulador AFN importado e produz resultado', async () => {
+    const user = userEvent.setup();
+    render(<ModulePage moduleSlug="modulo-03" userId="user-local" />);
+
+    const input = (await screen.findByLabelText(/string:/i)) as HTMLInputElement;
+    await user.type(input, 'aab');
+    await user.click(screen.getByRole('button', { name: /iniciar/i }));
+    await user.click(screen.getByRole('button', { name: /executar/i }));
+
+    const resultEl = document.getElementById('afn-result');
+    expect(resultEl?.textContent || '').toMatch(/aceita/i);
+  });
+
+  it('avança a construção de subconjuntos no módulo 3 importado', async () => {
+    const user = userEvent.setup();
+    render(<ModulePage moduleSlug="modulo-03" userId="user-local" />);
+
+    await screen.findByRole('button', { name: /próximo passo/i });
+    await user.click(screen.getByRole('button', { name: /próximo passo/i }));
+
+    const partialTable = document.getElementById('subset-table-container');
+    expect(partialTable?.textContent || '').toMatch(/\{q0\}/i);
+
+    await user.click(screen.getByRole('button', { name: /construir tudo/i }));
+    expect(partialTable?.textContent || '').toMatch(/\{q0, q2\}/i);
+  });
+
+  it('corrige questão importada do módulo 3 e mostra explicação oficial', async () => {
+    const user = userEvent.setup();
+    render(<ModulePage moduleSlug="modulo-03" userId="user-local" />);
+
+    const questionHeading = await screen.findByRole('heading', { name: /questão 3/i });
+    const questionCard = questionHeading.closest('.quiz');
+    expect(questionCard).not.toBeNull();
+
+    if (!questionCard) {
+      return;
+    }
+
+    await user.click(within(questionCard).getByLabelText(/aceita, pois pelo menos um caminho/i));
+    await user.click(within(questionCard).getByRole('button', { name: /verificar/i }));
+
+    expect(within(questionCard).getByText(/correta\./i)).toBeInTheDocument();
+    expect(within(questionCard).getByText(/o caminho via q2 morreu/i)).toBeInTheDocument();
   });
 });

@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F4.3 — Complexidade Computacional · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0F1E;--sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;--n300:#B8BDD8;
+  --n400:#8A90B0;--n500:#5C6180;--white:#fff;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-pill:9999px;
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  --bg:#f5f0ff;--card:#fff;--primary:#3d0080;--accent:#7c3aed;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#d4c5f0;--code-bg:#ede9fe;
+  --text:#1a1a2e;--muted:#5a6a8a;--blue:#1a6bcc;--blue-bg:#e8f0fe;
+  --teal:#0891b2;--teal-bg:#e0f7fa;--orange-bg:#fff3e0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,#f5f0ff,var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--accent)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));border-radius:var(--r-pill);width:24%}
+.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:#f5f0ff;color:var(--accent);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:#FEF3C7}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:40%;background:linear-gradient(90deg,var(--accent),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;text-decoration:none}
+.lesson-area{flex:1;overflow-y:auto}.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+.lesson-header{background:linear-gradient(135deg,#3d0080 0%,#1a3a8f 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--r-pill);padding:3px 14px;font-family:var(--fm);font-size:.72rem;letter-spacing:1px;margin-bottom:.8rem}
+.hero-title{font-family:var(--fd);font-size:1.8rem;font-weight:800;margin-bottom:.5rem;position:relative;z-index:1}
+.hero-sub{opacity:.8;font-size:.9rem;max-width:600px;margin:.4rem auto 0;position:relative;z-index:1}
+.hero-chips{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;margin-top:1rem;position:relative;z-index:1}
+.hero-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-pill);padding:4px 14px;font-size:.8rem;font-family:var(--fm)}
+.section-nav{background:#3d0080;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover,.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+.lesson-content{max-width:920px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3.2rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.3rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.3rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.5rem 0 .6rem;font-weight:700}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.8}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--fm);font-size:.88rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0}
+.callout{border-left:4px solid var(--accent);background:#f5f0ff;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem;line-height:1.7}
+.callout.warning{border-color:var(--accent2);background:var(--orange-bg)}
+.callout.success{border-color:var(--green);background:#e8f5ee}
+.callout.blue{border-color:var(--blue);background:var(--blue-bg)}
+.callout.teal{border-color:var(--teal);background:var(--teal-bg)}
+.callout strong{color:var(--primary)}
+.sym-dict{display:grid;gap:.5rem;margin:1rem 0}
+.sym-row{display:grid;grid-template-columns:80px 1fr;gap:1rem;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem}
+.sym-row.highlight{border-color:var(--accent);background:#f5f0ff}
+.sym-sym{font-family:Georgia,serif;font-size:1.3rem;color:var(--accent);text-align:center;line-height:1}
+.sym-body{font-size:.88rem;line-height:1.6}
+.sym-body strong{color:var(--primary)}
+.sym-body .eg{margin-top:.3rem;font-family:var(--fm);font-size:.82rem;background:var(--code-bg);padding:2px 8px;border-radius:4px;display:inline-block}
+.formula-annotated{background:var(--primary);color:white;border-radius:12px;padding:1.6rem 2rem 2rem;text-align:center;margin:1.5rem 0}
+.fa-title{font-size:.72rem;opacity:.6;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.fa-line{font-size:1.15rem;font-family:Georgia,serif;margin-bottom:1.2rem;line-height:1.8}
+.fa-ann{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.4rem}
+.fa-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:.25rem .7rem;font-size:.76rem}
+.fa-chip strong{color:#c4b5fd}
+/* PROOF STEPS */
+.proof-steps{margin:1rem 0}
+.proof-step{display:flex;gap:1rem;padding:.8rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:.5rem 0;font-size:.9rem;align-items:flex-start;line-height:1.6}
+.proof-step .ps-num{background:var(--accent);color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;font-family:var(--fm)}
+.proof-step .ps-body code{background:var(--code-bg);padding:1px 6px;border-radius:4px}
+/* DETAILS TOGGLE */
+.details-toggle{margin:.8rem 0;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.dt-trigger{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--accent);background:#f5f0ff;user-select:none;transition:background .15s}
+.dt-trigger:hover{background:#e8e0ff}
+.dt-arrow{font-size:.7rem;transition:transform .2s}
+.dt-trigger.open .dt-arrow{transform:rotate(90deg)}
+.dt-content{display:none;background:var(--card);padding:.8rem 1rem}
+.dt-content.show{display:block}
+/* SCALE TABLE */
+.scale-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.86rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.scale-table th{background:var(--primary);color:white;padding:.55rem .8rem;text-align:left;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px}
+.scale-table td{padding:.5rem .8rem;border-bottom:1px solid var(--border)}
+.scale-table tr:nth-child(even) td{background:#f9f7ff}
+.scale-table .feasible{color:var(--green);font-weight:700}
+.scale-table .borderline{color:var(--accent2);font-weight:700}
+.scale-table .infeasible{color:var(--red);font-weight:700}
+/* COMPLEXITY DIAGRAM */
+.complexity-diagram{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.6rem;margin:1.5rem 0}
+.cd-region{position:relative;border-radius:12px;padding:1rem;margin:.6rem 0;border:2px solid}
+.cd-r-p{background:#e8f5ee;border-color:var(--green)}
+.cd-r-np{background:var(--blue-bg);border-color:var(--blue)}
+.cd-r-npc{background:var(--orange-bg);border-color:var(--accent2)}
+.cd-r-nph{background:#fde8e8;border-color:var(--red)}
+.cd-r-name{font-weight:700;font-size:.92rem;margin-bottom:.3rem}
+.cd-r-p .cd-r-name{color:var(--green)}
+.cd-r-np .cd-r-name{color:var(--blue)}
+.cd-r-npc .cd-r-name{color:var(--accent2)}
+.cd-r-nph .cd-r-name{color:var(--red)}
+.cd-r-desc{font-size:.82rem;color:var(--text);line-height:1.5}
+/* COMPARE GRID */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:1.2rem 0}
+.compare-card{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:1rem}
+.compare-card.left{border-color:var(--green);background:#e8f5ee}
+.compare-card.right{border-color:var(--blue);background:var(--blue-bg)}
+.compare-name{font-weight:700;font-size:.9rem;margin-bottom:.4rem}
+.compare-card.left .compare-name{color:var(--green)}
+.compare-card.right .compare-name{color:var(--blue)}
+.compare-list{font-size:.82rem;color:var(--text);line-height:1.6;list-style:none}
+.compare-list li{padding:.15rem 0}
+/* REDUCTION DIAGRAM */
+.reduction-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.reduction-box h4{color:var(--primary);font-weight:700;font-size:.95rem;margin-bottom:.8rem}
+.reduction-flow{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.rf-box{background:var(--card);border:2px solid var(--accent);border-radius:8px;padding:.6rem 1rem;text-align:center;font-family:var(--fm);font-size:.85rem;color:var(--accent);font-weight:700}
+.rf-arrow{font-size:1.4rem;color:var(--accent);font-weight:700}
+.rf-label{font-size:.72rem;color:var(--muted);text-align:center;margin-top:.2rem;font-family:var(--fm)}
+/* SAT DEMO */
+.sat-demo{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.sat-demo h4{color:var(--primary);font-weight:700;font-size:.95rem;margin-bottom:.6rem}
+.sat-formula{font-family:var(--fm);font-size:.95rem;background:var(--n50);border-radius:8px;padding:.7rem 1rem;text-align:center;margin:.6rem 0;letter-spacing:.5px;color:var(--primary);font-weight:700}
+.sat-vars{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;margin:.6rem 0}
+.sat-var{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.sat-var label{font-family:var(--fm);font-size:.86rem;color:var(--primary);font-weight:700}
+.sat-toggle{display:inline-flex;background:var(--n100);border-radius:var(--r-pill);padding:2px;cursor:pointer;font-family:var(--fm);font-size:.78rem;font-weight:700}
+.sat-toggle .opt{padding:.25rem .8rem;border-radius:var(--r-pill);transition:all .12s}
+.sat-toggle .opt.active{background:var(--accent);color:white}
+.sat-toggle .opt:not(.active){color:var(--muted)}
+.sat-result{margin-top:.8rem;padding:.7rem 1rem;border-radius:8px;font-size:.88rem;font-weight:700;text-align:center}
+.sat-result.sat{background:#e8f5ee;color:var(--green);border:2px solid var(--green)}
+.sat-result.unsat{background:#fde8e8;color:var(--red);border:2px solid var(--red)}
+.sat-clauses{display:flex;flex-direction:column;gap:.3rem;margin-top:.5rem}
+.sat-clause{display:flex;align-items:center;gap:.5rem;font-family:var(--fm);font-size:.84rem;padding:.3rem .7rem;border-radius:6px;background:var(--n50)}
+.sat-clause.sat-true{background:#e8f5ee;color:var(--green)}
+.sat-clause.sat-false{background:#fde8e8;color:var(--red)}
+.sat-clause-result{margin-left:auto;font-weight:700;font-family:var(--fm)}
+/* GALLERY */
+.gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin:1rem 0}
+.gallery-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem}
+.gallery-card h4{color:var(--accent);font-size:.88rem;font-weight:700;margin-bottom:.3rem}
+.gallery-card p{font-size:.82rem;color:var(--text);line-height:1.55;margin:0}
+.gallery-card .gc-cat{font-family:var(--fm);font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:.2rem}
+/* QUIZ */
+.quiz-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.quiz-q{font-weight:600;color:var(--primary);margin-bottom:1rem;font-size:.95rem;line-height:1.5}
+.quiz-option{display:flex;align-items:flex-start;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f9f7ff;margin:.4rem 0;font-size:.9rem;line-height:1.5}
+.quiz-option:hover{background:#f0ebff;border-color:var(--accent)}
+.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+.quiz-feedback{margin-top:.8rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;display:none;line-height:1.6}
+.quiz-feedback.show{display:block}.quiz-feedback.ok{background:#e8f5ee;color:#15803d;border:1px solid #86efac}.quiz-feedback.fail{background:#fde8e8;color:var(--red);border:1px solid #fca5a5}
+.summary-box{background:linear-gradient(135deg,#3d0080,#1a3a8f);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}
+.summary-box h3{color:white;margin-bottom:1rem;font-size:1.05rem}
+.summary-row{display:flex;gap:.6rem;margin:.45rem 0;align-items:flex-start;font-size:.9rem;line-height:1.5}
+.summary-row::before{content:'✓';color:#c4b5fd;flex-shrink:0;font-weight:700;margin-top:.05rem}
+.ref-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.84rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.ref-table th{background:rgba(255,255,255,.15);color:white;padding:.5rem .8rem;text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(255,255,255,.2)}
+.ref-table td{padding:.48rem .8rem;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.88)}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table td:first-child{font-family:var(--fm);font-weight:700;color:#c4b5fd}
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05)}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));width:100%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}
+.btn-nav:hover{background:var(--n100);color:var(--ink)}.btn-nav.next{background:var(--accent);color:white;border-color:var(--accent)}.btn-nav.next:hover{background:var(--primary)}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .lesson-content{padding:1.5rem 1rem}
+  .compare-grid{grid-template-columns:1fr}
+  .gallery-grid{grid-template-columns:1fr}
+  .sym-row{grid-template-columns:60px 1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">24%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">6 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div><a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div><a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span></a><a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div><a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span></a></div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section"><a class="sb-item" href="curriculo.html"><div class="sb-item-icon">📊</div><span class="sb-item-text">Currículo Completo</span></a></div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section"><a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span></a></div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Linguagens Formais</a><span class="sep">›</span>
+        <span class="current">F4.3 — Complexidade Computacional</span>
+      </div>
+      <div class="topbar-actions"><a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a></div>
+    </header>
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header">
+        <div class="hero-tag">LINGUAGENS FORMAIS · F4.3</div>
+        <div class="hero-title">Complexidade Computacional</div>
+        <div class="hero-sub">Decidível mas inviável: a fronteira entre o que tem algoritmo eficiente e o que (provavelmente) não tem. P, NP, NP-completo e o problema de US$ 1 milhão.</div>
+        <div class="hero-chips">
+          <div class="hero-chip">P vs NP</div>
+          <div class="hero-chip">Reduções polinomiais</div>
+          <div class="hero-chip">SAT &amp; Cook-Levin</div>
+        </div>
+      </div>
+      <nav class="section-nav" id="sectionNav">
+        <a href="#motivacao">1. Decidível ≠ tratável</a>
+        <a href="#tempo">2. Tempo em MT</a>
+        <a href="#classe-p">3. Classe P</a>
+        <a href="#classe-np">4. Classe NP</a>
+        <a href="#nd">5. NP por ND</a>
+        <a href="#reducoes">6. Reduções</a>
+        <a href="#npc">7. NP-completude</a>
+        <a href="#sat">8. SAT</a>
+        <a href="#galeria">9. Galeria NP-C</a>
+        <a href="#quiz">10. Quiz</a>
+        <a href="#resumo">11. Resumo</a>
+      </nav>
+      <div class="lesson-content">
+
+<!-- §1 MOTIVAÇÃO -->
+<section id="motivacao">
+  <h2><span class="num">1</span> Decidível não é o suficiente</h2>
+
+  <p>No módulo anterior (F4.2) você viu duas classes: <strong>decidível</strong> (existe algoritmo que sempre para) e <strong>indecidível</strong> (não existe). Essa fronteira separa o que pode ser computado em princípio do que não pode — um resultado teórico fundamental.</p>
+
+  <p>Mas no mundo real há uma terceira fronteira, mais sutil e mais prática: o que é <em>decidível e viável</em> versus o que é <em>decidível mas inviável</em>. Vamos ver isso com um exemplo.</p>
+
+  <h3>O Caixeiro Viajante (TSP) por força bruta</h3>
+
+  <p>Considere o <strong>Problema do Caixeiro Viajante</strong> (Travelling Salesman Problem): dadas n cidades e distâncias entre elas, encontre a rota mais curta que visita cada cidade exatamente uma vez e retorna ao ponto inicial.</p>
+
+  <p>Existe um algoritmo trivial — testar todas as ordens possíveis de visita e escolher a menor. É decidível: o algoritmo sempre termina em tempo finito. Mas vamos olhar para o tempo real:</p>
+
+  <table class="scale-table">
+    <thead><tr><th>n cidades</th><th>Permutações (≈ n!)</th><th>Tempo a 1 bilhão ops/s</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>10</td><td>3.628.800</td><td>0,004 segundos</td><td class="feasible">viável</td></tr>
+      <tr><td>15</td><td>1,3 × 10¹²</td><td>22 minutos</td><td class="borderline">aguentável</td></tr>
+      <tr><td>20</td><td>2,4 × 10¹⁸</td><td>77 anos</td><td class="infeasible">inviável</td></tr>
+      <tr><td>25</td><td>1,5 × 10²⁵</td><td>5 × 10⁸ anos</td><td class="infeasible">inviável</td></tr>
+      <tr><td>50</td><td>3 × 10⁶⁴</td><td>10⁴⁷ anos</td><td class="infeasible">absurdo</td></tr>
+    </tbody>
+  </table>
+
+  <p>Para 50 cidades — uma instância pequena na vida real — não há computador atual nem futuro que resolva por força bruta. Mesmo que todos os átomos do universo fossem computadores rodando desde o Big Bang, não chegaria nem perto.</p>
+
+  <p>O algoritmo é "correto": sempre dá a resposta certa. Mas não serve. Existe uma diferença qualitativa entre <strong>O(n!)</strong>, <strong>O(2ⁿ)</strong> e <strong>O(n²)</strong> que muda o que pode ou não ser feito na prática.</p>
+
+  <h3>O divisor: tempo polinomial</h3>
+
+  <p>A linha que a teoria da complexidade desenhou é simples: <strong>tempo polinomial em função do tamanho da entrada é viável; tempo exponencial não é</strong>.</p>
+
+  <div class="card">
+    <p>"Polinomial" significa <code>O(n^k)</code> para alguma constante k fixa: O(n), O(n²), O(n³), O(n¹⁰⁰). Cresce devagar comparado a 2ⁿ ou n!.</p>
+    <p style="margin-top:.6rem">"Exponencial" significa que o expoente cresce com n: O(2ⁿ), O(3ⁿ), O(n!). Dobrar n não dobra o tempo — multiplica por uma constante.</p>
+    <p style="margin-top:.6rem"><strong>Por que essa fronteira é a "natural"?</strong> Porque algoritmos polinomiais escalam: dobrar a velocidade do hardware permite resolver entradas maiores. Algoritmos exponenciais não escalam: a melhoria de hardware é engolida pela explosão da função.</p>
+  </div>
+
+  <h3>O grande mistério</h3>
+
+  <p>Para alguns problemas, sabemos que existe algoritmo polinomial: ordenação (O(n log n)), busca em grafo (O(n+m)), multiplicação de matrizes (O(n²·³⁷⁶)). Para outros, como TSP, ninguém conhece algoritmo polinomial — mas <em>ninguém provou que não existe</em>.</p>
+
+  <p>Essa lacuna entre "não conhecemos" e "não existe" é o coração de complexidade. E o coração desse coração tem um nome: a pergunta P versus NP.</p>
+
+  <div class="callout warning">
+    <strong>Importante:</strong> "ineficiente" aqui é diferente de "indecidível". HALT (problema da parada) é indecidível — não há algoritmo correto, ponto. TSP é decidível mas (aparentemente) inviável — há algoritmo correto, só que ele leva tempo absurdo. Esses são fenômenos distintos e exigem ferramentas distintas.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 2):</strong> antes de definir P, NP e NP-completo precisamos formalizar "tempo de execução" no modelo de Máquina de Turing. Spoiler: é exatamente o que você esperaria — número de passos.
+  </div>
+</section>
+
+<!-- §2 TEMPO EM MT -->
+<section id="tempo">
+  <h2><span class="num">2</span> Tempo de execução em Máquina de Turing</h2>
+
+  <p>Em F4.2 você viu MTs em ação — cada passo aplicando δ uma vez. Para falar de complexidade, precisamos contar passos.</p>
+
+  <h3>Definição operacional</h3>
+
+  <div class="card">
+    <p><strong>Tempo de M sobre entrada w</strong> = número de passos que M executa antes de entrar em q_acc ou q_rej.</p>
+    <p style="margin-top:.6rem">Se M nunca para com w, o tempo é infinito (mas estamos olhando para MTs decisores, então sempre paramos).</p>
+  </div>
+
+  <p>Esse número depende de <code>w</code> — entradas diferentes podem dar tempos diferentes. Para falar de complexidade <em>do algoritmo</em>, agregamos as entradas pelo seu <strong>tamanho</strong>:</p>
+
+  <div class="formula-annotated">
+    <div class="fa-title">Função de tempo de M no pior caso</div>
+    <div class="fa-line">T_M(n) = max { passos de M com entrada w &nbsp;:&nbsp; |w| = n }</div>
+    <div class="fa-ann">
+      <div class="fa-chip"><strong>n</strong> = tamanho da entrada</div>
+      <div class="fa-chip"><strong>max</strong> = pior caso entre todas as entradas de tamanho n</div>
+      <div class="fa-chip">Resposta: número de passos como função de n</div>
+    </div>
+  </div>
+
+  <p>Você já viu isso em F1.2 (notações assintóticas): O(n), O(n²), O(2ⁿ). A diferença aqui é que o "passo" agora é uma <em>operação concreta de MT</em> (escrever, mover, mudar estado), não uma operação aritmética abstrata.</p>
+
+  <div class="callout">
+    <strong>Por que isso não muda nada na prática?</strong> Pelo Tese de Church-Turing estendida (a versão "polinomial-tempo"), todos os modelos computacionais razoáveis simulam-se mutuamente com sobrecarga polinomial. Um algoritmo O(n²) em Python é O(n²) em MT (com constante diferente). Você pode pensar em "tempo polinomial" sem se preocupar com qual modelo concreto está sendo medido.
+  </div>
+
+  <h3>A definição que separa tudo</h3>
+
+  <p>Diga-se que uma MT M roda em <strong>tempo polinomial</strong> se existe um polinômio p(n) tal que para toda entrada w, T_M(|w|) ≤ p(|w|).</p>
+
+  <p>Equivalentemente, T_M(n) = O(n^k) para alguma constante k.</p>
+
+  <div class="callout warning">
+    <strong>Erro comum:</strong> "polinomial = rápido". Não é exatamente isso. O(n¹⁰⁰) é polinomial mas absurdamente lento. A noção de "tempo polinomial" é uma abstração matemática — captura uma <em>classe de comportamento</em>, não "rapidez real". Mas na prática, problemas com algoritmo polinomial conhecido tendem a ter expoentes pequenos (2 ou 3). É essa coincidência empírica que torna a definição útil.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 3):</strong> com tempo polinomial definido, podemos batizar a classe dos problemas com algoritmo eficiente. Ela tem nome: P.
+  </div>
+</section>
+
+<!-- §3 CLASSE P -->
+<section id="classe-p">
+  <h2><span class="num">3</span> Classe P — problemas com algoritmo eficiente</h2>
+
+  <p>Antes da definição formal, vamos olhar exemplos de problemas que pertencem a P. Você verá que a classe captura a maior parte dos algoritmos clássicos que você aprendeu em F1, F2 e F3.</p>
+
+  <h3>Quem está em P</h3>
+
+  <div class="card">
+    <ul style="padding-left:1.4rem;line-height:1.9;font-size:.9rem;list-style:none">
+      <li>✓ <strong>Ordenação</strong> de uma lista de n números — O(n log n)</li>
+      <li>✓ <strong>Busca em grafo</strong> (BFS, DFS) — O(V + E)</li>
+      <li>✓ <strong>Caminho mais curto</strong> com pesos não-negativos (Dijkstra) — O((V+E) log V)</li>
+      <li>✓ <strong>Árvore geradora mínima</strong> (Kruskal, Prim) — O(E log V)</li>
+      <li>✓ <strong>Verificar se um número é primo</strong> (AKS, 2002) — O((log n)⁶)</li>
+      <li>✓ <strong>Multiplicação de matrizes</strong> — O(n²·³⁷⁶)</li>
+      <li>✓ <strong>Programação linear</strong> — O(n³·⁵) ou similar</li>
+      <li>✓ <strong>Casamento de padrão em string</strong> (KMP) — O(n + m)</li>
+    </ul>
+  </div>
+
+  <p>Todos esses problemas têm algoritmos polinomiais conhecidos. P é, intuitivamente, "o que sabemos resolver bem". Agora a definição formal:</p>
+
+  <h3>Dicionário de símbolos</h3>
+
+  <div class="sym-dict">
+    <div class="sym-row">
+      <div class="sym-sym">L</div>
+      <div class="sym-body"><strong>Linguagem</strong> — conjunto de strings que codificam instâncias-positivas de um problema.<br>
+        <span class="eg">L_PRIMO = { 2, 3, 5, 7, 11, ... } codificadas em binário</span></div>
+    </div>
+    <div class="sym-row highlight">
+      <div class="sym-sym">P</div>
+      <div class="sym-body"><strong>A classe P</strong> — conjunto de todas as linguagens decidíveis em tempo polinomial por uma MT determinística.<br>
+        <span class="eg">L_PRIMO ∈ P, L_ORDENADO ∈ P, L_CAMINHO_CURTO ∈ P</span></div>
+    </div>
+    <div class="sym-row">
+      <div class="sym-sym">p(n)</div>
+      <div class="sym-body"><strong>Polinômio de tempo</strong> — qualquer expressão da forma a·n^k + b·n^(k−1) + ... com k constante.<br>
+        <span class="eg">p(n) = 5n³ + 12n + 7 → polinômio (k=3); 2ⁿ não é polinômio</span></div>
+    </div>
+  </div>
+
+  <h3>A definição</h3>
+
+  <div class="formula-annotated">
+    <div class="fa-title">Classe P</div>
+    <div class="fa-line">P = { L &nbsp;:&nbsp; existe MT M e polinômio p(n) tais que M decide L em tempo ≤ p(|w|) }</div>
+    <div class="fa-ann">
+      <div class="fa-chip"><strong>L decidida</strong> = M sempre para</div>
+      <div class="fa-chip"><strong>tempo ≤ p(|w|)</strong> = polinomial no tamanho</div>
+      <div class="fa-chip"><strong>determinística</strong> = δ é função (sem ramificações)</div>
+    </div>
+    <div class="details-toggle" style="margin:1rem 0 0">
+      <div class="dt-trigger" onclick="toggleDetails(this)"><span class="dt-arrow">▸</span> Ver leitura detalhada</div>
+      <div class="dt-content">
+        <div style="text-align:left;font-size:.85rem;line-height:1.7;color:var(--text)">
+          <strong>"Existe MT M"</strong> — não estamos exigindo o melhor algoritmo possível. Basta que algum algoritmo polinomial funcione.<br>
+          <strong>"Polinômio p(n)"</strong> — qualquer p(n) basta. P = O(n) ∪ O(n²) ∪ O(n³) ∪ ... — todos os polinômios em uma só classe.<br>
+          <strong>"Decide L"</strong> — M sempre para; aceita strings em L, rejeita strings fora de L.<br>
+          <strong>"≤ p(|w|)"</strong> — tempo é função de tamanho. Entradas grandes podem demorar mais, mas o crescimento é polinomial.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>Em palavras: P é a classe dos problemas para os quais conhecemos um algoritmo eficiente. Tudo que você aprendeu sobre análise de algoritmos em F1 — Big-O polinomial — está aqui.</p>
+
+  <div class="callout">
+    <strong>Por que "polinomial" é uma classe natural?</strong> Três razões:<br>
+    (1) <strong>Composição:</strong> se A está em P e usa B como sub-rotina, e B está em P, então A continua em P. Polinômios fechados sob composição.<br>
+    (2) <strong>Robustez de modelo:</strong> qualquer modelo razoável de computação (MT, RAM, computadores reais) preserva "polinomial" — só muda o expoente.<br>
+    (3) <strong>Empírica:</strong> na prática, algoritmos polinomiais conhecidos têm expoentes pequenos. Não há praticamente nenhum problema natural cujo melhor algoritmo seja O(n¹⁰⁰).
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 4):</strong> P captura "resolver eficientemente". Mas há problemas onde <em>verificar uma solução proposta</em> é fácil, mesmo que <em>encontrar</em> a solução pareça difícil. Essa distinção define a próxima classe — e o mistério mais famoso da computação.
+  </div>
+</section>
+
+<!-- §4 CLASSE NP -->
+<section id="classe-np">
+  <h2><span class="num">4</span> Classe NP — problemas com verificação eficiente</h2>
+
+  <p>Antes da definição, considere uma observação concreta. Olhe esses dois problemas:</p>
+
+  <div class="compare-grid">
+    <div class="compare-card left">
+      <div class="compare-name">Resolver Sudoku 9×9</div>
+      <ul class="compare-list">
+        <li>Você recebe um tabuleiro parcial</li>
+        <li>Encontrar o preenchimento correto leva tempo</li>
+        <li>Sem algoritmo polinomial conhecido para Sudoku N×N geral</li>
+      </ul>
+    </div>
+    <div class="compare-card right">
+      <div class="compare-name">Verificar uma solução de Sudoku</div>
+      <ul class="compare-list">
+        <li>Alguém te entrega um tabuleiro completo</li>
+        <li>Conferir se está correto: percorrer linhas, colunas e blocos</li>
+        <li>Tempo polinomial — trivialmente</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>A diferença entre <strong>encontrar uma solução</strong> e <strong>verificar uma solução já dada</strong> pode ser dramática. Sudoku ilustra: encontrar parece difícil, verificar é fácil. Esse padrão se repete em centenas de problemas.</p>
+
+  <p>NP é a classe dos problemas com essa característica: <em>existe um "certificado" que torna a verificação fácil</em>.</p>
+
+  <h3>Dicionário antes da definição</h3>
+
+  <div class="sym-dict">
+    <div class="sym-row highlight">
+      <div class="sym-sym">c</div>
+      <div class="sym-body"><strong>Certificado</strong> (ou "testemunha") — uma string adicional que prova que a entrada está em L. Para Sudoku: o tabuleiro preenchido. Para Caminho Hamiltoniano: a sequência de vértices.<br>
+        <span class="eg">Para w = "Sudoku parcial", c = "tabuleiro completo válido"</span></div>
+    </div>
+    <div class="sym-row highlight">
+      <div class="sym-sym">V</div>
+      <div class="sym-body"><strong>Verificador</strong> — uma MT que recebe (w, c), e decide em tempo polinomial: "este c prova que w está em L?"<br>
+        <span class="eg">V(w, c) = aceita ⟺ c é um certificado válido para w</span></div>
+    </div>
+    <div class="sym-row">
+      <div class="sym-sym">|c|</div>
+      <div class="sym-body"><strong>Tamanho do certificado</strong> — tem que ser polinomial em |w|. Senão, V poderia "esconder" trabalho exponencial no certificado.<br>
+        <span class="eg">Para Sudoku 9×9, |c| = 81 dígitos — polinomial em |w|</span></div>
+    </div>
+  </div>
+
+  <h3>A definição (a versão verificador)</h3>
+
+  <div class="formula-annotated">
+    <div class="fa-title">Classe NP — versão verificador</div>
+    <div class="fa-line">L ∈ NP ⟺ existe verificador V em tempo polinomial e polinômio q(n) tais que:<br>w ∈ L ⟺ ∃ c com |c| ≤ q(|w|), V(w, c) aceita</div>
+    <div class="fa-ann">
+      <div class="fa-chip"><strong>∃ c</strong> = "existe certificado"</div>
+      <div class="fa-chip"><strong>|c| polinomial</strong> = certificado curto</div>
+      <div class="fa-chip"><strong>V em tempo polinomial</strong> = verificação rápida</div>
+    </div>
+  </div>
+
+  <p>Em português: <strong>L está em NP se, para toda string w em L, existe um certificado curto que um verificador polinomial usa para confirmar que w está em L</strong>.</p>
+
+  <h3>Por que esse nome estranho — NP</h3>
+
+  <div class="callout warning">
+    <strong>Erro comum:</strong> "NP" significa "não polinomial". Errado! NP significa <em>"Não-determinístico Polinomial"</em> — o nome vem da definição alternativa via MT não-determinística (próxima seção). NP <em>contém</em> P; muitos problemas em NP estão também em P. NP não é o oposto de P.
+  </div>
+
+  <h3>P está dentro de NP</h3>
+
+  <p>Se L ∈ P, então existe algoritmo polinomial M que decide L. Para mostrar L ∈ NP, basta usar um certificado vazio (ou ignorado) e usar M como verificador: V(w, c) = M(w). É polinomial, e w ∈ L ⟺ V aceita. Logo, <strong>P ⊆ NP</strong>.</p>
+
+  <h3>O grande mistério: P = NP?</h3>
+
+  <p>A pergunta central da teoria da complexidade — e um dos sete <em>Problemas do Milênio</em> com prêmio de US$ 1 milhão — é:</p>
+
+  <div class="card" style="text-align:center;background:var(--n50)">
+    <strong style="font-size:1.05rem;color:var(--primary)">P = NP?</strong><br>
+    <span style="font-size:.9rem;color:var(--muted)">Toda linguagem que tem verificação eficiente também tem decisão eficiente?</span>
+  </div>
+
+  <p>A maioria absoluta dos pesquisadores acredita que <strong>P ≠ NP</strong> — ou seja, há problemas em NP cuja solução é "intrinsecamente difícil" mesmo a verificação sendo fácil. Mas ninguém sabe provar.</p>
+
+  <div class="callout">
+    <strong>Por que isso importa?</strong> Se P = NP, então TSP, Sudoku, fatoração de inteiros, dobramento de proteínas — todos teriam algoritmos eficientes. Criptografia moderna (RSA, AES) deixaria de ser segura. Otimização industrial seria revolucionada. Se P ≠ NP (cenário considerado provável), todos esses problemas estão em uma classe permanentemente difícil — e a teoria que explica isso é a próxima seção.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 5):</strong> NP foi definida via verificador. Mas o nome "Não-determinístico Polinomial" sugere outra definição — via MT não-determinística. As duas formulações são equivalentes, e a segunda dá uma intuição diferente.
+  </div>
+</section>
+
+<!-- §5 NP POR ND -->
+<section id="nd">
+  <h2><span class="num">5</span> NP via Máquina de Turing Não-determinística</h2>
+
+  <p>Em F4.2, seção 6, foi mencionado que MTs não-determinísticas (NMT) reconhecem o mesmo conjunto de linguagens que MTs determinísticas — só que potencialmente em tempo diferente. Aqui vem o uso desse "tempo diferente".</p>
+
+  <h3>Como uma NMT computa</h3>
+
+  <p>Uma NMT é como uma MT, mas em cada (estado, símbolo) δ pode oferecer <em>várias transições possíveis</em>. Em vez de seguir um único caminho, a NMT segue todos simultaneamente — pense numa árvore de possibilidades.</p>
+
+  <p>A NMT <strong>aceita</strong> uma entrada w se existe <em>algum</em> caminho na árvore que termina em q_acc. Não importa que outros caminhos rejeitem ou loopem — basta que <em>um</em> aceite.</p>
+
+  <h3>Tempo em NMT</h3>
+
+  <div class="card">
+    <p><strong>Tempo de uma NMT em w</strong> = profundidade do caminho aceitante mais curto (se existe) ou profundidade da árvore (se nenhum aceita).</p>
+    <p style="margin-top:.6rem">Não somamos os custos de todos os caminhos — apenas seguimos o caminho aceitante mais eficiente, como se a NMT "adivinhasse" qual seguir.</p>
+  </div>
+
+  <p>Essa definição parece truque mágico — porque <em>é</em>. A NMT não é um modelo realista de computação. É um modelo abstrato útil para definir classes.</p>
+
+  <h3>Definição alternativa de NP</h3>
+
+  <div class="formula-annotated">
+    <div class="fa-title">Classe NP — versão NMT</div>
+    <div class="fa-line">NP = { L &nbsp;:&nbsp; existe NMT que decide L em tempo polinomial }</div>
+    <div class="fa-ann">
+      <div class="fa-chip"><strong>NMT</strong> = não-determinística</div>
+      <div class="fa-chip"><strong>tempo polinomial</strong> = caminho aceitante de comprimento ≤ p(n)</div>
+    </div>
+  </div>
+
+  <h3>Por que as duas definições são equivalentes</h3>
+
+  <p>Esta equivalência é elegante e merece atenção:</p>
+
+  <div class="proof-steps">
+    <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Verificador → NMT.</strong> Se L tem verificador V polinomial: construa NMT N que, dada w, primeiro <em>adivinha</em> não-deterministicamente um certificado c de tamanho q(|w|), depois roda V(w, c). N aceita w ⟺ existe c com V(w,c) aceita ⟺ w ∈ L. Tempo: q(|w|) + p(|w|) = polinomial.</div></div>
+    <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>NMT → Verificador.</strong> Se L é decidida por NMT N em tempo polinomial p(n): o certificado c é a sequência de escolhas que N faz no caminho aceitante. |c| ≤ p(|w|) — polinomial. O verificador V(w, c) simula N seguindo as escolhas em c. Se chega em q_acc, aceita; senão rejeita. V é polinomial.</div></div>
+    <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Conclusão:</strong> as duas definições capturam exatamente o mesmo conjunto de linguagens. NP via verificador = NP via NMT. ∎</div></div>
+  </div>
+
+  <h3>Quando usar cada definição</h3>
+
+  <div class="card">
+    <p><strong>Verificador (intuição "encontrar é difícil, conferir é fácil"):</strong> útil para mostrar que um problema concreto está em NP. Você descreve qual seria o certificado e como verificá-lo.</p>
+    <p style="margin-top:.6rem"><strong>NMT (intuição "adivinhe e confira"):</strong> útil em provas teóricas e na demonstração do teorema de Cook-Levin (próxima seção). Permite raciocinar sobre execuções.</p>
+  </div>
+
+  <div class="callout">
+    <strong>Onde está P nessa história?</strong> P é a versão "determinística" de NP — mesma definição, mas com MT determinística. Daí o nome: NP = "Non-deterministic Polynomial". A pergunta P = NP é equivalente a perguntar: <em>determinismo é tão poderoso quanto não-determinismo, em tempo polinomial?</em>
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 6):</strong> agora temos as duas classes principais. Para entender NP-completude, precisamos de uma ferramenta nova: como dizer que "problema A é tão difícil quanto problema B"? A resposta é redução polinomial.
+  </div>
+</section>
+
+<!-- §6 REDUÇÕES -->
+<section id="reducoes">
+  <h2><span class="num">6</span> Reduções polinomiais</h2>
+
+  <p>Em F4.2 você viu reduções no contexto de indecidibilidade — para mostrar que P é indecidível, mostrava-se "se P fosse decidível, HALT também seria". Aqui usamos a mesma ferramenta para complexidade — mas com a restrição extra de que a transformação seja eficiente.</p>
+
+  <h3>A intuição</h3>
+
+  <p>Você quer comparar a dificuldade de dois problemas A e B. Diga "A reduz a B" se você sabe resolver A <em>desde que</em> alguém te dê um solver para B. Em outras palavras, A é "no máximo tão difícil" quanto B.</p>
+
+  <p>Para complexidade, exigimos que a tradução A → B seja em tempo polinomial. Senão, poderíamos esconder trabalho exponencial dentro da tradução.</p>
+
+  <h3>Definição</h3>
+
+  <div class="sym-dict">
+    <div class="sym-row highlight">
+      <div class="sym-sym">A ≤ₚ B</div>
+      <div class="sym-body"><strong>"A reduz polinomialmente a B"</strong> — existe função f computável em tempo polinomial tal que para toda string w:<br>
+        <code>w ∈ A ⟺ f(w) ∈ B</code><br>
+        <span class="eg">f transforma instâncias de A em instâncias equivalentes de B, preservando "sim/não"</span></div>
+    </div>
+  </div>
+
+  <div class="formula-annotated">
+    <div class="fa-title">Redução polinomial</div>
+    <div class="fa-line">A ≤ₚ B &nbsp;⟺&nbsp; ∃ f polinomial: w ∈ A ⟺ f(w) ∈ B</div>
+    <div class="fa-ann">
+      <div class="fa-chip"><strong>f polinomial</strong> = transformação eficiente</div>
+      <div class="fa-chip"><strong>⟺</strong> = preserva resposta nos dois sentidos</div>
+      <div class="fa-chip">A é "≤" em dificuldade que B</div>
+    </div>
+  </div>
+
+  <h3>Por que isso é útil</h3>
+
+  <div class="card">
+    <p><strong>Teorema da preservação.</strong> Se A ≤ₚ B e B ∈ P, então A ∈ P.</p>
+    <p style="margin-top:.6rem"><strong>Por quê?</strong> Para resolver A em w: (1) compute f(w) em polinomial; (2) rode o solver polinomial de B em f(w). Se f(w) ∈ B → aceita. Senão → rejeita. Total: polinomial + polinomial = polinomial.</p>
+    <p style="margin-top:.6rem"><strong>Contrapositiva (a forma mais usada):</strong> se A ≤ₚ B e A ∉ P, então B ∉ P. Reduzir um problema "difícil" a outro mostra que o segundo também é difícil.</p>
+  </div>
+
+  <h3>Diagrama de uma redução</h3>
+
+  <div class="reduction-box">
+    <h4>Estrutura: usar B para resolver A</h4>
+    <div class="reduction-flow">
+      <div>
+        <div class="rf-box">w<br><span style="font-weight:400;font-size:.7rem;color:var(--muted)">instância de A</span></div>
+      </div>
+      <div class="rf-arrow">→</div>
+      <div>
+        <div class="rf-box" style="border-color:var(--accent2);color:var(--accent2)">f(w)<br><span style="font-weight:400;font-size:.7rem;color:var(--muted)">instância de B</span></div>
+        <div class="rf-label">via f polinomial</div>
+      </div>
+      <div class="rf-arrow">→</div>
+      <div>
+        <div class="rf-box" style="border-color:var(--green);color:var(--green)">sim/não</div>
+        <div class="rf-label">via solver de B</div>
+      </div>
+    </div>
+    <p style="font-size:.84rem;color:var(--muted);text-align:center;margin-top:.4rem">A resposta de B em f(w) é exatamente a resposta de A em w — é o que f garante.</p>
+  </div>
+
+  <h3>Exemplo concreto: 3-COLOR ≤ₚ SAT</h3>
+
+  <div class="card">
+    <strong>3-COLORAÇÃO:</strong> dado um grafo G, é possível colorir os vértices com 3 cores de modo que vizinhos tenham cores diferentes?<br><br>
+    <strong>SAT:</strong> dada uma fórmula booleana, existe atribuição de variáveis que a torna verdadeira?<br><br>
+    <strong>Redução f:</strong> dado G com vértices v₁, ..., vₙ:<br>
+    Para cada vᵢ, crie 3 variáveis: x_{i,R}, x_{i,G}, x_{i,B} (vᵢ é vermelho/verde/azul).<br>
+    Adicione cláusulas:<br>
+    &nbsp;&nbsp;• "vᵢ tem ao menos uma cor": (x_{i,R} ∨ x_{i,G} ∨ x_{i,B})<br>
+    &nbsp;&nbsp;• "vᵢ não tem duas cores": (¬x_{i,R} ∨ ¬x_{i,G}), (¬x_{i,R} ∨ ¬x_{i,B}), (¬x_{i,G} ∨ ¬x_{i,B})<br>
+    &nbsp;&nbsp;• Para cada aresta (vᵢ, vⱼ): (¬x_{i,R} ∨ ¬x_{j,R}), (¬x_{i,G} ∨ ¬x_{j,G}), (¬x_{i,B} ∨ ¬x_{j,B})<br><br>
+    A fórmula resultante é satisfazível ⟺ G é 3-colorível. A construção é polinomial: O(n + e) cláusulas para grafo com n vértices e e arestas. ✓
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 7):</strong> com reduções polinomiais como ferramenta, podemos definir uma classe especial — os problemas "mais difíceis" de NP. São aqueles que <em>todos</em> os outros problemas em NP reduzem a eles.
+  </div>
+</section>
+
+<!-- §7 NP-COMPLETUDE -->
+<section id="npc">
+  <h2><span class="num">7</span> NP-completude — os problemas mais difíceis de NP</h2>
+
+  <p>Reduções dão uma escala de dificuldade. Agora podemos perguntar: existe um problema em NP para o qual <em>todos</em> os outros reduzem? Se sim, esse problema seria "o mais difícil" — resolvê-lo em polinomial resolveria todo NP em polinomial.</p>
+
+  <h3>Definição</h3>
+
+  <p>Um problema B é <strong>NP-completo</strong> se satisfaz duas condições:</p>
+
+  <div class="sym-dict">
+    <div class="sym-row highlight">
+      <div class="sym-sym">(1)</div>
+      <div class="sym-body"><strong>B está em NP</strong> — existe verificador polinomial para B (ou equivalentemente, NMT polinomial).<br>
+        <span style="font-size:.84rem;color:var(--muted)">Garante que B "não é mais difícil" que NP em geral.</span></div>
+    </div>
+    <div class="sym-row highlight">
+      <div class="sym-sym">(2)</div>
+      <div class="sym-body"><strong>B é NP-difícil</strong> — para toda L em NP, L ≤ₚ B.<br>
+        <span style="font-size:.84rem;color:var(--muted)">Garante que B "não é mais fácil" que qualquer problema em NP.</span></div>
+    </div>
+  </div>
+
+  <div class="formula-annotated">
+    <div class="fa-title">B é NP-completo</div>
+    <div class="fa-line">B ∈ NP &nbsp; ∧ &nbsp; ∀ L ∈ NP: L ≤ₚ B</div>
+    <div class="fa-ann">
+      <div class="fa-chip"><strong>Em NP</strong> — não excede o limite superior</div>
+      <div class="fa-chip"><strong>NP-difícil</strong> — atinge o limite inferior</div>
+      <div class="fa-chip">Resolver B = resolver tudo em NP</div>
+    </div>
+  </div>
+
+  <h3>O significado dramático</h3>
+
+  <div class="card">
+    <p><strong>Se algum problema NP-completo está em P, então P = NP.</strong></p>
+    <p style="margin-top:.5rem">Por quê? Suponha B é NP-completo e B ∈ P. Para qualquer L ∈ NP, L ≤ₚ B. Pelo Teorema da preservação: como B ∈ P, então L ∈ P. Logo todo L ∈ NP está em P, ou seja, NP ⊆ P. Como P ⊆ NP sempre vale, conclui-se P = NP.</p>
+    <p style="margin-top:.5rem"><strong>Contrapositivamente:</strong> se P ≠ NP (a hipótese aceita), nenhum problema NP-completo está em P.</p>
+  </div>
+
+  <p>NP-completos são "uma classe inteira ligada por reduções": resolver eficientemente qualquer um deles seria uma revolução. Mas há centenas de problemas NP-completos conhecidos — e nenhum tem algoritmo polinomial. Essa é a evidência mais forte (não-prova) de que P ≠ NP.</p>
+
+  <h3>O quadro completo (assumindo P ≠ NP)</h3>
+
+  <div class="complexity-diagram">
+    <div class="cd-region cd-r-nph">
+      <div class="cd-r-name">NP-difícil</div>
+      <div class="cd-r-desc">"Pelo menos tão difícil quanto qualquer NP". Pode ou não estar em NP. Inclui problemas indecidíveis (HALT é NP-difícil!).</div>
+    </div>
+    <div class="cd-region cd-r-npc" style="margin-left:1rem">
+      <div class="cd-r-name">NP-completo (= NP ∩ NP-difícil)</div>
+      <div class="cd-r-desc">SAT, 3-SAT, Clique, Vertex Cover, TSP (versão decisão), Hamiltoniano, Sudoku N×N…</div>
+    </div>
+    <div class="cd-region cd-r-np" style="margin-left:2rem">
+      <div class="cd-r-name">NP \ (P ∪ NP-completo)</div>
+      <div class="cd-r-desc">"Em NP mas nem em P nem NP-completo". Suspeito de existir (Ladner, 1975) — fatoração de inteiros é candidato.</div>
+    </div>
+    <div class="cd-region cd-r-p" style="margin-left:3rem">
+      <div class="cd-r-name">P</div>
+      <div class="cd-r-desc">Ordenação, busca em grafo, caminho mais curto, primalidade…</div>
+    </div>
+  </div>
+
+  <p style="font-size:.85rem;color:var(--muted)">Cada região está contida na de cima. Se P = NP (cenário considerado improvável), as regiões internas colapsam todas em uma só.</p>
+
+  <h3>Como provar que B é NP-completo na prática</h3>
+
+  <div class="card">
+    <p>Provar (1) — "B em NP" — é geralmente fácil: descreva o certificado e o verificador polinomial.</p>
+    <p style="margin-top:.6rem">Provar (2) — "B é NP-difícil" — pela definição literal exigiria reduzir <em>todo</em> problema em NP a B. Isso é impossível na prática.</p>
+    <p style="margin-top:.6rem"><strong>O truque:</strong> usar <em>transitividade</em> da redução polinomial.</p>
+    <p style="margin-top:.6rem; font-size:.88rem;background:var(--code-bg);padding:.5rem .8rem;border-radius:6px"><strong>Lema (transitividade):</strong> se A ≤ₚ C e C ≤ₚ B, então A ≤ₚ B. (Componha as funções f₁ e f₂; ainda é polinomial.)</p>
+    <p style="margin-top:.6rem">Usando isso: se já conhecemos um problema C que é NP-completo, e mostramos C ≤ₚ B, então B é NP-difícil. Junto com B ∈ NP, B é NP-completo.</p>
+    <p style="margin-top:.6rem"><strong>Receita prática:</strong></p>
+    <ol style="padding-left:1.4rem;font-size:.88rem;line-height:1.8">
+      <li>Mostre B ∈ NP (descreva certificado e verificador)</li>
+      <li>Escolha algum C já conhecido como NP-completo</li>
+      <li>Construa uma redução polinomial C ≤ₚ B</li>
+      <li>Pronto: B é NP-completo</li>
+    </ol>
+  </div>
+
+  <div class="callout warning">
+    <strong>Cuidado com a direção da redução.</strong> Para mostrar que B é difícil, reduza um problema <em>conhecido como difícil</em> a B (C ≤ₚ B). Reduzir B a algo fácil não prova nada sobre B. Estudantes erram isso o tempo todo: para mostrar que SAT é difícil, reduzimos algo a SAT, não SAT a algo.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 8):</strong> tem algum problema que conhecemos como NP-completo? Sim — o ponto de partida histórico foi SAT, provado por Stephen Cook em 1971 (e independentemente por Leonid Levin). É o "pai" da teoria.
+  </div>
+</section>
+
+<!-- §8 SAT -->
+<section id="sat">
+  <h2><span class="num">8</span> SAT e o Teorema de Cook-Levin</h2>
+
+  <p>Em 1971, Stephen Cook publicou "The complexity of theorem-proving procedures", provando que um problema específico — SAT — é NP-completo. Independentemente, Leonid Levin chegou ao mesmo resultado em 1973 na União Soviética. Esse é o ponto de partida histórico de toda a teoria.</p>
+
+  <h3>O problema SAT</h3>
+
+  <div class="card">
+    <strong>SAT (Satisfatibilidade Booleana).</strong> Dada uma fórmula booleana φ envolvendo variáveis x₁, x₂, …, xₙ e os conectivos ∧ (E), ∨ (OU), ¬ (NÃO), existe atribuição de valores (true/false) que torna φ verdadeira?
+  </div>
+
+  <p>Exemplo: <code>(x₁ ∨ ¬x₂) ∧ (¬x₁ ∨ x₂ ∨ x₃) ∧ (x₂ ∨ ¬x₃)</code><br>
+  Resposta: sim — atribuir x₁ = true, x₂ = true, x₃ = false torna todas as cláusulas verdadeiras.</p>
+
+  <h3>Experimente — SAT interativo</h3>
+
+  <div class="sat-demo">
+    <h4>🎛️ Tente satisfazer esta fórmula</h4>
+    <div class="sat-formula" id="satFormula">(x₁ ∨ ¬x₂ ∨ x₃) ∧ (¬x₁ ∨ x₂) ∧ (¬x₂ ∨ ¬x₃) ∧ (x₁ ∨ x₃)</div>
+
+    <div class="sat-vars" id="satVars">
+      <div class="sat-var">
+        <label>x₁</label>
+        <div class="sat-toggle" data-var="0" onclick="satToggle(0,this)">
+          <span class="opt active">F</span><span class="opt">T</span>
+        </div>
+      </div>
+      <div class="sat-var">
+        <label>x₂</label>
+        <div class="sat-toggle" data-var="1" onclick="satToggle(1,this)">
+          <span class="opt active">F</span><span class="opt">T</span>
+        </div>
+      </div>
+      <div class="sat-var">
+        <label>x₃</label>
+        <div class="sat-toggle" data-var="2" onclick="satToggle(2,this)">
+          <span class="opt active">F</span><span class="opt">T</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sat-clauses" id="satClauses"></div>
+    <div class="sat-result" id="satResult"></div>
+
+    <p style="font-size:.82rem;color:var(--muted);margin-top:.6rem">Há 2³ = 8 atribuições possíveis. Qualquer atribuição que satisfaça todas as cláusulas serve como certificado de que a fórmula é satisfazível.</p>
+  </div>
+
+  <h3>SAT está em NP</h3>
+
+  <p>Trivialmente: o certificado é a atribuição. O verificador substitui os valores na fórmula e avalia — operação de tempo linear no tamanho da fórmula. Confere. ✓</p>
+
+  <h3>SAT é NP-difícil — esboço de Cook-Levin</h3>
+
+  <p>A parte difícil é mostrar que <em>todo</em> problema em NP reduz a SAT. A genialidade de Cook foi observar: NP é definido por "existe NMT polinomial". A computação dessa NMT pode ser <em>codificada como uma fórmula booleana</em>. Veja a estrutura:</p>
+
+  <div class="proof-steps">
+    <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Setup.</strong> Seja L ∈ NP, decidida pela NMT N em tempo p(n). Para mostrar L ≤ₚ SAT, precisamos: dada w, construir em tempo polinomial uma fórmula φ_w tal que φ_w é satisfazível ⟺ N aceita w.</div></div>
+    <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Quadro de computação.</strong> Em qualquer execução aceitante de N com w, a "trajetória" da máquina é uma tabela: t passos × m células de fita. Cada célula tem (símbolo, há cabeça aqui?, qual estado?). Tempo p(|w|), espaço também ≤ p(|w|), então tabela tem tamanho polinomial.</div></div>
+    <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Variáveis booleanas.</strong> Para cada (linha t, coluna i, conteúdo c possível), crie uma variável <code>x_{t,i,c}</code>: "no passo t, célula i tem conteúdo c". Total: polinomial em |w|.</div></div>
+    <div class="proof-step"><span class="ps-num">4</span><div class="ps-body"><strong>Cláusulas.</strong> Construa fórmulas que codificam:<br>
+      • Início correto: linha 0 contém w no formato inicial<br>
+      • Cada célula tem exatamente um conteúdo (consistência)<br>
+      • Transições válidas: linha t+1 segue de linha t por alguma transição de N<br>
+      • Aceitação: alguma célula em alguma linha contém q_acc<br>
+      Toda essa codificação é polinomial em |w|.</div></div>
+    <div class="proof-step"><span class="ps-num">5</span><div class="ps-body"><strong>Conclusão.</strong> φ_w é satisfazível ⟺ existe trajetória aceitante de N com w ⟺ w ∈ L. A construção de φ_w é polinomial. Logo L ≤ₚ SAT. Como L era arbitrária em NP, SAT é NP-difícil. Junto com (NP), SAT é NP-completo. ∎</div></div>
+  </div>
+
+  <div class="callout teal">
+    <strong>Teorema de Cook-Levin (1971).</strong> SAT é NP-completo. Esse teorema fundou a teoria de NP-completude — todos os outros resultados de NP-completude vêm depois, por redução a partir de SAT (ou descendentes).
+  </div>
+
+  <h3>3-SAT — versão simplificada</h3>
+
+  <p>Uma fórmula está em <strong>3-CNF</strong> se é uma conjunção de cláusulas, cada cláusula sendo a disjunção de exatamente 3 literais (variável ou sua negação). Exemplo: <code>(x₁ ∨ ¬x₂ ∨ x₃) ∧ (¬x₁ ∨ x₂ ∨ x₄) ∧ ...</code></p>
+
+  <p><strong>3-SAT</strong> é o problema de satisfatibilidade restrito a fórmulas 3-CNF. Por uma redução polinomial simples, SAT ≤ₚ 3-SAT — então 3-SAT também é NP-completo. 3-SAT é o "ponto de partida prático" para a maioria das reduções modernas, porque sua estrutura regular facilita as construções.</p>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 9):</strong> com 3-SAT como ponto de partida, foi possível provar NP-completude para uma quantidade impressionante de problemas. Vamos olhar uma galeria com os mais famosos.
+  </div>
+</section>
+
+<!-- §9 GALERIA -->
+<section id="galeria">
+  <h2><span class="num">9</span> Galeria de problemas NP-completos</h2>
+
+  <p>Em 1972, Richard Karp publicou "Reducibility Among Combinatorial Problems", mostrando 21 problemas naturais NP-completos por redução. Hoje há centenas. Aqui estão os mais relevantes para o POSCOMP — pelo menos um deles deve aparecer na sua prova.</p>
+
+  <h3>Problemas em grafos</h3>
+
+  <div class="gallery-grid">
+    <div class="gallery-card">
+      <div class="gc-cat">Grafos · clássico</div>
+      <h4>CLIQUE</h4>
+      <p>Dado grafo G e inteiro k, existe subconjunto de k vértices todos conectados entre si? (CLIQUE é NP-completo via redução de 3-SAT.)</p>
+    </div>
+    <div class="gallery-card">
+      <div class="gc-cat">Grafos · clássico</div>
+      <h4>VERTEX COVER</h4>
+      <p>Dado G e k, existe subconjunto de k vértices que toca pelo menos uma extremidade de cada aresta? Reduzido a partir de CLIQUE — complementar.</p>
+    </div>
+    <div class="gallery-card">
+      <div class="gc-cat">Grafos · clássico</div>
+      <h4>INDEPENDENT SET</h4>
+      <p>Dado G e k, existe subconjunto de k vértices sem nenhuma aresta entre eles? Equivalente a CLIQUE no grafo complementar.</p>
+    </div>
+    <div class="gallery-card">
+      <div class="gc-cat">Grafos · caminhos</div>
+      <h4>HAMILTONIAN CYCLE</h4>
+      <p>Existe ciclo que visita cada vértice exatamente uma vez? Reduzido de 3-SAT (via gadgets). Notar: caminho Euleriano é em P, Hamiltoniano é NPC.</p>
+    </div>
+    <div class="gallery-card">
+      <div class="gc-cat">Grafos · otimização</div>
+      <h4>TSP (decisão)</h4>
+      <p>Dado grafo ponderado e k, existe rota fechada visitando cada vértice com peso total ≤ k? Reduzido de Hamiltoniano. A versão otimização é NP-difícil.</p>
+    </div>
+    <div class="gallery-card">
+      <div class="gc-cat">Grafos · coloração</div>
+      <h4>3-COLORING</h4>
+      <p>É possível pintar vértices com 3 cores tal que vizinhos tenham cores distintas? 2-coloring (bipartido) está em P; 3-coloring é NPC.</p>
+    </div>
+  </div>
+
+  <h3>Problemas combinatórios</h3>
+
+  <div class="gallery-grid">
+    <div class="gallery-card">
+      <div class="gc-cat">Combinatório · subconjunto</div>
+      <h4>SUBSET SUM</h4>
+      <p>Dado conjunto de inteiros S e alvo t, existe subconjunto de S cuja soma é exatamente t? Reduzido de 3-SAT. Pseudo-polinomial via DP.</p>
+    </div>
+    <div class="gallery-card">
+      <div class="gc-cat">Combinatório · empacotamento</div>
+      <h4>KNAPSACK (decisão)</h4>
+      <p>Dados itens com peso/valor e capacidade W e meta V, existe subconjunto com peso ≤ W e valor ≥ V? Generaliza Subset Sum.</p>
+    </div>
+    <div class="gallery-card">
+      <div class="gc-cat">Combinatório · partição</div>
+      <h4>PARTITION</h4>
+      <p>Dado conjunto de inteiros, é possível partir em dois subconjuntos com somas iguais? Caso especial de Subset Sum.</p>
+    </div>
+    <div class="gallery-card">
+      <div class="gc-cat">Lógico · cláusulas</div>
+      <h4>3-SAT</h4>
+      <p>SAT restrito a fórmulas em 3-CNF — cada cláusula com exatamente 3 literais. Ponto de partida prático para a maioria das reduções modernas.</p>
+    </div>
+  </div>
+
+  <h3>O que é "fácil" e o que é "difícil" — pares delicados</h3>
+
+  <p>Algumas combinações merecem atenção especial — diferenças sutis que mudam a classe completa:</p>
+
+  <table class="scale-table" style="font-size:.85rem">
+    <thead><tr><th>Problema</th><th>Em P</th><th>NP-completo</th></tr></thead>
+    <tbody>
+      <tr><td>Caminho mais curto</td><td>Pesos não-negativos (Dijkstra)</td><td>Caminho mais longo (sem ciclos)</td></tr>
+      <tr><td>Coloração</td><td>2 cores (bipartido)</td><td>3 cores</td></tr>
+      <tr><td>Caminho que visita tudo</td><td>Euleriano (todas arestas, uma vez)</td><td>Hamiltoniano (todos vértices, uma vez)</td></tr>
+      <tr><td>Satisfatibilidade</td><td>2-SAT (cláusulas com 2 literais)</td><td>3-SAT</td></tr>
+      <tr><td>Programação linear</td><td>Variáveis reais</td><td>Variáveis inteiras (ILP)</td></tr>
+      <tr><td>Casamento</td><td>Bipartido</td><td>3-Dimensional Matching</td></tr>
+    </tbody>
+  </table>
+
+  <p>Essa tabela revela um padrão: pequenas restrições adicionais (mais cores, mais literais por cláusula, exigir inteiros) podem catapultar um problema de P para NP-completo. A fronteira é frequentemente sutil.</p>
+
+  <div class="callout warning">
+    <strong>Atenção em prova:</strong> uma armadilha clássica do POSCOMP é apresentar uma versão "P" e uma versão "NPC" lado a lado, esperando que o candidato confunda. Decore: <em>2-SAT está em P, 3-SAT é NPC; 2-coloração é em P, 3-coloração é NPC; Euleriano é em P, Hamiltoniano é NPC</em>.
+  </div>
+
+  <h3>Como abordar problemas NP-completos na prática</h3>
+
+  <p>NP-completude não é um beco sem saída — é informação valiosa. Sabendo que um problema é NPC:</p>
+
+  <div class="card">
+    <ul style="padding-left:1.4rem;line-height:1.9;font-size:.9rem;list-style:none">
+      <li>✓ <strong>Pare de procurar algoritmo polinomial exato.</strong> Use seu tempo de outras formas.</li>
+      <li>✓ <strong>Algoritmos de aproximação:</strong> trade-off — solução não ótima mas com garantia de qualidade. Ex: Vertex Cover tem aproximação 2 em tempo polinomial.</li>
+      <li>✓ <strong>Heurísticas:</strong> sem garantia formal, mas funcionam bem na prática (simulated annealing, algoritmos genéticos).</li>
+      <li>✓ <strong>Algoritmos exatos exponenciais melhorados:</strong> 2ⁿ é ruim, mas 1.3ⁿ é muito menos ruim — instâncias razoáveis ficam viáveis.</li>
+      <li>✓ <strong>Restrições do mundo real:</strong> a instância prática pode ter estrutura especial (ex: planar, esparsa) que admite algoritmo polinomial.</li>
+      <li>✓ <strong>Solvers especializados:</strong> SAT solvers modernos resolvem instâncias com milhões de variáveis em segundos, embora SAT seja NPC.</li>
+    </ul>
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 10):</strong> hora de testar com 6 questões estilo POSCOMP, cobrindo definições, classificação, reduções e armadilhas comuns.
+  </div>
+</section>
+
+<!-- §10 QUIZ -->
+<section id="quiz">
+  <h2><span class="num">10</span> Quiz — estilo POSCOMP</h2>
+  <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem">Após cada resposta você verá uma explicação detalhada — incluindo o motivo pelo qual cada opção errada está errada.</p>
+
+  <div class="quiz-box" id="q1">
+    <div class="quiz-q">Considere a definição da classe NP. Qual das alternativas está correta?</div>
+    <div class="quiz-option" data-qid="q1" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) NP é o conjunto dos problemas que <em>não</em> podem ser resolvidos em tempo polinomial</div>
+    <div class="quiz-option" data-qid="q1" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) NP é o conjunto dos problemas resolvíveis em tempo exponencial</div>
+    <div class="quiz-option" data-qid="q1" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) NP é o conjunto dos problemas com verificador polinomial — equivalentemente, decidíveis por NMT em tempo polinomial</div>
+    <div class="quiz-option" data-qid="q1" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) NP é o conjunto dos problemas indecidíveis</div>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q2">
+    <div class="quiz-q">Qual das relações abaixo é verdadeira independentemente da resposta de P vs NP?</div>
+    <div class="quiz-option" data-qid="q2" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) P ⊊ NP (estritamente contido)</div>
+    <div class="quiz-option" data-qid="q2" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) P ⊆ NP (contido, podendo ser igual)</div>
+    <div class="quiz-option" data-qid="q2" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) NP ⊆ P</div>
+    <div class="quiz-option" data-qid="q2" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) P e NP são disjuntos</div>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q3">
+    <div class="quiz-q">Suponha que A ≤ₚ B (A reduz polinomialmente a B). Qual das afirmações está correta?</div>
+    <div class="quiz-option" data-qid="q3" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Se B ∈ P, então A ∈ P</div>
+    <div class="quiz-option" data-qid="q3" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Se A ∈ P, então B ∈ P</div>
+    <div class="quiz-option" data-qid="q3" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Se A é NP-completo, então B é NP-completo</div>
+    <div class="quiz-option" data-qid="q3" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Se B é decidível, A é indecidível</div>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q4">
+    <div class="quiz-q">Para provar que um problema B é NP-completo, é suficiente mostrar que:</div>
+    <div class="quiz-option" data-qid="q4" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) B ∈ NP e existe algum problema C ∈ NP tal que C ≤ₚ B</div>
+    <div class="quiz-option" data-qid="q4" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) B ∈ NP e existe um problema C já conhecido como NP-completo tal que C ≤ₚ B</div>
+    <div class="quiz-option" data-qid="q4" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) B ∈ NP e B ≤ₚ SAT</div>
+    <div class="quiz-option" data-qid="q4" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) B ∉ P e B ∈ NP</div>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q5">
+    <div class="quiz-q">Qual dos pares abaixo lista corretamente um problema em P e um problema NP-completo?</div>
+    <div class="quiz-option" data-qid="q5" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Caminho Hamiltoniano (P) e Caminho Euleriano (NPC)</div>
+    <div class="quiz-option" data-qid="q5" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) 2-SAT (P) e 3-SAT (NPC)</div>
+    <div class="quiz-option" data-qid="q5" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) 3-coloração (P) e 2-coloração (NPC)</div>
+    <div class="quiz-option" data-qid="q5" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Programação linear inteira (P) e programação linear contínua (NPC)</div>
+    <div class="quiz-feedback" id="q5-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q6">
+    <div class="quiz-q">Considere as afirmações sobre NP-completude:<br>
+    I. Se um problema NP-completo é mostrado estar em P, então P = NP.<br>
+    II. HALT (problema da parada) é NP-completo, pois é um dos problemas "mais difíceis".<br>
+    III. Todo problema NP-difícil está em NP.<br>
+    Quais são verdadeiras?</div>
+    <div class="quiz-option" data-qid="q6" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Apenas I</div>
+    <div class="quiz-option" data-qid="q6" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Apenas I e III</div>
+    <div class="quiz-option" data-qid="q6" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Apenas II e III</div>
+    <div class="quiz-option" data-qid="q6" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) I, II e III</div>
+    <div class="quiz-feedback" id="q6-fb"></div>
+  </div>
+</section>
+
+<!-- §11 RESUMO -->
+<section id="resumo">
+  <h2><span class="num">11</span> Resumo</h2>
+  <div class="summary-box">
+    <h3>🎯 O que você precisa dominar</h3>
+    <div class="summary-row">P = problemas decidíveis em tempo polinomial por MT determinística — "resolvíveis eficientemente"</div>
+    <div class="summary-row">NP = problemas com verificador polinomial — equivalentemente, decidíveis por NMT polinomial</div>
+    <div class="summary-row">P ⊆ NP sempre vale; saber se P = NP é problema em aberto (Problema do Milênio, US$ 1 milhão)</div>
+    <div class="summary-row">A ≤ₚ B = existe transformação polinomial que preserva resposta sim/não</div>
+    <div class="summary-row">Reduções são <strong>transitivas</strong>: A ≤ₚ B e B ≤ₚ C ⟹ A ≤ₚ C</div>
+    <div class="summary-row">B é NP-completo ⟺ B ∈ NP E B é NP-difícil (todo L em NP reduz a B)</div>
+    <div class="summary-row">Para provar B NP-completo: (1) B ∈ NP, (2) reduzir um C já NPC para B</div>
+    <div class="summary-row">Cook-Levin (1971): SAT é NP-completo — primeiro problema da história a ser provado NPC</div>
+    <div class="summary-row">3-SAT, Clique, Vertex Cover, Hamiltoniano, TSP (decisão), Subset Sum, 3-coloração — todos NPC</div>
+    <div class="summary-row">Pares enganadores: 2-SAT é P, 3-SAT é NPC; Euleriano é P, Hamiltoniano é NPC; 2-color é P, 3-color é NPC</div>
+
+    <table class="ref-table">
+      <thead><tr><th>Conceito</th><th>Definição rápida</th><th>Exemplo</th></tr></thead>
+      <tbody>
+        <tr><td>P</td><td>MT determinística polinomial</td><td>Ordenação, Dijkstra</td></tr>
+        <tr><td>NP</td><td>Verificador polinomial</td><td>SAT, Sudoku, TSP</td></tr>
+        <tr><td>NP-difícil</td><td>Tudo de NP reduz a ele</td><td>SAT, HALT (também)</td></tr>
+        <tr><td>NP-completo</td><td>NP-difícil ∩ NP</td><td>SAT, 3-SAT, Clique</td></tr>
+        <tr><td>≤ₚ</td><td>Redução polinomial</td><td>3-COLOR ≤ₚ SAT</td></tr>
+        <tr><td>Cook-Levin</td><td>SAT é NPC (primeiro)</td><td>Base de toda NP-completude</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout teal" style="margin-top:1.5rem">
+    <strong>🎓 Trilha F4 concluída.</strong> Você cobriu Linguagens Formais (F4.1), Máquinas de Turing e Decidibilidade (F4.2), e agora Complexidade Computacional (F4.3). Tem o quadro completo da teoria da computação para POSCOMP: do que é regular ao que é incomputável, passando por o que é eficientemente computável e o que (provavelmente) não é.<br><br>
+    <strong>Próxima trilha sugerida:</strong> F5 (Sistemas Operacionais) — alto peso na prova e independente da teoria. Ou voltar para F3 (Paradigmas) para fechar a trilha que tem só F3.1.
+  </div>
+</section>
+
+      </div><!-- /lesson-content -->
+
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="f4-2-maquinas-turing.html">← F4.2 Máquinas de Turing</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico F4</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 3 de 3 ✓</div>
+        </div>
+        <a class="btn-nav next" href="trilhas.html">Voltar às trilhas →</a>
+      </div>
+    </div><!-- /lesson-area -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ─── SIDEBAR ───
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){
+  if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}
+  const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);
+  localStorage.setItem('sb-state',c?'collapsed':'expanded');
+}
+
+// ─── SECTION NAV ───
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+
+// ─── DETAILS TOGGLE ───
+function toggleDetails(trigger){
+  const content=trigger.parentElement.querySelector('.dt-content');
+  const isOpen=content.classList.toggle('show');
+  trigger.classList.toggle('open',isOpen);
+}
+
+// ─── SAT DEMO ───
+// Formula: (x1 ∨ ¬x2 ∨ x3) ∧ (¬x1 ∨ x2) ∧ (¬x2 ∨ ¬x3) ∧ (x1 ∨ x3)
+// Each clause is array of literals; literal = (varIndex, negated)
+const SAT_CLAUSES = [
+  [[0,false],[1,true],[2,false]],   // x1 ∨ ¬x2 ∨ x3
+  [[0,true],[1,false]],              // ¬x1 ∨ x2
+  [[1,true],[2,true]],               // ¬x2 ∨ ¬x3
+  [[0,false],[2,false]],             // x1 ∨ x3
+];
+const SAT_CLAUSE_TEXTS = [
+  '(x₁ ∨ ¬x₂ ∨ x₃)',
+  '(¬x₁ ∨ x₂)',
+  '(¬x₂ ∨ ¬x₃)',
+  '(x₁ ∨ x₃)',
+];
+
+let satVars = [false, false, false];
+
+function satToggle(idx, btn){
+  satVars[idx] = !satVars[idx];
+  // Update toggle UI
+  const opts = btn.querySelectorAll('.opt');
+  opts[0].classList.toggle('active', !satVars[idx]);
+  opts[1].classList.toggle('active', satVars[idx]);
+  satEvaluate();
+}
+
+function evalLit(lit){
+  const [idx, neg] = lit;
+  const val = satVars[idx];
+  return neg ? !val : val;
+}
+
+function satEvaluate(){
+  const clausesEl = document.getElementById('satClauses');
+  let allSat = true;
+  let html = '';
+  for(let i=0;i<SAT_CLAUSES.length;i++){
+    const clause = SAT_CLAUSES[i];
+    const isSat = clause.some(evalLit);
+    if(!isSat) allSat = false;
+    const cls = isSat ? 'sat-true' : 'sat-false';
+    const symbol = isSat ? 'T ✓' : 'F ✗';
+    html += `<div class="sat-clause ${cls}"><span>${SAT_CLAUSE_TEXTS[i]}</span><span class="sat-clause-result">${symbol}</span></div>`;
+  }
+  clausesEl.innerHTML = html;
+
+  const result = document.getElementById('satResult');
+  if(allSat){
+    result.className = 'sat-result sat';
+    result.innerHTML = '✓ SATISFEITO — fórmula é true. Você encontrou um certificado.';
+  } else {
+    result.className = 'sat-result unsat';
+    result.innerHTML = '✗ Não satisfaz — pelo menos uma cláusula é false. Tente outra atribuição.';
+  }
+}
+
+// Initial render
+satEvaluate();
+
+// ─── QUIZ ───
+const QUIZ = {
+  q1: {
+    correct: 'C',
+    ok: 'Correto! NP é definido como o conjunto dos problemas com verificador polinomial — equivalentemente, decidíveis por uma MT não-determinística em tempo polinomial. As duas formulações são equivalentes (mostrado na seção 5).',
+    why: {
+      A: 'Erro clássico — "NP" não significa "não polinomial". NP significa "Não-determinístico Polinomial". P está contido em NP, então muitos problemas em NP são polinomiais.',
+      B: 'Falso. NP não é definido em termos de tempo exponencial. Tempo exponencial define a classe EXP, que é maior que NP. Há problemas em NP com algoritmos polinomiais (todos os problemas em P, por exemplo).',
+      D: 'Falso. NP é uma classe de problemas decidíveis (subclasse das decidíveis). Indecidíveis (como HALT) estão fora de NP por definição — NP exige verificação polinomial, que pressupõe decidibilidade.',
+    }
+  },
+  q2: {
+    correct: 'B',
+    ok: 'Correto! P ⊆ NP é teorema demonstrado, sem suposições. Para todo L ∈ P, basta usar o solver polinomial como verificador (ignorando o certificado). O que está em aberto é se a inclusão é estrita (P ⊊ NP) ou se P = NP.',
+    why: {
+      A: 'Quase certo, mas se P = NP fosse verdade, seria igualdade, não inclusão estrita. Como P vs NP está em aberto, não podemos afirmar P ⊊ NP. P ⊆ NP é o que sabemos com certeza.',
+      C: 'Não sabemos se NP ⊆ P. Isso seria equivalente a P = NP (já que P ⊆ NP sempre vale). É exatamente o que está em aberto há 50 anos. Quem provar isso ganha US$ 1 milhão.',
+      D: 'Falso — P e NP têm interseção (todo problema em P está em NP). Disjuntos significaria nenhum elemento em comum, o oposto da realidade.',
+    }
+  },
+  q3: {
+    correct: 'A',
+    ok: 'Correto! Esta é a propriedade fundamental das reduções polinomiais. A ≤ₚ B significa que conseguimos resolver A usando um solver de B com transformação polinomial. Se B tem solver polinomial, A herda eficiência: f(w) em poly + solver de B em poly = poly total.',
+    why: {
+      B: 'Direção errada. "A ≤ₚ B" significa A é "no máximo tão difícil" quanto B — não diz nada sobre B ser fácil. Saber que A ∈ P não te ajuda a resolver B (B pode ser muito mais difícil).',
+      C: 'Direção errada novamente. Se A é NPC, A é "muito difícil". Reduzir A a B não faz B ser difícil — é o inverso: para mostrar B difícil, reduzimos algo difícil A B. Ou seja, queremos C ≤ₚ B (com C difícil), não A ≤ₚ B.',
+      D: 'Sem relação. Reduções polinomiais aplicam-se a problemas decidíveis. Se B é decidível, A também é (mesmo argumento de A): use solver de B + transformação f. A indecidibilidade não entra aqui.',
+    }
+  },
+  q4: {
+    correct: 'B',
+    ok: 'Correto! Esta é a receita prática para provar NP-completude. (1) Mostre que B está em NP. (2) Pegue algum problema C que já se sabe NP-completo (ex: SAT, 3-SAT). (3) Mostre C ≤ₚ B. Por transitividade da redução, todos os problemas em NP reduzem a B via C. Logo B é NP-difícil. Junto com B ∈ NP, B é NP-completo.',
+    why: {
+      A: 'Insuficiente. Se C ∈ NP, isso só mostra que B é "no máximo tão difícil" quanto algum C de NP — não que B é tão difícil quanto TUDO em NP. Para concluir NP-difícil, C precisa ser NPC (ou NP-difícil) — só assim a transitividade dá o resultado.',
+      C: 'Direção errada da redução. Para mostrar B é difícil, reduza algo difícil A B (C ≤ₚ B). Mostrar B ≤ₚ SAT só prova que B é "no máximo tão difícil" quanto SAT, e como SAT está em NP, isso só mostra B ∈ NP — algo que já estava na lista.',
+      D: 'Não basta. "B ∉ P" assume que P ≠ NP — circular. Mais ainda: há problemas em NP que não estão em P e não são NP-completos (existem problemas "intermediários" se P ≠ NP, pelo Teorema de Ladner). NP-completude exige redução, não apenas ausência de algoritmo polinomial.',
+    }
+  },
+  q5: {
+    correct: 'B',
+    ok: 'Correto! 2-SAT (cláusulas com no máximo 2 literais) está em P — algoritmo de implicações em tempo linear. 3-SAT é NP-completo — primeiro derivado de SAT por Cook-Levin. Esta é uma das fronteiras P/NPC mais comentadas no POSCOMP.',
+    why: {
+      A: 'Invertido. Caminho Euleriano (visita cada aresta uma vez) está em P — basta verificar paridade dos graus. Caminho Hamiltoniano (visita cada vértice uma vez) é NPC. A confusão é comum: dois conceitos parecidos com classes opostas.',
+      C: 'Invertido. 2-coloração equivale a verificar se o grafo é bipartido — está em P (BFS resolve). 3-coloração é NPC. A regra geral: para grafos, 2 cores é fácil, 3 ou mais é difícil.',
+      D: 'Invertido. Programação Linear contínua (LP) está em P (Khachiyan, 1979 / Karmarkar, 1984). Programação Linear Inteira (ILP) — restringir variáveis a inteiros — é NP-completo. A restrição de "ser inteiro" é o que torna o problema difícil.',
+    }
+  },
+  q6: {
+    correct: 'A',
+    ok: 'Correto! Apenas I é verdadeira. (I) Se algum problema NPC está em P, então P = NP — argumento direto via reduções. (II) Errada — HALT é indecidível, e NP-completos são todos decidíveis (com certificado polinomial). HALT é NP-difícil mas não NP-completo. (III) Errada — NP-difícil só exige "tudo de NP reduz a ele"; não exige estar em NP. Todo NPC é NP-difícil, mas a recíproca não vale.',
+    why: {
+      B: 'Errado em III. Nem todo NP-difícil está em NP. HALT é exemplo: é NP-difícil (pode-se mostrar reduzindo SAT a HALT) mas é indecidível, então não tem nem verificador (muito menos polinomial). NP-difícil é a fronteira "inferior", NP é o "limite superior" — e podem não coincidir.',
+      C: 'Errado em II. HALT não é NP-completo. NPC exige (a) NP-difícil — que HALT é — E (b) estar em NP — que HALT não está, por ser indecidível. Confundir NP-difícil com NPC é erro frequente.',
+      D: 'Erro em II e III pelos motivos acima. Apenas I é verdadeira.',
+    }
+  },
+};
+
+function ansQ(el){
+  const qid = el.getAttribute('data-qid');
+  const chosen = el.getAttribute('data-opt');
+  const box = document.getElementById(qid);
+  if(box.dataset.answered) return;
+  box.dataset.answered = '1';
+
+  const correct = QUIZ[qid].correct;
+  const ok = chosen === correct;
+
+  box.querySelectorAll('.quiz-option').forEach(o=>{
+    o.style.pointerEvents = 'none';
+    if(o.getAttribute('data-opt') === correct) o.classList.add('correct');
+  });
+  if(!ok) el.classList.add('wrong');
+
+  const fb = document.getElementById(qid + '-fb');
+  let html = '';
+  if(ok){
+    html = '<strong>✓ Correto!</strong> ' + QUIZ[qid].ok;
+    fb.className = 'quiz-feedback show ok';
+  } else {
+    const whyWrong = QUIZ[qid].why[chosen] || '';
+    html = '<strong>✗ Incorreto.</strong><br><br>'
+      + '<strong>Por que ' + chosen + ' está errada:</strong> ' + whyWrong + '<br><br>'
+      + '<strong>Por que ' + correct + ' está certa:</strong> ' + QUIZ[qid].ok;
+    fb.className = 'quiz-feedback show fail';
+  }
+  fb.innerHTML = html;
+}
+</script>
+</body>
+</html>
