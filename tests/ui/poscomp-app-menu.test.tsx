@@ -92,11 +92,14 @@ describe('shell de estudo com navegação por rotas', () => {
     );
 
     const sidebar = screen.getByTestId('study-sidebar');
+    const shell = sidebar.closest('.study-shell');
     const toggle = screen.getByRole('button', { name: /alternar menu lateral/i });
 
     expect(sidebar).not.toHaveClass('collapsed');
+    expect(shell).not.toHaveClass('collapsed');
     await userEvent.click(toggle);
     expect(sidebar).toHaveClass('collapsed');
+    expect(shell).toHaveClass('collapsed');
     expect(window.localStorage.getItem('study:sidebar')).toBe('collapsed');
   });
 

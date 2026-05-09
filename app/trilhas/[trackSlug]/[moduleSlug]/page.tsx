@@ -7,48 +7,37 @@ import { ModulePage } from '@/components/study/module-page';
 import { StudyShell } from '@/components/study/study-shell';
 
 interface ModuleRouteProps {
-  params: Promise<{ moduleSlug: string }>;
+  params: Promise<{ trackSlug: string; moduleSlug: string }>;
 }
 
 const LESSON_MODULE_SLUGS = new Set([
-  'modulo-01',
-  'modulo-02',
-  'modulo-03',
-  'modulo-04',
-  'modulo-05',
-  'modulo-06',
-  'modulo-07',
-  'modulo-08',
-  'modulo-09',
+  'f1-1-analise-notacoes',
+  'f1-2-notacoes-assintoticas',
+  'f2-1-estruturas-lineares',
+  'f2-2-arvores-hashing',
+  'f2-3-grafos',
+  'f3-1-paradigmas',
+  'f4-1-linguagens-formais',
 ]);
 
-const CANONICAL_MODULE_TITLES: Record<string, string> = {
-  'modulo-01': 'Fundamentos Matemáticos',
-  'modulo-02': 'Autômato Finito Determinístico',
-  'modulo-03': 'AFN e ε-Transições',
-  'modulo-04': 'Operações e Fechamento',
-  'modulo-05': 'Minimização de AFD',
-  'modulo-06': 'Expressões Regulares',
-  'modulo-07': 'GLC e Autômatos de Pilha',
-  'modulo-08': 'Bombeamento, Chomsky e Computabilidade',
-  'modulo-09': 'P, NP, NP-Completo e Teorema de Gödel',
-};
-
-export default async function TrilhasF6ModuleRoutePage({ params }: ModuleRouteProps) {
-  const { moduleSlug } = await params;
+export default async function TrilhasTrackModuleRoutePage({ params }: ModuleRouteProps) {
+  const { trackSlug, moduleSlug } = await params;
   const moduleData = getStudyModule(moduleSlug);
 
   if (!moduleData) {
     notFound();
   }
 
+  if (moduleData.trackCode.toLowerCase() !== trackSlug.toLowerCase()) {
+    notFound();
+  }
+
   const viewer = await getServerViewer();
   const isImportedLesson = LESSON_MODULE_SLUGS.has(moduleSlug);
-  const canonicalModuleTitle = CANONICAL_MODULE_TITLES[moduleSlug] || moduleData.title;
   const trackTitle =
     getStudyTrackCards().find((track) => track.code === moduleData.trackCode)?.title ||
     `Trilha ${moduleData.trackCode}`;
-  const moduleLabel = `Módulo ${String(moduleData.order).padStart(2, '0')} — ${canonicalModuleTitle}`;
+  const moduleLabel = `Módulo ${String(moduleData.order).padStart(2, '0')} — ${moduleData.title}`;
 
   return (
     <StudyRouteGuard>

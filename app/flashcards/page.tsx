@@ -1,14 +1,10 @@
-import { auth } from '@clerk/nextjs/server';
-
-import { isClerkEnabledServer } from '@/lib/auth-config';
+import { getServerViewer } from '@/lib/server-viewer';
 import { StudyRouteGuard } from '@/components/auth/study-route-guard';
 import { FlashcardsPanel } from '@/components/modules/flashcards-panel';
 import { StudyShell } from '@/components/study/study-shell';
 
 export default async function FlashcardsRoutePage() {
-  const userId = isClerkEnabledServer()
-    ? (await auth()).userId ?? undefined
-    : 'local-dev-user';
+  const viewer = await getServerViewer();
 
   return (
     <StudyRouteGuard>
@@ -17,8 +13,9 @@ export default async function FlashcardsRoutePage() {
         pageTitle="Flashcards"
         pageSubtitle="Revisão com repetição espaçada e dificuldade adaptativa"
         breadcrumb={['App', 'Flashcards']}
+        viewer={viewer}
       >
-        <FlashcardsPanel userId={userId} />
+        <FlashcardsPanel userId={viewer.userId} />
       </StudyShell>
     </StudyRouteGuard>
   );

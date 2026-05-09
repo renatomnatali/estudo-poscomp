@@ -87,6 +87,10 @@ function addDays(date: Date, days: number): Date {
   return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 }
 
+function toDateKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
 function defaultProgress(now: Date): ProgressState {
   return {
     easeFactor: 2.5,
@@ -524,4 +528,47 @@ export async function getFlashcardProgressSummary(userId: string): Promise<Flash
     masteredCount,
     reviewedToday,
   };
+}
+
+export async function listFlashcardReviewActivity(userId: string, days = 28): Promise<Array<{ date: string; count: number }>> {
+  const safeDays = Math.max(1, Math.floor(days));
+  const start = startOfToday();
+  start.setDate(start.getDate() - (safeDays - 1));
+
+  if (process.env.DATABASE_URL) {
+    try {
+      const rows = await db.flashcardReviewEvent.findMany({
+        where: {
+          userId,
+          reviewedAt: { gte: start },
+        },
+        select: { reviewedAt: true },
+        orderBy: [{ reviewedAt: 'desc' }],
+      });
+
+      const counts = new Map<string, number>();
+      rows.forEach((row) => {
+        const key = toDateKey(row.reviewedAt);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      });
+
+      return [...counts.entries()]
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => b.date.localeCompare(a.date));
+    } catch {
+      // fallback em memória
+    }
+  }
+
+  const counts = new Map<string, number>();
+  memoryReviewEvents.forEach((event) => {
+    if (event.userId !== userId) return;
+    if (event.reviewedAt < start) return;
+    const key = toDateKey(event.reviewedAt);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  });
+
+  return [...counts.entries()]
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => b.date.localeCompare(a.date));
 }

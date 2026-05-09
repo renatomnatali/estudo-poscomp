@@ -5,15 +5,16 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { authSpy } = vi.hoisted(() => ({
-  authSpy: vi.fn(async () => ({ userId: 'user-clerk-1' })),
+  authSpy: vi.fn(async () => ({
+    userId: 'user-clerk-1',
+    email: 'renatomnatali@gmail.com',
+    displayName: 'Renato Natali',
+    isPremium: true,
+  })),
 }));
 
-vi.mock('@/lib/auth-config', () => ({
-  isClerkEnabledServer: () => true,
-}));
-
-vi.mock('@clerk/nextjs/server', () => ({
-  auth: authSpy,
+vi.mock('@/lib/server-viewer', () => ({
+  getServerViewer: authSpy,
 }));
 
 vi.mock('@/components/auth/study-route-guard', () => ({
