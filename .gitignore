@@ -38,3 +38,6 @@ next-env.d.ts
 # OCR / ingest artifacts
 *.traineddata
 docs/Provas/.tmp-*
+
+# Claude Code local context (worktrees, plans, agents, settings, transcripts)
+.claude/
