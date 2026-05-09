@@ -121,6 +121,17 @@ Auditoria 1:1: cada sub-task ou foi entregue ou tem justificativa registrada. En
 
 Ao criar **qualquer** página em Tasks (tasks operacionais, épicos `[EPIC]`), a propriedade `Product` deve ter relação para a página do produto **aprovado.xyz** (`https://www.notion.so/aprovado-xyz-3590d9578db3807ca14dc330d23458eb`). Sem `Product` setado = órfã → red flag em review.
 
+**Regra 11 — Anatomia mínima de feature/épico novo no Notion.**
+
+Ao criar nova entry em **Feature Registry** ou novo **épico** em Tasks (`[EPIC]`), preencher no body os 4 blocos:
+
+1. **Por quê / Theme** — link explícito ao Theme que esta entrega realiza. Se for tech-only (sem user story direto), `⚙ Tech-only — habilita [feature/épico X]` apontando ao trabalho de produto que destrava.
+2. **Story** — uma frase no formato "Como [persona], quero [ação], para [valor]". Persona referencia database `Personas`. Tech-only OK com callout do item 1.
+3. **Goals** — 1-3 outcomes mensuráveis que definem sucesso. Cada um com métrica observável (não "melhorar UX" — sim "tempo médio para concluir simulado cai abaixo de 4h em 80% dos casos").
+4. **Anti-goals / Out of scope** — o que esta entrega **NÃO** faz. Evita feature creep e clarifica fronteiras antes da execução.
+
+Sub-tasks dentro do épico podem ser chore técnico sem story própria, mas o épico pai precisa ter user story (ou justificativa tech-only documentada). Entry sem os 4 blocos = órfã → red flag em review.
+
 ## Fluxo de PR (OBRIGATÓRIO)
 
 1. Criar branch e fazer commits.
