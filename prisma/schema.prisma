@@ -44,6 +44,35 @@ enum FlashcardRating {
   easy
 }
 
+enum SimuladoMode {
+  partial
+  full
+  area
+}
+
+enum SubscriptionPlan {
+  free
+  premium
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+  expired
+}
+
+enum AccessGrantScope {
+  premium_access
+}
+
+enum AccessGrantType {
+  vip
+  promo
+  manual
+}
+
 model Question {
   id                 String           @id
   year               Int
@@ -273,4 +302,59 @@ model FlashcardReviewEvent {
 
   @@index([userId, reviewedAt])
   @@index([flashcardId])
+}
+
+model UserSimuladoAttempt {
+  id                    String       @id @default(cuid())
+  userId                String
+  mode                  SimuladoMode
+  total                 Int
+  correct               Int
+  accuracy              Float
+  durationSeconds       Int?
+  recommendedNextTopics Json
+  createdAt             DateTime     @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model UserSubscription {
+  id                     String             @id @default(cuid())
+  userId                 String?
+  emailNormalized        String?
+  provider               String
+  providerSubscriptionId String?
+  planCode               SubscriptionPlan   @default(free)
+  status                 SubscriptionStatus
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  metadata               Json?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  @@unique([provider, providerSubscriptionId])
+  @@index([userId, status])
+  @@index([emailNormalized, status])
+  @@index([status, currentPeriodEnd])
+}
+
+model UserAccessGrant {
+  id              String           @id @default(cuid())
+  userId          String?
+  emailNormalized String?
+  scope           AccessGrantScope @default(premium_access)
+  grantType       AccessGrantType  @default(vip)
+  startsAt        DateTime         @default(now())
+  endsAt          DateTime?
+  revokedAt       DateTime?
+  reason          String?
+  grantedBy       String?
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId, scope, revokedAt])
+  @@index([emailNormalized, scope, revokedAt])
+  @@index([scope, revokedAt, endsAt])
 }

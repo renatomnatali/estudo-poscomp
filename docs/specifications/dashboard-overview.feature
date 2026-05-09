@@ -10,6 +10,7 @@ Funcionalidade: Dashboard de estudo fiel ao mockup
     Quando o dashboard é carregado
     Então devo visualizar a saudação "Bom dia, Renato Natali"
     E devo visualizar o CTA "Continuar estudando"
+    E o nome exibido deve vir da sessão autenticada
 
   Cenário: Exibir hero de transição para próximo tópico
     Dado que estou no dashboard
@@ -22,6 +23,7 @@ Funcionalidade: Dashboard de estudo fiel ao mockup
     Quando os dados de resumo são carregados
     Então devo visualizar 4 cartões de estatísticas
     E devo visualizar os blocos "Módulos concluídos", "Currículo coberto", "Simulados realizados" e "Sequência de estudo"
+    E os valores devem refletir dados reais do usuário autenticado
 
   Cenário: Exibir grade com trilhas, atividade e widgets laterais
     Dado que estou no dashboard
@@ -31,3 +33,30 @@ Funcionalidade: Dashboard de estudo fiel ao mockup
     E devo visualizar o card "Cobertura por área"
     E devo visualizar o widget de flashcards com CTA "Revisar agora"
     E devo visualizar o card "Próximas ações"
+    E o heatmap deve usar atividade real das últimas 4 semanas
+
+  Cenário: Atualizar métricas após progresso de módulo
+    Dado que estou autenticado
+    E salvo progresso concluído em um módulo da trilha F6
+    Quando recarrego "/dashboard"
+    Então o card "Módulos concluídos" deve refletir o novo total
+
+  Cenário: Atualizar métricas após finalizar simulado
+    Dado que estou autenticado
+    E finalizo um simulado
+    Quando recarrego "/dashboard"
+    Então o card "Simulados realizados" deve incrementar
+
+  Cenário: Tratar erro de carregamento com retry
+    Dado que estou no dashboard
+    E ocorre falha ao carregar o resumo
+    Quando o erro é exibido
+    Então devo visualizar mensagem acionável em português
+    E devo visualizar ação "Tentar novamente"
+    E ao clicar em "Tentar novamente" o carregamento deve ser reexecutado
+
+  Cenário: Exigir sessão quando Clerk está habilitado
+    Dado que o Clerk está habilitado
+    E eu não estou autenticado
+    Quando consulto "GET /api/study/dashboard/summary"
+    Então devo receber status 401
