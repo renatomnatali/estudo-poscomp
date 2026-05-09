@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 import { StudyRouteGuard } from '@/components/auth/study-route-guard';
 import { AdminUsersPage } from '@/components/admin/admin-users-page';
 import { StudyShell } from '@/components/study/study-shell';
@@ -6,6 +8,10 @@ import { getServerViewer } from '@/lib/server-viewer';
 
 export default async function AdminUsersRoutePage() {
   const [viewer, admin] = await Promise.all([getServerViewer(), resolveAdminAccess()]);
+
+  if (!admin.allowed) {
+    redirect('/dashboard');
+  }
 
   return (
     <StudyRouteGuard>
@@ -20,16 +26,7 @@ export default async function AdminUsersRoutePage() {
         ]}
         viewer={viewer}
       >
-        {admin.allowed ? (
-          <AdminUsersPage />
-        ) : (
-          <section className="section-card">
-            <h2 className="text-lg font-semibold">Acesso restrito</h2>
-            <p className="mt-2 text-sm text-slate-600">
-              {admin.error || 'Você não possui permissão para visualizar o painel administrativo.'}
-            </p>
-          </section>
-        )}
+        <AdminUsersPage />
       </StudyShell>
     </StudyRouteGuard>
   );
