@@ -1,9 +1,8 @@
-import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { isClerkEnabledServer } from '@/lib/auth-config';
 import { resolveUserEntitlements } from '@/lib/entitlements';
 import { listQuestions } from '@/lib/questions-repo';
+import { resolveRouteIdentity } from '@/lib/route-identity';
 import type { MacroArea, Question, SimuladoMode } from '@/lib/types';
 
 const SESSION_CONFIG: Record<SimuladoMode, { questionCount: number; minutes: number; premium: boolean }> = {
@@ -13,58 +12,6 @@ const SESSION_CONFIG: Record<SimuladoMode, { questionCount: number; minutes: num
 };
 
 const VALID_MACRO_AREAS = new Set<MacroArea>(['fundamentos', 'matematica', 'tecnologia']);
-
-function getFallbackUserId(request: Request, payloadUserId?: unknown) {
-  const fromBody = String(payloadUserId || '').trim();
-  if (fromBody) return fromBody;
-
-  const { searchParams } = new URL(request.url);
-  const fromQuery = String(searchParams.get('userId') || '').trim();
-  if (fromQuery) return fromQuery;
-
-  const fromHeader = String(request.headers.get('x-user-id') || '').trim();
-  if (fromHeader) return fromHeader;
-
-  return 'local-dev-user';
-}
-
-function getFallbackEmail(request: Request, payloadEmail?: unknown) {
-  const fromBody = String(payloadEmail || '').trim();
-  if (fromBody) return fromBody;
-
-  const { searchParams } = new URL(request.url);
-  const fromQuery = String(searchParams.get('email') || '').trim();
-  if (fromQuery) return fromQuery;
-
-  const fromHeader = String(request.headers.get('x-user-email') || '').trim();
-  if (fromHeader) return fromHeader;
-
-  return process.env.DEV_USER_EMAIL || undefined;
-}
-
-async function resolveIdentity(
-  request: Request,
-  payloadUserId?: unknown,
-  payloadEmail?: unknown
-): Promise<{ userId?: string; email?: string }> {
-  if (isClerkEnabledServer()) {
-    const session = await auth();
-    if (!session.userId) return {};
-
-    const user = typeof currentUser === 'function' ? await currentUser().catch(() => null) : null;
-    const email =
-      user?.primaryEmailAddress?.emailAddress ||
-      user?.emailAddresses?.[0]?.emailAddress ||
-      undefined;
-
-    return { userId: session.userId, email };
-  }
-
-  return {
-    userId: getFallbackUserId(request, payloadUserId),
-    email: getFallbackEmail(request, payloadEmail),
-  };
-}
 
 function parseMode(value: unknown): SimuladoMode | null {
   const normalized = String(value || '').trim() as SimuladoMode;
@@ -93,9 +40,9 @@ export async function POST(request: NextRequest) {
   }
 
   const config = SESSION_CONFIG[mode];
-  const identity = await resolveIdentity(request, body?.userId, body?.email);
+  const identity = await resolveRouteIdentity(request, body?.userId, body?.email);
 
-  if (isClerkEnabledServer() && !identity.userId) {
+  if (!identity.userId) {
     return NextResponse.json(
       { error: 'Autenticação necessária para iniciar o simulado.' },
       { status: 401 }

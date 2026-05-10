@@ -1,80 +1,19 @@
-import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { isClerkEnabledServer } from '@/lib/auth-config';
 import { resolveUserEntitlements } from '@/lib/entitlements';
+import { resolveRouteIdentity } from '@/lib/route-identity';
 import { createSimuladoAttempt, listSimuladoAttempts } from '@/lib/simulado-attempts-repo';
 import type { SimuladoMode } from '@/lib/types';
 
 const VALID_MODES = new Set<SimuladoMode>(['partial', 'full', 'area']);
-
-function getFallbackUserId(request: Request, payloadUserId?: unknown) {
-  const fromBody = String(payloadUserId || '').trim();
-  if (fromBody) return fromBody;
-
-  const { searchParams } = new URL(request.url);
-  const fromQuery = String(searchParams.get('userId') || '').trim();
-  if (fromQuery) return fromQuery;
-
-  const fromHeader = String(request.headers.get('x-user-id') || '').trim();
-  if (fromHeader) return fromHeader;
-
-  return 'local-dev-user';
-}
-
-async function resolveUserId(request: Request, payloadUserId?: unknown): Promise<string | null> {
-  if (isClerkEnabledServer()) {
-    const session = await auth();
-    return session.userId ?? null;
-  }
-  return getFallbackUserId(request, payloadUserId);
-}
-
-function getFallbackEmail(request: Request, payloadEmail?: unknown) {
-  const fromBody = String(payloadEmail || '').trim();
-  if (fromBody) return fromBody;
-
-  const { searchParams } = new URL(request.url);
-  const fromQuery = String(searchParams.get('email') || '').trim();
-  if (fromQuery) return fromQuery;
-
-  const fromHeader = String(request.headers.get('x-user-email') || '').trim();
-  if (fromHeader) return fromHeader;
-
-  return process.env.DEV_USER_EMAIL || undefined;
-}
-
-async function resolveIdentity(
-  request: Request,
-  payloadUserId?: unknown,
-  payloadEmail?: unknown
-): Promise<{ userId?: string; email?: string }> {
-  if (isClerkEnabledServer()) {
-    const session = await auth();
-    if (!session.userId) return {};
-
-    const user = typeof currentUser === 'function' ? await currentUser().catch(() => null) : null;
-    const email =
-      user?.primaryEmailAddress?.emailAddress ||
-      user?.emailAddresses?.[0]?.emailAddress ||
-      undefined;
-
-    return { userId: session.userId, email };
-  }
-
-  return {
-    userId: getFallbackUserId(request, payloadUserId),
-    email: getFallbackEmail(request, payloadEmail),
-  };
-}
 
 function isValidNumber(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
 export async function GET(request: NextRequest) {
-  const userId = await resolveUserId(request);
-  if (!userId) {
+  const identity = await resolveRouteIdentity(request);
+  if (!identity.userId) {
     return NextResponse.json(
       { error: 'Autenticação necessária para consultar tentativas.' },
       { status: 401 }
@@ -82,7 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   const limit = request.nextUrl.searchParams.get('limit') || '5';
-  const payload = await listSimuladoAttempts({ userId, limit });
+  const payload = await listSimuladoAttempts({ userId: identity.userId, limit });
 
   return NextResponse.json(payload, {
     headers: {
@@ -93,9 +32,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
-  const userId = await resolveUserId(request, body?.userId);
+  const identity = await resolveRouteIdentity(request, body?.userId, body?.email);
 
-  if (!userId) {
+  if (!identity.userId) {
     return NextResponse.json(
       { error: 'Autenticação necessária para registrar tentativa.' },
       { status: 401 }
@@ -120,7 +59,6 @@ export async function POST(request: NextRequest) {
 
   const requiresPremium = mode === 'full' || mode === 'area';
   if (requiresPremium) {
-    const identity = await resolveIdentity(request, body?.userId, body?.email);
     const entitlements = await resolveUserEntitlements({
       userId: identity.userId,
       email: identity.email,
@@ -169,7 +107,7 @@ export async function POST(request: NextRequest) {
     : [];
 
   const created = await createSimuladoAttempt({
-    userId,
+    userId: identity.userId,
     mode,
     total,
     correct,
