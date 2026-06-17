@@ -321,3 +321,31 @@ export async function getTopicProgress(userId: string, topicSlug: string): Promi
 
   return memoryProgress.get(`${userId}:${topicSlug}`) ?? null;
 }
+
+export async function listTopicProgressByUser(userId: string): Promise<TopicProgress[]> {
+  if (process.env.DATABASE_URL) {
+    try {
+      const rows = await db.userTopicProgress.findMany({
+        where: { userId },
+        include: { topic: { select: { slug: true } } },
+        orderBy: [{ updatedAt: 'desc' }],
+      });
+
+      if (rows.length > 0) {
+        return rows.map((row) =>
+          mapProgressRecord(row.userId, row.topic.slug, row.status, row.score, row.updatedAt)
+        );
+      }
+    } catch {
+      // fallback em memória
+    }
+  }
+
+  const items: TopicProgress[] = [];
+  memoryProgress.forEach((value, key) => {
+    if (!key.startsWith(`${userId}:`)) return;
+    items.push(value);
+  });
+
+  return items.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}

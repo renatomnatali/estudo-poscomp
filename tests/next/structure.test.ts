@@ -9,6 +9,12 @@ function exists(rel: string) {
   return fs.existsSync(path.join(root, rel));
 }
 
+function readIfExists(rel: string) {
+  const filePath = path.join(root, rel);
+  if (!fs.existsSync(filePath)) return '';
+  return fs.readFileSync(filePath, 'utf8');
+}
+
 describe('estrutura Next App Router', () => {
   it('possui arquivos mínimos de app', () => {
     expect(exists('app/layout.tsx')).toBe(true);
@@ -29,9 +35,11 @@ describe('estrutura Next App Router', () => {
     expect(exists('app/dashboard/page.tsx')).toBe(true);
     expect(exists('app/trilhas/page.tsx')).toBe(true);
     expect(exists('app/trilhas/f6/[moduleSlug]/page.tsx')).toBe(true);
+    expect(exists('app/trilhas/[trackSlug]/[moduleSlug]/page.tsx')).toBe(true);
     expect(exists('app/flashcards/page.tsx')).toBe(true);
     expect(exists('app/simulado/page.tsx')).toBe(true);
     expect(exists('app/premium/page.tsx')).toBe(true);
+    expect(exists('app/admin/usuarios/page.tsx')).toBe(true);
   });
 
   it('possui rotas API da especificação de estudo', () => {
@@ -41,5 +49,18 @@ describe('estrutura Next App Router', () => {
     expect(exists('app/api/study/modules/[slug]/source/route.ts')).toBe(true);
     expect(exists('app/api/study/modules/[slug]/quiz/route.ts')).toBe(true);
     expect(exists('app/api/study/modules/[slug]/progress/route.ts')).toBe(true);
+    expect(exists('app/api/simulado/attempts/route.ts')).toBe(true);
+    expect(exists('app/api/simulado/session/route.ts')).toBe(true);
+    expect(exists('app/api/admin/users/route.ts')).toBe(true);
+    expect(exists('app/api/admin/users/vip/route.ts')).toBe(true);
+  });
+
+  it('possui middleware do Clerk para suportar auth() em runtime', () => {
+    expect(exists('middleware.ts')).toBe(true);
+
+    const middlewareContent = readIfExists('middleware.ts');
+    expect(middlewareContent).toContain('clerkMiddleware');
+    expect(middlewareContent).toContain('export const config');
+    expect(middlewareContent).toContain('matcher');
   });
 });

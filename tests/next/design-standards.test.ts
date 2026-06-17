@@ -23,4 +23,14 @@ describe('padrões de design', () => {
     expect(uiGuide).toContain('Botões (padrão oficial)');
     expect(uiGuide).toContain('Botões de ação usam formato semi-retangular');
   });
+
+  it('mantém estilos base para blocos importados do módulo F1.1', () => {
+    const globalsCss = read('app/globals.css');
+    expect(globalsCss).toContain('.module-import-body .notation-grid');
+    expect(globalsCss).toContain('.module-import-body .notation-card');
+    expect(globalsCss).toContain('.module-import-body .complexity-chart');
+    expect(globalsCss).toContain('.module-import-body .proof-step');
+    expect(globalsCss).toContain('.module-import-body .quiz-box');
+    expect(globalsCss).toContain('.module-import-body .summary-box');
+  });
 });
