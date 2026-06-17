@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F1.3 — Análise de Recorrências · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0A0F1E;--ink2:#1C2333;
+  --sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --amb:#F59E0B;--amb-bg:#FEF3C7;
+  --coral:#F04E37;--coral-bg:#FEE2E2;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;
+  --n300:#B8BDD8;--n400:#8A90B0;--n500:#5C6180;--n600:#3E4260;
+  --white:#FFFFFF;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;--r-pill:9999px;
+  --sh-xs:0 1px 2px rgba(10,15,30,.06);
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sh-md:0 4px 16px rgba(10,15,30,.09);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  --bg:#f0f6ff;--card:#ffffff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--sap)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));border-radius:var(--r-pill);width:12%}.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--sap-bg);color:var(--sap);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--sap);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:var(--amb-bg)}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}.sidebar.collapsed .sb-item-icon{width:22px;height:22px;font-size:1rem;margin:0}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sb-tooltip{position:absolute;left:calc(var(--sidebar-c) + 6px);top:50%;transform:translateY(-50%);background:var(--ink);color:white;font-size:.76rem;padding:4px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}.sidebar.collapsed .sb-item:hover .sb-tooltip{opacity:1}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--sap),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:50%;background:linear-gradient(90deg,var(--sap),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--n500)}.topbar-icon-btn:hover{background:var(--n100)}
+
+/* LESSON */
+.lesson-area{flex:1;overflow-y:auto}
+.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+
+/* HERO */
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#1a6bcc 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--r-pill);padding:3px 14px;font-family:var(--fm);font-size:.72rem;letter-spacing:1px;margin-bottom:.8rem}
+.hero-title{font-family:var(--fd);font-size:1.8rem;font-weight:800;margin-bottom:.5rem;position:relative;z-index:1}
+.hero-formula{font-family:var(--fm);font-size:1.1rem;background:rgba(255,255,255,.12);border-radius:var(--r-md);padding:.5rem 1.4rem;display:inline-block;margin:.6rem 0;letter-spacing:1px}
+.hero-sub{opacity:.8;font-size:.9rem;max-width:540px;margin:.4rem auto 0;position:relative;z-index:1}
+
+/* SECTION NAV */
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover{background:rgba(255,255,255,.15);color:white}.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+
+/* CONTENT */
+.lesson-content{max-width:900px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.3rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.4rem 0 .5rem}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.75}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--fm);font-size:.88rem}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0;font-size:.92rem;line-height:1.7}
+.callout{border-left:4px solid var(--accent);background:#e8f0fe;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem}.callout.warning{border-color:var(--accent2);background:#fff3e0}.callout.success{border-color:var(--green);background:#e8f5ee}.callout strong{color:var(--primary)}
+
+/* SYM DICT */
+.sym-dict{display:grid;gap:.5rem;margin:1rem 0}
+.sym-row{display:grid;grid-template-columns:90px 1fr;gap:1rem;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem}
+.sym-row.highlight{border-color:var(--accent);background:#f0f4ff}
+.sym-sym{font-family:Georgia,serif;font-size:1.2rem;color:var(--accent);text-align:center;line-height:1.4}
+.sym-body{font-size:.88rem;line-height:1.6}.sym-body strong{color:var(--primary)}
+.sym-body .eg{margin-top:.3rem;font-family:var(--fm);font-size:.82rem;background:var(--code-bg);padding:2px 8px;border-radius:4px;display:inline-block}
+
+/* PROOF STEPS */
+.proof-steps{margin:1rem 0}
+.proof-step{display:flex;gap:1rem;padding:.8rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:.4rem 0;font-size:.9rem;align-items:flex-start}
+.proof-step .ps-num{background:var(--accent);color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;font-family:var(--fm)}
+.proof-step .ps-body{line-height:1.6;flex:1}
+
+/* ANALOGY */
+.analogy{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+.analogy .side{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}
+.analogy .side h4{font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+
+/* FORMULA ANNOTATED */
+.formula-annotated{position:relative;background:var(--primary);color:white;border-radius:12px;padding:1.6rem 2rem 2rem;text-align:center;margin:1.5rem 0}
+.fa-title{font-size:.72rem;opacity:.6;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.fa-line{font-size:1.25rem;font-family:Georgia,serif;margin-bottom:1.2rem;line-height:1.8}
+.fa-ann{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.4rem}
+.fa-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:.25rem .7rem;font-size:.76rem;cursor:default}.fa-chip:hover{background:rgba(255,255,255,.2)}.fa-chip strong{color:#7ef0c0}
+
+/* ANIM BOX */
+.anim-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.5rem 0}
+.anim-box h4{color:var(--primary);font-size:.9rem;margin-bottom:.6rem}
+.anim-controls{display:flex;align-items:center;gap:.8rem;margin-top:.8rem;flex-wrap:wrap}
+.anim-btn{padding:.35rem .9rem;border-radius:var(--r-pill);border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:.8rem;font-family:var(--fb);color:var(--primary);font-weight:600}
+.anim-btn:hover,.anim-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.anim-legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.8rem;margin-top:.6rem}
+.leg-item{display:flex;align-items:center;gap:.4rem}
+.leg-dot{width:12px;height:4px;border-radius:2px;flex-shrink:0}
+
+/* EXPANSION BUILDER */
+.expansion-builder{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.2rem 0}
+.expansion-builder h4{color:var(--primary);font-size:.9rem;margin-bottom:.8rem}
+.exp-presets{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.exp-preset-btn{padding:.3rem .8rem;border:1px solid var(--border);border-radius:var(--r-pill);font-size:.8rem;font-family:var(--fm);cursor:pointer;background:var(--card);color:var(--primary);font-weight:600;transition:all .15s}
+.exp-preset-btn:hover,.exp-preset-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.exp-steps-container{min-height:280px}
+.exp-step{background:#0d1a36;border-radius:8px;padding:1rem 1.2rem;margin:.4rem 0;display:none;animation:fadeIn .25s ease}
+.exp-step.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.exp-step-label{font-family:var(--fm);font-size:.7rem;color:#7acdf0;text-transform:uppercase;letter-spacing:1px;margin-bottom:.3rem}
+.exp-step-math{font-family:Georgia,serif;font-size:1.1rem;color:white;margin-bottom:.3rem;line-height:1.6}
+.exp-step-explain{font-size:.83rem;color:#c8d4f0;line-height:1.5}
+.exp-step.highlight-step{background:#1a2d1a}
+.exp-step.highlight-step .exp-step-math{color:#7ef0a0}
+.exp-controls{display:flex;gap:.6rem;align-items:center;margin-top:.8rem;flex-wrap:wrap}
+.exp-counter{font-family:var(--fm);font-size:.8rem;color:var(--muted);margin-left:auto}
+
+/* TREE TABLE */
+.tree-table{width:100%;border-collapse:collapse;margin:.8rem 0;font-size:.9rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.tree-table th{background:var(--primary);color:white;padding:.55rem .9rem;text-align:left}
+.tree-table td{padding:.5rem .9rem;border-bottom:1px solid var(--border)}
+.tree-table tr:nth-child(even) td{background:#f5f8ff}
+.tree-table tr.total-row td{background:#fff3cd;font-weight:700;font-family:var(--fm)}
+
+/* MASTER THEOREM CARDS */
+.master-cases{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.2rem 0}
+.master-case{border-radius:12px;padding:1.2rem;text-align:center}
+.mc-1{background:#e8f0fe;border:2px solid var(--accent)}
+.mc-2{background:#fff3e0;border:2px solid var(--accent2)}
+.mc-3{background:#e8f5ee;border:2px solid var(--green)}
+.mc-num{font-family:var(--fd);font-size:1.6rem;font-weight:800;margin-bottom:.3rem}
+.mc-1 .mc-num{color:var(--accent)}.mc-2 .mc-num{color:var(--accent2)}.mc-3 .mc-num{color:var(--green)}
+.mc-title{font-weight:700;font-size:.85rem;margin-bottom:.4rem;color:var(--primary)}
+.mc-cond{font-family:var(--fm);font-size:.8rem;margin-bottom:.4rem;line-height:1.5}
+.mc-result{font-family:Georgia,serif;font-size:1rem;font-weight:700;margin-bottom:.3rem}
+.mc-1 .mc-result{color:var(--accent)}.mc-2 .mc-result{color:var(--accent2)}.mc-3 .mc-result{color:var(--green)}
+.mc-explain{font-size:.78rem;color:var(--muted);line-height:1.4}
+
+/* MASTER CALC */
+.master-calc{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.2rem 0}
+.master-calc h4{color:var(--primary);font-size:.9rem;margin-bottom:1rem}
+.mc-presets{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.mc-preset-btn{padding:.3rem .8rem;border:1px solid var(--border);border-radius:var(--r-pill);font-size:.78rem;font-family:var(--fm);cursor:pointer;background:var(--n50);color:var(--primary);font-weight:600;transition:all .15s}
+.mc-preset-btn:hover{background:var(--sap-bg);border-color:var(--accent);color:var(--accent)}
+.mc-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+.mc-field label{display:block;font-size:.78rem;font-weight:600;color:var(--primary);margin-bottom:.3rem}
+.mc-field input,.mc-field select{width:100%;padding:.45rem .6rem;border:1px solid var(--border);border-radius:var(--r-md);font-family:var(--fm);font-size:.9rem;background:var(--n50)}
+.mc-field input:focus,.mc-field select:focus{outline:none;border-color:var(--accent)}
+.mc-calc-btn{padding:.45rem 1.4rem;background:var(--accent);color:white;border:none;border-radius:var(--r-pill);cursor:pointer;font-size:.85rem;font-weight:700;font-family:var(--fb);margin-top:.2rem}
+.mc-calc-btn:hover{background:var(--primary)}
+.mc-result-box{background:#0d1a36;border-radius:10px;padding:1.2rem;margin-top:1rem;display:none}
+.mc-result-box.show{display:block}
+.mc-res-step{color:#c8d4f0;font-size:.86rem;line-height:1.7;margin-bottom:.3rem;font-family:var(--fm)}
+.mc-res-step span{color:#7acdf0}
+.mc-res-answer{margin-top:.6rem;padding:.7rem 1rem;border-radius:8px;font-size:.95rem;font-family:Georgia,serif;text-align:center;font-weight:700}
+.mc-ans-1{background:#1a2a4d;color:#7acdf0}
+.mc-ans-2{background:#2d1a00;color:#ffd580}
+.mc-ans-3{background:#1a2d1a;color:#7ef0a0}
+
+/* QUIZ */
+.quiz-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.5rem 0}
+.quiz-q{font-weight:600;color:var(--primary);margin-bottom:1rem;font-size:.95rem;line-height:1.5}
+.quiz-option{display:flex;align-items:center;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f8faff;margin:.4rem 0;font-size:.9rem}.quiz-option:hover{background:#e8f0fe;border-color:var(--accent)}
+.quiz-option.selected{background:#e8f0fe;border-color:var(--accent)}.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+.quiz-feedback{margin-top:.8rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;display:none}
+.quiz-feedback.show{display:block}.quiz-feedback.ok{background:#e8f5ee;color:#15803d;border:1px solid #86efac}.quiz-feedback.fail{background:#fde8e8;color:var(--red);border:1px solid #fca5a5}
+
+/* SUMMARY */
+.summary-box{background:var(--primary);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}
+.summary-box h3{color:white;margin-bottom:1rem;font-size:1.1rem}
+.summary-row{display:flex;gap:.5rem;margin:.4rem 0;align-items:flex-start;font-size:.9rem}
+.summary-row::before{content:'✓';color:#7ef0a0;flex-shrink:0;font-weight:700}
+.ref-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.88rem;border-radius:10px;overflow:hidden}
+.ref-table th{background:rgba(255,255,255,.12);padding:.5rem .9rem;text-align:left;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px}
+.ref-table td{padding:.5rem .9rem;border-bottom:1px solid rgba(255,255,255,.08);font-family:var(--fm);font-size:.84rem}
+.ref-table tr:last-child td{border-bottom:none}
+
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05)}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--sap),var(--em));width:100%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}.btn-nav:hover{background:var(--n100);color:var(--ink)}
+.btn-nav.next{background:var(--sap);color:white;border-color:var(--sap)}.btn-nav.next:hover{background:var(--sap-d)}
+
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .master-cases{grid-template-columns:1fr}
+  .analogy{grid-template-columns:1fr}
+  .mc-inputs{grid-template-columns:1fr 1fr}
+  .lesson-content{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">12%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">3 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div>
+        <a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span><span class="sb-tooltip">Dashboard</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div>
+        <a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span><span class="sb-tooltip">Trilhas de Estudo</span></a>
+        <a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span><span class="sb-tooltip">Flashcards</span></a>
+      </div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div>
+        <a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span><span class="sb-tooltip">Simulado POSCOMP</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item" href="curriculo.html"><div class="sb-item-icon">📊</div><span class="sb-item-text">Currículo Completo</span><span class="sb-tooltip">Currículo Completo</span></a>
+      </div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section">
+        <a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span><span class="sb-tooltip">Seja Premium</span></a>
+      </div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Análise de Algoritmos</a><span class="sep">›</span>
+        <span class="current">F1.3 — Análise de Recorrências</span>
+      </div>
+      <div class="topbar-actions">
+        <a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a>
+      </div>
+    </header>
+
+    <div class="lesson-area" id="lessonArea">
+      <!-- HERO -->
+      <div class="lesson-header">
+        <div class="hero-tag">ANÁLISE DE ALGORITMOS · F1.3</div>
+        <div class="hero-title">Análise de Recorrências</div>
+        <div class="hero-formula">T(n) = a · T(n/b) + f(n)</div>
+        <div class="hero-sub">Como calcular o custo de algoritmos recursivos — dos três métodos ao Teorema Mestre</div>
+      </div>
+
+      <!-- SECTION NAV -->
+      <nav class="section-nav" id="sectionNav">
+        <a href="#motivacao">1. Por que recorrências?</a>
+        <a href="#equacoes">2. Anatomia</a>
+        <a href="#expansao">3. Método 1: Expansão</a>
+        <a href="#arvore">4. Método 2: Árvore</a>
+        <a href="#mestre">5. Método 3: Teorema Mestre</a>
+        <a href="#exemplos">6. Exemplos resolvidos</a>
+        <a href="#quiz">7. Quiz</a>
+        <a href="#resumo">8. Resumo</a>
+      </nav>
+
+      <div class="lesson-content">
+
+        <!-- §1 MOTIVAÇÃO -->
+        <section id="motivacao">
+          <h2><span class="num">1</span> Por que recorrências?</h2>
+
+          <p>Em F1.2 você aprendeu a calcular o custo de algoritmos iterativos — loops. A última regra deixou uma pergunta em aberto: <strong>e quando uma função chama a si mesma?</strong> As quatro regras de loops não conseguem responder. O custo não pode ser calculado diretamente porque ele depende do custo de chamadas menores, que dependem de chamadas ainda menores — e assim por diante.</p>
+
+          <p>Você já viu isso acontecer em F1.1: o Merge Sort divide o array ao meio, ordena cada metade, e junta. Para saber o custo total, você precisa saber o custo de ordenar a metade — que por sua vez depende do custo de ordenar um quarto, e assim sucessivamente. A análise de loops trava aqui.</p>
+
+          <div class="analogy">
+            <div class="side" style="border-left:4px solid var(--red)">
+              <h4 style="color:var(--red)">Por que loops não bastam?</h4>
+              <p style="font-size:.88rem">Para loops, você conta iterações: um loop de n vezes custa O(n). Mas em recursão, <strong>o número de "iterações" depende do tamanho do subproblema</strong> — e esse tamanho muda a cada chamada. A mesma função com n=8 chama a si mesma com n=4, que chama com n=2, que chama com n=1. Não dá para contar isso como um loop simples.</p>
+            </div>
+            <div class="side" style="border-left:4px solid var(--accent)">
+              <h4 style="color:var(--accent)">A ferramenta certa: equação de recorrência</h4>
+              <p style="font-size:.88rem">A solução é descrever o custo <em>em função de si mesmo</em>: "o custo para n elementos é igual ao custo para n/2 elementos, mais o trabalho de juntar os resultados". Essa é uma <strong>equação de recorrência</strong> — e resolver ela nos dá o Big-O. É isso que este módulo ensina.</p>
+            </div>
+          </div>
+
+          <h3>Três formas de resolver uma recorrência</h3>
+          <p>Este módulo apresenta três métodos em ordem crescente de poder. Você vai entender cada um antes de ver o próximo:</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0">
+            <div style="background:var(--card);border:2px solid var(--accent);border-radius:10px;padding:1rem;text-align:center">
+              <div style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:var(--accent)">1</div>
+              <div style="font-weight:700;font-size:.88rem;color:var(--primary);margin:.3rem 0">Expansão</div>
+              <div style="font-size:.8rem;color:var(--muted)">Abrir a equação passo a passo até enxergar o padrão.</div>
+            </div>
+            <div style="background:var(--card);border:2px solid var(--accent2);border-radius:10px;padding:1rem;text-align:center">
+              <div style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:var(--accent2)">2</div>
+              <div style="font-weight:700;font-size:.88rem;color:var(--primary);margin:.3rem 0">Árvore de recorrência</div>
+              <div style="font-size:.8rem;color:var(--muted)">Desenhar quem chama quem e somar o trabalho por nível.</div>
+            </div>
+            <div style="background:var(--card);border:2px solid var(--green);border-radius:10px;padding:1rem;text-align:center">
+              <div style="font-family:var(--fd);font-size:1.3rem;font-weight:800;color:var(--green)">3</div>
+              <div style="font-weight:700;font-size:.88rem;color:var(--primary);margin:.3rem 0">Teorema Mestre</div>
+              <div style="font-size:.8rem;color:var(--muted)">Fórmula fechada para uma classe ampla de recorrências.</div>
+            </div>
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 2):</strong> antes de qualquer método, você precisa saber ler uma equação de recorrência — identificar cada parte e entender o que ela representa. Vamos construir isso a partir de um algoritmo que você já conhece.
+          </div>
+        </section>
+
+        <!-- §2 ANATOMIA -->
+        <section id="equacoes">
+          <h2><span class="num">2</span> Anatomia de uma recorrência</h2>
+
+          <p>Vamos construir uma equação de recorrência do zero — a partir de um algoritmo que você já conhece, observando o que acontece em cada chamada.</p>
+
+          <h3>Passo 1 — observe o que o Merge Sort faz</h3>
+          <div class="card" style="padding:1.2rem">
+            <pre style="font-family:var(--fm);font-size:.85rem;color:var(--text);line-height:2;background:#f5f8ff;padding:.8rem;border-radius:6px">def merge_sort(arr):
+    if len(arr) <= 1:          <span style="color:var(--green)">← caso base: 1 elemento, custo O(1)</span>
+        return arr
+    meio = len(arr) // 2
+    esq = merge_sort(arr[:meio])   <span style="color:var(--accent)">← chama a si mesmo com n/2 elementos</span>
+    dir = merge_sort(arr[meio:])   <span style="color:var(--accent)">← chama a si mesmo com n/2 elementos</span>
+    return merge(esq, dir)         <span style="color:var(--accent2)">← junta as duas metades: custa n operações</span></pre>
+            <p style="margin-top:.8rem;font-size:.88rem">Para um array de <strong>n</strong> elementos, o Merge Sort faz três coisas:<br>
+            <strong>①</strong> Chama a si mesmo duas vezes — uma para cada metade (n/2 elementos cada)<br>
+            <strong>②</strong> Junta as duas metades ordenadas — isso custa n comparações<br>
+            <strong>③</strong> Para quando o array tem 1 elemento — custo constante</p>
+          </div>
+
+          <h3>Passo 2 — escreva o custo em português</h3>
+          <div class="callout">
+            <strong>"O custo de ordenar n elementos é igual a duas vezes o custo de ordenar n/2 elementos, mais n operações para juntar."</strong><br><br>
+            Essa frase é a recorrência. Agora só precisamos de uma notação para escrevê-la de forma compacta.
+          </div>
+
+          <h3>Passo 3 — o que cada símbolo representa</h3>
+          <p style="font-size:.88rem;color:var(--muted);margin-bottom:.6rem">Cada símbolo abaixo é a versão curta de uma parte da frase que você acabou de ler:</p>
+          <div class="sym-dict">
+            <div class="sym-row highlight">
+              <div class="sym-sym">T(n)</div>
+              <div class="sym-body"><strong>"O custo de processar n elementos"</strong> — é o que queremos descobrir. Você viu isso em português: "o custo de ordenar n elementos".<br>
+              <span class="eg">T(8) = custo de rodar merge_sort em um array de 8 elementos</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">2 · T(n/2)</div>
+              <div class="sym-body"><strong>"Duas vezes o custo de processar n/2 elementos"</strong> — as duas chamadas recursivas, cada uma com metade do array.<br>
+              <span class="eg">T(8) chama T(4) duas vezes → custo das chamadas = 2 · T(4)</span></div>
+            </div>
+            <div class="sym-row highlight">
+              <div class="sym-sym">+ n</div>
+              <div class="sym-body"><strong>"Mais o trabalho feito fora das chamadas recursivas"</strong> — o merge das duas metades, que custa n comparações. Esse é o custo local, independente da recursão.<br>
+              <span class="eg">T(8): o merge de dois arrays de 4 elementos exige até 8 comparações</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">T(1) = 1</div>
+              <div class="sym-body"><strong>"Quando n = 1, o custo é constante"</strong> — o caso base. Um array de 1 elemento já está ordenado, retorna imediatamente. Sem isso, a recorrência seria infinita.<br>
+              <span class="eg">merge_sort([x]) retorna [x] sem nenhuma comparação</span></div>
+            </div>
+          </div>
+
+          <h3>A equação completa</h3>
+          <div class="formula-annotated">
+            <div class="fa-title">Merge Sort — equação de recorrência</div>
+            <div class="fa-line">T(n) = 2 · T(n/2) + n</div>
+            <div class="fa-ann">
+              <div class="fa-chip"><strong>T(n)</strong> = custo total para n elementos</div>
+              <div class="fa-chip"><strong>2</strong> = duas chamadas recursivas</div>
+              <div class="fa-chip"><strong>T(n/2)</strong> = custo de cada chamada (metade do array)</div>
+              <div class="fa-chip"><strong>n</strong> = custo do merge (trabalho local)</div>
+              <div class="fa-chip">T(1) = 1 (caso base)</div>
+            </div>
+          </div>
+
+          <h3>A forma geral — outros algoritmos, mesmo padrão</h3>
+          <p>O Merge Sort é um caso específico da forma geral <code>T(n) = a·T(n/b) + f(n)</code>. Veja o que muda entre algoritmos:</p>
+          <div class="card" style="padding:1.2rem">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:.88rem">
+              <div style="background:#e8f0fe;border-radius:8px;padding:1rem">
+                <div style="font-family:var(--fm);font-weight:700;font-size:.95rem;color:var(--accent);margin-bottom:.6rem">Merge Sort</div>
+                <div style="font-family:Georgia,serif;font-size:1.05rem;margin-bottom:.5rem">T(n) = <span style="color:var(--accent2)">2</span>T(n/<span style="color:var(--accent2)">2</span>) + <span style="color:var(--green)">n</span></div>
+                <div style="color:var(--accent2);font-size:.8rem;margin-bottom:.2rem">● a=2: chama esquerda E direita</div>
+                <div style="color:var(--accent2);font-size:.8rem;margin-bottom:.2rem">● b=2: cada metade tem n/2</div>
+                <div style="color:var(--green);font-size:.8rem">● f(n)=n: merge custa n comparações</div>
+              </div>
+              <div style="background:#e8f5ee;border-radius:8px;padding:1rem">
+                <div style="font-family:var(--fm);font-weight:700;font-size:.95rem;color:var(--green);margin-bottom:.6rem">Busca Binária</div>
+                <div style="font-family:Georgia,serif;font-size:1.05rem;margin-bottom:.5rem">T(n) = <span style="color:var(--accent2)">1</span>T(n/<span style="color:var(--accent2)">2</span>) + <span style="color:var(--green)">1</span></div>
+                <div style="color:var(--accent2);font-size:.8rem;margin-bottom:.2rem">● a=1: só chama UMA metade</div>
+                <div style="color:var(--accent2);font-size:.8rem;margin-bottom:.2rem">● b=2: a metade relevante tem n/2</div>
+                <div style="color:var(--green);font-size:.8rem">● f(n)=1: uma comparação por nível</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout warning">
+            <strong>Erro comum — esquecer o caso base:</strong> T(n) = 2T(n/2) + n sem T(1) = 1 não está completa. Sem caso base, a equação se refere a si mesma infinitamente. Toda recorrência precisa de um ponto de parada.
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 3):</strong> você já sabe ler e escrever uma recorrência. Agora vamos resolver — o primeiro método é a expansão: abrir a equação passo a passo até o padrão aparecer.
+          </div>
+        </section>
+
+        <!-- §3 EXPANSÃO -->
+        <section id="expansao">
+          <h2><span class="num">3</span> Método 1: Expansão (Unrolling)</h2>
+
+          <p>Lembra da analogia dos juros compostos? "Quanto vale R$1.000 após 5 anos com 10% ao ano?" Você pode calcular assim:</p>
+          <div class="card" style="padding:1rem 1.2rem;margin-bottom:.8rem">
+            <div style="font-family:Georgia,serif;font-size:.95rem;line-height:2.2;color:var(--text)">
+              Ano 1: 1000 × 1.1 = 1100<br>
+              Ano 2: 1100 × 1.1 = 1210<br>
+              Ano 3: 1210 × 1.1 = 1331<br>
+              <span style="color:var(--muted)">...</span><br>
+              Após k anos: 1000 × 1.1ᵏ
+            </div>
+            <p style="font-size:.88rem;color:var(--muted);margin-top:.5rem">Você substitui o valor do ano anterior pela fórmula, repete, e depois de k passos reconhece o padrão: 1000 × 1.1ᵏ. Isso é expansão.</p>
+          </div>
+
+          <p><strong>Com recorrências é o mesmo processo:</strong> substituir T(n) pela sua própria definição, uma vez a cada passo. Depois de k substituições você reconhece um padrão geral — e então descobre qual k faz a recorrência "tocar o fundo" (chegar ao caso base T(1)).</p>
+
+          <h3>O que é "k" aqui?</h3>
+          <div class="callout">
+            <strong>k é o número de vezes que você abriu a equação.</strong> Depois de 1 abertura você tem T(n/2). Depois de 2 você tem T(n/4). Depois de k você tem T(n/2ᵏ). Quando n/2ᵏ = 1, você chegou ao caso base — esse é o k que interessa.
+          </div>
+
+          <h3>Veja a expansão passo a passo — escolha uma recorrência</h3>
+          <div class="expansion-builder" id="expansionBuilder">
+            <h4>Builder: expansão passo a passo</h4>
+            <div class="exp-presets">
+              <button class="exp-preset-btn active" onclick="setPreset('lin')">T(n) = T(n−1) + 1</button>
+              <button class="exp-preset-btn" onclick="setPreset('log')">T(n) = T(n/2) + 1</button>
+              <button class="exp-preset-btn" onclick="setPreset('nlogn')">T(n) = 2T(n/2) + n</button>
+              <button class="exp-preset-btn" onclick="setPreset('exp')">T(n) = 2T(n−1)</button>
+            </div>
+            <div class="exp-steps-container" id="expStepsContainer"></div>
+            <div class="exp-controls">
+              <button class="anim-btn" id="expNextBtn" onclick="expNext()">▶ Próximo passo</button>
+              <button class="anim-btn" onclick="expRunAll()">⏭ Ver tudo</button>
+              <button class="anim-btn" onclick="expReset()">↺ Reiniciar</button>
+              <span class="exp-counter" id="expCounter">Passo 0 / 6</span>
+            </div>
+          </div>
+
+          <h3>O que procurar em cada expansão</h3>
+          <div class="card">
+            <p>Em toda expansão você precisa encontrar duas coisas:</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;font-size:.88rem;margin:.5rem 0">
+              <div style="background:#e8f0fe;padding:.7rem;border-radius:6px">
+                <strong style="color:var(--accent)">1. A expressão geral após k aberturas</strong><br>
+                Uma fórmula que combina k com T no caso base. Ex: T(n/2ᵏ) + k, ou 2ᵏ · T(n/2ᵏ) + k·n.
+              </div>
+              <div style="background:#e8f5ee;padding:.7rem;border-radius:6px">
+                <strong style="color:var(--green)">2. O k que chega ao caso base</strong><br>
+                Quando n/2ᵏ = 1 → k = log₂n.<br>
+                Quando n − k = 1 → k = n − 1.<br>
+                Substitua esse k na expressão geral.
+              </div>
+            </div>
+            <p style="margin-top:.6rem;font-size:.85rem;color:var(--muted)">Com T(1) = 1 e o k correto, você tem o custo total em função de n.</p>
+          </div>
+
+          <div class="callout warning">
+            <strong>Quando usar expansão:</strong> funciona bem para recorrências simples (a = 1 ou 2, f(n) constante ou linear). Para recorrências com a ≥ 3 ou f(n) complexo, a álgebra fica pesada — prefira o Teorema Mestre.
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 4):</strong> a expansão é algébrica — você trabalha com fórmulas. O método da árvore de recorrência dá a mesma resposta de forma visual, mostrando exatamente quanto trabalho é feito em cada "camada" de chamadas recursivas.
+          </div>
+        </section>
+
+        <!-- §4 ÁRVORE DE RECORRÊNCIA -->
+        <section id="arvore">
+          <h2><span class="num">4</span> Método 2: Árvore de recorrência</h2>
+
+          <p>Antes de calcular qualquer coisa, observe o que acontece quando o Merge Sort executa em um array de 8 elementos. Cada chamada recursiva divide o problema — e se você desenhar quem chama quem, vai ver uma árvore se formando.</p>
+
+          <div class="callout">
+            <strong>Você já viu isso em F1.1.</strong> A animação do Merge Sort mostrava a árvore de chamadas se revelando nível a nível, com n operações de merge por nível. O método da árvore de recorrência é exatamente isso — mas agora vamos tornar explícito por que cada nível custa n, e por que são log₂(n) níveis.
+          </div>
+
+          <p><strong>O que é um "nível"?</strong> Nível 0 é a chamada original (n elementos). Nível 1 são as duas chamadas que ela faz (n/2 cada). Nível 2 são as quatro chamadas do nível 1 (n/4 cada). Cada vez que você desce um nível, os problemas ficam menores mas são mais numerosos.</p>
+
+          <h3>Como construir a árvore — T(n) = 2T(n/2) + n</h3>
+          <p style="font-size:.88rem;color:var(--muted);margin-bottom:.8rem">Cada linha da tabela abaixo corresponde a um nível da árvore. Use o botão "Próximo nível" para revelar nível a nível.</p>
+
+          <div class="anim-box">
+            <h4>Árvore de recorrência: T(n) = 2T(n/2) + n</h4>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:.8rem;flex-wrap:wrap">
+              <span style="font-size:.85rem;font-weight:600;color:var(--primary)">Tamanho inicial n =</span>
+              <div style="display:flex;gap:.4rem">
+                <button class="anim-btn" id="treeN4Btn" onclick="setTreeN(4)">4</button>
+                <button class="anim-btn active" id="treeN8Btn" onclick="setTreeN(8)">8</button>
+                <button class="anim-btn" id="treeN16Btn" onclick="setTreeN(16)">16</button>
+                <button class="anim-btn" id="treeN32Btn" onclick="setTreeN(32)">32</button>
+              </div>
+            </div>
+            <div id="treeTableContainer"></div>
+            <div class="anim-controls">
+              <button class="anim-btn" onclick="treeNext()">▶ Próximo nível</button>
+              <button class="anim-btn" onclick="treeRunAll()">⏭ Ver árvore completa</button>
+              <button class="anim-btn" onclick="treeReset()">↺ Reiniciar</button>
+            </div>
+            <div class="anim-legend" style="margin-top:.6rem">
+              <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div><span>Níveis de merge — cada um custa n no total</span></div>
+              <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div><span>Nível base — arrays de 1 elemento, custo 0</span></div>
+            </div>
+          </div>
+
+          <h3>A lógica do método em três passos</h3>
+          <div class="proof-steps">
+            <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">
+              <strong>Calcule o trabalho em cada nível.</strong><br>
+              Nível 0: 1 chamada com n elementos → merge custa n. Total do nível: <strong>n</strong>.<br>
+              Nível 1: 2 chamadas com n/2 elementos cada → merge custa n/2 por chamada → 2 × n/2 = <strong>n</strong>.<br>
+              Nível 2: 4 chamadas com n/4 elementos cada → merge custa n/4 por chamada → 4 × n/4 = <strong>n</strong>.<br>
+              <br>
+              O padrão: no nível k há 2ᵏ chamadas, cada uma com n/2ᵏ elementos, custando n/2ᵏ para o merge. Total do nível: 2ᵏ × n/2ᵏ = <strong>n</strong>. Constante por nível — essa é a chave do Merge Sort.
+            </div></div>
+            <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">
+              <strong>Conte quantos níveis há.</strong><br>
+              O array começa em n e é dividido por 2 a cada nível: n → n/2 → n/4 → … → 1.<br>
+              Quantas divisões por 2 até chegar em 1? Exatamente log₂(n). (Você viu isso em F1.2: log₂(n) é a quantidade de vezes que você divide n por 2 até chegar em 1.)<br>
+              No nível final (tamanho 1), não há merge — custo 0.
+            </div></div>
+            <div class="proof-step"><span class="ps-num">3</span><div class="ps-body">
+              <strong>Some o trabalho de todos os níveis.</strong><br>
+              São log₂(n) níveis de merge, cada um fazendo n trabalho. Total: <strong>n × log₂(n) = O(n log n)</strong>.<br>
+              <span style="font-size:.84rem;color:var(--muted)">Nota: a base do log não importa para Big-O — log₂ e log₁₀ diferem só por uma constante multiplicativa, que some no Big-O.</span>
+            </div></div>
+          </div>
+
+          <h3>Tabela padrão para qualquer árvore</h3>
+          <table class="tree-table">
+            <thead><tr><th>Nível</th><th>Nós</th><th>Tamanho por nó</th><th>Trabalho/nó</th><th>Trabalho total do nível</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>1</td><td>n</td><td>n</td><td>n</td></tr>
+              <tr><td>1</td><td>2</td><td>n/2</td><td>n/2</td><td>n</td></tr>
+              <tr><td>2</td><td>4</td><td>n/4</td><td>n/4</td><td>n</td></tr>
+              <tr><td>k</td><td>2ᵏ</td><td>n/2ᵏ</td><td>n/2ᵏ</td><td>n</td></tr>
+              <tr><td>log₂n</td><td>n</td><td>1</td><td>0 (base)</td><td>0</td></tr>
+              <tr class="total-row"><td colspan="4">Total: log₂(n) níveis × n por nível</td><td>Θ(n log n)</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout warning">
+            <strong>Quando a árvore fica assimétrica:</strong> o método funciona mesmo quando os subproblemas não são iguais (ex: T(n) = T(n/3) + T(2n/3) + n). Nesses casos o Teorema Mestre não se aplica diretamente, mas a árvore ainda pode ser somada — cada nível tem um custo diferente, e você soma uma série geométrica.
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 5):</strong> expansão e árvore são poderosos, mas trabalhosos para recorrências complexas. O Teorema Mestre é uma fórmula fechada — dados a, b e f(n), você identifica qual dos três casos se aplica e lê o resultado diretamente.
+          </div>
+        </section>
+
+        <!-- §5 TEOREMA MESTRE -->
+        <section id="mestre">
+          <h2><span class="num">5</span> Método 3: Teorema Mestre</h2>
+
+          <p>Expansão e árvore funcionam para qualquer recorrência, mas exigem cálculo manual. O Teorema Mestre é diferente: para uma família específica de recorrências da forma <code>T(n) = a·T(n/b) + f(n)</code>, ele dá o resultado direto — você identifica três números, consulta três casos, e lê a resposta.</p>
+
+          <p>A ideia central é uma competição: <strong>quem domina o custo total — o trabalho feito em cada nível (f(n)) ou o número de chamadas que explodem até as folhas?</strong> O Teorema Mestre mede exatamente isso.</p>
+
+          <h3>Dicionário dos símbolos do Teorema Mestre</h3>
+          <div class="sym-dict">
+            <div class="sym-row">
+              <div class="sym-sym">a ≥ 1</div>
+              <div class="sym-body"><strong>Número de subproblemas por chamada.</strong> Deve ser inteiro ≥ 1.<br>
+              <span class="eg">Merge Sort: a = 2 · Busca binária: a = 1 · Strassen: a = 7</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">b > 1</div>
+              <div class="sym-body"><strong>Fator de redução do tamanho.</strong> Cada subproblema tem tamanho n/b. Deve ser > 1 (se b = 1, o tamanho nunca diminui).<br>
+              <span class="eg">Merge Sort: b = 2 · Busca ternária: b = 3</span></div>
+            </div>
+            <div class="sym-row highlight">
+              <div class="sym-sym">log_b(a)</div>
+              <div class="sym-body"><strong>Quantos níveis a árvore tem até as folhas crescerem por fator a.</strong> É o expoente que aparece no custo total das folhas: se você tem a subproblemas por nível e log_b(n) níveis, o número total de folhas é a^(log_b(n)) — que por propriedade de logaritmos é igual a n^(log_b(a)).<br>
+              <span class="eg">a=2, b=2 → log₂(2) = 1 &nbsp;·&nbsp; a=4, b=2 → log₂(4) = 2 &nbsp;·&nbsp; a=1, b=2 → log₂(1) = 0</span></div>
+            </div>
+            <div class="sym-row highlight">
+              <div class="sym-sym">n^log_b(a)</div>
+              <div class="sym-body"><strong>Custo total das folhas da árvore de recursão.</strong> A árvore tem n^(log_b(a)) folhas; cada folha resolve um subproblema de tamanho O(1). Esse é o "peso" acumulado das chamadas recursivas — o adversário que f(n) precisa vencer.<br>
+              <span class="eg">Merge Sort: a=2, b=2 → n^(log₂2) = n¹ = n &nbsp;·&nbsp; Strassen: a=7, b=2 → n^(log₂7) ≈ n^2.81</span></div>
+            </div>
+            <div class="sym-row">
+              <div class="sym-sym">f(n)</div>
+              <div class="sym-body"><strong>Custo do trabalho local em cada chamada</strong> (além das recursões). É comparado com n^(log_b(a)) para decidir quem domina.<br>
+              <span class="eg">Merge Sort: f(n) = n · Busca binária: f(n) = 1 · Strassen: f(n) = n²</span></div>
+            </div>
+          </div>
+
+          <h3>A comparação central: f(n) vs n^log_b(a)</h3>
+          <div class="card" style="background:#0d1a36;border-color:#1a3a6b;color:white">
+            <p style="text-align:center;margin-bottom:1rem;font-size:.9rem;color:rgba(255,255,255,.7)">O TM pergunta: quem cresce mais rápido?</p>
+            <div style="display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;font-family:Georgia,serif;font-size:1.1rem">
+              <div style="text-align:center;padding:.8rem 1.2rem;background:#1a2a4d;border-radius:8px">
+                <div style="color:#7acdf0;font-size:.75rem;font-family:var(--fb);margin-bottom:.3rem">TRABALHO LOCAL</div>
+                <div>f(n)</div>
+              </div>
+              <div style="font-size:1.6rem;color:rgba(255,255,255,.5)">vs</div>
+              <div style="text-align:center;padding:.8rem 1.2rem;background:#2d1a4d;border-radius:8px">
+                <div style="color:#d4a0f0;font-size:.75rem;font-family:var(--fb);margin-bottom:.3rem">CUSTO DAS FOLHAS</div>
+                <div>n<sup>log<sub>b</sub>a</sup></div>
+              </div>
+            </div>
+            <p style="text-align:center;font-size:.85rem;color:rgba(255,255,255,.6);margin-top:.8rem">O resultado é dominado pelo maior dos dois. Se empatar, multiplica por log n.</p>
+          </div>
+
+          <h3>Antes dos três casos: o que é ε?</h3>
+          <div class="callout">
+            <strong>ε (épsilon) é um número positivo, por menor que seja.</strong> Nos casos 1 e 3, a condição não exige que f(n) seja <em>um pouco</em> menor ou maior que n^(log_b(a)) — exige que seja <em>polinomialmente</em> diferente. "f(n) = O(n^(log_b(a) − ε))" significa: f(n) cresce como n elevado a um expoente que é estritamente menor que log_b(a), mesmo que por uma margem ínfima. Isso exclui o caso de empate (que é o Caso 2). Na prática, você raramente calcula ε explicitamente — você compara os expoentes e verifica se há diferença polinomial.
+          </div>
+
+          <h3>Os três casos</h3>
+          <div class="master-cases">
+            <div class="master-case mc-1">
+              <div class="mc-num">1</div>
+              <div class="mc-title">Folhas dominam</div>
+              <div class="mc-cond">f(n) = O(n^(log_b(a) − ε))<br>para algum ε > 0</div>
+              <div class="mc-result">T(n) = Θ(n^log_b(a))</div>
+              <div class="mc-explain">f(n) cresce mais devagar que n^log_b(a). As folhas da árvore custam mais que a raiz. O custo é dominado pelas folhas.</div>
+            </div>
+            <div class="master-case mc-2">
+              <div class="mc-num">2</div>
+              <div class="mc-title">Empate</div>
+              <div class="mc-cond">f(n) = Θ(n^log_b(a))<br>(mesmo crescimento)</div>
+              <div class="mc-result">T(n) = Θ(n^log_b(a) · log n)</div>
+              <div class="mc-explain">f(n) e n^log_b(a) crescem igual. Cada um dos log n níveis contribui igualmente. O log n extra vem dos log n níveis somados.</div>
+            </div>
+            <div class="master-case mc-3">
+              <div class="mc-num">3</div>
+              <div class="mc-title">Raiz domina</div>
+              <div class="mc-cond">f(n) = Ω(n^(log_b(a) + ε))<br>para algum ε > 0 (+ cond. regularidade)</div>
+              <div class="mc-result">T(n) = Θ(f(n))</div>
+              <div class="mc-explain">f(n) cresce mais rápido que n^log_b(a). O trabalho da raiz domina. O custo total é determinado pela chamada de nível 0.</div>
+            </div>
+          </div>
+
+          <h3>Fórmula anotada</h3>
+          <div class="formula-annotated">
+            <div class="fa-title">Teorema Mestre — forma geral</div>
+            <div class="fa-line">T(n) = a · T(n/b) + f(n)</div>
+            <div class="fa-ann">
+              <div class="fa-chip"><strong>a</strong> = nº de subproblemas</div>
+              <div class="fa-chip"><strong>b</strong> = fator de redução</div>
+              <div class="fa-chip"><strong>f(n)</strong> = trabalho local</div>
+              <div class="fa-chip"><strong>n^log_b(a)</strong> = custo das folhas</div>
+              <div class="fa-chip">Caso 1: folhas &gt; raiz → <strong>Θ(n^log_b(a))</strong></div>
+              <div class="fa-chip">Caso 2: empate → <strong>Θ(n^log_b(a) · log n)</strong></div>
+              <div class="fa-chip">Caso 3: raiz &gt; folhas → <strong>Θ(f(n))</strong></div>
+            </div>
+          </div>
+
+          <h3>Calculadora do Teorema Mestre — experimente</h3>
+          <div class="master-calc" id="masterCalc">
+            <h4>Calcule o resultado de T(n) = a · T(n/b) + f(n)</h4>
+            <div class="mc-presets">
+              <span style="font-size:.78rem;font-weight:600;color:var(--muted);align-self:center">Presets:</span>
+              <button class="mc-preset-btn" onclick="setMasterPreset('merge')">Merge Sort</button>
+              <button class="mc-preset-btn" onclick="setMasterPreset('binary')">Busca Binária</button>
+              <button class="mc-preset-btn" onclick="setMasterPreset('strassen')">Strassen</button>
+              <button class="mc-preset-btn" onclick="setMasterPreset('caso1')">Caso 1 puro</button>
+              <button class="mc-preset-btn" onclick="setMasterPreset('caso2b')">Caso 2 variante</button>
+              <button class="mc-preset-btn" onclick="setMasterPreset('caso3')">Caso 3 puro</button>
+            </div>
+            <div class="mc-inputs">
+              <div class="mc-field">
+                <label>a (nº de subproblemas)</label>
+                <input type="number" id="mcA" value="2" min="1" max="20">
+              </div>
+              <div class="mc-field">
+                <label>b (fator de redução)</label>
+                <input type="number" id="mcB" value="2" min="2" max="20">
+              </div>
+              <div class="mc-field">
+                <label>f(n) — trabalho local</label>
+                <select id="mcF">
+                  <option value="0">O(1) — constante</option>
+                  <option value="0.5">O(√n) — raiz quadrada</option>
+                  <option value="1" selected>O(n) — linear</option>
+                  <option value="1.5">O(n^1.5)</option>
+                  <option value="2">O(n²) — quadrático</option>
+                  <option value="3">O(n³)</option>
+                </select>
+              </div>
+            </div>
+            <button class="mc-calc-btn" onclick="calcMaster()">Calcular →</button>
+            <div class="mc-result-box" id="mcResultBox"></div>
+          </div>
+
+          <div class="callout warning">
+            <strong>Quando o TM NÃO se aplica:</strong>
+            <br>● T(n) = T(n−1) + 1 — redução é n−1, não n/b. TM exige divisão por b > 1.
+            <br>● T(n) = T(n/2) + n·log n — f(n) não é polinomial puro; o log n extra impede a comparação direta (use expansão ou variante do TM Estendido).
+            <br>● T(n) = T(n/2) + T(n/3) + n — dois subproblemas de tamanhos diferentes; não tem a forma a·T(n/b).
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 6):</strong> você tem os três métodos. Agora vamos aplicá-los em quatro recorrências clássicas — do tipo que cai no POSCOMP — e ver quando cada método é a escolha mais eficiente.
+          </div>
+        </section>
+
+        <!-- §6 EXEMPLOS RESOLVIDOS -->
+        <section id="exemplos">
+          <h2><span class="num">6</span> Exemplos resolvidos</h2>
+
+          <h3>Exemplo A — Busca binária: T(n) = T(n/2) + 1</h3>
+          <div class="card">
+            <p style="font-weight:600;color:var(--primary);margin-bottom:.6rem">Dois métodos, mesma resposta.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:.88rem">
+              <div>
+                <p style="font-weight:600;color:var(--accent);margin-bottom:.4rem">Via Expansão:</p>
+                <div style="font-family:Georgia,serif;font-size:.95rem;line-height:2;color:var(--text)">
+                  T(n) = T(n/2) + 1 &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size:.8rem;color:var(--muted)">(abertura 1)</span><br>
+                  = T(n/4) + 1 + 1 &nbsp;<span style="font-size:.8rem;color:var(--muted)">(abertura 2: T(n/2) → T(n/4)+1)</span><br>
+                  = T(n/8) + 1 + 1 + 1 &nbsp;<span style="font-size:.8rem;color:var(--muted)">(abertura 3)</span><br>
+                  <span style="color:var(--muted)">...</span><br>
+                  = T(n/2ᵏ) + k &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size:.8rem;color:var(--muted)">(após k aberturas: k somas de 1)</span><br>
+                  Quando n/2ᵏ = 1 → k = log₂n<br>
+                  T(n) = T(1) + log₂n = <strong>1 + log₂n</strong>
+                </div>
+              </div>
+              <div>
+                <p style="font-weight:600;color:var(--green);margin-bottom:.4rem">Via Teorema Mestre:</p>
+                <div style="font-size:.88rem;line-height:2">
+                  a=1, b=2, f(n)=1<br>
+                  log_b(a) = log₂(1) = 0<br>
+                  n^0 = 1 = f(n)<br>
+                  → Caso 2 (empate)<br>
+                  T(n) = <strong>Θ(n⁰ · log n) = Θ(log n)</strong>
+                </div>
+              </div>
+            </div>
+            <div class="callout success" style="margin:.8rem 0 0">Resultado: <strong>O(log n)</strong> — confirmado pelos dois métodos. Para n = 1.000.000, isso significa ≈ 20 comparações.</div>
+          </div>
+
+          <h3>Exemplo B — Merge Sort: T(n) = 2T(n/2) + n</h3>
+          <div class="card">
+            <div class="proof-steps">
+              <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">Identificar: a=2, b=2, f(n)=n</div></div>
+              <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">Calcular: log₂(2) = 1, portanto n^log_b(a) = n¹ = n</div></div>
+              <div class="proof-step"><span class="ps-num">3</span><div class="ps-body">Comparar: f(n) = n = n^log_b(a) = n → <strong>Caso 2 (empate)</strong></div></div>
+              <div class="proof-step"><span class="ps-num">4</span><div class="ps-body">Aplicar: T(n) = Θ(n¹ · log n) = <strong>Θ(n log n)</strong></div></div>
+            </div>
+            <div class="callout success" style="margin:.6rem 0 0">Confirma o que você viu na árvore em F1.1: log₂(n) níveis × n por nível = n log n.</div>
+          </div>
+
+          <h3>Exemplo C — Recursão ingênua: T(n) = 2T(n−1)</h3>
+          <div class="card">
+            <p style="margin-bottom:.6rem;font-size:.88rem">Aparece no cálculo ingênuo de Fibonacci e na solução recursiva ingênua da Torre de Hanói.</p>
+            <p style="font-weight:600;color:var(--red);margin-bottom:.4rem">⚠ O TM não se aplica aqui — a redução é n−1, não n/b.</p>
+            <p style="margin-bottom:.4rem;font-weight:600;color:var(--accent)">Via Expansão:</p>
+            <div style="font-family:Georgia,serif;font-size:.95rem;line-height:2;background:#f5f8ff;padding:.8rem 1rem;border-radius:6px">
+              T(n) = 2T(n−1)<br>
+              = 2 · 2T(n−2) = 2²T(n−2)<br>
+              = 2³T(n−3)<br>
+              = 2ᵏT(n−k)<br>
+              Quando n−k=1 → k = n−1<br>
+              T(n) = 2^(n−1) · T(1) = 2^(n−1)
+            </div>
+            <div class="callout warning" style="margin:.8rem 0 0"><strong>Resultado: O(2ⁿ)</strong> — exponencial. Para n=50 isso é ~10¹⁵ operações. Por isso memoização/programação dinâmica é essencial para Fibonacci.</div>
+          </div>
+
+          <h3>Exemplo D — Insertion Sort pior caso: T(n) = T(n−1) + n</h3>
+          <div class="card">
+            <p style="margin-bottom:.6rem;font-size:.88rem">A cada chamada você insere 1 elemento na posição certa em uma lista já ordenada — no pior caso isso custa n comparações.</p>
+            <p style="font-weight:600;color:var(--red);margin-bottom:.4rem">⚠ TM não se aplica (redução n−1). Use expansão.</p>
+            <div style="font-family:Georgia,serif;font-size:.95rem;line-height:2;background:#f5f8ff;padding:.8rem 1rem;border-radius:6px">
+              T(n) = T(n−1) + n<br>
+              = T(n−2) + (n−1) + n<br>
+              = T(n−3) + (n−2) + (n−1) + n<br>
+              = T(1) + 2 + 3 + ... + n
+            </div>
+            <div class="callout" style="margin:.6rem 0">
+              <strong>Por que T(1) + 2 + 3 + ... + n?</strong> A cada abertura você descola um termo: primeiro n, depois n−1, depois n−2, até chegar em T(1) com os termos 2, 3, ..., n acumulados. É a soma dos inteiros de 2 até n, que é a mesma coisa que (soma de 1 a n) − 1.<br><br>
+              <strong>Soma de 1 a n</strong> = n(n+1)/2 &nbsp;(fórmula de Gauss: n termos, média (1+n)/2, produto = n(n+1)/2)<br>
+              Portanto: T(1) + 2 + 3 + ... + n = 1 + [n(n+1)/2 − 1] = <strong>n(n+1)/2</strong>
+            </div>
+            <div class="callout" style="margin:.8rem 0 0"><strong>Resultado: O(n²)</strong> — quadrático. Confirma o que se sabe sobre Insertion Sort no pior caso (array invertido).</div>
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 7):</strong> quatro exemplos resolvidos. Hora de testar se você sabe aplicar esses métodos sozinho — o quiz traz questões do estilo POSCOMP, com feedback detalhado por opção.
+          </div>
+        </section>
+
+        <!-- §7 QUIZ -->
+        <section id="quiz">
+          <h2><span class="num">7</span> Quiz</h2>
+          <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem">Seis questões — do simples ao nível POSCOMP. Ao errar, você verá por que sua opção está errada e por que a certa está certa.</p>
+
+          <!-- Q1 -->
+          <div class="quiz-box" id="q1">
+            <div class="quiz-q">1. Qual a complexidade de T(n) = T(n/2) + c, onde c é uma constante?</div>
+            <div class="quiz-option" onclick="quizAnswer('q1', this, 'A')">○ A) O(1)</div>
+            <div class="quiz-option" onclick="quizAnswer('q1', this, 'B')">○ B) O(log n)</div>
+            <div class="quiz-option" onclick="quizAnswer('q1', this, 'C')">○ C) O(n)</div>
+            <div class="quiz-option" onclick="quizAnswer('q1', this, 'D')">○ D) O(n log n)</div>
+            <div class="quiz-feedback" id="q1-fb"></div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="quiz-box" id="q2">
+            <div class="quiz-q">2. T(n) = 2T(n/2) + n corresponde a qual caso do Teorema Mestre?</div>
+            <div class="quiz-option" onclick="quizAnswer('q2', this, 'A')">○ A) Caso 1 — as folhas dominam</div>
+            <div class="quiz-option" onclick="quizAnswer('q2', this, 'B')">○ B) Caso 2 — empate entre raiz e folhas</div>
+            <div class="quiz-option" onclick="quizAnswer('q2', this, 'C')">○ C) Caso 3 — a raiz domina</div>
+            <div class="quiz-option" onclick="quizAnswer('q2', this, 'D')">○ D) O Teorema Mestre não se aplica</div>
+            <div class="quiz-feedback" id="q2-fb"></div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="quiz-box" id="q3">
+            <div class="quiz-q">3. Qual é o resultado de T(n) = 4T(n/2) + n²?</div>
+            <div class="quiz-option" onclick="quizAnswer('q3', this, 'A')">○ A) Θ(n²)</div>
+            <div class="quiz-option" onclick="quizAnswer('q3', this, 'B')">○ B) Θ(n³)</div>
+            <div class="quiz-option" onclick="quizAnswer('q3', this, 'C')">○ C) Θ(n² log n)</div>
+            <div class="quiz-option" onclick="quizAnswer('q3', this, 'D')">○ D) Θ(n log n)</div>
+            <div class="quiz-feedback" id="q3-fb"></div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="quiz-box" id="q4">
+            <div class="quiz-q">4. Qual é o caso e o resultado de T(n) = 4T(n/2) + n³?</div>
+            <div class="quiz-option" onclick="quizAnswer('q4', this, 'A')">○ A) Caso 1, resultado Θ(n²)</div>
+            <div class="quiz-option" onclick="quizAnswer('q4', this, 'B')">○ B) Caso 2, resultado Θ(n² log n)</div>
+            <div class="quiz-option" onclick="quizAnswer('q4', this, 'C')">○ C) Caso 1, resultado Θ(n³)</div>
+            <div class="quiz-option" onclick="quizAnswer('q4', this, 'D')">○ D) Caso 3, resultado Θ(n³)</div>
+            <div class="quiz-feedback" id="q4-fb"></div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="quiz-box" id="q5">
+            <div class="quiz-q">5. O Teorema Mestre pode ser aplicado diretamente a T(n) = 2T(n−1) + 1?</div>
+            <div class="quiz-option" onclick="quizAnswer('q5', this, 'A')">○ A) Não — a redução é n−1, não n/b</div>
+            <div class="quiz-option" onclick="quizAnswer('q5', this, 'B')">○ B) Sim — é Caso 1 com resultado Θ(n)</div>
+            <div class="quiz-option" onclick="quizAnswer('q5', this, 'C')">○ C) Sim — é Caso 2 com resultado Θ(log n)</div>
+            <div class="quiz-option" onclick="quizAnswer('q5', this, 'D')">○ D) Sim — é Caso 3 com resultado Θ(2ⁿ)</div>
+            <div class="quiz-feedback" id="q5-fb"></div>
+          </div>
+
+          <!-- Q6 -->
+          <div class="quiz-box" id="q6">
+            <div class="quiz-q">6. Qual é a complexidade de T(n) = 3T(n/3) + n?</div>
+            <div class="quiz-option" onclick="quizAnswer('q6', this, 'A')">○ A) Θ(n)</div>
+            <div class="quiz-option" onclick="quizAnswer('q6', this, 'B')">○ B) Θ(n log n)</div>
+            <div class="quiz-option" onclick="quizAnswer('q6', this, 'C')">○ C) Θ(n²)</div>
+            <div class="quiz-option" onclick="quizAnswer('q6', this, 'D')">○ D) Θ(n log² n)</div>
+            <div class="quiz-feedback" id="q6-fb"></div>
+          </div>
+        </section>
+
+        <!-- §8 RESUMO -->
+        <section id="resumo">
+          <h2><span class="num">8</span> Resumo</h2>
+          <div class="summary-box">
+            <h3>🎯 O que você precisa dominar</h3>
+            <div class="summary-row">Uma recorrência tem três partes: chamadas recursivas a·T(n/b), trabalho local f(n), e caso base T(1)</div>
+            <div class="summary-row">Expansão: substitua T(n) repetidamente, encontre o padrão geral e qual k toca o caso base</div>
+            <div class="summary-row">Árvore de recorrência: some o trabalho por nível — nós × custo por nó. Para T(n)=2T(n/2)+n dá n × log₂n</div>
+            <div class="summary-row">Teorema Mestre: calcule n^log_b(a), compare com f(n), aplique Caso 1, 2 ou 3</div>
+            <div class="summary-row">TM não se aplica quando a redução é n−1 (não n/b) ou quando f(n) tem log extras não-polinomiais</div>
+            <div class="summary-row">T(n) = 2T(n−1) → O(2ⁿ); T(n) = T(n−1)+n → O(n²) — recursão linear não é sempre barata</div>
+            <div class="summary-row">Merge Sort e busca ternária têm o mesmo estrutura de TM (Caso 2) — o resultado é sempre Θ(n^log_b(a) · log n)</div>
+
+            <h3 style="margin-top:1.4rem">Tabela de referência rápida</h3>
+            <table class="ref-table">
+              <thead><tr><th>Recorrência</th><th>Método</th><th>Resultado</th><th>Exemplo</th></tr></thead>
+              <tbody>
+                <tr><td>T(n)=T(n−1)+1</td><td>Expansão</td><td>Θ(n)</td><td>Busca linear</td></tr>
+                <tr><td>T(n)=T(n/2)+1</td><td>Exp. / TM Caso 2</td><td>Θ(log n)</td><td>Busca binária</td></tr>
+                <tr><td>T(n)=2T(n/2)+n</td><td>Árvore / TM Caso 2</td><td>Θ(n log n)</td><td>Merge Sort</td></tr>
+                <tr><td>T(n)=4T(n/2)+n²</td><td>TM Caso 2</td><td>Θ(n² log n)</td><td>—</td></tr>
+                <tr><td>T(n)=4T(n/2)+n³</td><td>TM Caso 3</td><td>Θ(n³)</td><td>—</td></tr>
+                <tr><td>T(n)=2T(n−1)</td><td>Expansão</td><td>Θ(2ⁿ)</td><td>Fib. ingênuo</td></tr>
+                <tr><td>T(n)=T(n−1)+n</td><td>Expansão</td><td>Θ(n²)</td><td>Insertion Sort</td></tr>
+              </tbody>
+            </table>
+
+            <p style="font-size:.85rem;opacity:.8;margin-top:1rem;line-height:1.6">
+              <strong>Fim da trilha F1 — Análise de Algoritmos.</strong> Com F1.1 (algoritmos de referência), F1.2 (notações assintóticas) e F1.3 (recorrências) você tem o vocabulário completo para analisar qualquer algoritmo do currículo POSCOMP.
+            </p>
+          </div>
+        </section>
+
+      </div><!-- /lesson-content -->
+
+      <!-- BOTTOM NAV -->
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="f1-2-notacoes-assintoticas.html">← F1.2 Notações Assintóticas</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico F1</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 3 de 3</div>
+        </div>
+        <button class="btn-nav" disabled style="opacity:.4;cursor:default">Próxima trilha →</button>
+      </div>
+    </div><!-- /lesson-area -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ─────────────────────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────────────────────
+const sidebar = document.getElementById('sidebar');
+const progressLine = document.getElementById('progressLine');
+const overlay = document.getElementById('sbOverlay');
+const isMobile = () => window.innerWidth < 768;
+const saved = localStorage.getItem('sb-state');
+if (saved === 'collapsed' && !isMobile()) {
+  sidebar.classList.add('collapsed');
+  progressLine.classList.add('visible');
+}
+function toggleSidebar() {
+  if (isMobile()) {
+    const o = sidebar.classList.toggle('open');
+    overlay.classList.toggle('visible', o);
+    return;
+  }
+  const c = sidebar.classList.toggle('collapsed');
+  progressLine.classList.toggle('visible', c);
+  localStorage.setItem('sb-state', c ? 'collapsed' : 'expanded');
+}
+
+// ─────────────────────────────────────────────────────────
+// SECTION NAV HIGHLIGHT
+// ─────────────────────────────────────────────────────────
+const la = document.getElementById('lessonArea');
+const secIds = [...document.querySelectorAll('section[id]')].map(s => s.id);
+document.querySelectorAll('.section-nav a').forEach(a => {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.getElementById(this.getAttribute('href').slice(1));
+    if (target) la.scrollTo({ top: target.offsetTop - 48, behavior: 'smooth' });
+  });
+});
+la.addEventListener('scroll', () => {
+  const st = la.scrollTop + 60;
+  let cur = secIds[0];
+  secIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= st) cur = id;
+  });
+  document.querySelectorAll('.section-nav a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+  });
+});
+
+// ─────────────────────────────────────────────────────────
+// EXPANSION BUILDER
+// ─────────────────────────────────────────────────────────
+const PRESETS = {
+  lin: {
+    title: 'T(n) = T(n−1) + 1, T(1) = 1',
+    steps: [
+      { label: 'Definição original', math: 'T(n) = T(n−1) + 1', explain: 'A recorrência descreve: processar n itens custa processar n−1 itens mais 1 operação extra.' },
+      { label: 'Substituição k=1', math: 'T(n) = [T(n−2) + 1] + 1 = T(n−2) + 2', explain: 'Aplicamos a definição de T(n−1): substituímos T(n−1) por T(n−2)+1. Acumulamos 2 unidades de custo.' },
+      { label: 'Substituição k=2', math: 'T(n) = T(n−3) + 3', explain: 'Repetimos: T(n−2) = T(n−3)+1. Padrão emergindo: a cada passo, o índice cai 1 e o custo acumulado sobe 1.' },
+      { label: 'Padrão geral após k passos', math: 'T(n) = T(n−k) + k', explain: 'Generalizando: após k substituições temos T(n) = T(n−k) + k. Isso vale para qualquer k ≤ n−1.' },
+      { label: 'Encontrando o caso base', math: 'n − k = 1  →  k = n − 1', explain: 'O caso base é T(1). Queremos n−k = 1, portanto k = n−1. Substituímos na fórmula geral.' },
+      { label: 'Resultado final', math: 'T(n) = T(1) + (n−1) = 1 + n − 1 = n', explain: 'T(n) = n → O(n). Intuitivo: buscamos 1 elemento, depois 2, depois 3... no total somamos 1+1+1+... = n vezes.', highlight: true }
+    ]
+  },
+  log: {
+    title: 'T(n) = T(n/2) + 1, T(1) = 1',
+    steps: [
+      { label: 'Definição original', math: 'T(n) = T(n/2) + 1', explain: 'Descreve a busca binária: processar n elementos custa processar n/2 elementos (metade descartada) mais 1 comparação.' },
+      { label: 'Substituição k=1', math: 'T(n) = T(n/4) + 1 + 1 = T(n/4) + 2', explain: 'Aplicamos a definição em T(n/2): T(n/2) = T(n/4)+1. Temos agora T(n) = T(n/2²) + 2.' },
+      { label: 'Substituição k=2', math: 'T(n) = T(n/8) + 3', explain: 'Repetindo: T(n/4) = T(n/8)+1. Perceba: n é dividido por 2 mais uma vez, e o custo acumulado sobe mais 1.' },
+      { label: 'Padrão geral após k passos', math: 'T(n) = T(n / 2ᵏ) + k', explain: 'Generalizando: após k substituições, temos T(n) = T(n/2ᵏ) + k. A cada passo, n é dividido por 2 e acumulamos +1.' },
+      { label: 'Encontrando o caso base', math: 'n / 2ᵏ = 1  →  2ᵏ = n  →  k = log₂(n)', explain: 'Queremos chegar em T(1). Isso ocorre quando n/2ᵏ = 1, ou seja, 2ᵏ = n. Por definição de logaritmo, k = log₂(n).' },
+      { label: 'Resultado final', math: 'T(n) = T(1) + log₂(n) = 1 + log₂(n)', explain: 'T(n) = 1 + log₂(n) → O(log n). Para n = 1.000.000, isso é ≈ 20 passos. Dobrar n adiciona apenas 1 passo.', highlight: true }
+    ]
+  },
+  nlogn: {
+    title: 'T(n) = 2T(n/2) + n, T(1) = 1',
+    steps: [
+      { label: 'Definição original', math: 'T(n) = 2T(n/2) + n', explain: 'Merge Sort: dividimos em 2 metades (custo 2T(n/2)) e juntamos as metades ordenadas (custo n).' },
+      { label: 'Substituição k=1', math: 'T(n) = 2[2T(n/4) + n/2] + n = 4T(n/4) + n + n = 4T(n/4) + 2n', explain: 'Aplicamos a definição em cada T(n/2): T(n/2) = 2T(n/4) + n/2. Expandindo: 2 × [2T(n/4) + n/2] = 4T(n/4) + n. Somando o +n do nível 0: 4T(n/4) + 2n.' },
+      { label: 'Substituição k=2', math: 'T(n) = 8T(n/8) + 3n', explain: 'Aplicamos de novo: 4T(n/4) = 4[2T(n/8) + n/4] = 8T(n/8) + n. Somando o 2n acumulado: 8T(n/8) + 3n.' },
+      { label: 'Padrão geral após k passos', math: 'T(n) = 2ᵏ · T(n/2ᵏ) + k · n', explain: 'Generalizando: 2ᵏ subproblemas de tamanho n/2ᵏ, cada nível contribuindo exatamente n de trabalho. O fator k vem de k níveis somados.' },
+      { label: 'Encontrando o caso base', math: 'n / 2ᵏ = 1  →  k = log₂(n)', explain: 'Base quando n/2ᵏ = 1 → k = log₂(n). Temos 2^log₂(n) = n subproblemas de tamanho 1.' },
+      { label: 'Resultado final', math: 'T(n) = n · T(1) + log₂(n) · n = n + n log₂(n)  →  Θ(n log n)', explain: 'log₂(n) níveis × n trabalho por nível = n log₂n. O +n é absorvido. Confirma o que você viu na árvore de recorrência.', highlight: true }
+    ]
+  },
+  exp: {
+    title: 'T(n) = 2T(n−1), T(1) = 1',
+    steps: [
+      { label: 'Definição original', math: 'T(n) = 2T(n−1)', explain: 'Aparece no cálculo ingênuo de Fibonacci e na Torre de Hanói. Duas chamadas recursivas, cada uma de tamanho n−1. Nota: o TM não se aplica (redução é n−1, não n/b).' },
+      { label: 'Substituição k=1', math: 'T(n) = 2 · [2T(n−2)] = 4T(n−2) = 2²T(n−2)', explain: 'Aplicamos T(n−1) = 2T(n−2). O coeficiente 2 duplica a cada passo — isso é o sinal de crescimento exponencial.' },
+      { label: 'Substituição k=2', math: 'T(n) = 2³T(n−3)', explain: 'Repetindo: T(n−2) = 2T(n−3), portanto 4T(n−2) = 8T(n−3) = 2³T(n−3). Cada passo dobra o coeficiente.' },
+      { label: 'Padrão geral após k passos', math: 'T(n) = 2ᵏ · T(n−k)', explain: 'Generalizando: após k substituições, temos 2ᵏ chamadas para subproblemas de tamanho n−k.' },
+      { label: 'Encontrando o caso base', math: 'n − k = 1  →  k = n − 1', explain: 'Base quando n−k = 1 → k = n−1. Nesse ponto temos 2^(n−1) chamadas ao caso base.' },
+      { label: 'Resultado final', math: 'T(n) = 2^(n−1) · T(1) = 2^(n−1)  →  Θ(2ⁿ)', explain: 'T(n) = 2^(n−1) → O(2ⁿ). Para n=50: ~10¹⁵ operações. É por isso que Fibonacci ingênuo é impraticável e precisa de memoização.', highlight: true }
+    ]
+  }
+};
+
+let currentPreset = 'lin';
+let currentStep = -1;
+
+function setPreset(key) {
+  currentPreset = key;
+  currentStep = -1;
+  document.querySelectorAll('.exp-preset-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.exp-preset-btn').forEach(b => {
+    const onclick = b.getAttribute('onclick');
+    if (onclick && onclick.includes("'" + key + "'")) b.classList.add('active');
+  });
+  renderExpSteps();
+}
+
+function renderExpSteps() {
+  const preset = PRESETS[currentPreset];
+  const container = document.getElementById('expStepsContainer');
+  let html = `<div style="font-family:var(--fm);font-size:.78rem;color:var(--muted);margin-bottom:.6rem;padding:.4rem .6rem;background:var(--n50);border-radius:6px">${preset.title}</div>`;
+  preset.steps.forEach((s, i) => {
+    const show = i <= currentStep;
+    const cls = `exp-step${s.highlight ? ' highlight-step' : ''}${show ? ' show' : ''}`;
+    html += `<div class="${cls}" id="expStep${i}">
+      <div class="exp-step-label">${s.label}</div>
+      <div class="exp-step-math">${s.math}</div>
+      <div class="exp-step-explain">${s.explain}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  updateExpCounter();
+}
+
+function updateExpCounter() {
+  const total = PRESETS[currentPreset].steps.length;
+  const shown = Math.max(0, currentStep + 1);
+  document.getElementById('expCounter').textContent = `Passo ${shown} / ${total}`;
+  const btn = document.getElementById('expNextBtn');
+  if (btn) btn.disabled = currentStep >= total - 1;
+}
+
+function expNext() {
+  const total = PRESETS[currentPreset].steps.length;
+  if (currentStep < total - 1) {
+    currentStep++;
+    const el = document.getElementById('expStep' + currentStep);
+    if (el) {
+      el.classList.add('show');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    updateExpCounter();
+  }
+}
+
+function expRunAll() {
+  const total = PRESETS[currentPreset].steps.length;
+  currentStep = total - 1;
+  renderExpSteps();
+}
+
+function expReset() {
+  currentStep = -1;
+  renderExpSteps();
+}
+
+// ─────────────────────────────────────────────────────────
+// TREE OF RECURRENCE
+// ─────────────────────────────────────────────────────────
+let treeN = 8;
+let treeLevel = -1;
+
+function setTreeN(n) {
+  treeN = n;
+  treeLevel = -1;
+  ['4','8','16','32'].forEach(v => {
+    const btn = document.getElementById('treeN' + v + 'Btn');
+    if (btn) btn.classList.toggle('active', parseInt(v) === n);
+  });
+  renderTreeTable();
+}
+
+function treeNext() {
+  const maxLevel = Math.log2(treeN);
+  if (treeLevel < maxLevel) {
+    treeLevel++;
+    renderTreeTable();
+  }
+}
+
+function treeRunAll() {
+  treeLevel = Math.log2(treeN);
+  renderTreeTable();
+}
+
+function treeReset() {
+  treeLevel = -1;
+  renderTreeTable();
+}
+
+function renderTreeTable() {
+  const container = document.getElementById('treeTableContainer');
+  if (!container) return;
+  const mergeLevels = Math.log2(treeN);
+  let html = `<table class="tree-table"><thead><tr>
+    <th>Nível</th><th>Nós</th><th>Tamanho/nó</th><th>Trabalho/nó</th><th style="min-width:140px">Total do nível</th>
+  </tr></thead><tbody>`;
+  let cumWork = 0;
+  for (let lv = 0; lv <= mergeLevels; lv++) {
+    const nodes = Math.pow(2, lv);
+    const size = treeN / nodes;
+    const isBase = lv === mergeLevels;
+    const workPerNode = isBase ? 0 : size;
+    const totalWork = nodes * workPerNode;
+    const visible = lv <= treeLevel;
+    if (visible) cumWork += totalWork;
+    const rowStyle = isBase
+      ? 'style="background:#e8f5ee"'
+      : (lv % 2 === 1 ? 'style="background:#f5f8ff"' : '');
+    const totalCell = !visible
+      ? '<span style="color:var(--n300)">—</span>'
+      : (isBase
+          ? '<span style="color:var(--green);font-weight:700">0 (base)</span>'
+          : `<span style="color:var(--accent);font-weight:700">${treeN}</span>`);
+    html += `<tr ${rowStyle}>
+      <td>${lv}</td>
+      <td>${visible ? nodes : '<span style="color:var(--n300)">—</span>'}</td>
+      <td>${visible ? size : '<span style="color:var(--n300)">—</span>'}</td>
+      <td>${visible ? (isBase ? '0' : size) : '<span style="color:var(--n300)">—</span>'}</td>
+      <td>${totalCell}</td>
+    </tr>`;
+  }
+  const isComplete = treeLevel >= mergeLevels;
+  html += `<tr class="total-row">
+    <td colspan="4">${isComplete
+      ? `✓ Total: ${mergeLevels} níveis × ${treeN} = `
+      : `Em progresso (${Math.max(0, treeLevel + 1)} de ${mergeLevels + 1} níveis revelados)`
+    }</td>
+    <td>${isComplete
+      ? `<strong>${cumWork}</strong> = Θ(${treeN} × log₂${treeN})`
+      : cumWork > 0 ? `${cumWork} até agora` : '—'
+    }</td>
+  </tr>`;
+  html += '</tbody></table>';
+  if (isComplete) {
+    const seq = Array.from({ length: mergeLevels + 1 }, (_, i) => treeN / Math.pow(2, i)).join(' → ');
+    html += `<div class="callout success" style="margin-top:.6rem">
+      <strong>De onde vem o log₂(${treeN}) = ${mergeLevels}?</strong> Dividindo por 2 até chegar em 1: ${seq}.
+      São <strong>${mergeLevels} divisões</strong>. Cada um dos ${mergeLevels} níveis de merge faz exatamente <strong>${treeN} operações</strong>.
+      Custo total = ${treeN} × ${mergeLevels} = <strong>${cumWork} = Θ(n log n)</strong>.
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────
+// MASTER THEOREM CALCULATOR
+// ─────────────────────────────────────────────────────────
+const MASTER_PRESETS = {
+  merge:   { a: 2, b: 2, f: '1',   label: 'Merge Sort: T(n)=2T(n/2)+n' },
+  binary:  { a: 1, b: 2, f: '0',   label: 'Busca Binária: T(n)=T(n/2)+1' },
+  strassen:{ a: 7, b: 2, f: '2',   label: 'Strassen: T(n)=7T(n/2)+n²' },
+  caso1:   { a: 4, b: 2, f: '1',   label: 'Caso 1 puro: T(n)=4T(n/2)+n' },
+  caso2b:  { a: 4, b: 2, f: '2',   label: 'Caso 2 variante: T(n)=4T(n/2)+n²' },
+  caso3:   { a: 4, b: 2, f: '3',   label: 'Caso 3 puro: T(n)=4T(n/2)+n³' }
+};
+
+function setMasterPreset(key) {
+  const p = MASTER_PRESETS[key];
+  document.getElementById('mcA').value = p.a;
+  document.getElementById('mcB').value = p.b;
+  document.getElementById('mcF').value = p.f;
+  calcMaster();
+}
+
+function logBase(a, b) { return Math.log(a) / Math.log(b); }
+
+function fLabel(exp) {
+  if (exp === '0') return 'O(1)';
+  if (exp === '0.5') return 'O(√n)';
+  if (exp === '1') return 'O(n)';
+  if (exp === '1.5') return 'O(n^1.5)';
+  if (exp === '2') return 'O(n²)';
+  if (exp === '3') return 'O(n³)';
+  return 'O(n^' + exp + ')';
+}
+
+function calcMaster() {
+  const a = parseFloat(document.getElementById('mcA').value);
+  const b = parseFloat(document.getElementById('mcB').value);
+  const fExp = parseFloat(document.getElementById('mcF').value);
+  const box = document.getElementById('mcResultBox');
+  if (!box) return;
+
+  if (a < 1 || b <= 1) {
+    box.className = 'mc-result-box show';
+    box.innerHTML = '<div style="color:#ff8a80;font-size:.88rem">⚠ a deve ser ≥ 1 e b deve ser > 1.</div>';
+    return;
+  }
+
+  const logBA = logBase(a, b);
+  const logBAr = Math.round(logBA * 100) / 100;
+  const fExpN = fExp;
+
+  let caseNum, resultText, answerClass, explanation;
+  const EPS = 0.0001;
+
+  if (fExpN < logBA - EPS) {
+    caseNum = 1;
+    const exp = logBAr % 1 === 0 ? logBAr.toFixed(0) : logBAr.toFixed(2);
+    resultText = `Θ(n^${exp})`;
+    answerClass = 'mc-ans-1';
+    explanation = `f(n) = O(n^${fExpN}) cresce mais devagar que n^log_b(a) = n^${logBAr}. As <strong>folhas dominam</strong>. O custo total é determinado pela última camada da árvore.`;
+  } else if (Math.abs(fExpN - logBA) <= EPS) {
+    caseNum = 2;
+    const exp = logBAr % 1 === 0 ? logBAr.toFixed(0) : logBAr.toFixed(2);
+    resultText = `Θ(n^${exp} · log n)`;
+    answerClass = 'mc-ans-2';
+    explanation = `f(n) = O(n^${fExpN}) cresce igual a n^log_b(a) = n^${logBAr}. <strong>Empate</strong> — cada um dos log n níveis contribui igualmente. O log n extra vem da soma de log n parcelas iguais.`;
+  } else {
+    caseNum = 3;
+    const exp = fExpN % 1 === 0 ? fExpN.toFixed(0) : fExpN.toFixed(2);
+    resultText = `Θ(n^${exp})`;
+    answerClass = 'mc-ans-3';
+    explanation = `f(n) = O(n^${fExpN}) cresce mais rápido que n^log_b(a) = n^${logBAr}. A <strong>raiz domina</strong>. O custo total é determinado pelo trabalho do nível 0 (a raiz da árvore).`;
+  }
+
+  box.className = 'mc-result-box show';
+  box.innerHTML = `
+    <div class="mc-res-step">Entrada: <span>a = ${a}, b = ${b}, f(n) = ${fLabel(String(fExp))}</span></div>
+    <div class="mc-res-step">Calcular: <span>log_b(a) = log_${b}(${a}) = ${logBAr}</span></div>
+    <div class="mc-res-step">Comparar: <span>n^log_b(a) = n^${logBAr}</span> vs <span>f(n) = ${fLabel(String(fExp))}</span></div>
+    <div class="mc-res-step">→ <strong style="color:white">Caso ${caseNum}:</strong> ${explanation}</div>
+    <div class="mc-res-answer ${answerClass}">T(n) = ${resultText}</div>
+  `;
+}
+
+// ─────────────────────────────────────────────────────────
+// QUIZ
+// ─────────────────────────────────────────────────────────
+const QUIZ_DATA = {
+  q1: {
+    correct: 'B',
+    ok: 'T(n) = T(n/2) + c: a cada passo a entrada é dividida por 2 e adicionamos c (constante). Após k passos: T(n) = T(n/2ᵏ) + k·c. Quando n/2ᵏ = 1 → k = log₂(n). Portanto T(n) = T(1) + c·log₂(n) = O(log n).',
+    why: {
+      A: 'O(1) significaria custo constante independente de n — mas a recorrência tem chamadas recursivas que dependem de n. Só seria O(1) se não houvesse recursão.',
+      C: 'O(n) ocorre quando você faz n operações no total (ex: loop de n iterações). Aqui, cada expansão divide n por 2 — são apenas log n passos, não n.',
+      D: 'O(n log n) seria o custo se você tivesse n trabalho POR nível (como T(n)=2T(n/2)+n). Aqui o trabalho é apenas c (constante) por nível, não n.'
+    }
+  },
+  q2: {
+    correct: 'B',
+    ok: 'a=2, b=2. log_b(a) = log₂(2) = 1. n^log_b(a) = n¹ = n. f(n) = n = n¹. Como f(n) = Θ(n^log_b(a)) — eles crescem igual — aplica-se o Caso 2. Resultado: Θ(n¹ · log n) = Θ(n log n).',
+    why: {
+      A: 'Caso 1 exigiria que f(n) crescesse MAIS DEVAGAR que n^log_b(a) = n. Mas f(n) = n cresce exatamente igual a n — não mais devagar.',
+      C: 'Caso 3 exigiria que f(n) crescesse MAIS RÁPIDO que n^log_b(a) = n. Mas n = n — são iguais, não há quem cresça mais rápido.',
+      D: 'O TM se aplica perfeitamente: a=2 (inteiro ≥ 1), b=2 (>1), f(n)=n (polinomial). Todos os pré-requisitos são satisfeitos.'
+    }
+  },
+  q3: {
+    correct: 'C',
+    ok: 'a=4, b=2. log₂(4) = 2. n^2 = n². f(n) = n² = n². Como f(n) = Θ(n^2) = Θ(n^log_b(a)) — empate — aplica-se o Caso 2. Resultado: Θ(n² · log n) = Θ(n² log n).',
+    why: {
+      A: 'Θ(n²) seria o resultado do Caso 1 (folhas dominam) ou Caso 3 (raiz domina) com f(n)=n². Mas aqui f(n) e n^log_b(a) são iguais → Caso 2, que adiciona o fator log n.',
+      B: 'Θ(n³) exigiria log_b(a) = 3 ou f(n) = n³. Aqui log₂(4) = 2 e f(n) = n² — nenhum dos dois é n³.',
+      D: 'Θ(n log n) é o resultado do Merge Sort (a=2, b=2, f(n)=n). Aqui a=4 dá log₂(4)=2, então o expoente base é n², não n.'
+    }
+  },
+  q4: {
+    correct: 'D',
+    ok: 'a=4, b=2. log₂(4) = 2. n^log_b(a) = n². f(n) = n³. Como n³ cresce MAIS RÁPIDO que n² (n³/n² = n → ∞), temos Caso 3. Resultado: Θ(f(n)) = Θ(n³).',
+    why: {
+      A: 'Caso 1 com Θ(n²) seria correto SE f(n) crescesse mais devagar que n²=n^log_b(a). Mas f(n)=n³ cresce mais rápido — é o oposto do Caso 1.',
+      B: 'Caso 2 exige f(n) = Θ(n^log_b(a)) = Θ(n²). Mas n³ ≠ Θ(n²) — n³ cresce assintoticamente mais rápido que n².',
+      C: 'O resultado Θ(n³) está certo, mas o caso está errado. Caso 1 significa que as FOLHAS dominam (n^log_b(a) > f(n)). Aqui é o oposto: f(n) = n³ domina n² — isso é Caso 3.'
+    }
+  },
+  q5: {
+    correct: 'A',
+    ok: 'O Teorema Mestre exige subproblemas de tamanho n/b, com b > 1 constante. Em T(n) = 2T(n−1) + 1, o subproblema tem tamanho n−1 — uma redução aditiva, não multiplicativa. O TM não se aplica. Use expansão: T(n) = 2ⁿ⁻¹ → O(2ⁿ).',
+    why: {
+      B: 'Não se pode aplicar o TM e dizer Caso 1 aqui. A forma T(n−1) não tem a estrutura T(n/b) necessária. O resultado real via expansão é O(2ⁿ), muito pior que O(n).',
+      C: 'Caso 2 com Θ(log n) não faz sentido para T(n)=2T(n−1): a recursão dobra o número de chamadas a cada passo, o que leva a crescimento exponencial, não logarítmico.',
+      D: 'Θ(2ⁿ) é o resultado CORRETO da recorrência, mas a opção diz que o TM se aplica — o que está errado. O resultado correto veio de expansão, não do TM. Não confunda o resultado com o método de obtenção.'
+    }
+  },
+  q6: {
+    correct: 'B',
+    ok: 'a=3, b=3. log_b(a) = log₃(3) = 1. n^1 = n. f(n) = n = n¹. Empate → Caso 2. Resultado: Θ(n¹ · log n) = Θ(n log n). Mesma estrutura do Merge Sort, apenas com divisão em 3 partes em vez de 2.',
+    why: {
+      A: 'Θ(n) seria o resultado do Caso 3 (raiz domina). Mas f(n) = n = n^log_b(a) — são iguais, não há dominância de um sobre o outro. Caso 2 adiciona o fator log n.',
+      C: 'Θ(n²) exigiria log₃(3) = 2, mas log₃(3) = 1. Ou exigiria f(n) = n² com Caso 3, mas f(n) = n aqui.',
+      D: 'Θ(n log² n) aparece em variantes do TM Estendido para f(n) = n log n. Aqui f(n) = n, sem log extra, então o resultado é n log n, não n log² n.'
+    }
+  }
+};
+
+function quizAnswer(qid, el, chosen) {
+  const box = document.getElementById(qid);
+  if (box.dataset.answered) return;
+  box.dataset.answered = '1';
+  const data = QUIZ_DATA[qid];
+  const correct = data.correct;
+  const isOk = chosen === correct;
+  box.querySelectorAll('.quiz-option').forEach(opt => {
+    opt.style.pointerEvents = 'none';
+    const m = opt.getAttribute('onclick').match(/'([A-F])'\)$/);
+    if (m && m[1] === correct) opt.classList.add('correct');
+  });
+  if (!isOk) el.classList.add('wrong');
+  const fb = document.getElementById(qid + '-fb');
+  let html;
+  if (isOk) {
+    html = '<strong>✓ Correto!</strong> ' + data.ok;
+    fb.className = 'quiz-feedback show ok';
+  } else {
+    const whyWrong = data.why[chosen] || '';
+    html = '<strong>✗ Incorreto.</strong><br><br>'
+      + '<strong>Por que ' + chosen + ' está errada:</strong> ' + whyWrong + '<br><br>'
+      + '<strong>Por que ' + correct + ' está certa:</strong> ' + data.ok;
+    fb.className = 'quiz-feedback show fail';
+  }
+  fb.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+setPreset('lin');
+setTreeN(8);
+</script>
+</body>
+</html>

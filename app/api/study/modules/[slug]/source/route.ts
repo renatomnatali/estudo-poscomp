@@ -15,6 +15,7 @@ interface ModuleSourcePayload {
   };
   navLinks: Array<{ id: string; label: string }>;
   html: string;
+  script?: string;
 }
 
 export async function GET(

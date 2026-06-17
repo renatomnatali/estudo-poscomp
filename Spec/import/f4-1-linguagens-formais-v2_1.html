@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F4.1 — Linguagens Formais e Autômatos · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0F1E;--sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;--n300:#B8BDD8;
+  --n400:#8A90B0;--n500:#5C6180;--white:#fff;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-pill:9999px;
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  --bg:#f5f0ff;--card:#fff;--primary:#3d0080;--accent:#7c3aed;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#d4c5f0;--code-bg:#ede9fe;
+  --text:#1a1a2e;--muted:#5a6a8a;--blue:#1a6bcc;--blue-bg:#e8f0fe;
+  --teal:#0891b2;--teal-bg:#e0f7fa;--orange-bg:#fff3e0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,#f5f0ff,var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--accent)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));border-radius:var(--r-pill);width:20%}
+.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:#f5f0ff;color:var(--accent);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:#FEF3C7}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:40%;background:linear-gradient(90deg,var(--accent),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;text-decoration:none}
+.lesson-area{flex:1;overflow-y:auto}.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+/* HEADER */
+.lesson-header{background:linear-gradient(135deg,#3d0080 0%,#1a3a8f 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--r-pill);padding:3px 14px;font-family:var(--fm);font-size:.72rem;letter-spacing:1px;margin-bottom:.8rem}
+.hero-title{font-family:var(--fd);font-size:1.8rem;font-weight:800;margin-bottom:.5rem;position:relative;z-index:1}
+.hero-sub{opacity:.8;font-size:.9rem;max-width:600px;margin:.4rem auto 0;position:relative;z-index:1}
+.hero-chips{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;margin-top:1rem;position:relative;z-index:1}
+.hero-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-pill);padding:4px 14px;font-size:.8rem;font-family:var(--fm)}
+.section-nav{background:#3d0080;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover,.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+/* CONTENT */
+.lesson-content{max-width:920px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3.2rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.3rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.3rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.5rem 0 .6rem;font-weight:700}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.8}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--fm);font-size:.88rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0}
+.callout{border-left:4px solid var(--accent);background:#f5f0ff;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem;line-height:1.7}
+.callout.warning{border-color:var(--accent2);background:var(--orange-bg)}
+.callout.success{border-color:var(--green);background:#e8f5ee}
+.callout.blue{border-color:var(--blue);background:var(--blue-bg)}
+.callout.teal{border-color:var(--teal);background:var(--teal-bg)}
+.callout strong{color:var(--primary)}
+/* HIERARCHY */
+.hierarchy-wrap{display:flex;flex-direction:column;gap:0;margin:1.2rem auto;max-width:640px}
+.hier-level{border-radius:10px;padding:.9rem 1.4rem;text-align:center;position:relative;border:2px solid;cursor:pointer;transition:all .18s}
+.hier-level:not(:first-child){margin-top:-1px}
+.hier-l0{background:#fff0f0;border-color:#c0392b;border-radius:10px 10px 0 0}.hier-l0:hover,.hier-l0.active{background:#ffd5d5}
+.hier-l1{background:#fff3e0;border-color:var(--accent2)}.hier-l1:hover,.hier-l1.active{background:#ffe0b0}
+.hier-l2{background:var(--blue-bg);border-color:var(--blue)}.hier-l2:hover,.hier-l2.active{background:#c8dcf8}
+.hier-l3{background:#f5f0ff;border-color:var(--accent);border-radius:0 0 10px 10px}.hier-l3:hover,.hier-l3.active{background:#e8e0ff}
+.hier-name{font-weight:700;font-size:.95rem}.hier-l0 .hier-name{color:#c0392b}.hier-l1 .hier-name{color:var(--accent2)}.hier-l2 .hier-name{color:var(--blue)}.hier-l3 .hier-name{color:var(--accent)}
+.hier-detail{font-size:.82rem;color:var(--muted);margin-top:.2rem}
+.hier-tag{font-family:var(--fm);font-size:.76rem;font-weight:700;display:inline-block;padding:2px 8px;border-radius:4px;margin-top:.3rem}
+.hier-l0 .hier-tag{background:#c0392b;color:white}.hier-l1 .hier-tag{background:var(--accent2);color:white}.hier-l2 .hier-tag{background:var(--blue);color:white}.hier-l3 .hier-tag{background:var(--accent);color:white}
+/* HIERARCHY EXPLORER PANEL */
+.hier-explorer{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.2rem;margin-top:1rem;display:none}
+.hier-explorer.show{display:block}
+.he-title{font-weight:700;color:var(--primary);font-size:1rem;margin-bottom:.6rem}
+.he-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.he-cell{background:var(--n50);border-radius:8px;padding:.7rem .9rem;font-size:.84rem}
+.he-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-family:var(--fm);margin-bottom:.3rem}
+.he-val{color:var(--primary);font-weight:600;line-height:1.5}
+/* AUTOMATA */
+.auto-canvas-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:#f9f7ff;margin:.6rem 0}
+/* TAPE */
+.tape-row{display:flex;justify-content:center;align-items:center;gap:0;margin:.8rem 0;flex-wrap:nowrap;overflow-x:auto}
+.tape-cell{min-width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:2px solid var(--border);font-family:var(--fm);font-size:1rem;font-weight:700;color:var(--primary);background:var(--card);transition:all .2s;flex-shrink:0}
+.tape-cell.active{background:var(--accent);color:white;border-color:var(--accent);transform:scaleY(1.1)}
+.tape-cell.accepted{background:var(--green);color:white;border-color:var(--green)}
+.tape-cell.rejected{background:var(--red);color:white;border-color:var(--red)}
+.tape-cell.consumed{background:#e8f5ee;color:var(--green);border-color:var(--green)}
+.tape-head{text-align:center;font-size:1.2rem;margin-bottom:.1rem;transition:all .2s}
+.tape-wrap{display:flex;flex-direction:column;align-items:center;margin:.6rem 0}
+.tape-ptr{display:flex;justify-content:center;gap:0;overflow-x:auto}
+.tape-ptr-cell{min-width:42px;height:18px;display:flex;align-items:flex-start;justify-content:center;font-size:1rem;color:var(--accent);flex-shrink:0;transition:all .2s}
+/* STATE MACHINE */
+.state-circle{display:inline-flex;flex-direction:column;align-items:center;gap:.2rem}
+.sc-ring{width:52px;height:52px;border-radius:50%;border:3px solid var(--n300);background:var(--card);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.9rem;font-weight:700;color:var(--muted);transition:all .25s;position:relative}
+.sc-ring.initial::before{content:'▶';position:absolute;left:-18px;top:50%;transform:translateY(-50%);font-size:.7rem;color:var(--muted)}
+.sc-ring.accept{border-width:3px;box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--n300)}
+.sc-ring.current{background:var(--accent);border-color:var(--accent);color:white;box-shadow:0 4px 12px rgba(124,58,237,.35)}
+.sc-ring.accept.current{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--accent),0 4px 12px rgba(124,58,237,.35)}
+.sc-ring.accepted-state{background:var(--green);border-color:var(--green);color:white}
+.sc-ring.dead{background:var(--red);border-color:var(--red);color:white}
+.sc-label{font-size:.72rem;color:var(--muted);font-family:var(--fm)}
+/* TABLES */
+.ops-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.88rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.ops-table th{background:var(--primary);color:white;padding:.6rem 1rem;text-align:left;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px}
+.ops-table td{padding:.55rem 1rem;border-bottom:1px solid var(--border)}
+.ops-table tr:nth-child(even) td{background:#f9f7ff}
+.ops-table tr:hover td{background:#f0ebff}
+.op-good{color:var(--green);font-weight:700;font-family:var(--fm)}.op-ok{color:var(--blue);font-weight:700;font-family:var(--fm)}.op-bad{color:var(--red);font-weight:700;font-family:var(--fm)}
+/* TRANSITION TABLE */
+.trans-table{border-collapse:collapse;font-family:var(--fm);font-size:.84rem;margin:.8rem auto}
+.trans-table th{background:var(--primary);color:white;padding:.4rem .8rem;text-align:center}
+.trans-table td{padding:.38rem .8rem;border:1px solid var(--border);text-align:center;min-width:60px}
+.trans-table td.current-row{background:#f5f0ff;font-weight:700;color:var(--accent)}
+.trans-table td.highlight{background:var(--accent);color:white;font-weight:700}
+/* SIMULATORS */
+.sim-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.sim-box h4{color:var(--primary);font-weight:700;font-size:.95rem;margin-bottom:.8rem}
+.sim-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem;align-items:center}
+.sim-btn{padding:.38rem .9rem;border-radius:var(--r-pill);border:1px solid var(--accent);background:var(--white);color:var(--accent);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s}
+.sim-btn:hover{background:#f5f0ff}.sim-btn.go{background:var(--accent);color:white;border-color:var(--accent)}.sim-btn.go:hover{background:var(--primary)}
+.sim-btn.step{border-color:var(--accent2);color:var(--accent2)}.sim-btn.step:hover{background:var(--orange-bg)}
+.sim-btn.rst{border-color:var(--red);color:var(--red)}.sim-btn.rst:hover{background:#fde8e8}
+.sim-btn:disabled{opacity:.4;cursor:not-allowed}
+.sim-label{font-size:.8rem;color:var(--muted);font-family:var(--fm)}
+.sim-log{font-family:var(--fm);font-size:.82rem;color:var(--muted);margin-top:.6rem;background:var(--n50);border-radius:6px;padding:.55rem .8rem;min-height:1.8rem;line-height:1.6}
+.sim-log.ok{color:var(--green);font-weight:700;background:#e8f5ee}.sim-log.err{color:var(--red);font-weight:700;background:#fde8e8}
+.algo-state{display:flex;gap:1rem;flex-wrap:wrap;margin:.5rem 0;font-family:var(--fm);font-size:.8rem}
+.state-box{background:var(--n50);border:1px solid var(--n200);border-radius:6px;padding:.4rem .8rem;flex:1;min-width:130px}
+.state-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:.2rem}
+.state-val{color:var(--primary);font-weight:700;word-break:break-all}
+/* AFN STATES ROW */
+.afn-states-row{display:flex;gap:1.2rem;justify-content:center;align-items:flex-end;padding:1rem;background:#f9f7ff;border-radius:8px;margin:.8rem 0;flex-wrap:wrap}
+.afn-state-node{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.afn-sc{width:52px;height:52px;border-radius:50%;border:3px solid var(--n300);background:var(--card);display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:1rem;font-weight:700;color:var(--muted);transition:all .3s;position:relative}
+.afn-sc.active-state{background:var(--accent);border-color:var(--accent);color:white;box-shadow:0 4px 14px rgba(124,58,237,.4);transform:scale(1.1)}
+.afn-sc.accept-ring{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--n300)}
+.afn-sc.active-state.accept-ring{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--accent),0 4px 14px rgba(124,58,237,.4);transform:scale(1.1)}
+.afn-sc.final-accept{background:var(--green);border-color:var(--green);color:white}
+.afn-sc.final-reject{background:var(--n300);border-color:var(--n300);color:white}
+.afn-sc.initial-arrow::before{content:'▶';position:absolute;left:-20px;top:50%;transform:translateY(-50%);font-size:.7rem;color:var(--muted)}
+.afn-node-label{font-size:.72rem;color:var(--muted);font-family:var(--fm)}
+.afn-set-display{font-family:var(--fm);font-size:.88rem;background:var(--code-bg);border-radius:8px;padding:.5rem 1rem;text-align:center;color:var(--primary);font-weight:700;margin:.4rem 0}
+/* DERIVATION */
+.deriv-steps{margin:.8rem 0}
+.deriv-step{display:flex;align-items:center;gap:.8rem;margin:.4rem 0;padding:.5rem .8rem;border-radius:6px;font-family:var(--fm);font-size:.88rem;line-height:1.5}
+.deriv-step:nth-child(even){background:var(--n50)}
+.deriv-rule{font-size:.73rem;color:var(--muted);white-space:nowrap}
+.deriv-highlight{color:var(--accent);font-weight:700;background:var(--code-bg);padding:0 3px;border-radius:3px}
+/* REGEX */
+.regex-tester{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.regex-input-row{display:flex;gap:.6rem;align-items:center;margin-bottom:.8rem;flex-wrap:wrap}
+.regex-input{font-family:var(--fm);font-size:.9rem;padding:.45rem .8rem;border:1.5px solid var(--border);border-radius:var(--r-pill);flex:1;min-width:150px;outline:none;color:var(--primary)}
+.regex-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.regex-test-btn{padding:.4rem 1rem;border-radius:var(--r-pill);border:none;background:var(--accent);color:white;font-size:.82rem;font-weight:700;cursor:pointer;font-family:var(--fb)}
+.regex-results{display:flex;flex-direction:column;gap:.3rem;max-height:200px;overflow-y:auto}
+.regex-result-row{display:flex;align-items:center;gap:.6rem;padding:.35rem .8rem;border-radius:6px;font-family:var(--fm);font-size:.84rem}
+.regex-result-row.match{background:#e8f5ee}.regex-result-row.nomatch{background:#fde8e8}
+.rr-badge{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:var(--r-pill)}.rr-badge.yes{background:var(--green);color:white}.rr-badge.no{background:var(--red);color:white}
+/* PUMPING */
+.pump-vis{display:flex;justify-content:center;gap:0;margin:1rem 0;flex-wrap:wrap}
+.pump-part{padding:.6rem 1rem;border:2px solid;border-radius:8px;font-family:var(--fm);font-size:.9rem;font-weight:700;text-align:center;min-width:60px}
+.pump-x{background:#e8f5ee;border-color:var(--green);color:var(--green)}
+.pump-y{background:var(--orange-bg);border-color:var(--accent2);color:var(--accent2)}
+.pump-z{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.pump-label{font-size:.7rem;font-weight:400;display:block;margin-top:.1rem}
+/* QUIZ */
+.quiz-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.quiz-q{font-weight:600;color:var(--primary);margin-bottom:1rem;font-size:.95rem;line-height:1.5}
+.quiz-option{display:flex;align-items:flex-start;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f9f7ff;margin:.4rem 0;font-size:.9rem;line-height:1.5}
+.quiz-option:hover{background:#f0ebff;border-color:var(--accent)}
+.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+.quiz-feedback{margin-top:.8rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;display:none;line-height:1.6}
+.quiz-feedback.show{display:block}.quiz-feedback.ok{background:#e8f5ee;color:#15803d;border:1px solid #86efac}.quiz-feedback.fail{background:#fde8e8;color:var(--red);border:1px solid #fca5a5}
+/* SUMMARY */
+.summary-box{background:linear-gradient(135deg,#3d0080,#1a3a8f);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}
+.summary-box h3{color:white;margin-bottom:1rem;font-size:1.05rem}
+.summary-row{display:flex;gap:.6rem;margin:.45rem 0;align-items:flex-start;font-size:.9rem;line-height:1.5}
+.summary-row::before{content:'✓';color:#c4b5fd;flex-shrink:0;font-weight:700;margin-top:.05rem}
+/* SUMMARY REF TABLE */
+.ref-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.84rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.ref-table th{background:rgba(255,255,255,.15);color:white;padding:.5rem .8rem;text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(255,255,255,.2)}
+.ref-table td{padding:.48rem .8rem;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.88)}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table td:first-child{font-family:var(--fm);font-weight:700;color:#c4b5fd}
+/* BOTTOM NAV */
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05)}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));width:33%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}
+.btn-nav:hover{background:var(--n100);color:var(--ink)}.btn-nav.next{background:var(--accent);color:white;border-color:var(--accent)}.btn-nav.next:hover{background:var(--primary)}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .lesson-content{padding:1.5rem 1rem}
+  .hierarchy-wrap{margin:1rem}
+  .he-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">20%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">5 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div><a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div><a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span></a><a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div><a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span></a></div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section"><a class="sb-item" href="curriculo.html"><div class="sb-item-icon">📊</div><span class="sb-item-text">Currículo Completo</span></a></div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section"><a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span></a></div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Linguagens Formais</a><span class="sep">›</span>
+        <span class="current">F4.1 — Linguagens Formais</span>
+      </div>
+      <div class="topbar-actions"><a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a></div>
+    </header>
+
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header">
+        <div class="hero-tag">LINGUAGENS FORMAIS · F4.1</div>
+        <div class="hero-title">Linguagens Formais e Autômatos</div>
+        <div class="hero-sub">A teoria que fundamenta compiladores, regex, protocolos e inteligência artificial — do autômato finito à Hierarquia de Chomsky</div>
+        <div class="hero-chips">
+          <span class="hero-chip">AFD / AFN</span>
+          <span class="hero-chip">Gramáticas</span>
+          <span class="hero-chip">Expressões Regulares</span>
+          <span class="hero-chip">GLC / AP</span>
+          <span class="hero-chip">Pumping Lemma</span>
+        </div>
+      </div>
+
+      <nav class="section-nav" id="sectionNav">
+        <a href="#conceitos">1. Conceitos</a>
+        <a href="#hierarquia">2. Hierarquia</a>
+        <a href="#afd">3. AFD</a>
+        <a href="#afn">4. AFN</a>
+        <a href="#regex">5. Regex</a>
+        <a href="#glc">6. GLC</a>
+        <a href="#ap">7. AP</a>
+        <a href="#pumping">8. Pumping</a>
+        <a href="#aplicacoes">9. Aplicações</a>
+        <a href="#quiz">10. Quiz</a>
+        <a href="#resumo">11. Resumo</a>
+      </nav>
+
+      <div class="lesson-content">
+
+        <!-- 1. CONCEITOS -->
+        <section id="conceitos">
+          <h2><span class="num">1</span> Conceitos Fundamentais</h2>
+
+          <p>Quando você digita <code>grep "erro.*crítico" log.txt</code> no terminal, o sistema precisa verificar se cada linha do arquivo bate com o padrão — em milissegundos, em arquivos de gigabytes. Quando o compilador lê <code>if (x > 0) { return x; }</code>, ele precisa saber que aqueles símbolos formam código válido. Em ambos os casos, a ferramenta que viabiliza isso é um <strong>autômato</strong> guiado por uma <strong>gramática formal</strong>.</p>
+
+          <p>Linguagens formais são a teoria matemática por trás de qualquer sistema que processa texto com regras precisas: compiladores, bancos de dados, protocolos de rede, validadores de formulário, parsers de JSON. O POSCOMP testa se você entende <em>por que</em> certas linguagens são mais difíceis de reconhecer que outras, e qual mecanismo computacional é necessário para cada classe.</p>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin:1.2rem 0">
+            <div class="card" style="border-left:4px solid var(--accent)">
+              <strong style="color:var(--accent)">Alfabeto (Σ)</strong>
+              <p style="font-size:.86rem;margin:.4rem 0 0;color:var(--muted)">Conjunto finito e não-vazio de símbolos. Ex: Σ = {0, 1} para binário; Σ = {a, b, c, ..., z} para palavras.</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--blue)">
+              <strong style="color:var(--blue)">String (palavra)</strong>
+              <p style="font-size:.86rem;margin:.4rem 0 0;color:var(--muted)">Sequência finita de símbolos de Σ. A string vazia é ε (epsilon). |w| é o comprimento de w. Ex: "010" tem |010|=3.</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--green)">
+              <strong style="color:var(--green)">Linguagem (L)</strong>
+              <p style="font-size:.86rem;margin:.4rem 0 0;color:var(--muted)">Subconjunto de Σ*. Σ* = todas as strings sobre Σ incluindo ε. L pode ser finita ou infinita. Ex: L = {0ⁿ1ⁿ | n≥0}.</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--accent2)">
+              <strong style="color:var(--accent2)">Concatenação</strong>
+              <p style="font-size:.86rem;margin:.4rem 0 0;color:var(--muted)">w·v = justaposição de w e v. "ab"·"cd"="abcd". Σ⁰={ε}, Σ¹=Σ, Σ² = {xy | x,y ∈ Σ}. Σ* = Σ⁰ ∪ Σ¹ ∪ Σ² ∪ ...</p>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Formalismo de gramática:</strong> uma gramática G = (V, Σ, R, S) onde V = não-terminais, Σ = terminais, R = regras de produção, S ∈ V = símbolo inicial. O tipo das regras define a classe da linguagem.
+          </div>
+
+          <div class="callout success" style="margin-top:1rem">
+            <strong>→ Próximo passo (seção 2):</strong> agora que você sabe o que é uma linguagem formal, vamos ver como Chomsky as classificou em quatro classes aninhadas — cada uma reconhecível por um mecanismo computacional distinto.
+          </div>
+        </section>
+
+        <!-- 2. HIERARQUIA DE CHOMSKY -->
+        <section id="hierarquia">
+          <h2><span class="num">2</span> Hierarquia de Chomsky</h2>
+
+          <p>Por que um simples autômato finito consegue processar expressões regulares mas não consegue verificar se parênteses estão balanceados? Por que um compilador precisa de um mecanismo mais poderoso que um verificador de regex? A resposta está na hierarquia de Chomsky: linguagens mais complexas exigem máquinas com mais memória, e essa relação não é acidental — é matematicamente precisa.</p>
+
+          <p>Noam Chomsky classificou as linguagens em 4 tipos aninhados. Cada tipo mais externo contém o anterior, mas reconhecê-lo exige um autômato mais poderoso — e consequentemente mais lento. <strong>Clique em cada nível para explorar</strong> seus exemplos, limitações e aplicações.</p>
+
+          <div class="hierarchy-wrap">
+            <div class="hier-level hier-l0" onclick="hExplore(0)">
+              <div class="hier-name">Tipo 0 — Linguagens Recursivamente Enumeráveis</div>
+              <div class="hier-detail">Sem restrição nas regras. Reconhecidas pela Máquina de Turing universal.</div>
+              <span class="hier-tag">Máquina de Turing (MT)</span>
+            </div>
+            <div class="hier-level hier-l1" onclick="hExplore(1)">
+              <div class="hier-name">Tipo 1 — Linguagens Sensíveis ao Contexto</div>
+              <div class="hier-detail">Regras: αAβ → αγβ (lado direito ≥ lado esquerdo). Reconhecidas por MT com fita limitada.</div>
+              <span class="hier-tag">Autômato Linearmente Delimitado (ALD)</span>
+            </div>
+            <div class="hier-level hier-l2" onclick="hExplore(2)">
+              <div class="hier-name">Tipo 2 — Linguagens Livres de Contexto (LLC)</div>
+              <div class="hier-detail">Regras: A → γ (um não-terminal no lado esquerdo). Base de linguagens de programação.</div>
+              <span class="hier-tag">Autômato com Pilha (AP)</span>
+            </div>
+            <div class="hier-level hier-l3" onclick="hExplore(3)">
+              <div class="hier-name">Tipo 3 — Linguagens Regulares</div>
+              <div class="hier-detail">Regras: A → aB ou A → a. Reconhecidas por autômatos finitos. Equivalentes a expressões regulares.</div>
+              <span class="hier-tag">Autômato Finito (AFD / AFN)</span>
+            </div>
+          </div>
+
+          <div class="hier-explorer" id="hierExplorer">
+            <div class="he-title" id="hExTitle">—</div>
+            <div class="he-grid">
+              <div class="he-cell"><div class="he-label">Exemplo de linguagem</div><div class="he-val" id="hExLang">—</div></div>
+              <div class="he-cell"><div class="he-label">Autômato reconhecedor</div><div class="he-val" id="hExAuto">—</div></div>
+              <div class="he-cell"><div class="he-label">Por que precisa desse poder?</div><div class="he-val" id="hExWhy">—</div></div>
+              <div class="he-cell"><div class="he-label">Limitação principal</div><div class="he-val" id="hExLimit">—</div></div>
+            </div>
+          </div>
+
+          <table class="ops-table" style="margin-top:1.2rem">
+            <thead><tr><th>Tipo</th><th>Classe</th><th>Mecanismo</th><th>Exemplo de linguagem</th></tr></thead>
+            <tbody>
+              <tr><td>3</td><td>Regular</td><td class="op-good">AFD/AFN/ER</td><td><code>(ab)*</code> — strings de "ab" repetidos</td></tr>
+              <tr><td>2</td><td>Livre de Contexto</td><td class="op-ok">AP (pilha)</td><td><code>aⁿbⁿ</code> — n 'a's seguidos de n 'b's</td></tr>
+              <tr><td>1</td><td>Sensível ao Contexto</td><td class="op-ok">ALD</td><td><code>aⁿbⁿcⁿ</code> — n de cada símbolo</td></tr>
+              <tr><td>0</td><td>Rec. Enumerável</td><td class="op-bad">MT</td><td>Problema da Parada (não decidível)</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout warning">
+            <strong>Atenção (POSCOMP frequente):</strong> a hierarquia é estritamente aninhada — toda linguagem regular é LLC, toda LLC é sensível ao contexto, e por aí vai. <em>Mas a recíproca não vale.</em> Linguagens que exigem comparar duas quantidades arbitrariamente grandes não cabem em Tipo 3, porque autômatos finitos têm memória limitada — uma pilha é necessária (Tipo 2). Linguagens que exigem comparar três ou mais quantidades não cabem nem com pilha — sobem para Tipo 1. <strong>Saber em que ponto da hierarquia uma linguagem para é o que separa quem decora de quem entende.</strong>
+          </div>
+
+          <div class="callout success" style="margin-top:1rem">
+            <strong>→ Próximo passo (seção 3):</strong> a linguagem mais simples da hierarquia — o Tipo 3 — é reconhecida por Autômatos Finitos Determinísticos. Vamos entender o que é um AFD e o que ele pode (e não pode) fazer.
+          </div>
+        </section>
+
+        <!-- 3. AFD -->
+        <section id="afd">
+          <h2><span class="num">3</span> Autômato Finito Determinístico (AFD)</h2>
+
+          <p>Imagine um sistema com um número fixo de "modos de operação" — como um semáforo com estados VERDE, AMARELO, VERMELHO. Ele lê um símbolo de cada vez da entrada, e com base no estado atual e no símbolo lido, muda para exatamente um novo estado. Sem memória além do estado atual. Sem pilha, sem fita, sem nada além disso. Esse é o Autômato Finito Determinístico.</p>
+
+          <p>Essa extrema simplicidade é também sua limitação: um AFD não consegue "contar" arbitrariamente — não pode garantir que leu tantos 'a's quanto 'b's, porque para isso precisaria de memória ilimitada. Mas para padrões sem contagem — "string que contém 'ab'", "string de comprimento par", "email válido" — o AFD é rápido, eficiente e suficiente.</p>
+
+          <p>Formalmente, um AFD é uma quíntupla M = (Q, Σ, δ, q₀, F) onde Q = estados, Σ = alfabeto, δ: Q×Σ→Q = função de transição <em>total e determinística</em>, q₀ ∈ Q = estado inicial, F ⊆ Q = estados de aceitação. Para cada estado e símbolo, existe exatamente uma transição.</p>
+
+          <h3>AFD que aceita strings com número par de 'a's sobre Σ = {a, b}</h3>
+          <div class="sim-box">
+            <h4>🤖 Simulador AFD — "par de a's" (aceita: ε, b, bb, aa, aba, bab, aabb...)</h4>
+            <div class="sim-controls">
+              <input type="text" id="afdInput" class="regex-input" placeholder="Digite uma string (a, b)..." value="aaba" style="max-width:220px" oninput="afdReset()">
+              <button class="sim-btn step" id="afdStepBtn" onclick="afdStep()">▶ Próximo símbolo</button>
+              <button class="sim-btn go" onclick="afdRunAll()">⏩ Executar</button>
+              <button class="sim-btn rst" onclick="afdReset()">↺ Reiniciar</button>
+              <span class="sim-label" id="afdStepLabel">Passo 0</span>
+            </div>
+            <div style="display:flex;gap:2rem;align-items:center;justify-content:center;flex-wrap:wrap;margin:1rem 0;padding:1rem;background:#f9f7ff;border-radius:8px">
+              <div class="state-circle">
+                <div class="sc-ring initial accept" id="sc-q0">q₀</div>
+                <div class="sc-label">par (aceita)</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:.2rem;font-family:var(--fm);font-size:.78rem;color:var(--muted)">
+                <div style="display:flex;gap:3rem"><span>──a──→</span><span>←──a──</span></div>
+                <div style="display:flex;gap:4rem"><span style="font-size:.7rem">b: loop</span><span style="font-size:.7rem">b: loop</span></div>
+              </div>
+              <div class="state-circle">
+                <div class="sc-ring" id="sc-q1">q₁</div>
+                <div class="sc-label">ímpar</div>
+              </div>
+            </div>
+            <div class="tape-wrap">
+              <div class="tape-ptr" id="afdPtr"></div>
+              <div class="tape-row" id="afdTape"></div>
+            </div>
+            <div class="algo-state">
+              <div class="state-box"><span class="state-label">Estado atual</span><div class="state-val" id="afdState">q₀</div></div>
+              <div class="state-box"><span class="state-label">Símbolo lido</span><div class="state-val" id="afdSym">—</div></div>
+              <div class="state-box"><span class="state-label">Próximo estado</span><div class="state-val" id="afdNext">—</div></div>
+            </div>
+            <div style="overflow-x:auto;margin-top:.8rem">
+              <table class="trans-table">
+                <thead><tr><th>δ</th><th>a</th><th>b</th></tr></thead>
+                <tbody>
+                  <tr id="tr-q0"><td>→q₀ (aceita)</td><td>q₁</td><td>q₀</td></tr>
+                  <tr id="tr-q1"><td>q₁</td><td>q₀</td><td>q₁</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="sim-log" id="afdLog">→ Digite uma string e clique em "Próximo símbolo" para simular o AFD passo a passo</div>
+          </div>
+
+          <div class="callout success">
+            <strong>AFD mínimo:</strong> para cada linguagem regular existe um AFD com o menor número possível de estados — o AFD mínimo. O algoritmo de minimização identifica e une estados equivalentes (estados que para qualquer string futura têm o mesmo comportamento).
+          </div>
+
+          <div class="callout warning" style="margin-top:.8rem">
+            <strong>→ Próximo passo (seção 4):</strong> o AFD exige uma transição para cada símbolo em cada estado — isso pode tornar sua construção trabalhosa. O AFN relaxa essa restrição, tornando a construção mais natural. Mas isso tem um custo: o não-determinismo precisa ser resolvido na hora da conversão.
+          </div>
+        </section>
+
+        <!-- 4. AFN -->
+        <section id="afn">
+          <h2><span class="num">4</span> Autômato Finito Não-Determinístico (AFN)</h2>
+
+          <p>Construir um AFD diretamente para uma linguagem como "strings que terminam em 'ab'" é possível, mas trabalhoso: você precisa rastrear os últimos dois símbolos lidos em todo momento. Um AFN resolve isso de forma mais natural: o autômato simplesmente <em>adivinha</em> quando encontra o padrão e toma o caminho certo.</p>
+
+          <p>Na prática, "adivinhar" significa que o AFN pode, diante de um símbolo, ramificar para múltiplos estados ao mesmo tempo — ou até mudar de estado sem consumir símbolo algum (transição-ε). A string é aceita se <em>existe ao menos um</em> caminho que termina em estado de aceitação.</p>
+
+          <p>Formalmente, no AFN a função de transição é δ: Q×(Σ∪{ε}) → 𝒫(Q) — ela mapeia para um <em>conjunto</em> de estados, não para um único estado.</p>
+
+          <div class="callout blue">
+            <strong>Teorema de Rabin-Scott:</strong> para todo AFN existe um AFD equivalente que reconhece a mesma linguagem. A construção de subconjuntos (subset construction) converte um AFN de n estados em um AFD com até 2ⁿ estados. Na prática, a explosão raramente ocorre, mas no pior caso é inevitável.
+          </div>
+
+          <h3>Simulador AFN — "strings que terminam em 'ab'"</h3>
+          <p style="font-size:.88rem;color:var(--muted);margin-bottom:.3rem">O simulador mostra o <strong>conjunto de estados ativos</strong> a cada passo — essa é a essência do não-determinismo: múltiplos estados simultâneos. O estado <strong>r</strong> é o de aceitação.</p>
+          <div class="sim-box">
+            <h4>🔀 Simulador AFN — AFN com δ(p,a)={p,q}, δ(p,b)={p}, δ(q,b)={r}</h4>
+            <div class="sim-controls">
+              <input type="text" id="afnInput" class="regex-input" placeholder="Digite string (a,b)" value="bab" style="max-width:200px" oninput="afnReset()">
+              <button class="sim-btn step" id="afnStepBtn" onclick="afnStepFn()">▶ Próximo símbolo</button>
+              <button class="sim-btn go" onclick="afnRunAll()">⏩ Executar</button>
+              <button class="sim-btn rst" onclick="afnReset()">↺ Reiniciar</button>
+              <span class="sim-label" id="afnStepLabel">Passo 0</span>
+            </div>
+            <!-- Estado do AFN -->
+            <div class="afn-states-row">
+              <div class="afn-state-node">
+                <div class="afn-sc initial-arrow" id="afn-p">p</div>
+                <div class="afn-node-label">inicial</div>
+              </div>
+              <div style="font-family:var(--fm);font-size:.78rem;color:var(--muted);text-align:center;line-height:1.8">
+                <div>──a──→</div>
+                <div style="font-size:.7rem">b: loop em p</div>
+              </div>
+              <div class="afn-state-node">
+                <div class="afn-sc" id="afn-q">q</div>
+                <div class="afn-node-label">leu 'a'</div>
+              </div>
+              <div style="font-family:var(--fm);font-size:.78rem;color:var(--muted);line-height:1.8">──b──→</div>
+              <div class="afn-state-node">
+                <div class="afn-sc accept-ring" id="afn-r">r</div>
+                <div class="afn-node-label">aceita</div>
+              </div>
+            </div>
+            <!-- Conjunto atual -->
+            <div class="afn-set-display" id="afnSetDisplay">Conjunto inicial: {p}</div>
+            <!-- Fita -->
+            <div class="tape-wrap">
+              <div class="tape-ptr" id="afnPtr"></div>
+              <div class="tape-row" id="afnTape"></div>
+            </div>
+            <!-- Transições do AFN -->
+            <div style="overflow-x:auto;margin:.6rem 0">
+              <table class="trans-table" style="font-size:.78rem">
+                <thead><tr><th>δ</th><th>a</th><th>b</th></tr></thead>
+                <tbody>
+                  <tr><td>p</td><td>{p,q}</td><td>{p}</td></tr>
+                  <tr><td>q</td><td>∅</td><td>{r}</td></tr>
+                  <tr><td>r (aceita)</td><td>∅</td><td>∅</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="sim-log" id="afnLog">→ Estado inicial: {p}. A string é aceita se o conjunto final contém o estado r.</div>
+          </div>
+
+          <h3>Construção de Subconjuntos — AFN → AFD</h3>
+          <div class="card">
+            <div style="font-weight:700;color:var(--primary);margin-bottom:.8rem">AFN de 3 estados → AFD de 3 estados (sem explosão neste exemplo)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem">
+              <div>
+                <div style="font-family:var(--fm);font-size:.82rem;font-weight:700;color:var(--accent);margin-bottom:.5rem">AFN (3 estados)</div>
+                <div style="font-size:.82rem;color:var(--muted);line-height:1.8">δ(p,a)={p,q} &nbsp; δ(p,b)={p}<br>δ(q,b)={r} &nbsp; δ(r,·)=∅<br>Estados: {p, q, r} &nbsp; Aceita: {r}</div>
+              </div>
+              <div>
+                <div style="font-family:var(--fm);font-size:.82rem;font-weight:700;color:var(--blue);margin-bottom:.5rem">AFD equivalente (subset construction)</div>
+                <table class="trans-table" style="font-size:.78rem">
+                  <thead><tr><th>Estado AFD</th><th>a</th><th>b</th><th>Aceita?</th></tr></thead>
+                  <tbody>
+                    <tr><td>{p}</td><td>{p,q}</td><td>{p}</td><td>Não</td></tr>
+                    <tr><td>{p,q}</td><td>{p,q}</td><td>{p,r}</td><td>Não</td></tr>
+                    <tr><td>{p,r}</td><td>{p,q}</td><td>{p}</td><td>Sim ✓</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <table class="ops-table">
+            <thead><tr><th>Característica</th><th>AFD</th><th>AFN</th></tr></thead>
+            <tbody>
+              <tr><td>Transições por símbolo</td><td>Exatamente 1</td><td>0, 1 ou mais (incluindo ε)</td></tr>
+              <tr><td>Expressividade</td><td class="op-good">Linguagens regulares</td><td class="op-good">Linguagens regulares (mesmo!)</td></tr>
+              <tr><td>Facilidade de construção</td><td>Mais verboso</td><td>Mais compacto e natural</td></tr>
+              <tr><td>Número de estados</td><td>Até 2ⁿ (conversão de AFN)</td><td>n estados</td></tr>
+              <tr><td>Simulação</td><td>O(n) por string</td><td>O(n·2^estados) ingênuo</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout success" style="margin-top:.8rem">
+            <strong>→ Próximo passo (seção 5):</strong> AFDs e AFNs são mecanismos. Expressões regulares são a <em>linguagem</em> para descrever esses mesmos padrões de forma compacta. O Teorema de Kleene garante que as três notações — AFD, AFN, ER — descrevem exatamente a mesma classe de linguagens.
+          </div>
+        </section>
+
+        <!-- 5. EXPRESSÕES REGULARES -->
+        <section id="regex">
+          <h2><span class="num">5</span> Expressões Regulares (ER)</h2>
+          <p>Expressões regulares descrevem exatamente as linguagens regulares (Tipo 3). Operações base: <strong>concatenação</strong> (AB = "A seguido de B"), <strong>alternância</strong> (A|B = "A ou B"), <strong>fechamento de Kleene</strong> (A* = "zero ou mais A's"), além de A⁺ (um ou mais) e A? (zero ou um).</p>
+
+          <div class="callout success">
+            <strong>Teorema de Kleene:</strong> uma linguagem é regular ⟺ pode ser descrita por uma expressão regular ⟺ existe um AFD que a reconhece. As três representações são equivalentes e há algoritmos para converter entre elas (Thompson's construction ER→AFN, Berry-Sethi AFN→ER).
+          </div>
+
+          <h3>Testador de Expressões Regulares</h3>
+          <div class="regex-tester">
+            <h4 style="color:var(--primary);margin-bottom:.8rem">🔍 Teste sua Expressão Regular (JavaScript regex)</h4>
+            <div class="regex-input-row">
+              <div style="font-family:var(--fm);color:var(--muted);font-size:.88rem;padding:.4rem .6rem;background:var(--n50);border-radius:var(--r-pill) 0 0 var(--r-pill);border:1.5px solid var(--border);border-right:none">/</div>
+              <input type="text" id="regexPattern" class="regex-input" value="(ab)+" style="border-radius:0;border-left:none;border-right:none">
+              <div style="font-family:var(--fm);color:var(--muted);font-size:.88rem;padding:.4rem .6rem;background:var(--n50);border-radius:0 var(--r-pill) var(--r-pill) 0;border:1.5px solid var(--border);border-left:none">/</div>
+              <button class="regex-test-btn" onclick="testRegex()">Testar</button>
+            </div>
+            <div id="regexResults" class="regex-results"></div>
+            <div style="margin-top:.6rem;font-size:.8rem;color:var(--muted)">Strings de teste pré-carregadas. Adicione suas próprias no código para experimentar.</div>
+          </div>
+
+          <h3>Padrões regulares frequentes no POSCOMP</h3>
+          <table class="ops-table">
+            <thead><tr><th>Expressão</th><th>Linguagem descrita</th><th>Exemplo aceito</th><th>Rejeitado</th></tr></thead>
+            <tbody>
+              <tr><td><code>(0|1)*</code></td><td>Toda string binária, incluindo ε</td><td>ε, 0, 01, 110</td><td>2, a</td></tr>
+              <tr><td><code>0*10*</code></td><td>Exatamente um '1', cercado de '0's</td><td>1, 01, 0010</td><td>11, ε, 0</td></tr>
+              <tr><td><code>(ab)+</code></td><td>Uma ou mais repetições de "ab"</td><td>ab, abab, ababab</td><td>ε, a, ba, abb</td></tr>
+              <tr><td><code>[a-z]+@[a-z]+\.[a-z]{2,}</code></td><td>Email simples</td><td>user@mail.com</td><td>user@, @mail</td></tr>
+              <tr><td><code>a*b*</code></td><td>Zero ou mais 'a's seguidos de zero ou mais 'b's</td><td>ε, a, b, aab, abb</td><td>ba, aba</td></tr>
+              <tr><td><code>(a|b)*abb</code></td><td>Strings que terminam em "abb"</td><td>abb, aabb, babb</td><td>ab, abba, ε</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout success" style="margin-top:.8rem">
+            <strong>→ Próximo passo (seção 6):</strong> expressões regulares e AFDs cobrem o Tipo 3. Para ir além — para parênteses balanceados, expressões aritméticas, a sintaxe de uma linguagem de programação — precisamos do Tipo 2: Gramáticas Livres de Contexto.
+          </div>
+        </section>
+
+        <!-- 6. GLC -->
+        <section id="glc">
+          <h2><span class="num">6</span> Gramáticas Livres de Contexto (GLC)</h2>
+
+          <p>Um compilador precisa verificar se <code>if (x > 0) { while (y != 0) { y--; } }</code> é código válido. Expressões regulares não conseguem fazer isso: elas não reconhecem estruturas aninhadas arbitrariamente, como blocos dentro de blocos. O motivo é simples — um AFD não tem memória para rastrear a profundidade do aninhamento.</p>
+
+          <p>Gramáticas Livres de Contexto resolvem isso exatamente. Elas descrevem estruturas recursivas: "uma expressão é uma soma de termos, um termo é um produto de fatores, um fator pode ser uma expressão entre parênteses." Essa auto-referência captura o aninhamento ilimitado que os AFDs não conseguem.</p>
+
+          <p>Formalmente, uma GLC G = (V, Σ, P, S) gera linguagens Tipo 2. Regras de produção têm a forma A → α onde A ∈ V e α ∈ (V ∪ Σ)*. O adjetivo "livre de contexto" vem do fato de A poder ser expandido independentemente do contexto em que aparece.</p>
+
+          <div class="callout">
+            <strong>Subestrutura recursiva:</strong> GLC podem expressar estruturas aninhadas como parênteses balanceados, expressões aritméticas, e a maioria das sintaxes de linguagens de programação — exatamente o que os compiladores precisam.
+          </div>
+
+          <h3>Exemplo: gramática para expressões aritméticas simples</h3>
+          <div class="card">
+            <div style="font-family:var(--fm);font-size:.9rem;line-height:2.2;background:var(--code-bg);padding:1rem;border-radius:8px">
+              E → E + T | E − T | T<br>
+              T → T * F | T / F | F<br>
+              F → ( E ) | <span style="color:var(--blue)">num</span><br>
+              <span style="color:var(--muted);font-size:.78rem">E=Expressão, T=Termo, F=Fator — precedência embutida na estrutura</span>
+            </div>
+          </div>
+
+          <h3>Derivação de "2 + 3 * 4" passo a passo</h3>
+          <div class="sim-box">
+            <h4>📝 Derivação mais à esquerda (leftmost derivation)</h4>
+            <div class="sim-controls">
+              <button class="sim-btn step" id="derivStepBtn" onclick="derivStep()">▶ Próxima derivação</button>
+              <button class="sim-btn go" onclick="derivRunAll()">⏩ Derivar tudo</button>
+              <button class="sim-btn rst" onclick="derivReset()">↺ Reiniciar</button>
+              <span class="sim-label" id="derivStepLabel">Passo 0 de 9</span>
+            </div>
+            <div id="derivSteps" class="deriv-steps"></div>
+            <div class="sim-log" id="derivLog">→ Clique em "Próxima derivação" para ver a derivação passo a passo</div>
+          </div>
+
+          <h3>Árvore de Derivação (Parse Tree) — "2 + 3 * 4"</h3>
+          <div class="card" style="text-align:center">
+            <div style="overflow-x:auto;display:inline-block;text-align:left;font-family:var(--fm);font-size:.84rem;line-height:2;padding:1rem;background:var(--n50);border-radius:8px;white-space:nowrap">
+              <div style="color:var(--accent);font-weight:700;text-align:center">E</div>
+              <div style="display:flex;gap:2rem;justify-content:center;align-items:flex-start">
+                <div style="display:flex;flex-direction:column;align-items:center">
+                  <div style="color:var(--blue);font-weight:700">E</div>
+                  <div style="width:1px;height:16px;background:var(--n300)"></div>
+                  <div style="color:var(--blue);font-weight:700">T</div>
+                  <div style="width:1px;height:16px;background:var(--n300)"></div>
+                  <div style="color:var(--blue);font-weight:700">F</div>
+                  <div style="width:1px;height:16px;background:var(--n300)"></div>
+                  <div style="color:var(--green);font-weight:700;border:1px solid var(--green);padding:1px 6px;border-radius:4px">2</div>
+                </div>
+                <div style="color:var(--accent2);font-weight:700;margin-top:.3rem">+</div>
+                <div style="display:flex;flex-direction:column;align-items:center">
+                  <div style="color:var(--blue);font-weight:700">T</div>
+                  <div style="display:flex;gap:1.2rem;align-items:flex-start">
+                    <div style="display:flex;flex-direction:column;align-items:center">
+                      <div style="width:1px;height:16px;background:var(--n300)"></div>
+                      <div style="color:var(--blue);font-weight:700">T</div>
+                      <div style="width:1px;height:16px;background:var(--n300)"></div>
+                      <div style="color:var(--blue);font-weight:700">F</div>
+                      <div style="width:1px;height:16px;background:var(--n300)"></div>
+                      <div style="color:var(--green);font-weight:700;border:1px solid var(--green);padding:1px 6px;border-radius:4px">3</div>
+                    </div>
+                    <div style="color:var(--accent2);font-weight:700;margin-top:2rem">*</div>
+                    <div style="display:flex;flex-direction:column;align-items:center">
+                      <div style="width:1px;height:16px;background:var(--n300)"></div>
+                      <div style="color:var(--blue);font-weight:700">F</div>
+                      <div style="width:1px;height:16px;background:var(--n300)"></div>
+                      <div style="color:var(--green);font-weight:700;border:1px solid var(--green);padding:1px 6px;border-radius:4px">4</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p style="font-size:.84rem;color:var(--muted);margin-top:.8rem">A árvore captura a precedência: 3*4 é calculado antes de ser somado com 2. A gramática garante isso estruturalmente.</p>
+          </div>
+
+          <div class="callout warning">
+            <strong>Gramática Ambígua:</strong> uma GLC é ambígua se a mesma string admite duas árvores de derivação diferentes. Exemplo clássico: E → E+E | E*E | num é ambígua porque "2+3*4" pode ser parseada como (2+3)*4 ou 2+(3*4). Compiladores exigem gramáticas não-ambíguas (ou regras de precedência externas).
+          </div>
+
+          <h3>Forma Normal de Chomsky (FNC)</h3>
+          <p>Toda GLC pode ser convertida em FNC onde todas as produções têm a forma A → BC ou A → a. Isso é importante para provas e para o algoritmo CYK de parsing em O(n³).</p>
+
+          <div class="callout success" style="margin-top:.8rem">
+            <strong>→ Próximo passo (seção 7):</strong> a GLC gera linguagens Tipo 2. Para <em>reconhecer</em> essas linguagens — processar o código de entrada e verificar se é válido — precisamos de um mecanismo com memória: o Autômato com Pilha.
+          </div>
+        </section>
+
+        <!-- 7. AP -->
+        <section id="ap">
+          <h2><span class="num">7</span> Autômato com Pilha (AP)</h2>
+
+          <p>O que impede um AFD de verificar se "{aⁿbⁿ | n ≥ 0}" é a falta de memória: ele não consegue lembrar quantos 'a's leu. A solução é simples na ideia: acrescente uma pilha ao AFD. A cada 'a' lido, empilhe. A cada 'b' lido, desempilhe. Se a pilha ficar exatamente vazia no fim da string, os números batem — aceita.</p>
+
+          <p>Esse mecanismo adicional — uma pilha infinita — transforma um AFD em um Autômato com Pilha, e essa transição de poder computacional é exatamente o que separa o Tipo 3 do Tipo 2 na hierarquia de Chomsky.</p>
+
+          <p>Formalmente, um AP = (Q, Σ, Γ, δ, q₀, Z₀, F). Γ é o alfabeto da pilha, Z₀ é o símbolo inicial da pilha. A transição δ: Q×(Σ∪{ε})×Γ → 𝒫(Q×Γ*) lê um símbolo, desempilha o topo e empilha uma nova string. APs reconhecem exatamente as linguagens livres de contexto.</p>
+
+          <h3>Simulador AP: reconhece {aⁿbⁿ | n≥1}</h3>
+          <p style="font-size:.88rem;color:var(--muted);margin-bottom:.3rem">Estratégia: empilha um símbolo 'A' por cada 'a' lido; desempilha um por cada 'b'. Pilha vazia ao final → aceita.</p>
+          <div class="sim-box">
+            <h4>⬆ Autômato com Pilha — string padrão: "aaabbb"</h4>
+            <div class="sim-controls">
+              <input type="text" id="apInput" class="regex-input" placeholder="aⁿbⁿ ex: aaabbb" value="aaabbb" style="max-width:200px" oninput="apReset()">
+              <button class="sim-btn step" id="apStepBtn" onclick="apStep()">▶ Próximo passo</button>
+              <button class="sim-btn go" onclick="apRunAll()">⏩ Executar</button>
+              <button class="sim-btn rst" onclick="apReset()">↺ Reiniciar</button>
+              <span class="sim-label" id="apStepLabel">Passo 0</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:1.4rem;align-items:start;margin:.8rem 0">
+              <div>
+                <div style="font-size:.78rem;color:var(--muted);font-family:var(--fm);margin-bottom:.3rem">FITA DE ENTRADA</div>
+                <div class="tape-row" id="apTape" style="justify-content:flex-start"></div>
+              </div>
+              <div>
+                <div style="font-size:.78rem;color:var(--muted);font-family:var(--fm);margin-bottom:.3rem;text-align:center">PILHA</div>
+                <div id="apStack" style="display:flex;flex-direction:column;align-items:center;gap:1px;min-width:60px;border:2px solid var(--border);border-radius:6px;padding:.4rem;background:#f9f7ff;min-height:60px">
+                  <div style="font-size:.72rem;color:var(--muted);font-family:var(--fm)">topo ↑</div>
+                </div>
+              </div>
+            </div>
+            <div class="algo-state">
+              <div class="state-box"><span class="state-label">Estado</span><div class="state-val" id="apState">q₀</div></div>
+              <div class="state-box"><span class="state-label">Símbolo lido</span><div class="state-val" id="apSym">—</div></div>
+              <div class="state-box"><span class="state-label">Topo da pilha</span><div class="state-val" id="apTop">Z₀</div></div>
+              <div class="state-box"><span class="state-label">Ação</span><div class="state-val" id="apAction">—</div></div>
+            </div>
+            <div class="sim-log" id="apLog">→ Digite uma string aⁿbⁿ e simule o Autômato com Pilha</div>
+          </div>
+
+          <div class="callout success">
+            <strong>AP não-determinístico vs determinístico:</strong> diferente dos AFDs, APs não-determinísticos (APND) são <em>estritamente mais poderosos</em> que APs determinísticos (APD). Existe linguagem LLC que não é reconhecida por nenhum APD. Isso difere dos AFDs/AFNs que têm o mesmo poder.
+          </div>
+
+          <div class="callout warning" style="margin-top:.8rem">
+            <strong>→ Próximo passo (seção 8):</strong> você já sabe que {aⁿbⁿ} é LLC e não regular. Mas como <em>provar</em> matematicamente que nenhum AFD possível reconhece essa linguagem? Para isso existe o Pumping Lemma — a principal ferramenta para demonstrar que uma linguagem <em>não</em> pertence a uma classe.
+          </div>
+        </section>
+
+        <!-- 8. PUMPING LEMMA -->
+        <section id="pumping">
+          <h2><span class="num">8</span> Pumping Lemma</h2>
+          <p>O Pumping Lemma é a principal ferramenta para <strong>provar que uma linguagem NÃO é regular</strong> (ou NÃO é LLC). É uma prova por contradição: assumimos que a linguagem é regular, aplicamos o lema, chegamos em contradição → portanto não é regular.</p>
+
+          <h3>Pumping Lemma para Linguagens Regulares</h3>
+          <div class="card" style="border-left:4px solid var(--accent)">
+            <p style="font-size:.9rem;margin-bottom:.6rem">Se L é regular, então existe p ≥ 1 (comprimento de bombeamento) tal que toda string w ∈ L com |w| ≥ p pode ser escrita como w = xyz onde:</p>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.6rem 0">
+              <div class="pump-part pump-x">x<span class="pump-label">prefixo</span></div>
+              <div class="pump-part pump-y">y<span class="pump-label">|y| ≥ 1, bombeável</span></div>
+              <div class="pump-part pump-z">z<span class="pump-label">sufixo</span></div>
+            </div>
+            <div style="font-size:.88rem;line-height:1.8">
+              com as condições: (1) <code>|y| ≥ 1</code>, (2) <code>|xy| ≤ p</code>, (3) para todo i ≥ 0, <code>xyⁱz ∈ L</code> ("bombear" y qualquer número de vezes mantém a string na linguagem).
+            </div>
+          </div>
+
+          <h3>Prova que L = {aⁿbⁿ | n≥0} NÃO é regular</h3>
+          <div class="sim-box">
+            <h4>💣 Prova por contradição — Pumping Lemma</h4>
+            <div class="sim-controls">
+              <button class="sim-btn step" id="pumpStepBtn" onclick="pumpStep()">▶ Próximo passo da prova</button>
+              <button class="sim-btn rst" onclick="pumpReset()">↺ Reiniciar</button>
+              <span class="sim-label" id="pumpStepLabel">Passo 0 de 7</span>
+            </div>
+            <div id="pumpSteps" class="deriv-steps" style="min-height:80px"></div>
+            <div class="sim-log" id="pumpLog">→ Veremos como o Pumping Lemma prova que {aⁿbⁿ} não pode ser regular</div>
+          </div>
+
+          <div class="callout teal">
+            <strong>Pumping Lemma para LLC:</strong> similar mas mais forte. Se L é LLC, existe p tal que w ∈ L com |w| ≥ p pode ser escrita como w = uvxyz com |vy| ≥ 1, |vxy| ≤ p, e para todo i ≥ 0, uvⁱxyⁱz ∈ L. Usado para provar que {aⁿbⁿcⁿ} não é LLC.
+          </div>
+
+          <div class="callout success" style="margin-top:.8rem">
+            <strong>→ Próximo passo (seção 9):</strong> teoria na bagagem — hora de ver onde tudo isso vive no mundo real. Compiladores, regex, HTML parsers, protocolos de rede: cada um usa exatamente o nível da hierarquia que o problema exige.
+          </div>
+        </section>
+
+        <!-- 9. APLICAÇÕES -->
+        <section id="aplicacoes">
+          <h2><span class="num">9</span> Aplicações</h2>
+
+          <p>A hierarquia de Chomsky não é um exercício acadêmico — ela descreve precisamente <em>quanto poder computacional</em> cada problema exige. Entender isso explica por que um grep em arquivo de 10 GB termina em segundos (AFD: O(n) no tamanho do texto) enquanto um parser de XML é mais complexo (AP: Tipo 2), e por que certas validações que parecem simples na verdade não são regulares.</p>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;margin:1.2rem 0">
+            <div class="card" style="border-left:4px solid var(--accent)">
+              <div style="font-size:1.6rem;margin-bottom:.4rem">🔍</div>
+              <h4 style="color:var(--primary);margin-bottom:.3rem">Grep / Regex</h4>
+              <div style="font-family:var(--fm);font-size:.74rem;color:var(--accent);margin-bottom:.4rem">Tipo 3 — AFD</div>
+              <p style="font-size:.82rem;color:var(--muted);margin:0">grep, sed, awk, re do Python — todos compilam expressões regulares para AFDs. Busca em O(n) no tamanho do texto.</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--blue)">
+              <div style="font-size:1.6rem;margin-bottom:.4rem">⚙️</div>
+              <h4 style="color:var(--primary);margin-bottom:.3rem">Compiladores</h4>
+              <div style="font-family:var(--fm);font-size:.74rem;color:var(--blue);margin-bottom:.4rem">Tipo 2 — GLC / AP</div>
+              <p style="font-size:.82rem;color:var(--muted);margin:0">Análise léxica (tokens) usa AFDs. Análise sintática (parser) usa GLC — LL(1), LR(1), LALR. GCC, Clang, javac.</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--green)">
+              <div style="font-size:1.6rem;margin-bottom:.4rem">🌐</div>
+              <h4 style="color:var(--primary);margin-bottom:.3rem">HTML / XML Parser</h4>
+              <div style="font-family:var(--fm);font-size:.74rem;color:var(--green);margin-bottom:.4rem">Tipo 2 — GLC</div>
+              <p style="font-size:.82rem;color:var(--muted);margin:0">HTML e XML são LLCs (tags aninhadas). Browsers usam parsers baseados em GLC para construir a DOM. HTML5 é Tipo 2 estendido.</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--accent2)">
+              <div style="font-size:1.6rem;margin-bottom:.4rem">🔒</div>
+              <h4 style="color:var(--primary);margin-bottom:.3rem">Protocolos</h4>
+              <div style="font-family:var(--fm);font-size:.74rem;color:var(--accent2);margin-bottom:.4rem">Tipo 3 — AFD</div>
+              <p style="font-size:.82rem;color:var(--muted);margin:0">TCP, HTTP, Bluetooth implementam máquinas de estado (AFDs) para gerenciar conexões: CLOSED → SYN_SENT → ESTABLISHED → etc.</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--teal)">
+              <div style="font-size:1.6rem;margin-bottom:.4rem">🧠</div>
+              <h4 style="color:var(--primary);margin-bottom:.3rem">NLP / LLMs</h4>
+              <div style="font-family:var(--fm);font-size:.74rem;color:var(--teal);margin-bottom:.4rem">Tipo 2+ — GLC probabilísticas</div>
+              <p style="font-size:.82rem;color:var(--muted);margin:0">Gramáticas probabilísticas livres de contexto (PCFGs) são base de parsers de linguagem natural. Modelos como GPT usam atenção para capturar dependências além do Tipo 2.</p>
+            </div>
+            <div class="card" style="border-left:4px solid var(--red)">
+              <div style="font-size:1.6rem;margin-bottom:.4rem">📋</div>
+              <h4 style="color:var(--primary);margin-bottom:.3rem">Validação de formulários</h4>
+              <div style="font-family:var(--fm);font-size:.74rem;color:var(--red);margin-bottom:.4rem">Tipo 3 — ER / AFD</div>
+              <p style="font-size:.82rem;color:var(--muted);margin:0">Validação de email, CPF, CEP, telefone, cartão de crédito — todas são linguagens regulares, implementadas com regex em milissegundos.</p>
+            </div>
+          </div>
+
+          <div class="callout success">
+            <strong>→ Próximo passo (seção 10):</strong> vamos testar o que você aprendeu com questões no estilo POSCOMP — incluindo armadilhas clássicas sobre o que o Pumping Lemma prova e sobre a diferença de poder entre APND e APD.
+          </div>
+        </section>
+
+        <!-- 10. QUIZ -->
+        <section id="quiz">
+          <h2><span class="num">10</span> Quiz</h2>
+          <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem">Ao errar, você verá a explicação completa: por que sua resposta está errada e por que a correta está certa.</p>
+
+          <div class="quiz-box" id="q1">
+            <div class="quiz-q">A linguagem L = {aⁿb²ⁿ | n ≥ 0} (n 'a's seguidos de 2n 'b's, ex: ε, abb, aabbbb, ...) pertence a qual classe na Hierarquia de Chomsky?</div>
+            <div class="quiz-option" data-qid="q1" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Tipo 3 (Regular)</div>
+            <div class="quiz-option" data-qid="q1" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Tipo 2 (Livre de Contexto)</div>
+            <div class="quiz-option" data-qid="q1" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Tipo 1 (Sensível ao Contexto)</div>
+            <div class="quiz-option" data-qid="q1" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Tipo 0 (Recursivamente Enumerável)</div>
+            <div class="quiz-feedback" id="q1-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q2">
+            <div class="quiz-q">Um AFN com n estados é convertido em AFD pela construção de subconjuntos. Qual é o número máximo de estados do AFD resultante?</div>
+            <div class="quiz-option" data-qid="q2" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) n estados — mesma quantidade</div>
+            <div class="quiz-option" data-qid="q2" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) n² estados</div>
+            <div class="quiz-option" data-qid="q2" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) 2ⁿ estados</div>
+            <div class="quiz-option" data-qid="q2" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) n! estados</div>
+            <div class="quiz-feedback" id="q2-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q3">
+            <div class="quiz-q">O Pumping Lemma pode ser usado para provar que uma linguagem É regular?</div>
+            <div class="quiz-option" data-qid="q3" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Sim — se uma linguagem satisfaz o Pumping Lemma, ela é regular</div>
+            <div class="quiz-option" data-qid="q3" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Não — o Pumping Lemma é condição necessária mas não suficiente para regularidade</div>
+            <div class="quiz-option" data-qid="q3" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Sim — se w = xyz com as propriedades corretas para toda w ∈ L, L é regular</div>
+            <div class="quiz-option" data-qid="q3" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Sim, mas apenas para linguagens finitas</div>
+            <div class="quiz-feedback" id="q3-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q4">
+            <div class="quiz-q">Qual das seguintes linguagens sobre Σ={a,b} é regular?</div>
+            <div class="quiz-option" data-qid="q4" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) {aⁿbⁿ | n ≥ 0} — n 'a's e n 'b's</div>
+            <div class="quiz-option" data-qid="q4" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) {w | w tem o mesmo número de a's e b's}</div>
+            <div class="quiz-option" data-qid="q4" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) {w | w começa e termina com o mesmo símbolo}</div>
+            <div class="quiz-option" data-qid="q4" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) {ww | w ∈ {a,b}*} — string concatenada com ela mesma</div>
+            <div class="quiz-feedback" id="q4-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q5">
+            <div class="quiz-q">Qual mecanismo computacional reconhece <em>exatamente</em> as linguagens livres de contexto (Tipo 2)?</div>
+            <div class="quiz-option" data-qid="q5" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Autômato Finito Determinístico (AFD)</div>
+            <div class="quiz-option" data-qid="q5" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Máquina de Turing</div>
+            <div class="quiz-option" data-qid="q5" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Autômato com Pilha não-determinístico (APND)</div>
+            <div class="quiz-option" data-qid="q5" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Autômato com Pilha Determinístico (APD)</div>
+            <div class="quiz-feedback" id="q5-fb"></div>
+          </div>
+
+          <div class="quiz-box" id="q6">
+            <div class="quiz-q">Uma gramática é dita ambígua quando:</div>
+            <div class="quiz-option" data-qid="q6" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Contém mais de um símbolo não-terminal</div>
+            <div class="quiz-option" data-qid="q6" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Aceita strings de comprimento infinito</div>
+            <div class="quiz-option" data-qid="q6" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Existe pelo menos uma string que possui duas ou mais árvores de derivação distintas</div>
+            <div class="quiz-option" data-qid="q6" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Possui produções com ε (vazio) no lado direito</div>
+            <div class="quiz-feedback" id="q6-fb"></div>
+          </div>
+        </section>
+
+        <!-- 11. RESUMO -->
+        <section id="resumo">
+          <h2><span class="num">11</span> Resumo</h2>
+          <div class="summary-box">
+            <h3>🎯 O que você precisa dominar</h3>
+            <div class="summary-row">Hierarquia de Chomsky: Tipo 3 (Regular/AFD) ⊂ Tipo 2 (LLC/AP) ⊂ Tipo 1 (SC/ALD) ⊂ Tipo 0 (RE/MT). Cada nível é reconhecido por um mecanismo mais poderoso.</div>
+            <div class="summary-row">AFD = (Q, Σ, δ, q₀, F). δ total e determinística. AFN = δ pode ir para múltiplos estados ou ε. Todo AFN tem AFD equivalente (até 2ⁿ estados via subset construction).</div>
+            <div class="summary-row">Teorema de Kleene: Regular ⟺ ER ⟺ AFD. As três representações são equivalentes. ER usa concatenação, alternância (|) e Kleene star (*).</div>
+            <div class="summary-row">GLC = A → α (um não-terminal à esquerda). Gera linguagens Tipo 2. Compiladores usam GLC para sintaxe. Gramática ambígua = mesma string tem duas árvores. FNC: A → BC | a (usada para CYK em O(n³)).</div>
+            <div class="summary-row">AP = AFD + pilha infinita. APND reconhece todas as LLC. APD é estritamente menos poderoso que APND (ao contrário de AFD vs AFN).</div>
+            <div class="summary-row">Pumping Lemma: prova que L NÃO é regular por contradição. Não pode provar que É regular. Análogo existe para LLC. {aⁿbⁿ} é LLC (não regular). {aⁿbⁿcⁿ} é SC (não LLC).</div>
+
+            <h3 style="color:white;margin-top:1.4rem;margin-bottom:.8rem">📋 Tabela de referência rápida</h3>
+            <table class="ref-table">
+              <thead><tr><th>Tipo</th><th>Classe</th><th>Autômato</th><th>Gramática</th><th>Exemplo</th></tr></thead>
+              <tbody>
+                <tr><td>3</td><td>Regular</td><td>AFD / AFN</td><td>A→aB | a</td><td>(ab)*, a*b*</td></tr>
+                <tr><td>2</td><td>LLC</td><td>AP (APND)</td><td>A→α</td><td>aⁿbⁿ, parênteses</td></tr>
+                <tr><td>1</td><td>Sensível ctx</td><td>ALD</td><td>αAβ→αγβ</td><td>aⁿbⁿcⁿ</td></tr>
+                <tr><td>0</td><td>Rec. Enum.</td><td>MT</td><td>α→β</td><td>Problema da Parada</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout teal">
+            <strong>→ Próximo módulo (F4.2 — Máquinas de Turing e Decidibilidade):</strong> você aprendeu os quatro níveis da hierarquia de Chomsky. O próximo módulo mergulha no nível mais alto — Tipo 0 — e na questão mais profunda da computação: o que os computadores podem e <em>não podem</em> resolver, independente do tempo ou memória disponíveis. O Problema da Parada, redutibilidade e a fronteira entre o decidível e o indecidível.
+          </div>
+        </section>
+
+      </div>
+
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="f3-2-tecnicas-avancadas.html">← F3.2 Técnicas Avançadas</a>
+        <div class="lnp">
+          <div class="lnp-label">Fundamentos Teóricos · F4</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 1 de 3</div>
+        </div>
+        <a class="btn-nav next" href="f4-2-maquinas-turing.html">F4.2 Máquinas de Turing →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── SIDEBAR ── */
+const sidebar=document.getElementById('sidebar'),pLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMob=()=>window.innerWidth<768;
+if(localStorage.getItem('sb-state')==='collapsed'&&!isMob()){sidebar.classList.add('collapsed');pLine.classList.add('visible')}
+function toggleSidebar(){if(isMob()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}const c=sidebar.classList.toggle('collapsed');pLine.classList.toggle('visible',c);localStorage.setItem('sb-state',c?'collapsed':'expanded')}
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})})});
+const sids=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{const st=la.scrollTop+60;let cur=sids[0];sids.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});document.querySelectorAll('.section-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur))});
+
+/* ══════════════════════════════════════
+   HIERARQUIA EXPLORER
+══════════════════════════════════════ */
+const HIER_DATA=[
+  {title:'Tipo 0 — Recursivamente Enumerável',lang:'Problema da Parada: "este programa para com esta entrada?"',auto:'Máquina de Turing universal (fita infinita, leitura/escrita)',why:'Precisa simular qualquer computação. Memória ilimitada e acesso arbitrário à fita.',limit:'Nem todos os problemas são decidíveis — alguns não terminam nunca.'},
+  {title:'Tipo 1 — Sensível ao Contexto',lang:'aⁿbⁿcⁿ — n de cada símbolo em ordem',auto:'Autômato Linearmente Delimitado (ALD): MT com fita limitada ao tamanho da entrada',why:'Precisa rastrear três contadores simultâneos (n de a, n de b, n de c). Pilha única não basta.',limit:'Problemas de Tipo 1 são decidíveis mas podem ser computacionalmente caros (PSPACE-hard).'},
+  {title:'Tipo 2 — Livre de Contexto',lang:'aⁿbⁿ, {w | parênteses balanceados}, sintaxe de Java/Python',auto:'Autômato com Pilha não-determinístico (APND): AFD + pilha LIFO infinita',why:'A pilha permite rastrear um "contador" ou estrutura aninhada. Para parênteses: empilha ( e desempilha ao ver ).',limit:'Não consegue rastrear dois contadores independentes. {aⁿbⁿcⁿ} exige dois contadores → não é LLC.'},
+  {title:'Tipo 3 — Regular',lang:'(ab)*, a*b+, email simples, strings com número par de \'a\'s',auto:'Autômato Finito Determinístico (AFD) ou AFN: sem memória extra, só estados',why:'Padrões sem contagem ou aninhamento. O estado do autômato codifica tudo o que precisa ser lembrado.',limit:'Não consegue contar arbitrariamente. {aⁿbⁿ} não é regular: para n arbitrário, precisaria de estados infinitos.'},
+];
+let activeHier=-1;
+function hExplore(idx){
+  const explorer=document.getElementById('hierExplorer');
+  if(activeHier===idx){explorer.classList.remove('show');activeHier=-1;document.querySelectorAll('.hier-level').forEach(l=>l.classList.remove('active'));return;}
+  activeHier=idx;
+  document.querySelectorAll('.hier-level').forEach((l,i)=>l.classList.toggle('active',i===idx));
+  const d=HIER_DATA[idx];
+  document.getElementById('hExTitle').textContent=d.title;
+  document.getElementById('hExLang').textContent=d.lang;
+  document.getElementById('hExAuto').textContent=d.auto;
+  document.getElementById('hExWhy').textContent=d.why;
+  document.getElementById('hExLimit').textContent=d.limit;
+  explorer.classList.add('show');
+  setTimeout(()=>explorer.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+}
+
+/* ══════════════════════════════════════
+   AFD SIMULATOR
+══════════════════════════════════════ */
+let afdIdx=0,afdStr='',afdCurState='q0';
+function afdBuildTape(str,pos){
+  const tape=document.getElementById('afdTape'),ptr=document.getElementById('afdPtr');
+  tape.innerHTML='';ptr.innerHTML='';
+  for(let i=0;i<str.length;i++){
+    const cell=document.createElement('div');cell.className='tape-cell';
+    if(i<pos)cell.classList.add('consumed');else if(i===pos)cell.classList.add('active');
+    cell.textContent=str[i];tape.appendChild(cell);
+    const pcell=document.createElement('div');pcell.className='tape-ptr-cell';
+    if(i===pos)pcell.textContent='▲';ptr.appendChild(pcell);
+  }
+  if(str.length===0){const c=document.createElement('div');c.className='tape-cell';c.textContent='ε';tape.appendChild(c)}
+}
+function afdHighlightRow(state){
+  document.getElementById('tr-q0').querySelectorAll('td').forEach(td=>td.classList.remove('current-row'));
+  document.getElementById('tr-q1').querySelectorAll('td').forEach(td=>td.classList.remove('current-row'));
+  const row=document.getElementById('tr-'+state);
+  if(row)row.querySelectorAll('td').forEach(td=>td.classList.add('current-row'));
+}
+function afdHighlightState(state){
+  ['q0','q1'].forEach(s=>{const el=document.getElementById('sc-'+s);if(el)el.classList.remove('current','accepted-state','dead')});
+  const el=document.getElementById('sc-'+state);if(el)el.classList.add('current');
+}
+function afdReset(){
+  afdStr=document.getElementById('afdInput').value.replace(/[^ab]/g,'');
+  afdIdx=0;afdCurState='q0';
+  afdBuildTape(afdStr,0);afdHighlightRow('q0');afdHighlightState('q0');
+  document.getElementById('afdState').textContent='q₀';
+  document.getElementById('afdSym').textContent='—';
+  document.getElementById('afdNext').textContent='—';
+  const log=document.getElementById('afdLog');log.className='sim-log';
+  log.textContent='→ Estado inicial q₀ (par de a\'s: 0). Clique em "Próximo símbolo".';
+  document.getElementById('afdStepLabel').textContent='Passo 0';
+  document.getElementById('afdStepBtn').disabled=false;
+}
+function afdTransition(state,sym){
+  if(state==='q0')return sym==='a'?'q1':'q0';
+  if(state==='q1')return sym==='a'?'q0':'q1';
+  return 'dead';
+}
+function afdStep(){
+  afdStr=document.getElementById('afdInput').value.replace(/[^ab]/g,'');
+  if(afdIdx>=afdStr.length){
+    const accept=afdCurState==='q0';
+    afdBuildTape(afdStr,afdStr.length);
+    document.getElementById('afdTape').querySelectorAll('.tape-cell').forEach(c=>{c.className='tape-cell '+(accept?'accepted':'rejected')});
+    const stEl=document.getElementById('sc-'+afdCurState);
+    if(stEl){stEl.classList.remove('current');stEl.classList.add(accept?'accepted-state':'dead')}
+    const log=document.getElementById('afdLog');
+    log.className='sim-log '+(accept?'ok':'err');
+    log.textContent=accept?`✓ ACEITA! Estado final = q₀ (par de a's). "${afdStr||'ε'}" ∈ L.`:`✗ REJEITA! Estado final = q₁ (ímpar). "${afdStr}" ∉ L.`;
+    document.getElementById('afdStepBtn').disabled=true;return;
+  }
+  const sym=afdStr[afdIdx];const nextState=afdTransition(afdCurState,sym);
+  afdBuildTape(afdStr,afdIdx+1);afdHighlightRow(nextState);afdHighlightState(nextState);
+  document.getElementById('afdState').textContent=afdCurState==='q0'?'q₀':'q₁';
+  document.getElementById('afdSym').textContent=`'${sym}'`;
+  document.getElementById('afdNext').textContent=nextState==='q0'?'q₀':'q₁';
+  const log=document.getElementById('afdLog');log.className='sim-log';
+  log.textContent=`→ δ(${afdCurState==='q0'?'q₀':'q₁'}, '${sym}') = ${nextState==='q0'?'q₀':'q₁'}. ${sym==='a'?'Leu \'a\': muda paridade.':'Leu \'b\': mantém paridade.'}`;
+  afdCurState=nextState;afdIdx++;
+  document.getElementById('afdStepLabel').textContent=`Passo ${afdIdx} de ${afdStr.length}`;
+}
+function afdRunAll(){const run=()=>{if(afdIdx<=afdStr.length){afdStep();setTimeout(run,450)}};run()}
+afdReset();
+
+/* ══════════════════════════════════════
+   AFN SIMULATOR — strings ending in 'ab'
+   δ(p,a)={p,q}, δ(p,b)={p}, δ(q,b)={r}
+══════════════════════════════════════ */
+const AFN_DELTA={p:{a:['p','q'],b:['p']},q:{a:[],b:['r']},r:{a:[],b:[]}};
+let afnIdx=0,afnStr='',afnCurrentStates=new Set(['p']);
+
+function afnBuildTape(str,pos){
+  const tape=document.getElementById('afnTape'),ptr=document.getElementById('afnPtr');
+  tape.innerHTML='';ptr.innerHTML='';
+  for(let i=0;i<str.length;i++){
+    const cell=document.createElement('div');cell.className='tape-cell';
+    if(i<pos)cell.classList.add('consumed');else if(i===pos)cell.classList.add('active');
+    cell.textContent=str[i];tape.appendChild(cell);
+    const pc=document.createElement('div');pc.className='tape-ptr-cell';
+    if(i===pos)pc.textContent='▲';ptr.appendChild(pc);
+  }
+  if(str.length===0){const c=document.createElement('div');c.className='tape-cell';c.textContent='ε';tape.appendChild(c)}
+}
+
+function afnRenderStates(states){
+  ['p','q','r'].forEach(s=>{
+    const el=document.getElementById('afn-'+s);if(!el)return;
+    el.classList.remove('active-state','final-accept','final-reject');
+    if(states.has(s))el.classList.add('active-state');
+  });
+  const setStr=states.size>0?'{'+[...states].join(', ')+'}':'∅';
+  document.getElementById('afnSetDisplay').textContent='Conjunto de estados ativos: '+setStr;
+}
+
+function afnReset(){
+  afnStr=document.getElementById('afnInput').value.replace(/[^ab]/g,'');
+  afnIdx=0;afnCurrentStates=new Set(['p']);
+  afnBuildTape(afnStr,0);afnRenderStates(afnCurrentStates);
+  const log=document.getElementById('afnLog');log.className='sim-log';
+  log.textContent='→ Estado inicial: {p}. A string é aceita se o conjunto final contém r.';
+  document.getElementById('afnStepLabel').textContent='Passo 0';
+  document.getElementById('afnStepBtn').disabled=false;
+}
+
+function afnComputeNext(states,sym){
+  const next=new Set();
+  states.forEach(s=>{(AFN_DELTA[s][sym]||[]).forEach(ns=>next.add(ns))});
+  return next;
+}
+
+function afnStepFn(){
+  afnStr=document.getElementById('afnInput').value.replace(/[^ab]/g,'');
+  if(afnIdx>=afnStr.length){
+    const accepts=afnCurrentStates.has('r');
+    ['p','q','r'].forEach(s=>{
+      const el=document.getElementById('afn-'+s);if(!el)return;
+      el.classList.remove('active-state');
+      if(afnCurrentStates.has(s))el.classList.add(accepts?'final-accept':'final-reject');
+    });
+    const log=document.getElementById('afnLog');
+    log.className='sim-log '+(accepts?'ok':'err');
+    log.textContent=accepts?`✓ ACEITA! Conjunto final ${'{'+[...afnCurrentStates].join(', ')+'}'} contém r. A string termina em "ab".`:`✗ REJEITA! Conjunto final ${'{'+[...afnCurrentStates].join(', ') || '∅'+'}'} não contém r. A string não termina em "ab".`;
+    document.getElementById('afnStepBtn').disabled=true;return;
+  }
+  const sym=afnStr[afnIdx];
+  const next=afnComputeNext(afnCurrentStates,sym);
+  afnIdx++;afnBuildTape(afnStr,afnIdx);afnCurrentStates=next;afnRenderStates(next);
+  const log=document.getElementById('afnLog');log.className='sim-log';
+  const setStr=next.size>0?'{'+[...next].join(', ')+'}':'∅';
+  log.textContent=`→ Leu '${sym}'. Novo conjunto: ${setStr}. ${next.size===0?'Conjunto vazio — caminho morto, mas outros ramos podem continuar.':''}`;
+  document.getElementById('afnStepLabel').textContent=`Passo ${afnIdx} de ${afnStr.length}`;
+}
+
+function afnRunAll(){const run=()=>{if(afnIdx<=afnStr.length){afnStepFn();setTimeout(run,500)}};run()}
+afnReset();
+
+/* ══════════════════════════════════════
+   REGEX TESTER
+══════════════════════════════════════ */
+const REGEX_TEST_STRINGS=['ab','abab','ababab','a','b','ba','aba','','abc','abba','aabb'];
+function testRegex(){
+  const pat=document.getElementById('regexPattern').value;
+  const res=document.getElementById('regexResults');res.innerHTML='';
+  let re;
+  try{re=new RegExp('^(?:'+pat+')$')}catch(e){res.innerHTML=`<div style="color:var(--red);font-size:.84rem;font-family:var(--fm)">Erro na regex: ${e.message}</div>`;return}
+  REGEX_TEST_STRINGS.forEach(s=>{
+    const m=re.test(s);
+    const row=document.createElement('div');row.className='regex-result-row '+(m?'match':'nomatch');
+    row.innerHTML=`<span class="rr-badge ${m?'yes':'no'}">${m?'✓':'✗'}</span><span style="font-family:var(--fm)">"${s||'ε'}"</span><span style="font-size:.8rem;color:var(--muted)">${m?'aceita':'rejeitada'}</span>`;
+    res.appendChild(row);
+  });
+}
+testRegex();
+
+/* ══════════════════════════════════════
+   GLC DERIVATION SIMULATOR
+══════════════════════════════════════ */
+const DERIV_STEPS=[
+  {form:'<span class="deriv-highlight">E</span>',rule:'início',log:'→ Partimos do símbolo inicial E'},
+  {form:'<span class="deriv-highlight">E</span> + T',rule:'E → E + T',log:'→ Expande E usando E → E + T (adição tem menor precedência que multiplicação)'},
+  {form:'<span class="deriv-highlight">T</span> + T',rule:'E → T',log:'→ Expande E (esquerda) usando E → T'},
+  {form:'<span class="deriv-highlight">F</span> + T',rule:'T → F',log:'→ Expande T usando T → F'},
+  {form:'<span style="color:var(--green);font-weight:700">2</span> + <span class="deriv-highlight">T</span>',rule:'F → 2',log:'→ Expande F para o terminal 2'},
+  {form:'2 + <span class="deriv-highlight">T</span> * F',rule:'T → T * F',log:'→ Expande T usando T → T * F (multiplicação)'},
+  {form:'2 + <span class="deriv-highlight">F</span> * F',rule:'T → F',log:'→ Expande T (esquerda) usando T → F'},
+  {form:'2 + <span style="color:var(--green);font-weight:700">3</span> * <span class="deriv-highlight">F</span>',rule:'F → 3',log:'→ Expande F para o terminal 3'},
+  {form:'2 + 3 * <span style="color:var(--green);font-weight:700">4</span>',rule:'F → 4',log:'✓ Derivação completa! "2 + 3 * 4" gerada pela gramática. A estrutura garante precedência: 3*4 antes de + 2.'},
+];
+let derivIdx=0;
+function derivRender(){
+  const cont=document.getElementById('derivSteps');cont.innerHTML='';
+  DERIV_STEPS.slice(0,derivIdx).forEach((s,i)=>{
+    const div=document.createElement('div');div.className='deriv-step';
+    div.innerHTML=`<span style="font-family:var(--fm);font-size:.78rem;color:var(--muted);width:1.4rem;flex-shrink:0">${i}</span><span style="flex:1;font-family:var(--fm);font-size:.88rem">${s.form}</span>${i>0?`<span class="deriv-rule">[${s.rule}]</span>`:''}`;
+    cont.appendChild(div);
+  });
+  document.getElementById('derivStepLabel').textContent=`Passo ${derivIdx} de ${DERIV_STEPS.length}`;
+  document.getElementById('derivLog').textContent=derivIdx>0?DERIV_STEPS[derivIdx-1].log:'→ Clique em "Próxima derivação" para ver passo a passo';
+  document.getElementById('derivStepBtn').disabled=derivIdx>=DERIV_STEPS.length;
+}
+function derivStep(){if(derivIdx<DERIV_STEPS.length){derivIdx++;derivRender()}}
+function derivRunAll(){const run=()=>{if(derivIdx<DERIV_STEPS.length){derivIdx++;derivRender();setTimeout(run,700)}};run()}
+function derivReset(){derivIdx=0;derivRender()}
+derivRender();
+
+/* ══════════════════════════════════════
+   AP SIMULATOR — aⁿbⁿ
+══════════════════════════════════════ */
+let apIdx=0,apStr='',apStackArr=[];
+function apBuildTape(str,pos){
+  const tape=document.getElementById('apTape');tape.innerHTML='';
+  for(let i=0;i<str.length;i++){
+    const cell=document.createElement('div');cell.className='tape-cell';
+    if(i<pos)cell.classList.add('consumed');else if(i===pos)cell.classList.add('active');
+    cell.textContent=str[i];tape.appendChild(cell);
+  }
+  if(str.length===0){const c=document.createElement('div');c.className='tape-cell';c.textContent='ε';tape.appendChild(c)}
+}
+function apRenderStack(stack){
+  const div=document.getElementById('apStack');
+  div.innerHTML='<div style="font-size:.72rem;color:var(--muted);font-family:var(--fm)">topo ↑</div>';
+  [...stack].reverse().forEach(s=>{
+    const cell=document.createElement('div');
+    cell.style.cssText='padding:.3rem .8rem;background:var(--accent);color:white;border-radius:4px;font-family:var(--fm);font-size:.88rem;font-weight:700;margin:.1rem 0;width:100%;text-align:center';
+    cell.textContent=s;div.appendChild(cell);
+  });
+  const z=document.createElement('div');
+  z.style.cssText='padding:.3rem .8rem;background:var(--n200);color:var(--n500);border-radius:4px;font-family:var(--fm);font-size:.88rem;margin:.1rem 0;width:100%;text-align:center';
+  z.textContent='Z₀';div.appendChild(z);
+}
+function apReset(){
+  apStr=document.getElementById('apInput').value.trim().replace(/[^ab]/g,'');
+  apIdx=0;apStackArr=[];
+  apBuildTape(apStr,0);apRenderStack([]);
+  document.getElementById('apState').textContent='q₀';
+  document.getElementById('apSym').textContent='—';
+  document.getElementById('apTop').textContent='Z₀';
+  document.getElementById('apAction').textContent='—';
+  const log=document.getElementById('apLog');log.className='sim-log';
+  log.textContent='→ Estado q₀, pilha vazia (Z₀). Cada \'a\' empilha \'A\'; cada \'b\' desempilha \'A\'.';
+  document.getElementById('apStepLabel').textContent='Passo 0';
+  document.getElementById('apStepBtn').disabled=false;
+}
+function apStep(){
+  apStr=document.getElementById('apInput').value.trim().replace(/[^ab]/g,'');
+  if(apIdx>=apStr.length){
+    const ok=apStackArr.length===0;
+    const log=document.getElementById('apLog');
+    log.className='sim-log '+(ok?'ok':'err');
+    log.textContent=ok?`✓ ACEITA! Pilha vazia ao fim da leitura. "${apStr}" ∈ {aⁿbⁿ}.`:`✗ REJEITA! Pilha não vazia (${apStackArr.length} item(ns)). "${apStr}" ∉ {aⁿbⁿ}.`;
+    apBuildTape(apStr,apStr.length);document.getElementById('apStepBtn').disabled=true;return;
+  }
+  const sym=apStr[apIdx];let action='';
+  if(sym==='a'){apStackArr.push('A');action='push A';}
+  else if(sym==='b'){if(apStackArr.length>0){apStackArr.pop();action='pop A';}else{action='ERRO: pilha vazia!';}}
+  apIdx++;
+  apBuildTape(apStr,apIdx);apRenderStack(apStackArr);
+  document.getElementById('apState').textContent=`q${apStackArr.length>0?'₀':'f'}`;
+  document.getElementById('apSym').textContent=`'${sym}'`;
+  document.getElementById('apTop').textContent=apStackArr.length>0?apStackArr[apStackArr.length-1]:'Z₀';
+  document.getElementById('apAction').textContent=action;
+  const log=document.getElementById('apLog');log.className='sim-log';
+  const tops=apStackArr.length>0?`Pilha: ${apStackArr.length} A's`:'Pilha vazia';
+  log.textContent=`→ Leu '${sym}'. Ação: ${action}. ${tops}. (${apStr.length-apIdx} símbolos restantes)`;
+  document.getElementById('apStepLabel').textContent=`Passo ${apIdx} de ${apStr.length}`;
+}
+function apRunAll(){const run=()=>{if(apIdx<=apStr.length){apStep();setTimeout(run,420)}};run()}
+apReset();
+
+/* ══════════════════════════════════════
+   PUMPING LEMMA STEPS
+══════════════════════════════════════ */
+const PUMP_STEPS=[
+  {text:'<strong>Suposição:</strong> Suponha, por contradição, que L = {aⁿbⁿ | n≥0} é regular.',type:'normal'},
+  {text:'<strong>Passo 1:</strong> Pelo Pumping Lemma, existe p ≥ 1 (comprimento de bombeamento). Escolhemos a string w = aᵖbᵖ ∈ L, com |w| = 2p ≥ p. ✓',type:'normal'},
+  {text:'<strong>Passo 2:</strong> Pelo lema, w = xyz onde |xy| ≤ p e |y| ≥ 1. Como |xy| ≤ p e w começa com aᵖ, temos que x e y consistem apenas de \'a\'s. Logo y = aᵏ para algum k ≥ 1.',type:'normal'},
+  {text:'<strong>Visualização:</strong> w = [x = aʲ][y = aᵏ][z = aᵖ⁻ʲ⁻ᵏbᵖ] onde j+k ≤ p, k ≥ 1.',type:'visual'},
+  {text:'<strong>Passo 3 — Bombeamento:</strong> Pelo lema, xyⁱz ∈ L para todo i ≥ 0. Tome i = 0: xy⁰z = xz = aᵖ⁻ᵏbᵖ.',type:'normal'},
+  {text:'<strong>Contradição:</strong> xz = aᵖ⁻ᵏbᵖ com k ≥ 1 → p-k < p → número de \'a\'s ≠ número de \'b\'s → xz ∉ L!',type:'error'},
+  {text:'<strong>Conclusão:</strong> Chegamos em contradição com a suposição de que L é regular. Portanto L = {aⁿbⁿ} NÃO é regular. É Tipo 2 (LLC). ■',type:'success'},
+];
+let pumpIdx=0;
+function pumpRender(){
+  const cont=document.getElementById('pumpSteps');cont.innerHTML='';
+  PUMP_STEPS.slice(0,pumpIdx).forEach(s=>{
+    const div=document.createElement('div');div.className='deriv-step';
+    if(s.type==='visual'){
+      div.innerHTML=`<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin:.3rem 0">
+        <div class="pump-part pump-x">aʲ<span class="pump-label">x</span></div>
+        <div class="pump-part pump-y">aᵏ<span class="pump-label">y (bombeável)</span></div>
+        <div class="pump-part pump-z">aᵖ⁻ʲ⁻ᵏbᵖ<span class="pump-label">z</span></div>
+      </div>`;
+    } else {
+      const colors={normal:'',error:'background:#fde8e8;border-left:3px solid var(--red);',success:'background:#e8f5ee;border-left:3px solid var(--green);'};
+      div.style.cssText=colors[s.type]||'';
+      div.innerHTML=`<span style="font-size:.9rem;line-height:1.7">${s.text}</span>`;
+    }
+    cont.appendChild(div);
+  });
+  document.getElementById('pumpStepLabel').textContent=`Passo ${pumpIdx} de ${PUMP_STEPS.length}`;
+  document.getElementById('pumpLog').textContent=pumpIdx>0?PUMP_STEPS[pumpIdx-1].text.replace(/<[^>]+>/g,''):'→ Veremos como o Pumping Lemma prova que {aⁿbⁿ} não pode ser regular';
+  document.getElementById('pumpStepBtn').disabled=pumpIdx>=PUMP_STEPS.length;
+}
+function pumpStep(){if(pumpIdx<PUMP_STEPS.length){pumpIdx++;pumpRender()}}
+function pumpReset(){pumpIdx=0;pumpRender()}
+pumpRender();
+
+/* ══════════════════════════════════════
+   QUIZ — data-qid/data-opt pattern
+══════════════════════════════════════ */
+const QUIZ_CORRECT={q1:'B',q2:'C',q3:'B',q4:'C',q5:'C',q6:'C'};
+const FB={
+  q1:{
+    ok:'Correto! {aⁿb²ⁿ} é livre de contexto (Tipo 2). A GLC S → aSbb | ε a gera. Não é regular porque, para qualquer AFD com k estados, basta tomar n > k para que o autômato não consiga distinguir entre dois prefixos com quantidades diferentes de \\'a\\'s — pelo princípio da casa dos pombos, ele acabaria aceitando uma string como aⁿb²ᵐ com n ≠ m, que não pertence à linguagem. Análogo ao caso clássico {aⁿbⁿ} demonstrado pelo Pumping Lemma na seção 8.',
+    why:{
+      A:'Tipo 3 (Regular) exige que a linguagem possa ser reconhecida por um AFD com número fixo de estados. Para reconhecer {aⁿb²ⁿ}, o AFD precisaria "lembrar" quantos \'a\'s leu para verificar se há exatamente 2n \'b\'s depois — o que requer infinitos estados (um por valor de n). Logo não é regular.',
+      C:'Tipo 1 (Sensível ao Contexto) seria mais restritivo que necessário. {aⁿb²ⁿ} é LLC (Tipo 2), e toda LLC também é Tipo 1 — mas ao classificar, queremos o tipo mais específico (menor) que contém a linguagem. Aqui é Tipo 2.',
+      D:'Tipo 0 (Recursivamente Enumerável) inclui linguagens não decidíveis como o Problema da Parada. {aⁿb²ⁿ} é perfeitamente decidível e pertence ao Tipo 2. Tipo 0 é muito mais poderoso do que necessário.'
+    }
+  },
+  q2:{
+    ok:'Correto! Na construção de subconjuntos, cada estado do AFD corresponde a um subconjunto dos estados do AFN. Com n estados, há 2ⁿ subconjuntos possíveis (cada estado pode estar ou não estar no conjunto). Na prática, muitos são inatingíveis, mas no pior caso — como o AFN que aceita strings com \'a\' na n-ésima posição do fim — todos 2ⁿ subconjuntos são necessários.',
+    why:{
+      A:'n estados seria o mesmo número do AFN original, o que nunca é garantido. Em geral a conversão aumenta o número de estados exponencialmente. n seria correto apenas em casos muito especiais.',
+      B:'n² não tem justificativa na construção. Não há produto cartesiano envolvido — o número de subconjuntos de um conjunto de n elementos é 2ⁿ, não n².',
+      D:'n! (n fatorial) seria o número de permutações dos estados, não de subconjuntos. Na construção de subconjuntos, a ordem dos estados dentro de um conjunto não importa — só importa quais estados estão presentes.'
+    }
+  },
+  q3:{
+    ok:'Correto! O Pumping Lemma é uma condição necessária para regularidade: toda linguagem regular satisfaz o lema. Mas não é suficiente: existem linguagens não-regulares que também satisfazem as condições do lema. Para provar que L é regular, você precisa construir um AFD/AFN/ER. Para provar que NÃO é regular, use o Pumping Lemma por contradição.',
+    why:{
+      A:'Esta afirmação inverte a direção da implicação. O lema diz: "L regular → L satisfaz o lema." A contrapositiva é: "L não satisfaz o lema → L não é regular." Mas "L satisfaz o lema → L é regular" é falsa — existem contraexemplos.',
+      C:'Encontrar uma decomposição xyz para uma string específica não prova nada sobre a linguagem. O Pumping Lemma exige que a decomposição funcione para TODA string suficientemente longa — e mesmo assim só prova não-regularidade quando a contradição é encontrada.',
+      D:'Linguagens finitas são sempre regulares (podem ser enumeradas numa ER de alternâncias). O Pumping Lemma para linguagens finitas é trivialmente satisfeito (escolha p maior que o comprimento da string mais longa — não há strings suficientemente longas). Portanto o lema nunca serve para linguagens finitas.'
+    }
+  },
+  q4:{
+    ok:'Correto! {w | w começa e termina com o mesmo símbolo} é regular: ER = a(a|b)*a | b(a|b)*b | a | b. Um AFD com 5 estados a reconhece. As outras três opções exigem contagem ou memória ilimitada: {aⁿbⁿ} e "mesmo número de a\'s e b\'s" exigem contar; {ww} exige lembrar a string inteira.',
+    why:{
+      A:'{aⁿbⁿ} exige que o autômato lembre o número exato de \'a\'s para verificar se o número de \'b\'s bate. Isso requer memória ilimitada (um estado por valor de n) → não é regular.',
+      B:'"Mesmo número de a\'s e b\'s" é equivalente ao problema de contar — e é até mais geral que {aⁿbⁿ}. Também não é regular pelo Pumping Lemma.',
+      D:'{ww} exige que o autômato lembre uma string arbitrária inteira para verificar se a segunda metade é igual à primeira. Isso requer memória ilimitada → não é regular nem LLC (é Tipo 1 — sensível ao contexto).'
+    }
+  },
+  q5:{
+    ok:'Correto! APND (Autômato com Pilha Não-Determinístico) reconhece exatamente as linguagens livres de contexto (Tipo 2). APD (determinístico) é estritamente mais fraco — existe LLC não reconhecível por APD. Isso contrasta com AFD vs AFN, que têm o mesmo poder. MT reconhece Tipo 0 (mais amplo que LLC).',
+    why:{
+      A:'AFD reconhece apenas linguagens regulares (Tipo 3) — uma subclasse estrita das LLC. Ele não tem memória para rastrear estruturas aninhadas como parênteses balanceados.',
+      B:'Máquina de Turing reconhece Tipo 0 (Recursivamente Enumerável) — mais amplo que LLC. Uma MT pode reconhecer LLC, mas também reconhece linguagens que não são LLC. Não é o "exatamente" que o enunciado pede.',
+      D:'APD (determinístico) é mais fraco que APND. Existe LLC que nenhum APD reconhece. Por exemplo, {wwᴿ | w ∈ {a,b}*} (palíndromos de comprimento par) é LLC mas não é deterministicamente livre de contexto.'
+    }
+  },
+  q6:{
+    ok:'Correto! Ambiguidade = existe ao menos uma string com duas ou mais árvores de derivação distintas (equivalentemente, duas derivações mais à esquerda). Ex: E→E+E|E*E|num é ambígua porque "2+3*4" tem duas árvores. Gramáticas ambíguas são problemáticas para compiladores. A verificação de ambiguidade é indecidível em geral.',
+    why:{
+      A:'Múltiplos não-terminais são normais em qualquer gramática não-trivial. A GLC de expressões aritméticas tem E, T, F como não-terminais e não é ambígua. Ambiguidade não tem relação com o número de não-terminais.',
+      B:'Aceitar strings de comprimento infinito é propriedade de linguagens infinitas, não de ambiguidade. Uma gramática finita pode gerar uma linguagem infinita sem ser ambígua (ex: S→aS|ε gera a* sem ambiguidade).',
+      D:'Produções com ε (como S→ε) são comuns em gramáticas livres de contexto (ex: S→aSb|ε gera {aⁿbⁿ}) e não causam ambiguidade por si só. Ambiguidade depende de haver duas árvores para alguma string, não da presença de ε.'
+    }
+  }
+};
+
+function ansQ(el){
+  const qid=el.dataset.qid,opt=el.dataset.opt;
+  const box=document.getElementById(qid);if(box.dataset.answered)return;
+  box.dataset.answered='1';
+  box.querySelectorAll('.quiz-option').forEach(o=>o.style.pointerEvents='none');
+  const correct=QUIZ_CORRECT[qid];
+  const isOk=opt===correct;
+  el.classList.add(isOk?'correct':'wrong');
+  if(!isOk)box.querySelectorAll('.quiz-option').forEach(o=>{if(o.dataset.opt===correct)o.classList.add('correct')});
+  const fb=document.getElementById(qid+'-fb');
+  const info=FB[qid];
+  if(isOk){
+    fb.innerHTML=`<strong>✓ Correto!</strong> ${info.ok}`;
+    fb.className='quiz-feedback show ok';
+  } else {
+    const whyWrong=info.why[opt]||'';
+    fb.innerHTML=`<strong>✗ Incorreto.</strong><br><br><strong>Por que a opção ${opt} está errada:</strong> ${whyWrong}<br><br><strong>Por que a opção ${correct} está certa:</strong> ${info.ok}`;
+    fb.className='quiz-feedback show fail';
+  }
+}
+</script>
+</body>
+</html>

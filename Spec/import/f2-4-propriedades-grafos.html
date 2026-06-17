@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F2.4 — Propriedades de Grafos · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0F1E;--sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;--n300:#B8BDD8;
+  --n400:#8A90B0;--n500:#5C6180;--white:#fff;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-pill:9999px;
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  /* Tema F2 — azul de F2.3 */
+  --bg:#f0f6ff;--card:#fff;--primary:#0d2d6b;--accent:#1a6bcc;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#c8d8f0;--code-bg:#e8f0fe;
+  --text:#1a1a2e;--muted:#5a6a8a;--purple:#7c3aed;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,var(--sap-bg),var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--accent)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));border-radius:var(--r-pill);width:28%}
+.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:var(--code-bg);color:var(--accent);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:#FEF3C7}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:40%;background:linear-gradient(90deg,var(--accent),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;text-decoration:none}
+.lesson-area{flex:1;overflow-y:auto}.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+.lesson-header{background:linear-gradient(135deg,#0d2d6b 0%,#065f46 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--r-pill);padding:3px 14px;font-family:var(--fm);font-size:.72rem;letter-spacing:1px;margin-bottom:.8rem}
+.hero-title{font-family:var(--fd);font-size:1.8rem;font-weight:800;margin-bottom:.5rem;position:relative;z-index:1}
+.hero-sub{opacity:.85;font-size:.9rem;max-width:600px;margin:.4rem auto 0;position:relative;z-index:1}
+.hero-chips{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;margin-top:1rem;position:relative;z-index:1}
+.hero-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-pill);padding:4px 14px;font-size:.8rem;font-family:var(--fm)}
+.section-nav{background:#0d2d6b;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover,.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+.lesson-content{max-width:920px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3.2rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.3rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.3rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.5rem 0 .6rem;font-weight:700}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.8}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--fm);font-size:.88rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0}
+.callout{border-left:4px solid var(--accent);background:var(--code-bg);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem;line-height:1.7}
+.callout.warning{border-color:var(--accent2);background:#fff3e0}
+.callout.success{border-color:var(--green);background:#e8f5ee}
+.callout strong{color:var(--primary)}
+/* SYM DICT */
+.sym-dict{display:grid;gap:.5rem;margin:1rem 0}
+.sym-row{display:grid;grid-template-columns:120px 1fr;gap:1rem;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem}
+.sym-row.highlight{border-color:var(--accent);background:var(--code-bg)}
+.sym-sym{font-family:var(--fm);font-size:.95rem;color:var(--accent);text-align:center;line-height:1;font-weight:700}
+.sym-body{font-size:.88rem;line-height:1.6}
+.sym-body strong{color:var(--primary)}
+.sym-body .eg{margin-top:.3rem;font-family:var(--fm);font-size:.82rem;background:var(--code-bg);padding:2px 8px;border-radius:4px;display:inline-block}
+/* GRAPH SVG */
+.gv-node{fill:var(--card);stroke:var(--accent);stroke-width:2}
+.gv-node.hl{fill:var(--accent);stroke:var(--accent)}
+.gv-node.hl-2{fill:var(--accent2);stroke:var(--accent2)}
+.gv-node.hl-3{fill:var(--green);stroke:var(--green)}
+.gv-node.hl-4{fill:var(--red);stroke:var(--red)}
+.gv-label{font-family:var(--fm);font-size:11px;fill:var(--primary);text-anchor:middle;dominant-baseline:central;font-weight:700;pointer-events:none}
+.gv-label.on{fill:white}
+.gv-edge{stroke:var(--n400);stroke-width:1.6;fill:none}
+.gv-edge.hl{stroke:var(--accent);stroke-width:3}
+.gv-edge.hl-2{stroke:var(--accent2);stroke-width:3}
+/* SIM BOX */
+.sim-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.sim-box h4{color:var(--primary);font-weight:700;font-size:.95rem;margin-bottom:.6rem}
+.sim-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0;align-items:center}
+.sim-btn{padding:.38rem .9rem;border-radius:var(--r-pill);border:1px solid var(--accent);background:var(--white);color:var(--accent);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s}
+.sim-btn:hover{background:var(--code-bg)}
+.sim-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.sim-svg-wrap{background:var(--n50);border-radius:8px;padding:.6rem;text-align:center;overflow-x:auto}
+.sim-info{font-size:.85rem;color:var(--text);margin-top:.5rem;padding:.6rem .8rem;background:var(--code-bg);border-radius:6px;font-family:var(--fm)}
+.sim-info.ok{background:#e8f5ee;color:var(--green);font-weight:700}
+.sim-info.fail{background:#fde8e8;color:var(--red);font-weight:700}
+/* INPUT row */
+.input-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin:.6rem 0}
+.input-row label{font-size:.82rem;color:var(--muted);font-family:var(--fm)}
+.input-row input[type="text"]{font-family:var(--fm);font-size:.9rem;padding:.4rem .7rem;border:1.5px solid var(--border);border-radius:6px;outline:none;color:var(--primary);min-width:220px}
+.input-row input[type="text"]:focus{border-color:var(--accent)}
+.input-row input[type="number"]{font-family:var(--fm);font-size:.9rem;padding:.4rem .7rem;border:1.5px solid var(--border);border-radius:6px;outline:none;color:var(--primary);width:80px}
+input[type="range"]{accent-color:var(--accent)}
+/* TABLE */
+.scale-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.86rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.scale-table th{background:var(--primary);color:white;padding:.55rem .8rem;text-align:left;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px}
+.scale-table td{padding:.5rem .8rem;border-bottom:1px solid var(--border)}
+.scale-table tr:nth-child(even) td{background:var(--n50)}
+/* DETAILS TOGGLE */
+.details-toggle{margin:.8rem 0;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.dt-trigger{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--accent);background:var(--code-bg);user-select:none;transition:background .15s}
+.dt-trigger:hover{background:#dde6ff}
+.dt-arrow{font-size:.7rem;transition:transform .2s}
+.dt-trigger.open .dt-arrow{transform:rotate(90deg)}
+.dt-content{display:none;background:var(--card);padding:.8rem 1rem}
+.dt-content.show{display:block}
+/* PROOF STEPS */
+.proof-steps{margin:1rem 0}
+.proof-step{display:flex;gap:1rem;padding:.8rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:.5rem 0;font-size:.9rem;align-items:flex-start;line-height:1.6}
+.proof-step .ps-num{background:var(--accent);color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;font-family:var(--fm)}
+.proof-step .ps-body code{background:var(--code-bg);padding:1px 6px;border-radius:4px}
+/* QUIZ */
+.quiz-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.quiz-q{font-weight:600;color:var(--primary);margin-bottom:1rem;font-size:.95rem;line-height:1.5}
+.quiz-option{display:flex;align-items:flex-start;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:var(--n50);margin:.4rem 0;font-size:.9rem;line-height:1.5}
+.quiz-option:hover{background:var(--code-bg);border-color:var(--accent)}
+.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+.quiz-feedback{margin-top:.8rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;display:none;line-height:1.6}
+.quiz-feedback.show{display:block}.quiz-feedback.ok{background:#e8f5ee;color:#15803d;border:1px solid #86efac}.quiz-feedback.fail{background:#fde8e8;color:var(--red);border:1px solid #fca5a5}
+/* SUMMARY */
+.summary-box{background:linear-gradient(135deg,#0d2d6b,#065f46);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}
+.summary-box h3{color:white;margin-bottom:1rem;font-size:1.05rem}
+.summary-row{display:flex;gap:.6rem;margin:.45rem 0;align-items:flex-start;font-size:.9rem;line-height:1.5}
+.summary-row::before{content:'✓';color:#86efac;flex-shrink:0;font-weight:700;margin-top:.05rem}
+.ref-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.84rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.ref-table th{background:rgba(255,255,255,.15);color:white;padding:.5rem .8rem;text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(255,255,255,.2)}
+.ref-table td{padding:.48rem .8rem;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.88)}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table td:first-child{font-family:var(--fm);font-weight:700;color:#86efac}
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05)}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));width:100%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}
+.btn-nav:hover{background:var(--n100);color:var(--ink)}.btn-nav.next{background:var(--accent);color:white;border-color:var(--accent)}.btn-nav.next:hover{background:var(--primary)}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .lesson-content{padding:1.5rem 1rem}
+  .sym-row{grid-template-columns:80px 1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">28%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">7 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div><a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div><a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span></a><a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div><a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span></a></div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section"><a class="sb-item" href="curriculo.html"><div class="sb-item-icon">📊</div><span class="sb-item-text">Currículo Completo</span></a></div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section"><a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span></a></div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Algoritmos e EDs</a><span class="sep">›</span>
+        <span class="current">F2.4 — Propriedades de Grafos</span>
+      </div>
+      <div class="topbar-actions"><a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a></div>
+    </header>
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header">
+        <div class="hero-tag">ALGORITMOS E ESTRUTURAS DE DADOS · F2.4</div>
+        <div class="hero-title">Propriedades de Grafos</div>
+        <div class="hero-sub">As perguntas conceituais que caem na prova: graus, contagem de arestas, árvores, bipartição e planaridade. Tudo o que F2.3 não cobriu mas o POSCOMP cobra.</div>
+        <div class="hero-chips">
+          <div class="hero-chip">Lema do Aperto de Mão</div>
+          <div class="hero-chip">Caracterizações de Árvore</div>
+          <div class="hero-chip">Fórmula de Euler</div>
+        </div>
+      </div>
+      <nav class="section-nav" id="sectionNav">
+        <a href="#motivacao">1. Por que cai em prova</a>
+        <a href="#terminologia">2. Caminho × Trilha × Ciclo</a>
+        <a href="#graus">3. Graus &amp; Aperto de Mão</a>
+        <a href="#contagem">4. Contagem em famílias</a>
+        <a href="#arvores">5. Árvores</a>
+        <a href="#bipartido">6. Bipartição</a>
+        <a href="#digrafos">7. Digrafos</a>
+        <a href="#planaridade">8. Planaridade</a>
+        <a href="#quiz">9. Quiz</a>
+        <a href="#resumo">10. Resumo</a>
+      </nav>
+      <div class="lesson-content">
+
+<!-- §1 MOTIVAÇÃO COM QUESTÕES POSCOMP -->
+<section id="motivacao">
+  <h2><span class="num">1</span> Por que esse conteúdo cai em prova</h2>
+
+  <p>No F2.3 você viu grafos como estrutura de dados — BFS, DFS, Dijkstra, MST, ordenação topológica. Tudo focado em <em>algoritmos sobre grafos</em>. Mas a prova POSCOMP cobra também outro tipo de pergunta — perguntas <strong>sobre o grafo em si</strong>, sem rodar algoritmo nenhum:</p>
+
+  <div class="card" style="background:var(--n50)">
+    <p style="margin-bottom:.6rem;font-weight:700;color:var(--primary)">Questão típica 1 — POSCOMP estilo:</p>
+    <p style="font-size:.88rem;font-style:italic;margin:0">"Existe grafo simples com 5 vértices em que todos têm grau 3?"</p>
+    <p style="margin-top:.6rem;font-size:.84rem;color:var(--muted)">Você precisa do <strong>Lema do Aperto de Mão</strong> (seção 3) para resolver em 5 segundos.</p>
+  </div>
+
+  <div class="card" style="background:var(--n50)">
+    <p style="margin-bottom:.6rem;font-weight:700;color:var(--primary)">Questão típica 2 — POSCOMP estilo:</p>
+    <p style="font-size:.88rem;font-style:italic;margin:0">"Um grafo conexo com 15 vértices e 14 arestas é necessariamente:"<br>
+    (A) Cíclico &nbsp; (B) Uma árvore &nbsp; (C) Bipartido &nbsp; (D) Completo</p>
+    <p style="margin-top:.6rem;font-size:.84rem;color:var(--muted)">Você precisa das <strong>caracterizações de árvore</strong> (seção 5) para acertar sem hesitar.</p>
+  </div>
+
+  <div class="card" style="background:var(--n50)">
+    <p style="margin-bottom:.6rem;font-weight:700;color:var(--primary)">Questão típica 3 — POSCOMP estilo:</p>
+    <p style="font-size:.88rem;font-style:italic;margin:0">"Em um grafo bipartido completo K₄,₅, quantas arestas existem?"</p>
+    <p style="margin-top:.6rem;font-size:.84rem;color:var(--muted)">Você precisa da <strong>fórmula de contagem de arestas</strong> em famílias especiais (seção 4).</p>
+  </div>
+
+  <p>Essas três questões compartilham uma característica: <strong>todas se resolvem com fórmulas curtas e raciocínio combinatório</strong> — não com algoritmos. São pontos baratos, e quem decora as fórmulas garante esses pontos. Quem tenta deduzir na hora perde tempo.</p>
+
+  <h3>O recorte deste módulo</h3>
+
+  <p>Vamos cobrir exatamente o que cai em prova:</p>
+
+  <ul style="padding-left:1.4rem;line-height:1.8;font-size:.9rem;list-style:none">
+    <li>📋 <strong>Terminologia precisa</strong> — passeio, trilha, caminho, ciclo (alvo de pegadinhas)</li>
+    <li>📋 <strong>Lema do Aperto de Mão</strong> — soma dos graus = 2|E|</li>
+    <li>📋 <strong>Contagem em famílias especiais</strong> — Kₙ, k-regular, Kₘ,ₙ</li>
+    <li>📋 <strong>Caracterizações de árvore</strong> — quatro definições equivalentes</li>
+    <li>📋 <strong>Bipartição</strong> ⟺ sem ciclo ímpar</li>
+    <li>📋 <strong>Conexidade em digrafos</strong> — forte vs fraca</li>
+    <li>📋 <strong>Planaridade</strong> — fórmula de Euler V−E+F=2</li>
+  </ul>
+
+  <p>Cada seção: ideia, exemplo numérico, simulador interativo para experimentar, exercício resolvido. Sem teoria pura.</p>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 2):</strong> antes de qualquer fórmula, vamos limpar a terminologia. "Caminho" e "ciclo" parecem óbvios — mas há quatro termos sutis que o POSCOMP confunde: passeio, trilha, caminho e ciclo.
+  </div>
+</section>
+
+<!-- §2 TERMINOLOGIA -->
+<section id="terminologia">
+  <h2><span class="num">2</span> Caminho, trilha, passeio, ciclo</h2>
+
+  <p>O POSCOMP gosta de pegadinhas com terminologia. As quatro palavras parecem sinônimos, mas têm significados precisos que mudam a resposta. Vamos definir cada uma e ver no mesmo grafo qual sequência se encaixa em qual conceito.</p>
+
+  <h3>Definições</h3>
+
+  <div class="sym-dict">
+    <div class="sym-row">
+      <div class="sym-sym">Passeio</div>
+      <div class="sym-body"><strong>Sequência de vértices conectados por arestas.</strong> Tudo permitido: pode repetir vértices, pode repetir arestas.<br>
+        <span class="eg">A → B → C → B → A → D → A — passeio (volta em B e A)</span></div>
+    </div>
+    <div class="sym-row">
+      <div class="sym-sym">Trilha</div>
+      <div class="sym-body"><strong>Passeio sem aresta repetida.</strong> Vértices podem repetir, arestas não.<br>
+        <span class="eg">A → B → C → A → D — trilha: cada aresta usada uma vez (mas A apareceu 2 vezes)</span></div>
+    </div>
+    <div class="sym-row highlight">
+      <div class="sym-sym">Caminho</div>
+      <div class="sym-body"><strong>Passeio sem vértice repetido.</strong> Mais restrito que trilha — sem repetir vértices, automaticamente sem repetir arestas.<br>
+        <span class="eg">A → B → C → D — caminho: nenhum vértice se repete</span></div>
+    </div>
+    <div class="sym-row highlight">
+      <div class="sym-sym">Ciclo</div>
+      <div class="sym-body"><strong>Caminho fechado</strong> — começa e termina no mesmo vértice; só esse vértice aparece duas vezes.<br>
+        <span class="eg">A → B → C → A — ciclo de comprimento 3 (triângulo)</span></div>
+    </div>
+  </div>
+
+  <div class="callout warning">
+    <strong>Atenção — comprimento conta arestas, não vértices.</strong> O caminho A → B → C → D tem comprimento 3 (três arestas), embora tenha 4 vértices. Erro clássico em prova: confundir 4 vértices com "comprimento 4".
+  </div>
+
+  <h3>Veja na prática — destacando cada conceito</h3>
+
+  <div class="sim-box">
+    <h4>🎛️ Clique para ver cada tipo de sequência destacada no grafo</h4>
+
+    <div class="sim-controls">
+      <button class="sim-btn active" id="termBtn-passeio" onclick="termShow('passeio', this)">Passeio (com repetição)</button>
+      <button class="sim-btn" id="termBtn-trilha" onclick="termShow('trilha', this)">Trilha (sem aresta repetida)</button>
+      <button class="sim-btn" id="termBtn-caminho" onclick="termShow('caminho', this)">Caminho (sem vértice repetido)</button>
+      <button class="sim-btn" id="termBtn-ciclo" onclick="termShow('ciclo', this)">Ciclo (caminho fechado)</button>
+    </div>
+
+    <div class="sim-svg-wrap">
+      <svg id="termSvg" width="380" height="220" viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg" style="max-width:100%"></svg>
+    </div>
+    <div class="sim-info" id="termInfo"></div>
+  </div>
+
+  <h3>Tabela-resumo (decore para a prova)</h3>
+
+  <table class="scale-table">
+    <thead><tr><th>Termo</th><th>Vértices repetem?</th><th>Arestas repetem?</th><th>Fechado?</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Passeio</strong></td><td>Sim</td><td>Sim</td><td>Indiferente</td></tr>
+      <tr><td><strong>Trilha</strong></td><td>Sim</td><td>Não</td><td>Indiferente</td></tr>
+      <tr><td><strong>Caminho</strong></td><td>Não</td><td>Não</td><td>Não</td></tr>
+      <tr><td><strong>Ciclo</strong></td><td>Só o inicial=final</td><td>Não</td><td>Sim</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 3):</strong> com a terminologia limpa, vamos para a propriedade que mais cai em prova — graus dos vértices e o Lema do Aperto de Mão.
+  </div>
+</section>
+
+<!-- §3 GRAUS -->
+<section id="graus">
+  <h2><span class="num">3</span> Graus e o Lema do Aperto de Mão</h2>
+
+  <p>O grau de um vértice é a estatística mais simples possível — quantas arestas tocam ele. E é a base de uma das fórmulas que mais cai em prova POSCOMP.</p>
+
+  <h3>Observação que motiva o Lema</h3>
+
+  <p>Considere o triângulo K₃ com vértices A, B, C e arestas (A,B), (A,C), (B,C). Cada vértice toca 2 arestas. <strong>Conte e some:</strong> 2 + 2 + 2 = 6. Número de arestas: 3.</p>
+
+  <p>Coincidência? Faça com o quadrado C₄ (ciclo de 4 vértices, 4 arestas): cada vértice tem grau 2, soma = 4·2 = 8. E temos 4 arestas. Soma = 2 × arestas. De novo.</p>
+
+  <p>Faça com a estrela S₅ (1 centro, 4 pernas, 4 arestas): centro tem grau 4, cada perna tem grau 1. Soma = 4 + 4·1 = 8 = 2·4. <strong>Sempre dá o dobro do número de arestas.</strong></p>
+
+  <p style="font-size:.88rem;color:var(--muted);font-style:italic">Por quê? Cada aresta tem duas pontas. Quando você soma "arestas tocando A" + "arestas tocando B" + ..., cada aresta é contada <em>duas vezes</em> — uma para cada extremidade. Logo a soma é 2|E|.</p>
+
+  <h3>Definição e o Lema</h3>
+
+  <div class="sym-dict">
+    <div class="sym-row">
+      <div class="sym-sym">d(v)</div>
+      <div class="sym-body"><strong>Grau do vértice v</strong> — número de arestas que tocam v. Em grafo não-direcionado.<br>
+        <span class="eg">No triângulo K₃: d(A) = d(B) = d(C) = 2</span></div>
+    </div>
+    <div class="sym-row highlight">
+      <div class="sym-sym">∑ d(v) = 2|E|</div>
+      <div class="sym-body"><strong>Lema do Aperto de Mão.</strong> A soma dos graus de todos os vértices é igual ao dobro do número de arestas.<br>
+        <span class="eg">5 vértices, soma graus = 12 → |E| = 6</span></div>
+    </div>
+  </div>
+
+  <p>O nome vem de uma analogia: numa festa, cada pessoa conta quantos apertos de mão deu. A soma é o dobro do número total de apertos — porque cada aperto envolve duas mãos.</p>
+
+  <h3>O corolário que cai em prova</h3>
+
+  <div class="callout">
+    <strong>Corolário do Aperto de Mão.</strong> O número de vértices de grau ímpar é sempre par.
+  </div>
+
+  <p>Demonstração (vai cair em prova com certeza):</p>
+
+  <div class="proof-steps">
+    <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">Pelo Lema, ∑ d(v) = 2|E| é par. Separe a soma em duas partes — vértices de grau par e vértices de grau ímpar:<br>
+      &nbsp;&nbsp;∑<sub>par</sub> d(v) + ∑<sub>ímpar</sub> d(v) = 2|E|</div></div>
+    <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">A primeira parcela é soma de números pares — par. A direita é par. Logo a segunda parcela também é par.</div></div>
+    <div class="proof-step"><span class="ps-num">3</span><div class="ps-body">Mas ∑<sub>ímpar</sub> d(v) é soma de <em>números ímpares</em>. Soma de ímpares dá par só quando a quantidade de parcelas é par. ∎</div></div>
+  </div>
+
+  <p><strong>Aplicação imediata:</strong> não existe grafo com 5 vértices todos de grau 3. Soma seria 15, ímpar — viola o Lema. Esta questão cai literalmente em provas.</p>
+
+  <h3>Verificador de vetor de graus</h3>
+
+  <p>O Lema dá uma <em>condição necessária</em> para um vetor de graus ser realizável: a soma tem que ser par. Use o verificador abaixo para testar candidatos:</p>
+
+  <div class="sim-box">
+    <h4>🎛️ É possível ter um grafo com este vetor de graus?</h4>
+
+    <div class="input-row">
+      <label>Vetor de graus (separado por vírgulas):</label>
+      <input type="text" id="degInput" value="3,3,3,3,4" oninput="checkDegs()">
+    </div>
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="loadDegPreset('3,3,3,3,4')">3,3,3,3,4 (impossível)</button>
+      <button class="sim-btn" onclick="loadDegPreset('3,3,3,3')">3,3,3,3 (K₄)</button>
+      <button class="sim-btn" onclick="loadDegPreset('1,1,2,2,2,2,2,2,2,2,2,2,2,2,2')">14 graus 2 + 2 graus 1 (caminho)</button>
+      <button class="sim-btn" onclick="loadDegPreset('5,5,5,5')">4 vértices, todos grau 5</button>
+      <button class="sim-btn" onclick="loadDegPreset('4,4,3,3,2,2')">4,4,3,3,2,2</button>
+    </div>
+    <div class="sim-info" id="degInfo"></div>
+  </div>
+
+  <div class="callout warning">
+    <strong>Cuidado — soma par é necessária mas não suficiente.</strong> Por exemplo, "5,5,5,5" tem soma 20 (par), mas é impossível em grafo simples: cada vértice teria grau 5, mas só há 3 outros vértices para se conectar. Soma par é o primeiro filtro; questões mais sofisticadas (Erdős–Gallai) raramente caem no POSCOMP, mas saber que existe grau ≤ n−1 em grafo simples é suficiente para a maioria.
+  </div>
+
+  <h3>Versão direcionada</h3>
+
+  <div class="callout">
+    Em grafo direcionado: <strong>∑ d⁻(v) = ∑ d⁺(v) = |E|</strong>. Cada aresta sai de um vértice (conta em d⁺) e chega em outro (conta em d⁻) — uma vez cada lado, sem fator 2.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 4):</strong> agora que sabemos contar arestas via graus, vamos ver fórmulas diretas para famílias importantes — Kₙ, k-regular, Kₘ,ₙ. Saber decorado dispara a resposta na hora da prova.
+  </div>
+</section>
+
+<!-- §4 CONTAGEM EM FAMÍLIAS -->
+<section id="contagem">
+  <h2><span class="num">4</span> Contagem de arestas em famílias especiais</h2>
+
+  <p>Algumas famílias de grafos aparecem tanto em prova que vale decorar a contagem direta de arestas. Vou cobrir as três que mais caem.</p>
+
+  <h3>Grafo completo Kₙ</h3>
+
+  <p><strong>Definição:</strong> grafo simples com n vértices em que <em>todo par</em> de vértices distintos é conectado.</p>
+
+  <p><strong>Fórmula:</strong></p>
+  <div class="card" style="text-align:center;background:var(--n50)">
+    <code style="font-size:1rem">|E(K<sub>n</sub>)| = C(n, 2) = n(n−1)/2</code>
+  </div>
+
+  <p style="font-size:.88rem"><strong>Por quê:</strong> escolher 2 vértices entre n para formar uma aresta é a combinação C(n,2). Equivalentemente: cada vértice tem grau (n−1); soma = n(n−1); pelo Lema, |E| = n(n−1)/2.</p>
+
+  <h3>Grafo k-regular</h3>
+
+  <p><strong>Definição:</strong> grafo em que <em>todo vértice</em> tem o mesmo grau k.</p>
+
+  <p><strong>Fórmula:</strong></p>
+  <div class="card" style="text-align:center;background:var(--n50)">
+    <code style="font-size:1rem">|E| = n·k / 2</code>
+  </div>
+
+  <p style="font-size:.88rem"><strong>Por quê:</strong> aplicação direta do Lema. Soma de graus = n·k. Logo |E| = n·k/2. <strong>Importante:</strong> para existir, n·k tem que ser par (Aperto de Mão de novo).</p>
+
+  <p style="font-size:.88rem"><strong>Casos especiais:</strong> Kₙ é (n−1)-regular. Cₙ (ciclo) é 2-regular. Cubo Q₃ é 3-regular com 8 vértices e 12 arestas.</p>
+
+  <h3>Grafo bipartido completo Kₘ,ₙ</h3>
+
+  <p><strong>Definição:</strong> dois conjuntos de vértices, um com m e outro com n vértices; <em>cada vértice de um lado conecta a cada vértice do outro</em> (e nada mais).</p>
+
+  <p><strong>Fórmula:</strong></p>
+  <div class="card" style="text-align:center;background:var(--n50)">
+    <code style="font-size:1rem">|E(K<sub>m,n</sub>)| = m · n</code>
+  </div>
+
+  <p style="font-size:.88rem"><strong>Por quê:</strong> cada uma das m possibilidades à esquerda multiplica cada uma das n à direita. Vértices à esquerda têm grau n; à direita, grau m.</p>
+
+  <h3>Veja na prática — fórmulas em ação</h3>
+
+  <div class="sim-box">
+    <h4>🎛️ Use os controles e veja a contagem em tempo real</h4>
+
+    <div class="input-row">
+      <label>Família:</label>
+      <button class="sim-btn active" id="famBtn-kn" onclick="famSelect('kn', this)">Completo Kₙ</button>
+      <button class="sim-btn" id="famBtn-reg" onclick="famSelect('reg', this)">k-regular</button>
+      <button class="sim-btn" id="famBtn-bip" onclick="famSelect('bip', this)">Bipartido Kₘ,ₙ</button>
+    </div>
+
+    <div class="input-row" id="famParams">
+      <label>n:</label>
+      <input type="range" min="2" max="10" value="5" id="famN" oninput="famUpdate()">
+      <span id="famNVal" style="font-family:var(--fm);font-weight:700;color:var(--accent)">n = 5</span>
+    </div>
+
+    <div class="sim-info" id="famInfo"></div>
+  </div>
+
+  <h3>Exercício resolvido — questão típica POSCOMP</h3>
+
+  <div class="card">
+    <p style="font-weight:700;color:var(--primary);margin-bottom:.6rem">Quantas arestas tem K₅,₃?</p>
+    <p style="font-size:.88rem;line-height:1.7">Aplicando direto a fórmula bipartido completo: |E| = m · n = 5 · 3 = <strong>15 arestas</strong>.</p>
+    <p style="font-size:.88rem;line-height:1.7;margin-top:.4rem">Verificação pelo Lema: vértices à esquerda têm grau 3 (cada um conecta aos 3 da direita); à direita, grau 5. Soma = 5·3 + 3·5 = 30 = 2·15 ✓</p>
+  </div>
+
+  <div class="card">
+    <p style="font-weight:700;color:var(--primary);margin-bottom:.6rem">Existe grafo 3-regular com 7 vértices?</p>
+    <p style="font-size:.88rem;line-height:1.7">Pela fórmula, |E| = n·k/2 = 7·3/2 = 21/2. Não é inteiro → <strong>não existe</strong>. Pelo Aperto de Mão: soma de graus = 21, ímpar — viola o Lema.</p>
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 5):</strong> a próxima família tem propriedades especialmente elegantes — árvores. Quatro definições equivalentes, todas caem em prova.
+  </div>
+</section>
+
+<!-- §5 ÁRVORES -->
+<section id="arvores">
+  <h2><span class="num">5</span> Árvores — quatro caracterizações equivalentes</h2>
+
+  <p>Árvore é um dos objetos mais importantes na CC: estrutura de diretórios, parsing, BST, heaps, decisão, expressão. Em teoria de grafos, "árvore" é uma classe de grafo com propriedades especialmente regulares — e o POSCOMP testa essas propriedades constantemente.</p>
+
+  <h3>O fenômeno: quatro propriedades aparentemente diferentes</h3>
+
+  <p>Considere um grafo G com n vértices. Olhe estas quatro afirmações:</p>
+
+  <ol style="padding-left:1.4rem;line-height:1.9;font-size:.92rem">
+    <li>G é conexo e acíclico</li>
+    <li>G é conexo com exatamente n − 1 arestas</li>
+    <li>G é acíclico com exatamente n − 1 arestas</li>
+    <li>Existe exatamente um caminho entre todo par de vértices em G</li>
+  </ol>
+
+  <p><strong>Surpreendentemente, as quatro são equivalentes.</strong> Qualquer uma delas, sozinha, implica todas as outras três. Cada uma é uma definição válida de "árvore".</p>
+
+  <div class="callout warning">
+    <strong>Por que isso cai em prova?</strong> O POSCOMP gosta de questões do tipo: "G é conexo com 100 vértices e 99 arestas. Sobre G, é correto afirmar:" — e as alternativas testam se você sabe que isso é exatamente uma árvore (acíclica, caminho único, etc). Saber as quatro caracterizações equivale a uma resposta automática.
+  </div>
+
+  <h3>Construa uma árvore aresta por aresta</h3>
+
+  <p>O simulador abaixo começa com 8 vértices isolados. Adicione arestas uma de cada vez e veja: quando o grafo vira conexo? Quando ele tem n−1 arestas? Quando aparece um ciclo?</p>
+
+  <div class="sim-box">
+    <h4>🎛️ Construtor de árvore</h4>
+
+    <div class="sim-svg-wrap">
+      <svg id="treeSvg" width="380" height="220" viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg" style="max-width:100%"></svg>
+    </div>
+
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="treeStep()">▶ Adicionar próxima aresta</button>
+      <button class="sim-btn" onclick="treeReset()">↺ Reiniciar</button>
+    </div>
+
+    <div class="sim-info" id="treeInfo"></div>
+  </div>
+
+  <h3>Por que as caracterizações são equivalentes</h3>
+
+  <p>Esboço da equivalência (1) ⟺ (2):</p>
+
+  <div class="proof-steps">
+    <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Conexo + acíclico ⟹ n−1 arestas.</strong> Se você partir de n vértices isolados (0 arestas) e adicionar arestas uma por uma sem criar ciclo, cada aresta nova une dois componentes em um — reduz o número de componentes em 1. Para sair de n componentes (vértices isolados) para 1 (conexo), precisa exatamente de n−1 arestas.</div></div>
+    <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Conexo com n−1 arestas ⟹ acíclico.</strong> Suponha que tenha um ciclo. Remova qualquer aresta do ciclo: o grafo continua conexo (havia um caminho alternativo pelo resto do ciclo) e tem n−2 arestas. Mas não dá para ter conexo com menos de n−1 arestas — contradição.</div></div>
+    <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Conclusão:</strong> as duas condições são amarradas. Provas similares ligam as outras. Resultado: as 4 caracterizações se implicam mutuamente.</div></div>
+  </div>
+
+  <h3>Propriedades que decorrem das caracterizações</h3>
+
+  <div class="card">
+    <p style="font-size:.9rem;line-height:1.7"><strong>Adicionar qualquer aresta a uma árvore cria um ciclo.</strong> Por quê: já existe caminho único entre os dois extremos da nova aresta (caracterização 4); a nova aresta forma um segundo caminho, e dois caminhos distintos entre dois vértices = ciclo.</p>
+    <p style="font-size:.9rem;line-height:1.7;margin-top:.5rem"><strong>Remover qualquer aresta de uma árvore desconecta o grafo.</strong> Por quê: árvore com n−1 arestas vira árvore com n−2 — abaixo do mínimo para conexidade.</p>
+    <p style="font-size:.9rem;line-height:1.7;margin-top:.5rem"><strong>Toda árvore com pelo menos 2 vértices tem pelo menos 2 folhas.</strong> Folha = vértice de grau 1. Aplicação imediata do Lema do Aperto de Mão.</p>
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 6):</strong> outra classe que cai em prova é a dos grafos bipartidos. A caracterização "sem ciclo ímpar" é teorema clássico — e detectar bipartição é exatamente um BFS de duas cores.
+  </div>
+</section>
+
+<!-- §6 BIPARTIÇÃO -->
+<section id="bipartido">
+  <h2><span class="num">6</span> Bipartição e ciclos ímpares</h2>
+
+  <p>Em F2.3 você viu BFS. Aqui você vai ver para que <em>mais</em> ele serve: detectar se um grafo é bipartido. E descobrir o teorema que conecta bipartição a uma propriedade combinatória.</p>
+
+  <h3>Definição</h3>
+
+  <div class="sym-dict">
+    <div class="sym-row highlight">
+      <div class="sym-sym">Bipartido</div>
+      <div class="sym-body"><strong>O conjunto V de vértices se divide em duas partes V₁ e V₂ tais que toda aresta vai de V₁ a V₂.</strong> Nenhuma aresta dentro de V₁; nenhuma dentro de V₂.<br>
+        <span class="eg">K₂,₃ é bipartido: lado esquerdo {a,b}, lado direito {x,y,z}; toda aresta cruza.</span></div>
+    </div>
+  </div>
+
+  <p>Aplicações: alunos×cursos, doadores×receptores, tarefas×máquinas. Sempre que você tem dois "tipos" de objeto e a relação só faz sentido entre tipos diferentes.</p>
+
+  <h3>O Teorema</h3>
+
+  <div class="callout">
+    <strong>Teorema de König.</strong> Um grafo é bipartido se e somente se não contém ciclo de comprimento ímpar.
+  </div>
+
+  <p>Por quê funciona: se você tem bipartição V = V₁ ∪ V₂, qualquer ciclo alterna lados — V₁, V₂, V₁, V₂, ... — e para fechar precisa voltar ao lado original, exigindo número par de passos. Logo só ciclos pares.</p>
+
+  <p>Recíproca: se não tem ciclo ímpar, comece por qualquer vértice u, faça BFS, e atribua cores baseadas na paridade da distância. Vizinhos tomam cores opostas — e a ausência de ciclo ímpar garante que isso é consistente.</p>
+
+  <h3>BFS de duas cores — detector de bipartição</h3>
+
+  <div class="sim-box">
+    <h4>🎛️ Detector interativo de bipartição</h4>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:.6rem">Escolha um grafo. O BFS começará pelo vértice 1, atribuindo cores alternadamente. Se algum vizinho já tiver cor igual à atribuída → não bipartido (ciclo ímpar detectado).</p>
+
+    <div class="sim-controls">
+      <button class="sim-btn active" id="bipBtn-c4" onclick="bipLoad('c4', this)">Quadrado C₄</button>
+      <button class="sim-btn" id="bipBtn-c5" onclick="bipLoad('c5', this)">Pentágono C₅</button>
+      <button class="sim-btn" id="bipBtn-k33" onclick="bipLoad('k33', this)">K₃,₃</button>
+      <button class="sim-btn" id="bipBtn-k4" onclick="bipLoad('k4', this)">K₄</button>
+      <button class="sim-btn" id="bipBtn-tree" onclick="bipLoad('tree', this)">Árvore</button>
+      <button class="sim-btn" id="bipBtn-petersen" onclick="bipLoad('petersen', this)">Petersen</button>
+    </div>
+
+    <div class="sim-svg-wrap">
+      <svg id="bipSvg" width="380" height="220" viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg" style="max-width:100%"></svg>
+    </div>
+
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="bipStep()">▶ Próximo passo BFS</button>
+      <button class="sim-btn" onclick="bipReset()">↺ Reiniciar BFS</button>
+    </div>
+
+    <div class="sim-info" id="bipInfo"></div>
+  </div>
+
+  <div class="callout warning">
+    <strong>Atenção em prova:</strong> "ímpar" no teorema se refere ao <em>comprimento</em> do ciclo (número de arestas). Triângulo C₃ tem 3 arestas → ímpar → não bipartido. Pentágono C₅ tem 5 arestas → ímpar → não bipartido. Quadrado C₄ tem 4 arestas → par → bipartido.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 7):</strong> tudo isso foi sobre grafos não-direcionados. Em digrafos a noção de "conexo" se desdobra em duas — forte e fraca. Outra distinção que cai em prova.
+  </div>
+</section>
+
+<!-- §7 DIGRAFOS -->
+<section id="digrafos">
+  <h2><span class="num">7</span> Conexidade em digrafos — forte vs fraca</h2>
+
+  <p>Em F2.3 você viu grafos direcionados e ordenação topológica. Aqui vamos refinar: o conceito de "conexo" muda de cara quando arestas têm direção.</p>
+
+  <h3>Por que mudar a definição</h3>
+
+  <p>Considere um digrafo simples: A → B → C. Olhe as três perguntas:</p>
+
+  <ul style="padding-left:1.4rem;line-height:1.8;font-size:.9rem">
+    <li>"Existe caminho de A para C?" Sim — A → B → C.</li>
+    <li>"Existe caminho de C para A?" Não — não há aresta saindo de C.</li>
+    <li>"Se eu apagar as direções, é conexo?" Sim — vira A−B−C, conexo.</li>
+  </ul>
+
+  <p>Note que a resposta a "é conexo?" depende de qual versão da pergunta você quer responder. Daí dois conceitos:</p>
+
+  <h3>Definições</h3>
+
+  <div class="sym-dict">
+    <div class="sym-row highlight">
+      <div class="sym-sym">Forte</div>
+      <div class="sym-body"><strong>Fortemente conexo:</strong> existe caminho dirigido de u para v <em>e</em> de v para u, para <em>todo</em> par (u, v) de vértices.<br>
+        <span class="eg">A → B → C → A é fortemente conexo (ciclo dirigido)</span></div>
+    </div>
+    <div class="sym-row">
+      <div class="sym-sym">Fraca</div>
+      <div class="sym-body"><strong>Fracamente conexo:</strong> ignorando as direções (tratando como grafo não-direcionado), o grafo é conexo.<br>
+        <span class="eg">A → B → C é fracamente conexo (mas não fortemente)</span></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Implicação útil:</strong> fortemente conexo ⟹ fracamente conexo (mas não o contrário). Forte é a condição mais restrita.
+  </div>
+
+  <h3>Compare três digrafos</h3>
+
+  <div class="sim-box">
+    <h4>🎛️ Forte ou fraca?</h4>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:.6rem">Cada botão carrega um digrafo diferente. O sistema testa automaticamente as duas conexidades.</p>
+
+    <div class="sim-controls">
+      <button class="sim-btn active" id="diBtn-cycle3" onclick="diLoad('cycle3', this)">Ciclo A→B→C→A</button>
+      <button class="sim-btn" id="diBtn-path3" onclick="diLoad('path3', this)">Caminho A→B→C</button>
+      <button class="sim-btn" id="diBtn-complex" onclick="diLoad('complex', this)">Digrafo com 5 vértices</button>
+    </div>
+
+    <div class="sim-svg-wrap">
+      <svg id="diSvg" width="380" height="220" viewBox="0 0 380 220" xmlns="http://www.w3.org/2000/svg" style="max-width:100%">
+        <defs>
+          <marker id="diArrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--n400)"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="sim-info" id="diInfo"></div>
+  </div>
+
+  <h3>DAG nunca é fortemente conexo</h3>
+
+  <div class="callout warning">
+    <strong>Propriedade que cai em prova:</strong> um DAG (Directed Acyclic Graph — sem ciclos dirigidos) com mais de um vértice <em>nunca</em> é fortemente conexo. Por quê: se fosse, haveria caminhos u→v e v→u — concatenando, formaria um ciclo dirigido.
+  </div>
+
+  <p>Aplicação prática: ordenação topológica (F2.3) só faz sentido em DAG. Se o grafo for fortemente conexo, há ciclo, logo não tem ordenação topológica.</p>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 8):</strong> a última propriedade que cai em prova: planaridade. Quando um grafo pode ser desenhado sem cruzamentos, e a fórmula clássica de Euler que conecta vértices, arestas e faces.
+  </div>
+</section>
+
+<!-- §8 PLANARIDADE -->
+<section id="planaridade">
+  <h2><span class="num">8</span> Planaridade e Fórmula de Euler</h2>
+
+  <p>Algumas redes precisam ser desenhadas sem cruzamento de fios — circuitos impressos, mapas, sistemas de túneis. A pergunta "esse grafo pode ser desenhado no plano sem arestas se cruzando?" tem nome e fórmula clássica.</p>
+
+  <h3>Definição</h3>
+
+  <div class="sym-dict">
+    <div class="sym-row highlight">
+      <div class="sym-sym">Planar</div>
+      <div class="sym-body"><strong>Grafo que admite desenho no plano (ou esfera) sem cruzamento de arestas.</strong> Note: um grafo pode ser planar mesmo se um desenho específico tem cruzamentos — basta existir <em>algum</em> desenho sem cruzamento.<br>
+        <span class="eg">K₄ é planar (desenhe um vértice no centro e três ao redor); K₅ não é planar.</span></div>
+    </div>
+    <div class="sym-row">
+      <div class="sym-sym">F (face)</div>
+      <div class="sym-body"><strong>Em um desenho planar, uma face é uma região delimitada por arestas</strong> — incluindo a face externa (a região "infinita" ao redor do desenho).<br>
+        <span class="eg">Triângulo K₃ desenhado tem 2 faces: a interna e a externa.</span></div>
+    </div>
+  </div>
+
+  <h3>A Fórmula de Euler</h3>
+
+  <div class="callout">
+    <strong>Fórmula de Euler para grafos planares conexos:</strong>
+    <div style="text-align:center;margin-top:.5rem;font-family:var(--fm);font-size:1.1rem;color:var(--primary);font-weight:700">V − E + F = 2</div>
+    <p style="margin-top:.5rem;font-size:.84rem;color:var(--muted);text-align:center">onde V = vértices, E = arestas, F = faces (incluindo a externa).</p>
+  </div>
+
+  <p>Esta fórmula vale para qualquer desenho planar conexo, independente de qual desenho específico você escolheu. É invariante.</p>
+
+  <h3>Calculadora de Euler</h3>
+
+  <div class="sim-box">
+    <h4>🎛️ Calcule o número de faces de um grafo planar</h4>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:.6rem">Dado V e E (e supondo planar conexo), F é determinado pela fórmula.</p>
+
+    <div class="input-row">
+      <label>V (vértices):</label>
+      <input type="number" id="eulerV" min="1" max="20" value="6" oninput="eulerCalc()">
+      <label>E (arestas):</label>
+      <input type="number" id="eulerE" min="0" max="50" value="9" oninput="eulerCalc()">
+    </div>
+
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="eulerSet(4,6)">K₄ (V=4, E=6)</button>
+      <button class="sim-btn" onclick="eulerSet(5,5)">C₅ (V=5, E=5)</button>
+      <button class="sim-btn" onclick="eulerSet(6,9)">Cubo Q₃? (V=8, E=12)</button>
+      <button class="sim-btn" onclick="eulerSet(8,12)">Cubo Q₃ correto</button>
+    </div>
+
+    <div class="sim-info" id="eulerInfo"></div>
+  </div>
+
+  <h3>Critério de não-planaridade</h3>
+
+  <p>Para grafos planares simples conexos com V ≥ 3, vale a desigualdade:</p>
+
+  <div class="card" style="text-align:center;background:var(--n50)">
+    <code style="font-size:1rem">E ≤ 3V − 6</code>
+  </div>
+
+  <p style="font-size:.88rem"><strong>Aplicação:</strong> se um grafo viola essa desigualdade (E > 3V − 6), ele <em>não é planar</em>. Use isso como filtro rápido em prova.</p>
+
+  <p style="font-size:.88rem"><strong>Exemplo K₅:</strong> V = 5, E = 10. Verifique: 3·5 − 6 = 9. Como 10 > 9, K₅ <em>não é planar</em>. ✓</p>
+
+  <h3>Os dois grafos proibidos — Teorema de Kuratowski</h3>
+
+  <div class="callout">
+    <strong>Teorema de Kuratowski (1930).</strong> Um grafo é planar se e somente se não contém K₅ nem K₃,₃ como "subdivisão" (uma versão expandida).
+  </div>
+
+  <p style="font-size:.88rem">Em outras palavras, K₅ (completo com 5 vértices) e K₃,₃ (bipartido completo 3-3) são os "obstáculos mínimos" à planaridade. Todo grafo não-planar contém um deles "escondido" dentro.</p>
+
+  <p style="font-size:.88rem;color:var(--muted)">No POSCOMP, a versão prática que cai é: saber que K₅ e K₃,₃ não são planares. A construção formal de "subdivisão" raramente é cobrada — saber identificar os dois é suficiente.</p>
+
+  <h3>Aplicações que motivaram a teoria</h3>
+
+  <div class="card" style="font-size:.88rem;line-height:1.7">
+    <ul style="padding-left:1.4rem;list-style:none">
+      <li>🗺️ <strong>Problema das 4 cores</strong> — pode-se colorir todo mapa planar com 4 cores. Resultado clássico (Appel-Haken, 1976).</li>
+      <li>💾 <strong>Circuitos impressos</strong> — fios não podem cruzar; o circuito tem que ser planar.</li>
+      <li>🧬 <strong>Bioinformática</strong> — alguns grafos de interação proteica são planares; algoritmos especiais ficam mais rápidos.</li>
+    </ul>
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 9):</strong> hora de testar tudo com 7 questões estilo POSCOMP, mistura de cálculo direto e armadilhas conceituais.
+  </div>
+</section>
+
+<!-- §9 QUIZ -->
+<section id="quiz">
+  <h2><span class="num">9</span> Quiz — estilo POSCOMP</h2>
+  <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem">Após cada resposta você verá uma explicação detalhada — incluindo o motivo pelo qual cada opção errada está errada.</p>
+
+  <div class="quiz-box" id="q1">
+    <div class="quiz-q">É possível existir um grafo simples não-direcionado em que todos os 5 vértices têm grau 3?</div>
+    <div class="quiz-option" data-qid="q1" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Sim — é o ciclo C₅ com diagonais</div>
+    <div class="quiz-option" data-qid="q1" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Não — pelo Lema do Aperto de Mão, a soma dos graus seria 15 (ímpar), violando ∑d(v) = 2|E|</div>
+    <div class="quiz-option" data-qid="q1" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Sim — basta tomar K₅ menos algumas arestas</div>
+    <div class="quiz-option" data-qid="q1" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Não — porque grau máximo em grafo simples com n vértices é 4</div>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q2">
+    <div class="quiz-q">Um grafo simples não-direcionado conexo G tem 15 vértices e 14 arestas. Sobre G, é correto afirmar:</div>
+    <div class="quiz-option" data-qid="q2" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) G contém pelo menos um ciclo</div>
+    <div class="quiz-option" data-qid="q2" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) G é necessariamente uma árvore</div>
+    <div class="quiz-option" data-qid="q2" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) G é um grafo bipartido completo</div>
+    <div class="quiz-option" data-qid="q2" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) G admite caminho Hamiltoniano garantidamente</div>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q3">
+    <div class="quiz-q">Quantas arestas tem o grafo bipartido completo K₄,₅?</div>
+    <div class="quiz-option" data-qid="q3" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) 9</div>
+    <div class="quiz-option" data-qid="q3" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) 20</div>
+    <div class="quiz-option" data-qid="q3" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) 36</div>
+    <div class="quiz-option" data-qid="q3" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) 45</div>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q4">
+    <div class="quiz-q">Sobre grafos bipartidos, qual afirmação é VERDADEIRA?</div>
+    <div class="quiz-option" data-qid="q4" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Todo grafo bipartido é planar</div>
+    <div class="quiz-option" data-qid="q4" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Um grafo é bipartido se e somente se não contém ciclo de comprimento ímpar</div>
+    <div class="quiz-option" data-qid="q4" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Todo grafo bipartido é uma árvore</div>
+    <div class="quiz-option" data-qid="q4" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Um grafo é bipartido se e somente se tem dois componentes conexos</div>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q5">
+    <div class="quiz-q">Um grafo planar conexo possui 8 vértices e 14 arestas. Quantas faces tem qualquer desenho planar de G (incluindo a face externa)?</div>
+    <div class="quiz-option" data-qid="q5" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) 6</div>
+    <div class="quiz-option" data-qid="q5" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) 7</div>
+    <div class="quiz-option" data-qid="q5" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) 8</div>
+    <div class="quiz-option" data-qid="q5" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Depende do desenho específico</div>
+    <div class="quiz-feedback" id="q5-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q6">
+    <div class="quiz-q">Considere as afirmações sobre conexidade em grafos direcionados (digrafos):<br>
+    I. Se um digrafo é fortemente conexo, então é fracamente conexo.<br>
+    II. Se um digrafo é fracamente conexo, então é fortemente conexo.<br>
+    III. Um DAG (digrafo acíclico) com mais de um vértice nunca é fortemente conexo.<br>
+    Quais são VERDADEIRAS?</div>
+    <div class="quiz-option" data-qid="q6" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Apenas I</div>
+    <div class="quiz-option" data-qid="q6" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Apenas I e III</div>
+    <div class="quiz-option" data-qid="q6" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Apenas II e III</div>
+    <div class="quiz-option" data-qid="q6" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) I, II e III</div>
+    <div class="quiz-feedback" id="q6-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q7">
+    <div class="quiz-q">Considere as afirmações sobre o grafo completo K₅:<br>
+    I. K₅ tem exatamente 10 arestas.<br>
+    II. K₅ é planar — pode ser desenhado no plano sem cruzamentos.<br>
+    III. Todo vértice de K₅ tem grau 4.<br>
+    IV. K₅ contém ciclo Hamiltoniano (que visita todos os vértices).<br>
+    Quais são VERDADEIRAS?</div>
+    <div class="quiz-option" data-qid="q7" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Apenas I e III</div>
+    <div class="quiz-option" data-qid="q7" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Apenas I, III e IV</div>
+    <div class="quiz-option" data-qid="q7" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Apenas II e IV</div>
+    <div class="quiz-option" data-qid="q7" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) I, II, III e IV</div>
+    <div class="quiz-feedback" id="q7-fb"></div>
+  </div>
+</section>
+
+<!-- §10 RESUMO -->
+<section id="resumo">
+  <h2><span class="num">10</span> Resumo</h2>
+  <div class="summary-box">
+    <h3>🎯 O que você precisa dominar</h3>
+    <div class="summary-row">Passeio (vértices/arestas repetem) ⊃ Trilha (sem aresta repetida) ⊃ Caminho (sem vértice repetido); Ciclo = caminho fechado</div>
+    <div class="summary-row">Lema do Aperto de Mão: ∑ d(v) = 2|E|. Em digrafos: ∑ d⁻ = ∑ d⁺ = |E|</div>
+    <div class="summary-row">Corolário: número de vértices de grau ímpar é par. Não existe grafo com 5 vértices todos grau 3</div>
+    <div class="summary-row">|E(K_n)| = n(n−1)/2 ; |E(k-regular)| = nk/2 ; |E(K_{m,n})| = m·n</div>
+    <div class="summary-row">Existência k-regular com n vértices: nk deve ser par; e k ≤ n−1 em grafo simples</div>
+    <div class="summary-row">Árvore — 4 caracterizações equivalentes: conexo+acíclico = conexo+(n−1) arestas = acíclico+(n−1) arestas = caminho único entre todo par</div>
+    <div class="summary-row">Adicionar aresta a árvore cria ciclo; remover aresta desconecta</div>
+    <div class="summary-row">Bipartido ⟺ sem ciclo ímpar (Teorema de König) — testável com BFS de duas cores</div>
+    <div class="summary-row">Fortemente conexo ⟹ fracamente conexo. DAG com >1 vértice nunca é fortemente conexo</div>
+    <div class="summary-row">Fórmula de Euler (planar conexo): V − E + F = 2; critério rápido: E ≤ 3V − 6</div>
+    <div class="summary-row">K₅ e K₃,₃ não são planares (Kuratowski)</div>
+
+    <table class="ref-table">
+      <thead><tr><th>Família</th><th>|V|</th><th>|E|</th><th>Grau</th></tr></thead>
+      <tbody>
+        <tr><td>Kₙ (completo)</td><td>n</td><td>n(n−1)/2</td><td>n−1 (todos)</td></tr>
+        <tr><td>Cₙ (ciclo)</td><td>n</td><td>n</td><td>2 (todos)</td></tr>
+        <tr><td>Pₙ (caminho)</td><td>n</td><td>n−1</td><td>2 internos, 1 extremos</td></tr>
+        <tr><td>Sₙ (estrela)</td><td>n</td><td>n−1</td><td>n−1 centro, 1 folhas</td></tr>
+        <tr><td>Kₘ,ₙ (bipartido completo)</td><td>m+n</td><td>m·n</td><td>n (lado m), m (lado n)</td></tr>
+        <tr><td>Árvore</td><td>n</td><td>n−1</td><td>variável; ≥2 folhas</td></tr>
+        <tr><td>Qₖ (cubo k-dim)</td><td>2ᵏ</td><td>k·2ᵏ⁻¹</td><td>k (todos)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout" style="margin-top:1.5rem">
+    <strong>🎓 Trilha F2 concluída.</strong> Você cobriu Estruturas Lineares (F2.1), Árvores e Hashing (F2.2), Grafos com algoritmos clássicos (F2.3), e agora as Propriedades de Grafos (F2.4). Combinando F2.3 e F2.4, você tem o pacote completo de grafos para POSCOMP — algoritmos práticos + propriedades conceituais.<br><br>
+    <strong>Próximo módulo:</strong> F3.1 — Paradigmas e Técnicas de Programação. Lá você aprende as quatro estratégias universais (Divisão e Conquista, Programação Dinâmica, Guloso, Backtracking).
+  </div>
+</section>
+
+      </div><!-- /lesson-content -->
+
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="f2-3-grafos-v2.html">← F2.3 Grafos</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico F2</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 4 de 4 ✓</div>
+        </div>
+        <a class="btn-nav next" href="f3-1-paradigmas-v2.html">Próximo módulo →</a>
+      </div>
+    </div><!-- /lesson-area -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ─── SIDEBAR ───
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){
+  if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}
+  const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);
+  localStorage.setItem('sb-state',c?'collapsed':'expanded');
+}
+
+// ─── SECTION NAV ───
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+
+// ─── DETAILS TOGGLE ───
+function toggleDetails(trigger){
+  const content=trigger.parentElement.querySelector('.dt-content');
+  const isOpen=content.classList.toggle('show');
+  trigger.classList.toggle('open',isOpen);
+}
+
+// ═══════════════════════════════════════════════════════════
+// §2 — TERMINOLOGY DEMO
+// ═══════════════════════════════════════════════════════════
+// Grafo base: 5 vértices A-E formando uma estrutura mista
+const TERM_NODES = [
+  {id:'A',x:80,y:60},{id:'B',x:200,y:50},{id:'C',x:320,y:70},
+  {id:'D',x:130,y:170},{id:'E',x:280,y:170}
+];
+const TERM_EDGES = [
+  ['A','B'],['B','C'],['A','D'],['B','D'],['B','E'],['C','E'],['D','E']
+];
+
+const TERM_EXAMPLES = {
+  passeio: {
+    seq: ['A','B','D','B','E','C'],
+    label: 'Passeio: A → B → D → B → E → C',
+    info: 'Comprimento 5 (5 arestas). Vértice B aparece 2 vezes — passeio permite repetição. Aresta (A,B) e (B,D) são distintas, mas a sequência poderia repetir arestas se quiséssemos.'
+  },
+  trilha: {
+    seq: ['A','B','D','E','B','C'],
+    label: 'Trilha: A → B → D → E → B → C',
+    info: 'Comprimento 5. Vértice B aparece 2 vezes (permitido em trilha), mas nenhuma aresta se repete: (A,B), (B,D), (D,E), (E,B), (B,C) são todas distintas.'
+  },
+  caminho: {
+    seq: ['A','D','B','C','E'],
+    label: 'Caminho: A → D → B → C → E',
+    info: 'Comprimento 4 (4 arestas, 5 vértices). Nenhum vértice se repete — caminho é o tipo mais restrito antes de fechar.'
+  },
+  ciclo: {
+    seq: ['A','B','D','A'],
+    label: 'Ciclo: A → B → D → A',
+    info: 'Comprimento 3. Triângulo A-B-D. Único vértice que aparece 2 vezes é o inicial=final (A); essa é a regra do ciclo.'
+  }
+};
+
+function renderTermGraph(highlightedEdges, highlightedSeq){
+  const svg = document.getElementById('termSvg');
+  let html = '';
+  // Build set of highlighted edges (normalized as "u,v" with u<v)
+  const hlSet = new Set(highlightedEdges.map(([u,v])=>[u,v].sort().join(',')));
+  // Edges first
+  for(const [u,v] of TERM_EDGES){
+    const nu = TERM_NODES.find(n=>n.id===u);
+    const nv = TERM_NODES.find(n=>n.id===v);
+    const key = [u,v].sort().join(',');
+    const cls = hlSet.has(key) ? 'gv-edge hl' : 'gv-edge';
+    html += `<line class="${cls}" x1="${nu.x}" y1="${nu.y}" x2="${nv.x}" y2="${nv.y}"/>`;
+  }
+  // Nodes (highlighted if in sequence)
+  const seqSet = new Set(highlightedSeq);
+  for(const n of TERM_NODES){
+    const isInSeq = seqSet.has(n.id);
+    const cls = isInSeq ? 'gv-node hl' : 'gv-node';
+    const lblCls = isInSeq ? 'gv-label on' : 'gv-label';
+    html += `<circle class="${cls}" cx="${n.x}" cy="${n.y}" r="16"/>`;
+    html += `<text class="${lblCls}" x="${n.x}" y="${n.y}">${n.id}</text>`;
+  }
+  svg.innerHTML = html;
+}
+
+function termShow(kind, btn){
+  document.querySelectorAll('[id^="termBtn-"]').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+
+  const ex = TERM_EXAMPLES[kind];
+  // Build edges from sequence
+  const edges = [];
+  for(let i=0;i<ex.seq.length-1;i++){
+    edges.push([ex.seq[i], ex.seq[i+1]]);
+  }
+  renderTermGraph(edges, ex.seq);
+  document.getElementById('termInfo').innerHTML = '<strong>' + ex.label + '</strong><br>' + ex.info;
+}
+
+// Init terminology demo
+termShow('passeio', document.getElementById('termBtn-passeio'));
+
+// ═══════════════════════════════════════════════════════════
+// §3 — DEGREE VECTOR VERIFIER
+// ═══════════════════════════════════════════════════════════
+function loadDegPreset(str){
+  document.getElementById('degInput').value = str;
+  checkDegs();
+}
+
+function checkDegs(){
+  const str = document.getElementById('degInput').value;
+  const info = document.getElementById('degInfo');
+  // Parse
+  const parts = str.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  const nums = [];
+  for(const p of parts){
+    const n = parseInt(p, 10);
+    if(isNaN(n) || n < 0){
+      info.className = 'sim-info';
+      info.textContent = 'Entrada inválida — use números separados por vírgulas, ex: 3,3,2,2.';
+      return;
+    }
+    nums.push(n);
+  }
+  if(nums.length === 0){
+    info.className = 'sim-info';
+    info.textContent = 'Digite ao menos um grau.';
+    return;
+  }
+  const n = nums.length;
+  const sum = nums.reduce((a,b)=>a+b, 0);
+  const maxDeg = Math.max(...nums);
+
+  if(sum % 2 !== 0){
+    info.className = 'sim-info fail';
+    info.innerHTML = `✗ IMPOSSÍVEL — soma dos graus = ${sum} (ímpar). Pelo Lema do Aperto de Mão, ∑d(v) = 2|E| deve ser par. Portanto não existe grafo com este vetor.`;
+    return;
+  }
+  if(maxDeg > n - 1){
+    info.className = 'sim-info fail';
+    info.innerHTML = `✗ IMPOSSÍVEL — algum vértice tem grau ${maxDeg}, mas em grafo simples com ${n} vértices o grau máximo é n−1 = ${n-1}. (Cada vértice só pode conectar aos outros n−1.)`;
+    return;
+  }
+  // Sum is even and max <= n-1: necessary conditions satisfied
+  const E = sum / 2;
+  info.className = 'sim-info ok';
+  info.innerHTML = `✓ Condições necessárias OK — soma = ${sum} (par) e grau máximo ${maxDeg} ≤ n−1 = ${n-1}. Pelo Lema, |E| = ${sum}/2 = <strong>${E}</strong>.`;
+}
+
+// Init
+checkDegs();
+
+// ═══════════════════════════════════════════════════════════
+// §4 — FAMILY EDGE COUNTERS
+// ═══════════════════════════════════════════════════════════
+let famKind = 'kn';
+
+function famSelect(kind, btn){
+  document.querySelectorAll('[id^="famBtn-"]').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  famKind = kind;
+  // Update controls
+  const params = document.getElementById('famParams');
+  if(kind === 'kn'){
+    params.innerHTML = `
+      <label>n:</label>
+      <input type="range" min="2" max="10" value="5" id="famN" oninput="famUpdate()">
+      <span id="famNVal" style="font-family:var(--fm);font-weight:700;color:var(--accent)">n = 5</span>
+    `;
+  } else if(kind === 'reg'){
+    params.innerHTML = `
+      <label>n:</label>
+      <input type="range" min="2" max="10" value="6" id="famN" oninput="famUpdate()">
+      <span id="famNVal" style="font-family:var(--fm);font-weight:700;color:var(--accent)">n = 6</span>
+      &nbsp;&nbsp;
+      <label>k:</label>
+      <input type="range" min="0" max="9" value="3" id="famK" oninput="famUpdate()">
+      <span id="famKVal" style="font-family:var(--fm);font-weight:700;color:var(--accent)">k = 3</span>
+    `;
+  } else if(kind === 'bip'){
+    params.innerHTML = `
+      <label>m:</label>
+      <input type="range" min="1" max="8" value="4" id="famM" oninput="famUpdate()">
+      <span id="famMVal" style="font-family:var(--fm);font-weight:700;color:var(--accent)">m = 4</span>
+      &nbsp;&nbsp;
+      <label>n:</label>
+      <input type="range" min="1" max="8" value="5" id="famN" oninput="famUpdate()">
+      <span id="famNVal" style="font-family:var(--fm);font-weight:700;color:var(--accent)">n = 5</span>
+    `;
+  }
+  famUpdate();
+}
+
+function famUpdate(){
+  const info = document.getElementById('famInfo');
+  if(famKind === 'kn'){
+    const n = parseInt(document.getElementById('famN').value);
+    document.getElementById('famNVal').textContent = 'n = ' + n;
+    const E = n*(n-1)/2;
+    info.className = 'sim-info';
+    info.innerHTML = `<strong>K<sub>${n}</sub>:</strong> grafo completo com ${n} vértices.<br>
+      Fórmula: |E| = n(n−1)/2 = ${n}·${n-1}/2 = <strong>${E} arestas</strong>.<br>
+      Cada vértice tem grau n−1 = ${n-1}.`;
+  } else if(famKind === 'reg'){
+    const n = parseInt(document.getElementById('famN').value);
+    const k = parseInt(document.getElementById('famK').value);
+    document.getElementById('famNVal').textContent = 'n = ' + n;
+    document.getElementById('famKVal').textContent = 'k = ' + k;
+    const product = n*k;
+    if(k > n - 1){
+      info.className = 'sim-info fail';
+      info.innerHTML = `✗ Impossível: k = ${k} excede o grau máximo n−1 = ${n-1} em grafo simples.`;
+    } else if(product % 2 !== 0){
+      info.className = 'sim-info fail';
+      info.innerHTML = `✗ Impossível: nk = ${n}·${k} = ${product} é ímpar. Pelo Lema, |E| = nk/2 deveria ser inteiro.`;
+    } else {
+      const E = product / 2;
+      info.className = 'sim-info ok';
+      info.innerHTML = `✓ <strong>${k}-regular</strong> com ${n} vértices: cada vértice tem grau ${k}.<br>
+        Fórmula: |E| = nk/2 = ${n}·${k}/2 = <strong>${E} arestas</strong>.`;
+    }
+  } else if(famKind === 'bip'){
+    const m = parseInt(document.getElementById('famM').value);
+    const n = parseInt(document.getElementById('famN').value);
+    document.getElementById('famMVal').textContent = 'm = ' + m;
+    document.getElementById('famNVal').textContent = 'n = ' + n;
+    const E = m * n;
+    info.className = 'sim-info';
+    info.innerHTML = `<strong>K<sub>${m},${n}</sub>:</strong> bipartido completo com lados de ${m} e ${n} vértices.<br>
+      Fórmula: |E| = m·n = ${m}·${n} = <strong>${E} arestas</strong>.<br>
+      Vértices à esquerda têm grau ${n}; à direita, ${m}. Total de vértices: ${m+n}.`;
+  }
+}
+
+famUpdate();
+
+// ═══════════════════════════════════════════════════════════
+// §5 — TREE BUILDER
+// ═══════════════════════════════════════════════════════════
+const TREE_NODES = [
+  {id:1,x:60,y:60},{id:2,x:160,y:50},{id:3,x:280,y:60},{id:4,x:340,y:140},
+  {id:5,x:280,y:200},{id:6,x:160,y:200},{id:7,x:60,y:200},{id:8,x:200,y:120}
+];
+// Pre-defined sequence of edges to add — first 7 build a tree, 8th creates cycle
+const TREE_EDGE_SEQ = [
+  [1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,1],   // <- 7th edge creates cycle (7-1 closes)
+];
+// Better: 7 edges that build a tree (n-1), 8th creates cycle
+const TREE_GOOD_SEQ = [
+  [1,2],[2,8],[8,6],[3,8],[3,4],[4,5],[6,7], // 7 edges, tree on 8 nodes
+  [1,3]  // 8th: creates cycle 1-2-8-3 (or 1-3 directly closes 1→2→8→3→1)
+];
+
+let treeStepIdx = 0;
+let treeAddedEdges = [];
+
+function unionFind(n){
+  const p = Array.from({length: n+1}, (_,i) => i);
+  function find(x){ if(p[x]!==x) p[x] = find(p[x]); return p[x]; }
+  function union(a,b){ const ra=find(a), rb=find(b); if(ra===rb) return false; p[ra]=rb; return true; }
+  return {find, union};
+}
+
+function renderTreeGraph(){
+  const svg = document.getElementById('treeSvg');
+  let html = '';
+  // Edges
+  for(const [u,v,wouldCycle] of treeAddedEdges){
+    const nu = TREE_NODES.find(n=>n.id===u);
+    const nv = TREE_NODES.find(n=>n.id===v);
+    const cls = wouldCycle ? 'gv-edge hl-2' : 'gv-edge hl';
+    html += `<line class="${cls}" x1="${nu.x}" y1="${nu.y}" x2="${nv.x}" y2="${nv.y}"/>`;
+  }
+  // Nodes (compute components)
+  const uf = unionFind(8);
+  for(const [u,v,wouldCycle] of treeAddedEdges){
+    if(!wouldCycle) uf.union(u,v);
+  }
+  const compColors = {};
+  let nextColor = 0;
+  for(const n of TREE_NODES){
+    const root = uf.find(n.id);
+    if(!(root in compColors)) compColors[root] = nextColor++;
+  }
+  const colorClass = ['hl','hl-2','hl-3','hl-4'];
+  for(const n of TREE_NODES){
+    const root = uf.find(n.id);
+    const colIdx = compColors[root] % 4;
+    // If single node still isolated, no color
+    const compSize = TREE_NODES.filter(node => uf.find(node.id) === root).length;
+    const cls = compSize > 1 ? `gv-node ${colorClass[colIdx]}` : 'gv-node';
+    const lblCls = compSize > 1 ? 'gv-label on' : 'gv-label';
+    html += `<circle class="${cls}" cx="${n.x}" cy="${n.y}" r="14"/>`;
+    html += `<text class="${lblCls}" x="${n.x}" y="${n.y}">${n.id}</text>`;
+  }
+  svg.innerHTML = html;
+}
+
+function treeStep(){
+  if(treeStepIdx >= TREE_GOOD_SEQ.length) return;
+  const [u,v] = TREE_GOOD_SEQ[treeStepIdx];
+  // Check if would create cycle using union-find on current tree edges
+  const uf = unionFind(8);
+  for(const [eu,ev,wc] of treeAddedEdges){
+    if(!wc) uf.union(eu, ev);
+  }
+  const wouldCycle = uf.find(u) === uf.find(v);
+  treeAddedEdges.push([u,v,wouldCycle]);
+  treeStepIdx++;
+
+  // Compute current state
+  const uf2 = unionFind(8);
+  let edgesInTree = 0;
+  for(const [eu,ev,wc] of treeAddedEdges){
+    if(!wc){ uf2.union(eu, ev); edgesInTree++; }
+  }
+  const roots = new Set();
+  for(let i=1;i<=8;i++) roots.add(uf2.find(i));
+  const numComponents = roots.size;
+  const isConnected = numComponents === 1;
+  const isAcyclic = !treeAddedEdges.some(e => e[2]);
+  const isTree = isConnected && isAcyclic && edgesInTree === 7;
+
+  renderTreeGraph();
+
+  const info = document.getElementById('treeInfo');
+  let msg = `<strong>Aresta ${treeStepIdx}/${TREE_GOOD_SEQ.length}:</strong> (${u},${v}). `;
+  if(wouldCycle){
+    msg += `<span style="color:var(--red)">↪ Esta aresta CRIA UM CICLO</span> (ambos os extremos já estão no mesmo componente). Mostrada em laranja.<br>`;
+  }
+  msg += `Arestas no grafo (sem ciclos): <strong>${edgesInTree}</strong> | Componentes: <strong>${numComponents}</strong>`;
+
+  info.className = 'sim-info';
+  if(isTree){
+    info.className = 'sim-info ok';
+    msg += '<br>✓ <strong>É UMA ÁRVORE!</strong> Conexo (1 componente) + acíclico + n−1 = 7 arestas. As quatro caracterizações são satisfeitas.';
+  } else if(wouldCycle){
+    msg += '<br>⚠ Adicionar aresta a uma árvore SEMPRE cria ciclo — você acabou de ver isso na prática.';
+  } else if(numComponents > 1){
+    msg += `<br>Faltam ${numComponents - 1} arestas para conectar (cada nova aresta sem ciclo une dois componentes).`;
+  }
+  info.innerHTML = msg;
+}
+
+function treeReset(){
+  treeStepIdx = 0;
+  treeAddedEdges = [];
+  renderTreeGraph();
+  document.getElementById('treeInfo').innerHTML = 'Comece com 8 vértices isolados (8 componentes, 0 arestas). Clique em "Adicionar próxima aresta" para construir.';
+  document.getElementById('treeInfo').className = 'sim-info';
+}
+
+treeReset();
+
+// ═══════════════════════════════════════════════════════════
+// §6 — BIPARTITE BFS DETECTOR
+// ═══════════════════════════════════════════════════════════
+const BIP_GRAPHS = {
+  c4: {
+    name: 'C₄ (quadrado)', bipartite: true,
+    nodes: [{id:1,x:100,y:60},{id:2,x:280,y:60},{id:3,x:280,y:160},{id:4,x:100,y:160}],
+    edges: [[1,2],[2,3],[3,4],[4,1]]
+  },
+  c5: {
+    name: 'C₅ (pentágono)', bipartite: false,
+    nodes: [{id:1,x:190,y:40},{id:2,x:300,y:110},{id:3,x:255,y:200},{id:4,x:125,y:200},{id:5,x:80,y:110}],
+    edges: [[1,2],[2,3],[3,4],[4,5],[5,1]]
+  },
+  k33: {
+    name: 'K₃,₃', bipartite: true,
+    nodes: [{id:1,x:90,y:50},{id:2,x:90,y:110},{id:3,x:90,y:170},{id:4,x:290,y:50},{id:5,x:290,y:110},{id:6,x:290,y:170}],
+    edges: [[1,4],[1,5],[1,6],[2,4],[2,5],[2,6],[3,4],[3,5],[3,6]]
+  },
+  k4: {
+    name: 'K₄', bipartite: false,
+    nodes: [{id:1,x:120,y:60},{id:2,x:260,y:60},{id:3,x:120,y:170},{id:4,x:260,y:170}],
+    edges: [[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]
+  },
+  tree: {
+    name: 'Árvore', bipartite: true,
+    nodes: [{id:1,x:190,y:40},{id:2,x:100,y:110},{id:3,x:280,y:110},{id:4,x:60,y:180},{id:5,x:140,y:180},{id:6,x:240,y:180},{id:7,x:320,y:180}],
+    edges: [[1,2],[1,3],[2,4],[2,5],[3,6],[3,7]]
+  },
+  petersen: {
+    name: 'Petersen (10 vértices)', bipartite: false,
+    nodes: [
+      {id:1,x:190,y:30},{id:2,x:280,y:90},{id:3,x:250,y:190},{id:4,x:130,y:190},{id:5,x:100,y:90},
+      {id:6,x:190,y:90},{id:7,x:230,y:120},{id:8,x:215,y:170},{id:9,x:165,y:170},{id:10,x:150,y:120}
+    ],
+    edges: [
+      [1,2],[2,3],[3,4],[4,5],[5,1],
+      [1,6],[2,7],[3,8],[4,9],[5,10],
+      [6,8],[8,10],[10,7],[7,9],[9,6]
+    ]
+  }
+};
+
+let bipCurrent = null;
+let bipColors = {}; // node id -> 0 or 1
+let bipQueue = [];
+let bipVisited = new Set();
+let bipDone = false;
+let bipResult = null;
+
+function bipLoad(key, btn){
+  document.querySelectorAll('[id^="bipBtn-"]').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  bipCurrent = BIP_GRAPHS[key];
+  bipReset();
+}
+
+function bipReset(){
+  if(!bipCurrent) return;
+  bipColors = {};
+  bipQueue = [];
+  bipVisited = new Set();
+  bipDone = false;
+  bipResult = null;
+  renderBipGraph();
+  document.getElementById('bipInfo').innerHTML = `Grafo: <strong>${bipCurrent.name}</strong>. Clique em "Próximo passo BFS" para começar a colorir partindo do vértice 1.`;
+  document.getElementById('bipInfo').className = 'sim-info';
+}
+
+function renderBipGraph(){
+  const svg = document.getElementById('bipSvg');
+  if(!bipCurrent) return;
+  let html = '';
+  // Edges - mark conflict edges if present
+  for(const [u,v] of bipCurrent.edges){
+    const nu = bipCurrent.nodes.find(n=>n.id===u);
+    const nv = bipCurrent.nodes.find(n=>n.id===v);
+    let cls = 'gv-edge';
+    // Conflict: both endpoints same color
+    if(bipColors[u] !== undefined && bipColors[v] !== undefined && bipColors[u] === bipColors[v]){
+      cls = 'gv-edge hl-2';
+    }
+    html += `<line class="${cls}" x1="${nu.x}" y1="${nu.y}" x2="${nv.x}" y2="${nv.y}"/>`;
+  }
+  // Nodes
+  for(const n of bipCurrent.nodes){
+    let cls = 'gv-node', lblCls = 'gv-label';
+    if(bipColors[n.id] === 0){ cls = 'gv-node hl'; lblCls = 'gv-label on'; }
+    else if(bipColors[n.id] === 1){ cls = 'gv-node hl-2'; lblCls = 'gv-label on'; }
+    html += `<circle class="${cls}" cx="${n.x}" cy="${n.y}" r="14"/>`;
+    html += `<text class="${lblCls}" x="${n.x}" y="${n.y}">${n.id}</text>`;
+  }
+  svg.innerHTML = html;
+}
+
+function bipStep(){
+  if(!bipCurrent || bipDone) return;
+
+  // Initialize BFS if first call
+  if(Object.keys(bipColors).length === 0){
+    const startId = bipCurrent.nodes[0].id;
+    bipColors[startId] = 0;
+    bipQueue.push(startId);
+    bipVisited.add(startId);
+    renderBipGraph();
+    document.getElementById('bipInfo').innerHTML = `Início: vértice <strong>${startId}</strong> recebe cor <strong>azul</strong>. Próximo passo: visitar vizinhos.`;
+    return;
+  }
+
+  // Process next vertex from queue
+  if(bipQueue.length === 0){
+    // Check if there are unvisited components (graph is disconnected)
+    const unvisited = bipCurrent.nodes.find(n => !bipVisited.has(n.id));
+    if(unvisited){
+      bipColors[unvisited.id] = 0;
+      bipQueue.push(unvisited.id);
+      bipVisited.add(unvisited.id);
+      renderBipGraph();
+      document.getElementById('bipInfo').innerHTML = `Componente novo: vértice <strong>${unvisited.id}</strong> recebe cor azul. Continuando BFS.`;
+      return;
+    }
+    // All visited - finalize
+    bipDone = true;
+    bipResult = 'bipartite';
+    document.getElementById('bipInfo').className = 'sim-info ok';
+    document.getElementById('bipInfo').innerHTML = `✓ <strong>BIPARTIDO</strong> — todos os vértices coloridos sem conflito. Lado azul (cor 0) e lado laranja (cor 1) formam a partição.`;
+    return;
+  }
+
+  const u = bipQueue.shift();
+  const myColor = bipColors[u];
+  const otherColor = 1 - myColor;
+
+  // Find all neighbors
+  const neighbors = [];
+  for(const [a,b] of bipCurrent.edges){
+    if(a === u) neighbors.push(b);
+    else if(b === u) neighbors.push(a);
+  }
+
+  let conflictMsg = '';
+  let newColored = [];
+  for(const nb of neighbors){
+    if(bipColors[nb] === undefined){
+      bipColors[nb] = otherColor;
+      bipVisited.add(nb);
+      bipQueue.push(nb);
+      newColored.push(nb);
+    } else if(bipColors[nb] === myColor){
+      // CONFLICT: same color as u
+      conflictMsg = `<strong>✗ CONFLITO</strong> — vértice ${nb} já tem cor ${myColor === 0 ? 'azul' : 'laranja'}, mesma de ${u}. Aresta (${u},${nb}) liga dois vértices da mesma cor → existe ciclo de comprimento ímpar → <strong>NÃO É BIPARTIDO</strong>.`;
+      bipDone = true;
+      bipResult = 'not-bipartite';
+      break;
+    }
+  }
+
+  renderBipGraph();
+  const info = document.getElementById('bipInfo');
+  if(conflictMsg){
+    info.className = 'sim-info fail';
+    info.innerHTML = conflictMsg;
+  } else {
+    info.className = 'sim-info';
+    let msg = `Visitando vértice <strong>${u}</strong> (cor ${myColor === 0 ? 'azul' : 'laranja'}). `;
+    if(newColored.length > 0){
+      msg += `Vizinhos coloridos com a cor oposta: ${newColored.join(', ')}.`;
+    } else {
+      msg += `Sem novos vizinhos para colorir (todos já visitados sem conflito).`;
+    }
+    info.innerHTML = msg;
+  }
+}
+
+bipLoad('c4', document.getElementById('bipBtn-c4'));
+
+// ═══════════════════════════════════════════════════════════
+// §7 — DIGRAPH CONNECTIVITY COMPARISON
+// ═══════════════════════════════════════════════════════════
+const DI_GRAPHS = {
+  cycle3: {
+    name: 'Ciclo dirigido A → B → C → A',
+    nodes: [{id:'A',x:190,y:50},{id:'B',x:300,y:170},{id:'C',x:80,y:170}],
+    edges: [['A','B'],['B','C'],['C','A']]
+  },
+  path3: {
+    name: 'Caminho dirigido A → B → C',
+    nodes: [{id:'A',x:80,y:110},{id:'B',x:190,y:110},{id:'C',x:300,y:110}],
+    edges: [['A','B'],['B','C']]
+  },
+  complex: {
+    name: 'Digrafo com 5 vértices (mistura)',
+    nodes: [{id:'A',x:80,y:60},{id:'B',x:200,y:50},{id:'C',x:320,y:70},{id:'D',x:130,y:170},{id:'E',x:280,y:170}],
+    edges: [['A','B'],['B','C'],['C','E'],['E','D'],['D','A'],['B','D']]
+  }
+};
+
+function diLoad(key, btn){
+  document.querySelectorAll('[id^="diBtn-"]').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const g = DI_GRAPHS[key];
+  if(!g) return;
+  // Render
+  const svg = document.getElementById('diSvg');
+  let html = '<defs><marker id="diArrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,5 L0,10 z" fill="var(--n400)"/></marker></defs>';
+  // Edges with arrows (offset start/end so arrow doesn't overlap node)
+  for(const [u,v] of g.edges){
+    const nu = g.nodes.find(n=>n.id===u);
+    const nv = g.nodes.find(n=>n.id===v);
+    // Compute unit vector
+    const dx = nv.x - nu.x, dy = nv.y - nu.y;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const ux = dx/len, uy = dy/len;
+    const r = 16;
+    const x1 = nu.x + ux * r;
+    const y1 = nu.y + uy * r;
+    const x2 = nv.x - ux * r;
+    const y2 = nv.y - uy * r;
+    html += `<line class="gv-edge" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#diArrow)"/>`;
+  }
+  // Nodes
+  for(const n of g.nodes){
+    html += `<circle class="gv-node" cx="${n.x}" cy="${n.y}" r="16"/>`;
+    html += `<text class="gv-label" x="${n.x}" y="${n.y}">${n.id}</text>`;
+  }
+  svg.innerHTML = html;
+
+  // Compute connectivity
+  // Forward reachability from each node (directed)
+  function reachableDirected(start){
+    const visited = new Set([start]);
+    const stack = [start];
+    while(stack.length){
+      const u = stack.pop();
+      for(const [a,b] of g.edges){
+        if(a === u && !visited.has(b)){ visited.add(b); stack.push(b); }
+      }
+    }
+    return visited;
+  }
+  function reachableUndirected(start){
+    const visited = new Set([start]);
+    const stack = [start];
+    while(stack.length){
+      const u = stack.pop();
+      for(const [a,b] of g.edges){
+        if(a === u && !visited.has(b)){ visited.add(b); stack.push(b); }
+        if(b === u && !visited.has(a)){ visited.add(a); stack.push(a); }
+      }
+    }
+    return visited;
+  }
+  // Strongly connected: every node reachable from every other (directed)
+  let strong = true;
+  for(const start of g.nodes){
+    const r = reachableDirected(start.id);
+    if(r.size !== g.nodes.length){ strong = false; break; }
+  }
+  // Weakly connected: undirected reachability from any node covers all
+  const ur = reachableUndirected(g.nodes[0].id);
+  const weak = ur.size === g.nodes.length;
+
+  const info = document.getElementById('diInfo');
+  let msg = `<strong>${g.name}</strong><br>`;
+  msg += `Fortemente conexo? <strong>${strong ? '✓ SIM' : '✗ NÃO'}</strong> &nbsp;|&nbsp; `;
+  msg += `Fracamente conexo? <strong>${weak ? '✓ SIM' : '✗ NÃO'}</strong>`;
+  if(strong){
+    msg += '<br><span style="color:var(--green)">→ Existe caminho dirigido entre todo par de vértices em ambos os sentidos.</span>';
+  } else if(weak){
+    msg += '<br><span style="color:var(--accent2)">→ Ignorando direções é conexo, mas no digrafo há pares (u,v) sem caminho dirigido em algum sentido.</span>';
+  } else {
+    msg += '<br><span style="color:var(--red)">→ Mesmo ignorando direções, há vértices isolados (componentes separados).</span>';
+  }
+  info.className = 'sim-info';
+  info.innerHTML = msg;
+}
+
+diLoad('cycle3', document.getElementById('diBtn-cycle3'));
+
+// ═══════════════════════════════════════════════════════════
+// §8 — EULER FORMULA CALCULATOR
+// ═══════════════════════════════════════════════════════════
+function eulerSet(v, e){
+  document.getElementById('eulerV').value = v;
+  document.getElementById('eulerE').value = e;
+  eulerCalc();
+}
+
+function eulerCalc(){
+  const V = parseInt(document.getElementById('eulerV').value);
+  const E = parseInt(document.getElementById('eulerE').value);
+  const info = document.getElementById('eulerInfo');
+  if(isNaN(V) || isNaN(E) || V < 1 || E < 0){
+    info.className = 'sim-info';
+    info.textContent = 'Insira valores válidos.';
+    return;
+  }
+  // Check minimum edges to be connected
+  if(V > 1 && E < V - 1){
+    info.className = 'sim-info fail';
+    info.innerHTML = `✗ Para ser conexo com ${V} vértices, precisa ao menos V−1 = ${V-1} arestas. Com ${E} arestas, o grafo está desconectado.`;
+    return;
+  }
+  // Check planarity bound: E <= 3V - 6 (for V >= 3)
+  if(V >= 3 && E > 3*V - 6){
+    info.className = 'sim-info fail';
+    info.innerHTML = `✗ <strong>Não é planar!</strong> Para grafos planares simples conexos com V ≥ 3, é necessário E ≤ 3V−6 = ${3*V-6}. Você tem E = ${E} > ${3*V-6}.`;
+    return;
+  }
+  // Apply Euler
+  const F = 2 - V + E;
+  info.className = 'sim-info ok';
+  info.innerHTML = `✓ Para grafo planar conexo com V = ${V} e E = ${E}:<br>
+    Fórmula de Euler: F = 2 − V + E = 2 − ${V} + ${E} = <strong>${F} faces</strong> (incluindo a face externa).<br>
+    Verificação de planaridade: 3V−6 = ${3*V-6}, e ${E} ≤ ${3*V-6} ✓`;
+}
+
+eulerCalc();
+
+// ═══════════════════════════════════════════════════════════
+// §9 — QUIZ HANDLER
+// ═══════════════════════════════════════════════════════════
+const QUIZ = {
+  q1: {
+    correct: 'B',
+    ok: 'Correto! Pelo Lema do Aperto de Mão, ∑d(v) = 2|E| é sempre PAR. Se cada um dos 5 vértices tiver grau 3, a soma seria 5·3 = 15, ímpar. Logo viola o Lema, e tal grafo não pode existir. Esta é a aplicação clássica do corolário "vértices de grau ímpar em quantidade par" (aqui teríamos 5 ímpares — quantidade ímpar).',
+    why: {
+      A: 'Falso. O ciclo C₅ tem 5 vértices todos de grau 2 (não 3). Adicionar diagonais não resolve mantendo todos com grau 3 — a soma de graus 5·3 = 15 sempre seria ímpar, impossível.',
+      C: 'Falso. K₅ tem todos os vértices com grau 4 (não 3); remover arestas mudaria graus de forma não-uniforme. Não é possível manter o vetor (3,3,3,3,3) em nenhum subgrafo de K₅.',
+      D: 'Falso. O grau máximo em grafo simples com n vértices é n−1, não 4 fixo. Para n=5, o máximo é 4 — então grau 3 está abaixo do limite. O motivo da impossibilidade é a paridade da soma, não o limite máximo.',
+    }
+  },
+  q2: {
+    correct: 'B',
+    ok: 'Correto! Conexo + (n−1) arestas é uma das caracterizações equivalentes de árvore. Com 15 vértices e 14 arestas conexo, G é necessariamente uma árvore — o que implica acíclico, com caminho único entre cada par, e que adicionar qualquer aresta cria ciclo.',
+    why: {
+      A: 'Falso. Pela caracterização de árvore, grafo conexo com n−1 arestas é acíclico. Não existe ciclo. Esta opção troca a regra ao contrário.',
+      C: 'Falso. Árvore não é bipartido completo. Bipartido completo K_{m,n} tem m·n arestas, geralmente muito mais que n−1. Por exemplo K_{3,4} tem 12 arestas e 7 vértices, mas árvore com 7 vértices tem só 6 arestas.',
+      D: 'Falso. Existência de caminho Hamiltoniano é problema NP-completo em geral; árvores genéricas só têm caminho Hamiltoniano se forem caminhos Pₙ (cadeias). Uma estrela Sₙ é árvore mas não tem caminho Hamiltoniano para n > 3.',
+    }
+  },
+  q3: {
+    correct: 'B',
+    ok: 'Correto! Em K_{m,n} (bipartido completo), |E| = m·n. Para K₄,₅: |E| = 4·5 = 20 arestas. Cada um dos 4 vértices à esquerda conecta com cada um dos 5 à direita.',
+    why: {
+      A: 'Errado. 9 = m + n = 4 + 5 — você somou os tamanhos dos lados em vez de multiplicar. A fórmula é multiplicação porque cada vértice de um lado conecta com TODOS os do outro.',
+      C: 'Errado. 36 = 9·4 ou 6² — não corresponde a K₄,₅. Possivelmente confusão com K₆,₆ (36) ou C(9,2)=36.',
+      D: 'Errado. 45 = C(10,2) = 9·10/2 seria o número de arestas em K₁₀ (completo com 10 vértices), não bipartido.',
+    }
+  },
+  q4: {
+    correct: 'B',
+    ok: 'Correto! Este é o Teorema de König — caracterização clássica. Bipartido ⟺ sem ciclo ímpar. A demonstração é construtiva: BFS de duas cores funciona se e somente se não há ciclo ímpar. Este teorema permite testar bipartição em O(V+E).',
+    why: {
+      A: 'Falso. Bipartido e planar são propriedades independentes. K₃,₃ é bipartido mas NÃO é planar (Teorema de Kuratowski). Um quadrado C₄ é bipartido E planar; um cubo Q₃ é bipartido E planar.',
+      C: 'Falso. Árvores são bipartidas (acíclicas, então sem ciclo ímpar — satisfazem König). Mas há grafos bipartidos com ciclos pares, como C₄ — não são árvores. A inclusão é "árvore ⟹ bipartido", não a recíproca.',
+      D: 'Falso. Bipartição é sobre divisão dos vértices em duas partes com arestas entre as partes — nada a ver com componentes conexos. K₃,₃ é bipartido E conexo (1 componente).',
+    }
+  },
+  q5: {
+    correct: 'C',
+    ok: 'Correto! Pela Fórmula de Euler para grafos planares conexos: V − E + F = 2 → F = 2 − V + E = 2 − 8 + 14 = 8. A fórmula é INVARIANTE — vale para qualquer desenho planar do grafo, independente das posições escolhidas.',
+    why: {
+      A: 'Errado em conta. F = 2 − V + E = 2 − 8 + 14 = 8, não 6. Talvez tenha calculado V − E + F = 2 e isolado F errado.',
+      B: 'Errado. F = 8, não 7. Conta direta: 2 − 8 + 14 = 8.',
+      D: 'Falso. A fórmula de Euler é INVARIANTE — qualquer desenho planar tem o mesmo número de faces. Esse é um dos resultados mais elegantes da teoria de grafos: F é determinado por V e E em planares conexos.',
+    }
+  },
+  q6: {
+    correct: 'B',
+    ok: 'Correto! Apenas I e III são verdadeiras. (I) Fortemente conexo ⟹ fracamente conexo: se há caminho dirigido entre todo par, ignorando direções continua havendo caminho. (III) DAG (sem ciclos dirigidos) com >1 vértice nunca é fortemente conexo: se fosse, haveria caminhos u→v e v→u, que concatenados formariam ciclo dirigido. (II) é falsa: caminho A→B→C é fracamente conexo mas não fortemente (não há caminho de C para A).',
+    why: {
+      A: 'Erra ao descartar III. III é claramente verdadeira: DAG = sem ciclos dirigidos, e forte conexidade exigiria ciclos.',
+      C: 'Erra em II. O contraexemplo padrão é A→B→C: ignorando direções é conexo (fraco), mas não há caminho dirigido de C para A — então não é fortemente conexo.',
+      D: 'Erra em II pelos mesmos motivos. Fraco não implica forte; só o contrário vale.',
+    }
+  },
+  q7: {
+    correct: 'B',
+    ok: 'Correto! I, III e IV verdadeiras. (I) K₅ tem n(n−1)/2 = 5·4/2 = 10 arestas. (III) Em K₅ todo vértice conecta aos outros n−1 = 4, então grau 4. (IV) K₅ contém ciclo Hamiltoniano: como todo par está conectado, qualquer permutação dos 5 vértices forma um ciclo Hamiltoniano. (II) é FALSA: K₅ NÃO é planar — viola E ≤ 3V−6, pois 10 > 3·5−6 = 9. Pelo Teorema de Kuratowski, K₅ é exatamente um dos dois "obstáculos" mínimos à planaridade.',
+    why: {
+      A: 'Erra ao descartar IV. K₅ tem ciclo Hamiltoniano por razão simples: todo par conectado → qualquer ordem dos 5 vértices forma um ciclo (1→2→3→4→5→1, por exemplo).',
+      C: 'Erra em I e III, e inclui II (que é falsa). I é verdadeira (10 arestas), III é verdadeira (grau 4). E K₅ não é planar — pelo Teorema de Kuratowski, K₅ é um dos dois grafos proibidos.',
+      D: 'Inclui II, que é falsa. K₅ NÃO é planar — esta é uma propriedade que cai com frequência no POSCOMP. Lembre-se: K₅ e K₃,₃ são os dois grafos não-planares "fundamentais".',
+    }
+  },
+};
+
+function ansQ(el){
+  const qid = el.getAttribute('data-qid');
+  const chosen = el.getAttribute('data-opt');
+  const box = document.getElementById(qid);
+  if(box.dataset.answered) return;
+  box.dataset.answered = '1';
+
+  const correct = QUIZ[qid].correct;
+  const ok = chosen === correct;
+
+  box.querySelectorAll('.quiz-option').forEach(o=>{
+    o.style.pointerEvents = 'none';
+    if(o.getAttribute('data-opt') === correct) o.classList.add('correct');
+  });
+  if(!ok) el.classList.add('wrong');
+
+  const fb = document.getElementById(qid + '-fb');
+  let html = '';
+  if(ok){
+    html = '<strong>✓ Correto!</strong> ' + QUIZ[qid].ok;
+    fb.className = 'quiz-feedback show ok';
+  } else {
+    const whyWrong = QUIZ[qid].why[chosen] || '';
+    html = '<strong>✗ Incorreto.</strong><br><br>'
+      + '<strong>Por que ' + chosen + ' está errada:</strong> ' + whyWrong + '<br><br>'
+      + '<strong>Por que ' + correct + ' está certa:</strong> ' + QUIZ[qid].ok;
+    fb.className = 'quiz-feedback show fail';
+  }
+  fb.innerHTML = html;
+}
+</script>
+</body>
+</html>

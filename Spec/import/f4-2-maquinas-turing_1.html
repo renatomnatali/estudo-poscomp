@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F4.2 — Máquinas de Turing e Decidibilidade · POSCOMP Visual Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0F1E;--sap:#1B3FD8;--sap-d:#1230A8;--sap-bg:#EEF1FF;
+  --em:#00B37E;--em-d:#009968;--em-bg:#E6FBF4;
+  --n50:#F8F9FF;--n100:#EFF1FB;--n200:#DDE0F0;--n300:#B8BDD8;
+  --n400:#8A90B0;--n500:#5C6180;--white:#fff;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-pill:9999px;
+  --sh-sm:0 1px 4px rgba(10,15,30,.08);
+  --sidebar-w:240px;--sidebar-c:64px;--topbar-h:52px;
+  --transition:.22s cubic-bezier(.4,0,.2,1);
+  --bg:#f5f0ff;--card:#fff;--primary:#3d0080;--accent:#7c3aed;--accent2:#e8700a;
+  --green:#1a8c4e;--red:#c0392b;--border:#d4c5f0;--code-bg:#ede9fe;
+  --text:#1a1a2e;--muted:#5a6a8a;--blue:#1a6bcc;--blue-bg:#e8f0fe;
+  --teal:#0891b2;--teal-bg:#e0f7fa;--orange-bg:#fff3e0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--fb);color:var(--text);font-size:14px;line-height:1.7;overflow:hidden}
+.shell{display:flex;height:100vh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--white);border-right:1px solid var(--n200);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:20;box-shadow:var(--sh-sm)}
+.sidebar.collapsed{width:var(--sidebar-c)}
+.sb-logo{height:var(--topbar-h);padding:0 .8rem 0 1rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden;white-space:nowrap}
+.sb-logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sap),var(--em));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.82rem;font-weight:800;color:white;flex-shrink:0}
+.sb-logo-text{flex:1;min-width:0}.sb-logo-name{font-family:var(--fd);font-size:.9rem;font-weight:700;color:var(--ink);display:block;line-height:1.1}.sb-logo-sub{font-family:var(--fm);font-size:.6rem;color:var(--n400);text-transform:uppercase;letter-spacing:1.2px}
+.sb-toggle{width:28px;height:28px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto;color:var(--n500)}.sb-toggle:hover{background:var(--n100)}
+.sidebar.collapsed .sb-logo{flex-direction:column;gap:.3rem;height:auto;padding:.7rem 0;justify-content:center}.sidebar.collapsed .sb-toggle{margin-left:0}
+.sidebar.collapsed .sb-logo-text,.sidebar.collapsed .sb-item-text,.sidebar.collapsed .sb-item-badge,.sidebar.collapsed .sb-progress-strip,.sidebar.collapsed .sb-user-info{display:none}
+.sb-progress-strip{padding:.7rem 1rem;background:linear-gradient(90deg,#f5f0ff,var(--em-bg));border-bottom:1px solid var(--n100);flex-shrink:0;overflow:hidden}
+.sb-ps-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem}.sb-ps-label{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--n500)}.sb-ps-pct{font-family:var(--fd);font-size:.72rem;font-weight:700;color:var(--accent)}
+.sb-ps-bar-bg{background:rgba(255,255,255,.55);border-radius:var(--r-pill);height:5px;overflow:hidden}.sb-ps-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));border-radius:var(--r-pill);width:20%}
+.sb-ps-caption{font-size:.66rem;color:var(--n500);margin-top:.3rem}
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto;overflow-x:hidden}
+.sb-nav-section{width:100%;padding:0 .6rem}.sb-nav-label{font-family:var(--fm);font-size:.61rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--n300);padding:.55rem .5rem .2rem;white-space:nowrap;overflow:hidden}
+.sidebar.collapsed .sb-nav-label{display:none}
+.sb-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;border-radius:var(--r-md);cursor:pointer;transition:background var(--transition),color var(--transition);color:var(--n500);font-size:.84rem;font-weight:500;margin-bottom:2px;position:relative;white-space:nowrap;text-decoration:none;width:100%}.sb-item:hover{background:var(--n100);color:var(--ink)}.sb-item.active{background:#f5f0ff;color:var(--accent);font-weight:600}.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--accent);border-radius:0 3px 3px 0}.sb-item.premium{color:#92400E;background:#FEF3C7}
+.sb-item-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}.sb-item-text{flex:1;overflow:hidden;text-overflow:ellipsis}.sb-item-badge{font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:var(--r-pill);flex-shrink:0}.badge-green{background:var(--em-bg);color:#006B50}
+.sidebar.collapsed .sb-nav-section{padding:0}.sidebar.collapsed .sb-item{justify-content:center;padding:.5rem 0;gap:0;width:100%}
+.sb-sep{height:1px;background:var(--n100);margin:.4rem .6rem}
+.sb-footer{padding:.6rem;border-top:1px solid var(--n100);flex-shrink:0;overflow:hidden}.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem;border-radius:var(--r-md);cursor:pointer}.sb-user:hover{background:var(--n50)}.sidebar.collapsed .sb-user{justify-content:center;padding:.4rem}
+.sb-avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),#4B6BF5);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white;flex-shrink:0;font-family:var(--fd)}.sb-user-name{font-size:.8rem;font-weight:600;color:var(--ink)}.sb-user-plan{font-size:.65rem;color:var(--n400)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,.35);z-index:15}.sb-overlay.visible{display:block}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--bg)}
+.topbar-progress-line{height:3px;background:var(--n100);overflow:hidden;display:none;flex-shrink:0}.topbar-progress-line.visible{display:block}.topbar-progress-fill{height:100%;width:40%;background:linear-gradient(90deg,var(--accent),var(--em))}
+.topbar{height:var(--topbar-h);background:var(--white);border-bottom:1px solid var(--n200);display:flex;align-items:center;gap:.8rem;padding:0 1.4rem;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--n400)}.topbar-breadcrumb .sep{color:var(--n300)}.topbar-breadcrumb .current{color:var(--ink);font-weight:600}
+.topbar-actions{margin-left:auto}
+.topbar-icon-btn{width:30px;height:30px;border:1px solid var(--n200);background:var(--white);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;text-decoration:none}
+.lesson-area{flex:1;overflow-y:auto}.lesson-area::-webkit-scrollbar{width:4px}.lesson-area::-webkit-scrollbar-thumb{background:var(--n200);border-radius:4px}
+.lesson-header{background:linear-gradient(135deg,#3d0080 0%,#1a3a8f 100%);color:white;padding:2.2rem 2rem 2rem;text-align:center;position:relative}
+.lesson-header::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--r-pill);padding:3px 14px;font-family:var(--fm);font-size:.72rem;letter-spacing:1px;margin-bottom:.8rem}
+.hero-title{font-family:var(--fd);font-size:1.8rem;font-weight:800;margin-bottom:.5rem;position:relative;z-index:1}
+.hero-sub{opacity:.8;font-size:.9rem;max-width:600px;margin:.4rem auto 0;position:relative;z-index:1}
+.hero-chips{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;margin-top:1rem;position:relative;z-index:1}
+.hero-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:var(--r-pill);padding:4px 14px;font-size:.8rem;font-family:var(--fm)}
+.section-nav{background:#3d0080;display:flex;flex-wrap:wrap;gap:4px;padding:.45rem 1.5rem;position:sticky;top:0;z-index:10}
+.section-nav a{color:rgba(255,255,255,.7);text-decoration:none;padding:4px 10px;font-size:.82rem;border-radius:4px;transition:background .15s,color .15s}.section-nav a:hover,.section-nav a.active{background:rgba(255,255,255,.15);color:white;font-weight:600}
+.lesson-content{max-width:920px;margin:0 auto;padding:2rem 2rem 3rem}
+section{margin-bottom:3.2rem;scroll-margin-top:48px}
+h2{color:var(--primary);font-size:1.3rem;border-bottom:3px solid var(--accent);padding-bottom:.4rem;margin-bottom:1.3rem;display:flex;align-items:center;gap:.5rem}
+h2 .num{background:var(--accent);color:white;width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;font-family:var(--fm)}
+h3{color:var(--accent);font-size:1rem;margin:1.5rem 0 .6rem;font-weight:700}
+p{margin-bottom:.9rem;font-size:.92rem;line-height:1.8}
+code{background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--fm);font-size:.88rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;margin:1rem 0}
+.callout{border-left:4px solid var(--accent);background:#f5f0ff;padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.9rem;line-height:1.7}
+.callout.warning{border-color:var(--accent2);background:var(--orange-bg)}
+.callout.success{border-color:var(--green);background:#e8f5ee}
+.callout.blue{border-color:var(--blue);background:var(--blue-bg)}
+.callout.teal{border-color:var(--teal);background:var(--teal-bg)}
+.callout strong{color:var(--primary)}
+/* SYM DICT */
+.sym-dict{display:grid;gap:.5rem;margin:1rem 0}
+.sym-row{display:grid;grid-template-columns:80px 1fr;gap:1rem;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem}
+.sym-row.highlight{border-color:var(--accent);background:#f5f0ff}
+.sym-sym{font-family:Georgia,serif;font-size:1.3rem;color:var(--accent);text-align:center;line-height:1}
+.sym-body{font-size:.88rem;line-height:1.6}
+.sym-body strong{color:var(--primary)}
+.sym-body .eg{margin-top:.3rem;font-family:var(--fm);font-size:.82rem;background:var(--code-bg);padding:2px 8px;border-radius:4px;display:inline-block}
+/* FORMULA ANNOTATED */
+.formula-annotated{background:var(--primary);color:white;border-radius:12px;padding:1.6rem 2rem 2rem;text-align:center;margin:1.5rem 0}
+.fa-title{font-size:.72rem;opacity:.6;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.fa-line{font-size:1.15rem;font-family:Georgia,serif;margin-bottom:1.2rem;line-height:1.8}
+.fa-ann{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:.4rem}
+.fa-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:.25rem .7rem;font-size:.76rem}
+.fa-chip strong{color:#c4b5fd}
+/* TAPE */
+.tape-wrap{display:flex;flex-direction:column;align-items:center;margin:1rem 0;gap:.2rem}
+.tape-ptr{display:flex;justify-content:center;gap:0;width:100%;overflow-x:auto;padding:0 1rem}
+.tape-ptr-cell{min-width:42px;height:18px;display:flex;align-items:flex-end;justify-content:center;font-size:1.1rem;color:var(--accent);flex-shrink:0;font-weight:700}
+.tape-row{display:flex;justify-content:center;gap:0;width:100%;overflow-x:auto;padding:0 1rem}
+.tape-cell{min-width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:2px solid var(--border);font-family:var(--fm);font-size:1rem;font-weight:700;color:var(--primary);background:var(--card);transition:all .25s;flex-shrink:0;border-right-width:1px}
+.tape-cell:last-child{border-right-width:2px}
+.tape-cell.active{background:var(--accent);color:white;border-color:var(--accent)}
+.tape-cell.blank{color:var(--n300);font-style:italic}
+.tape-cell.marked{background:var(--em-bg);color:var(--em-d);border-color:var(--em-d)}
+.tape-cell.accepted{background:var(--green);color:white;border-color:var(--green)}
+.tape-cell.rejected{background:var(--red);color:white;border-color:var(--red)}
+/* MT STATE BOX */
+.mt-state-display{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin:.8rem 0;font-family:var(--fm);font-size:.85rem}
+.mt-state-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:.5rem 1rem;min-width:120px;text-align:center}
+.mt-state-card .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:.2rem}
+.mt-state-card .val{color:var(--primary);font-weight:700;font-size:1rem}
+.mt-state-card.q-acc{border-color:var(--green);background:#e8f5ee}.mt-state-card.q-acc .val{color:var(--green)}
+.mt-state-card.q-rej{border-color:var(--red);background:#fde8e8}.mt-state-card.q-rej .val{color:var(--red)}
+/* TRANSITION TABLE */
+.trans-table{border-collapse:collapse;font-family:var(--fm);font-size:.84rem;margin:.8rem auto;width:100%;max-width:600px}
+.trans-table th{background:var(--primary);color:white;padding:.4rem .7rem;text-align:center;font-size:.78rem}
+.trans-table td{padding:.4rem .7rem;border:1px solid var(--border);text-align:center}
+.trans-table td:first-child{background:var(--n50);font-weight:700;color:var(--accent)}
+.trans-table td.current{background:var(--accent);color:white;font-weight:700}
+/* SIM */
+.sim-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.sim-box h4{color:var(--primary);font-weight:700;font-size:.95rem;margin-bottom:.8rem}
+.sim-controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0;align-items:center}
+.sim-btn{padding:.38rem .9rem;border-radius:var(--r-pill);border:1px solid var(--accent);background:var(--white);color:var(--accent);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s}
+.sim-btn:hover{background:#f5f0ff}.sim-btn.go{background:var(--accent);color:white;border-color:var(--accent)}.sim-btn.go:hover{background:var(--primary)}
+.sim-btn.step{border-color:var(--accent2);color:var(--accent2)}.sim-btn.step:hover{background:var(--orange-bg)}
+.sim-btn.rst{border-color:var(--red);color:var(--red)}.sim-btn.rst:hover{background:#fde8e8}
+.sim-btn:disabled{opacity:.4;cursor:not-allowed}
+.sim-input{font-family:var(--fm);font-size:.9rem;padding:.4rem .8rem;border:1.5px solid var(--border);border-radius:var(--r-pill);outline:none;color:var(--primary);min-width:120px}
+.sim-input:focus{border-color:var(--accent)}
+.sim-presets{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
+.sim-preset{padding:.3rem .8rem;border-radius:var(--r-pill);background:var(--n50);border:1px solid var(--n200);font-size:.78rem;cursor:pointer;font-family:var(--fm);color:var(--primary)}
+.sim-preset:hover{background:var(--code-bg)}.sim-preset.active{background:var(--accent);color:white;border-color:var(--accent)}
+.sim-log{font-family:var(--fm);font-size:.8rem;color:var(--muted);margin-top:.6rem;background:var(--n50);border-radius:6px;padding:.55rem .8rem;min-height:1.8rem;line-height:1.6;max-height:140px;overflow-y:auto}
+.sim-log.ok{color:var(--green);font-weight:700;background:#e8f5ee}.sim-log.err{color:var(--red);font-weight:700;background:#fde8e8}
+.log-line{margin:.15rem 0;font-family:var(--fm);font-size:.78rem}
+.log-line.ok{color:var(--green)}.log-line.err{color:var(--red)}.log-line.info{color:var(--primary)}
+/* PROOF STEPS */
+.proof-steps{margin:1rem 0}
+.proof-step{display:flex;gap:1rem;padding:.8rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;margin:.5rem 0;font-size:.9rem;align-items:flex-start;line-height:1.6}
+.proof-step .ps-num{background:var(--accent);color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0;font-family:var(--fm)}
+.proof-step .ps-body code{background:var(--code-bg);padding:1px 6px;border-radius:4px}
+/* COMPARISON */
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1.2rem 0}
+.compare-card{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:1rem}
+.compare-card.regular{border-color:var(--green);background:#e8f5ee}
+.compare-card.context{border-color:var(--blue);background:var(--blue-bg)}
+.compare-card.turing{border-color:var(--accent);background:#f5f0ff}
+.compare-name{font-weight:700;font-size:.9rem;margin-bottom:.4rem}
+.compare-card.regular .compare-name{color:var(--green)}
+.compare-card.context .compare-name{color:var(--blue)}
+.compare-card.turing .compare-name{color:var(--accent)}
+.compare-list{font-size:.82rem;color:var(--text);line-height:1.6;list-style:none}
+.compare-list li{padding:.15rem 0}
+/* DIAGONAL TABLE */
+.diag-table{border-collapse:collapse;font-family:var(--fm);font-size:.78rem;margin:1rem auto;background:var(--card)}
+.diag-table th{background:var(--primary);color:white;padding:.35rem .55rem;text-align:center;font-size:.72rem}
+.diag-table th:first-child{background:#1a3a8f}
+.diag-table td{padding:.3rem .55rem;border:1px solid var(--border);text-align:center;min-width:40px}
+.diag-table td:first-child{background:var(--n50);font-weight:700;color:var(--accent);text-align:left}
+.diag-table .diag-acc{background:#e8f5ee;color:var(--green);font-weight:700}
+.diag-table .diag-loop{background:#fde8e8;color:var(--red);font-weight:700}
+.diag-table .diag-flip{background:#fff3e0;color:var(--accent2);font-weight:700;font-style:italic}
+.diag-table .diag-self{outline:3px solid var(--accent);outline-offset:-3px}
+/* DECID LAYERS */
+.layer-stack{display:flex;flex-direction:column;gap:0;margin:1rem auto;max-width:600px}
+.layer{padding:.7rem 1.4rem;text-align:center;border:2px solid;cursor:default;font-size:.86rem;line-height:1.4;position:relative}
+.layer:not(:first-child){margin-top:-1px}
+.layer.l-all{background:#fff0f0;border-color:#c0392b;border-radius:10px 10px 0 0;color:#c0392b;font-weight:600}
+.layer.l-re{background:var(--orange-bg);border-color:var(--accent2);color:var(--accent2);font-weight:700}
+.layer.l-dec{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);font-weight:700}
+.layer.l-llc{background:#e8f5ee;border-color:var(--green);color:var(--green);font-weight:700}
+.layer.l-reg{background:#f5f0ff;border-color:var(--accent);border-radius:0 0 10px 10px;color:var(--accent);font-weight:700}
+.layer-detail{font-size:.74rem;font-weight:400;opacity:.85;margin-top:.15rem}
+/* DETAILS TOGGLE */
+.details-toggle{margin:.8rem 0;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.dt-trigger{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--accent);background:#f5f0ff;user-select:none;transition:background .15s}
+.dt-trigger:hover{background:#e8e0ff}
+.dt-arrow{font-size:.7rem;transition:transform .2s}
+.dt-trigger.open .dt-arrow{transform:rotate(90deg)}
+.dt-content{display:none;background:var(--card);padding:.8rem 1rem}
+.dt-content.show{display:block}
+/* QUIZ */
+.quiz-box{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:1.4rem;margin:1.2rem 0}
+.quiz-q{font-weight:600;color:var(--primary);margin-bottom:1rem;font-size:.95rem;line-height:1.5}
+.quiz-option{display:flex;align-items:flex-start;gap:.7rem;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:#f9f7ff;margin:.4rem 0;font-size:.9rem;line-height:1.5}
+.quiz-option:hover{background:#f0ebff;border-color:var(--accent)}
+.quiz-option.correct{background:#e8f5ee;border-color:var(--green)}.quiz-option.wrong{background:#fde8e8;border-color:var(--red)}
+.quiz-feedback{margin-top:.8rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;display:none;line-height:1.6}
+.quiz-feedback.show{display:block}.quiz-feedback.ok{background:#e8f5ee;color:#15803d;border:1px solid #86efac}.quiz-feedback.fail{background:#fde8e8;color:var(--red);border:1px solid #fca5a5}
+/* SUMMARY */
+.summary-box{background:linear-gradient(135deg,#3d0080,#1a3a8f);color:white;border-radius:12px;padding:1.8rem;margin:2rem 0}
+.summary-box h3{color:white;margin-bottom:1rem;font-size:1.05rem}
+.summary-row{display:flex;gap:.6rem;margin:.45rem 0;align-items:flex-start;font-size:.9rem;line-height:1.5}
+.summary-row::before{content:'✓';color:#c4b5fd;flex-shrink:0;font-weight:700;margin-top:.05rem}
+.ref-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.84rem;border-radius:10px;overflow:hidden;box-shadow:var(--sh-sm)}
+.ref-table th{background:rgba(255,255,255,.15);color:white;padding:.5rem .8rem;text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(255,255,255,.2)}
+.ref-table td{padding:.48rem .8rem;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.88)}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table td:first-child{font-family:var(--fm);font-weight:700;color:#c4b5fd}
+.lesson-nav{background:var(--white);border-top:1px solid var(--n200);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 -2px 8px rgba(10,15,30,.05)}
+.lnp{display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:160px}.lnp-label{font-size:.7rem;color:var(--n400)}.lnp-bar{width:100%;height:4px;background:var(--n100);border-radius:2px;overflow:hidden}.lnp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--em));width:67%}.lnp-frac{font-family:var(--fm);font-size:.66rem;color:var(--n400)}
+.btn-nav{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:var(--r-pill);font-size:.82rem;font-weight:600;cursor:pointer;font-family:var(--fb);transition:all .15s;border:1px solid var(--n200);background:var(--white);color:var(--n500);text-decoration:none}
+.btn-nav:hover{background:var(--n100);color:var(--ink)}.btn-nav.next{background:var(--accent);color:white;border-color:var(--accent)}.btn-nav.next:hover{background:var(--primary)}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;transform:translateX(-100%);width:var(--sidebar-w)!important}.sidebar.open{transform:translateX(0)}
+  .lesson-content{padding:1.5rem 1rem}
+  .compare-grid{grid-template-columns:1fr}
+  .sym-row{grid-template-columns:60px 1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">PV</div>
+      <div class="sb-logo-text"><span class="sb-logo-name">POSCOMP</span><span class="sb-logo-sub">Visual Lab</span></div>
+      <button class="sb-toggle" onclick="toggleSidebar()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="1" y1="3.5" x2="13" y2="3.5"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="10.5" x2="13" y2="10.5"/></svg></button>
+    </div>
+    <div class="sb-progress-strip"><div class="sb-ps-header"><span class="sb-ps-label">Progresso geral</span><span class="sb-ps-pct">20%</span></div><div class="sb-ps-bar-bg"><div class="sb-ps-bar-fill"></div></div><div class="sb-ps-caption">5 de 25 tópicos concluídos</div></div>
+    <nav class="sb-nav">
+      <div class="sb-nav-section"><div class="sb-nav-label">Início</div><a class="sb-item" href="dashboard.html"><div class="sb-item-icon">🏠</div><span class="sb-item-text">Dashboard</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Estudar</div><a class="sb-item active" href="trilhas.html"><div class="sb-item-icon">📚</div><span class="sb-item-text">Trilhas de Estudo</span><span class="sb-item-badge badge-green">25</span></a><a class="sb-item" href="flashcards.html"><div class="sb-item-icon">🃏</div><span class="sb-item-text">Flashcards</span></a></div>
+      <div class="sb-nav-section"><div class="sb-nav-label">Praticar</div><a class="sb-item" href="simulado.html"><div class="sb-item-icon">⏱️</div><span class="sb-item-text">Simulado POSCOMP</span></a></div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section"><a class="sb-item" href="curriculo.html"><div class="sb-item-icon">📊</div><span class="sb-item-text">Currículo Completo</span></a></div>
+      <div class="sb-sep"></div>
+      <div class="sb-nav-section"><a class="sb-item premium" href="premium.html"><div class="sb-item-icon">⭐</div><span class="sb-item-text">Seja Premium</span></a></div>
+    </nav>
+    <div class="sb-footer"><div class="sb-user"><div class="sb-avatar">RN</div><div class="sb-user-info"><div class="sb-user-name">Renato Natali</div><div class="sb-user-plan">Plano Free</div></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="topbar-progress-line" id="progressLine"><div class="topbar-progress-fill"></div></div>
+    <header class="topbar">
+      <div class="topbar-breadcrumb">
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Trilhas</a><span class="sep">›</span>
+        <a href="trilhas.html" style="color:var(--n400);text-decoration:none">Linguagens Formais</a><span class="sep">›</span>
+        <span class="current">F4.2 — Máquinas de Turing e Decidibilidade</span>
+      </div>
+      <div class="topbar-actions"><a class="topbar-icon-btn" href="flashcards.html" title="Flashcards">🃏</a></div>
+    </header>
+    <div class="lesson-area" id="lessonArea">
+      <div class="lesson-header">
+        <div class="hero-tag">LINGUAGENS FORMAIS · F4.2</div>
+        <div class="hero-title">Máquinas de Turing e Decidibilidade</div>
+        <div class="hero-sub">O modelo computacional mais poderoso — e seus limites fundamentais. O que pode e o que não pode ser computado.</div>
+        <div class="hero-chips">
+          <div class="hero-chip">Fita infinita</div>
+          <div class="hero-chip">Tese de Church-Turing</div>
+          <div class="hero-chip">Problema da Parada</div>
+        </div>
+      </div>
+      <nav class="section-nav" id="sectionNav">
+        <a href="#motivacao">1. Por que MT?</a>
+        <a href="#anatomia">2. Anatomia</a>
+        <a href="#formal">3. Definição</a>
+        <a href="#computacao">4. Computação</a>
+        <a href="#simulador">5. Simulador</a>
+        <a href="#variacoes">6. Variações</a>
+        <a href="#decidibilidade">7. Decidibilidade</a>
+        <a href="#parada">8. Problema da Parada</a>
+        <a href="#rice">9. Teorema de Rice</a>
+        <a href="#quiz">10. Quiz</a>
+        <a href="#resumo">11. Resumo</a>
+      </nav>
+      <div class="lesson-content">
+
+<!-- §1 MOTIVAÇÃO -->
+<section id="motivacao">
+  <h2><span class="num">1</span> Por que precisamos de uma máquina nova?</h2>
+
+  <p>No módulo anterior (F4.1) você viu três modelos computacionais em ordem crescente de poder: AFD, AFN e Autômato de Pilha (AP). Cada um cobre uma classe de linguagens — mas todos têm um teto. Antes de definir Máquina de Turing, vamos ver <em>onde</em> esse teto aparece.</p>
+
+  <h3>O problema concreto: a linguagem aⁿbⁿcⁿ</h3>
+
+  <p>Considere a seguinte linguagem:</p>
+  <div class="card" style="text-align:center;background:var(--n50)">
+    <code style="font-size:1rem">L = { aⁿbⁿcⁿ | n ≥ 0 } &nbsp; = &nbsp; { ε, abc, aabbcc, aaabbbccc, ... }</code>
+  </div>
+
+  <p>Pergunta: <strong>existe um Autômato de Pilha que aceita exatamente essa linguagem?</strong></p>
+
+  <p>A intuição diz que sim — afinal, AP consegue contar e reconhecer aⁿbⁿ (empilha cada <code>a</code>, desempilha um para cada <code>b</code>). Mas vamos tentar adaptar essa estratégia para três blocos:</p>
+
+  <div class="card">
+    <strong>Tentativa 1:</strong> empilhar todos os <code>a</code>'s, desempilhar para cada <code>b</code>, depois… contar os <code>c</code>'s? Mas a pilha já está vazia depois dos <code>b</code>'s! Não há mais como saber quantos <code>a</code>'s vieram antes.<br><br>
+    <strong>Tentativa 2:</strong> empilhar <code>a</code>'s e <code>b</code>'s, depois desempilhar para os <code>c</code>'s? A pilha sairia em ordem inversa (LIFO) — desempilharia <code>b</code>'s primeiro, depois <code>a</code>'s. Mas precisaríamos verificar contagem dos três blocos simultaneamente.<br><br>
+    <strong>O obstáculo:</strong> a pilha consegue lembrar uma única quantidade. Aqui precisamos comparar três quantidades — e a estrutura LIFO impede que voltemos a informações já consumidas.
+  </div>
+
+  <p>Esse não é só um problema prático — é uma limitação <em>matemática</em> do modelo. Pelo Lema do Bombeamento para LLCs (que você verá em detalhes em F4.3), pode-se provar que <strong>nenhum</strong> AP consegue reconhecer aⁿbⁿcⁿ.</p>
+
+  <h3>O que falta?</h3>
+
+  <p>Volte ao tabuleiro de comparação:</p>
+
+  <div class="compare-grid">
+    <div class="compare-card regular">
+      <div class="compare-name">AFD / AFN</div>
+      <ul class="compare-list">
+        <li>Memória: <strong>finita</strong> (estados)</li>
+        <li>Acesso à entrada: só leitura, da esquerda para a direita</li>
+        <li>Ex: par de a's ✓</li>
+        <li>aⁿbⁿ ✗</li>
+      </ul>
+    </div>
+    <div class="compare-card context">
+      <div class="compare-name">AP (autômato de pilha)</div>
+      <ul class="compare-list">
+        <li>Memória: <strong>pilha</strong> (LIFO, ilimitada)</li>
+        <li>Acesso à entrada: só leitura, esquerda → direita</li>
+        <li>aⁿbⁿ ✓</li>
+        <li>aⁿbⁿcⁿ ✗</li>
+      </ul>
+    </div>
+    <div class="compare-card turing">
+      <div class="compare-name">Precisamos de algo que…</div>
+      <ul class="compare-list">
+        <li>Memória: <strong>livre</strong> (acesso aleatório)</li>
+        <li>Pode <strong>reler</strong> e <strong>reescrever</strong></li>
+        <li>Pode mover-se em ambas as direções</li>
+        <li>aⁿbⁿcⁿ ✓ (esperamos)</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>O que falta nos modelos anteriores é a capacidade de <strong>marcar coisas e voltar para verificar</strong>. Para resolver aⁿbⁿcⁿ, queremos algo que possa:</p>
+
+  <ol style="padding-left:1.4rem;font-size:.92rem;line-height:1.8">
+    <li>Encontrar o primeiro <code>a</code>, marcá-lo (substituir por X)</li>
+    <li>Andar até o primeiro <code>b</code>, marcar (substituir por Y)</li>
+    <li>Andar até o primeiro <code>c</code>, marcar (substituir por Z)</li>
+    <li><strong>Voltar ao começo</strong> e repetir até que tudo esteja marcado</li>
+    <li>Verificar que não sobraram letras desemparelhadas</li>
+  </ol>
+
+  <p>Os passos 1–4 exigem coisas que AFD e AP não têm: <strong>escrita na entrada</strong> e <strong>movimento bidirecional</strong>. É exatamente isso que a Máquina de Turing oferece.</p>
+
+  <div class="callout warning">
+    <strong>Antecipando uma confusão:</strong> "MT pode escrever na fita" não significa que ela está mudando os dados de entrada para sempre. A fita é o seu <em>espaço de trabalho</em> — ela pode rascunhar, marcar, apagar, reescrever. Pense numa pessoa fazendo conta no papel: ela rabisca, faz marcas, volta atrás. A MT faz o mesmo na fita.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 2):</strong> agora que sabemos <em>o que falta</em> nos modelos anteriores, vamos ver como uma Máquina de Turing combina esses ingredientes — fita, cabeça móvel, escrita — em uma definição operacional simples.
+  </div>
+</section>
+
+<!-- §2 ANATOMIA -->
+<section id="anatomia">
+  <h2><span class="num">2</span> Anatomia de uma Máquina de Turing</h2>
+
+  <p>Antes da definição matemática, vamos ver os <strong>componentes físicos</strong> da máquina. A intuição vem primeiro porque a definição formal só faz sentido depois que você visualiza as peças.</p>
+
+  <h3>Os três ingredientes</h3>
+
+  <div class="card">
+    <p><strong>1. A fita.</strong> Uma sequência infinita de células, numeradas …, −2, −1, 0, 1, 2, … (estendendo-se em ambos os lados). Cada célula contém um símbolo do alfabeto da fita Γ. Inicialmente, contém a entrada <code>w</code> nas primeiras posições e <code>⊔</code> (símbolo "branco") no resto.</p>
+
+    <div class="tape-wrap" style="margin-top:.6rem">
+      <div class="tape-ptr">
+        <div class="tape-ptr-cell">▼</div>
+        <div class="tape-ptr-cell"></div>
+        <div class="tape-ptr-cell"></div>
+        <div class="tape-ptr-cell"></div>
+        <div class="tape-ptr-cell"></div>
+        <div class="tape-ptr-cell"></div>
+        <div class="tape-ptr-cell"></div>
+        <div class="tape-ptr-cell"></div>
+      </div>
+      <div class="tape-row">
+        <div class="tape-cell active">a</div>
+        <div class="tape-cell">a</div>
+        <div class="tape-cell">b</div>
+        <div class="tape-cell">b</div>
+        <div class="tape-cell">c</div>
+        <div class="tape-cell">c</div>
+        <div class="tape-cell blank">⊔</div>
+        <div class="tape-cell blank">⊔</div>
+      </div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">A fita contém "aabbcc" seguido de brancos infinitos. A cabeça (▼) começa lendo a primeira célula.</div>
+    </div>
+
+    <p style="margin-top:1rem"><strong>2. A cabeça de leitura/escrita.</strong> Aponta para uma única célula da fita por vez. Lê o conteúdo dessa célula, pode reescrever esse conteúdo, e depois move-se uma posição para a esquerda (L), para a direita (R) — ou pode ficar parada, dependendo da variante.</p>
+
+    <p style="margin-top:1rem"><strong>3. O controle de estados.</strong> Um conjunto finito Q de estados, com um estado atual em cada momento. A cada passo, o controle olha para (estado atual, símbolo lido) e decide: o que escrever, para onde mover, qual o próximo estado.</p>
+  </div>
+
+  <h3>Como acontece um passo</h3>
+
+  <p>Em cada passo, a máquina executa três operações na seguinte ordem, todas baseadas em uma única "regra de transição":</p>
+
+  <div class="card" style="font-size:.9rem">
+    <strong>Estado atual = q</strong>, símbolo lido = <code>x</code>.<br>
+    A função de transição diz: <code>δ(q, x) = (q', y, D)</code>, onde:
+    <ul style="margin:.5rem 0 .5rem 1.4rem;line-height:1.8">
+      <li><code>q'</code> — novo estado</li>
+      <li><code>y</code> — símbolo a escrever na célula atual (sobrescreve <code>x</code>)</li>
+      <li><code>D ∈ {L, R}</code> — direção de movimento da cabeça</li>
+    </ul>
+    A máquina executa: escreve <code>y</code> → move cabeça em <code>D</code> → entra em <code>q'</code>.
+  </div>
+
+  <h3>Quando a máquina para</h3>
+
+  <p>Diferente de AFD/AP, a Máquina de Turing tem dois estados especiais que <strong>encerram a computação imediatamente</strong>:</p>
+
+  <ul style="padding-left:1.4rem;font-size:.92rem;line-height:1.8">
+    <li><code>q_acc</code> (estado de aceitação) — assim que a MT entra nesse estado, para e <strong>aceita</strong> a entrada.</li>
+    <li><code>q_rej</code> (estado de rejeição) — para e <strong>rejeita</strong>.</li>
+  </ul>
+
+  <div class="callout warning">
+    <strong>O detalhe perigoso — pode haver um terceiro destino:</strong> a MT pode também <em>nunca parar</em>. Se nunca chegar a <code>q_acc</code> nem <code>q_rej</code>, ela continua executando para sempre. Esse "loop infinito" não é um bug — é uma possibilidade fundamental do modelo. E tem consequências profundas, como você verá na seção 7.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 3):</strong> com os componentes claros, podemos formalizar a definição. Cada peça que você acabou de ver vira uma letra na 7-tupla.
+  </div>
+</section>
+
+<!-- §3 DEFINIÇÃO FORMAL -->
+<section id="formal">
+  <h2><span class="num">3</span> Definição formal — a 7-tupla</h2>
+
+  <p>Você acabou de ver as peças (fita, cabeça, controle, dois estados de parada). Agora vamos batizá-las matematicamente. Toda definição formal de MT consiste em sete componentes — daí "7-tupla". Antes da fórmula, o dicionário:</p>
+
+  <div class="sym-dict">
+    <div class="sym-row">
+      <div class="sym-sym">Q</div>
+      <div class="sym-body"><strong>Conjunto finito de estados.</strong> O "cérebro" da máquina — onde ela guarda em qual fase do trabalho está.<br>
+        <span class="eg">Q = {q₀, q₁, q₂, q_acc, q_rej} → 5 estados</span></div>
+    </div>
+    <div class="sym-row">
+      <div class="sym-sym">Σ</div>
+      <div class="sym-body"><strong>Alfabeto de entrada.</strong> Os símbolos que podem aparecer na entrada inicial. Não inclui o símbolo branco.<br>
+        <span class="eg">Σ = {a, b, c} → entrada usa só essas três letras</span></div>
+    </div>
+    <div class="sym-row highlight">
+      <div class="sym-sym">Γ</div>
+      <div class="sym-body"><strong>Alfabeto da fita.</strong> Os símbolos que <em>podem aparecer na fita durante a computação</em>. É um superconjunto de Σ — inclui símbolos auxiliares que a MT usa para marcar/rascunhar, e o branco <code>⊔</code>.<br>
+        <span class="eg">Γ = {a, b, c, X, Y, Z, ⊔} — letras de entrada + marcadores X/Y/Z + branco</span>
+        <div style="margin-top:.4rem;font-size:.82rem;color:var(--text)">
+          <strong style="color:var(--primary)">Por que Σ ⊂ Γ?</strong> Porque a fita começa com a entrada e precisa conter os símbolos de Σ. Mas a MT pode escrever <em>outros</em> símbolos que não estão em Σ — esses são os "marcadores" usados para rascunhar.
+        </div>
+      </div>
+    </div>
+    <div class="sym-row highlight">
+      <div class="sym-sym">δ</div>
+      <div class="sym-body"><strong>Função de transição.</strong> A regra que governa cada passo. Tipo: <code>δ : Q × Γ → Q × Γ × {L, R}</code>.<br>
+        <span class="eg">δ(q₀, a) = (q₁, X, R) → "no estado q₀ lendo 'a', escreva X, mova direita, entre em q₁"</span>
+        <div style="margin-top:.4rem;font-size:.82rem;color:var(--text)">
+          <strong style="color:var(--primary)">Por que isso é mais rico que δ de AFD?</strong> Em AFD, δ retorna apenas um próximo estado. Aqui retorna três coisas: estado, símbolo a escrever, direção. É exatamente essa multiplicidade que dá poder à MT.
+        </div>
+      </div>
+    </div>
+    <div class="sym-row">
+      <div class="sym-sym">q₀</div>
+      <div class="sym-body"><strong>Estado inicial.</strong> Onde a máquina começa, com a cabeça posicionada na primeira célula da entrada.<br>
+        <span class="eg">q₀ ∈ Q — é um único estado escolhido</span></div>
+    </div>
+    <div class="sym-row">
+      <div class="sym-sym">q_acc</div>
+      <div class="sym-body"><strong>Estado de aceitação.</strong> Ao entrar nele, a MT para imediatamente e a entrada é aceita. Único — só há um.<br>
+        <span class="eg">q_acc ∈ Q, q_acc ≠ q_rej</span></div>
+    </div>
+    <div class="sym-row">
+      <div class="sym-sym">q_rej</div>
+      <div class="sym-body"><strong>Estado de rejeição.</strong> Ao entrar nele, a MT para imediatamente e a entrada é rejeitada. Também único.<br>
+        <span class="eg">q_rej ∈ Q, q_rej ≠ q_acc</span></div>
+    </div>
+  </div>
+
+  <h3>Agora a fórmula — cada parte já faz sentido</h3>
+
+  <div class="formula-annotated">
+    <div class="fa-title">Máquina de Turing — definição</div>
+    <div class="fa-line">M = (Q, Σ, Γ, δ, q₀, q_acc, q_rej)</div>
+    <div class="fa-ann">
+      <div class="fa-chip"><strong>Q</strong> = estados (controle)</div>
+      <div class="fa-chip"><strong>Σ</strong> = entrada</div>
+      <div class="fa-chip"><strong>Γ</strong> = fita (Σ ⊂ Γ)</div>
+      <div class="fa-chip"><strong>δ</strong> = transição</div>
+      <div class="fa-chip"><strong>q₀</strong> = início</div>
+      <div class="fa-chip"><strong>q_acc</strong> = aceita</div>
+      <div class="fa-chip"><strong>q_rej</strong> = rejeita</div>
+    </div>
+    <div class="details-toggle" style="margin:1rem 0 0;color:black">
+      <div class="dt-trigger" onclick="toggleDetails(this)"><span class="dt-arrow">▸</span> Ver requisitos sobre cada componente</div>
+      <div class="dt-content">
+        <div style="text-align:left;font-size:.85rem;line-height:1.7;color:var(--text)">
+          <strong>Q</strong> — finito.<br>
+          <strong>Σ</strong> — alfabeto finito, não contém o símbolo branco ⊔.<br>
+          <strong>Γ</strong> — alfabeto finito, contém Σ e contém ⊔. Pode conter outros símbolos auxiliares.<br>
+          <strong>δ</strong> — função (não relação) — para todo par (q, x) com q ∉ {q_acc, q_rej} e x ∈ Γ, há exatamente uma terna de saída. (δ não está definida para q_acc e q_rej, pois esses estados param a máquina.)<br>
+          <strong>q₀</strong> — qualquer elemento de Q.<br>
+          <strong>q_acc, q_rej</strong> — ambos em Q, e q_acc ≠ q_rej.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Exemplo concreto — uma MT que decide aⁿbⁿ</h3>
+
+  <p>Vamos definir uma MT real que aceita exatamente as strings da forma aⁿbⁿ (n ≥ 0). A ideia: marcar pares (a, b), de fora para dentro, e verificar que a entrada esvazia.</p>
+
+  <div class="card">
+    <strong>Ingredientes:</strong><br>
+    Q = {q₀, q₁, q₂, q₃, q_acc, q_rej}<br>
+    Σ = {a, b}<br>
+    Γ = {a, b, X, Y, ⊔}<br>
+    Estado inicial: q₀
+  </div>
+
+  <p>Cada estado tem um "trabalho":</p>
+  <ul style="padding-left:1.4rem;font-size:.88rem;line-height:1.7">
+    <li><strong>q₀:</strong> procurar o próximo <code>a</code> não marcado, marcá-lo como X, ir para q₁.</li>
+    <li><strong>q₁:</strong> andar para a direita até achar o primeiro <code>b</code>; ao achar, marcar como Y e ir para q₂.</li>
+    <li><strong>q₂:</strong> voltar para a esquerda até achar X (a marca da rodada); reposicionar e ir para q₀.</li>
+    <li><strong>q₃:</strong> verificar que não sobraram <code>b</code>'s ou <code>a</code>'s desemparelhados.</li>
+  </ul>
+
+  <p>Tabela de transição (parcial — só as entradas relevantes):</p>
+
+  <table class="trans-table">
+    <thead><tr><th>Estado</th><th>Lê 'a'</th><th>Lê 'b'</th><th>Lê 'X'</th><th>Lê 'Y'</th><th>Lê '⊔'</th></tr></thead>
+    <tbody>
+      <tr><td>q₀</td><td>(q₁, X, R)</td><td>(q_rej, b, R)</td><td>—</td><td>(q₃, Y, R)</td><td>(q_acc, ⊔, R)</td></tr>
+      <tr><td>q₁</td><td>(q₁, a, R)</td><td>(q₂, Y, L)</td><td>—</td><td>(q₁, Y, R)</td><td>(q_rej, ⊔, R)</td></tr>
+      <tr><td>q₂</td><td>(q₂, a, L)</td><td>—</td><td>(q₀, X, R)</td><td>(q₂, Y, L)</td><td>—</td></tr>
+      <tr><td>q₃</td><td>—</td><td>(q_rej, b, R)</td><td>—</td><td>(q₃, Y, R)</td><td>(q_acc, ⊔, R)</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:.85rem;color:var(--muted)">Lê-se cada célula: "no estado da linha, lendo o símbolo da coluna, vai para (próximo estado, escreve, direção)". A entrada "—" significa que aquela combinação não acontece em entradas válidas (poderia mapear para q_rej por completude).</p>
+
+  <p>Você verá essa MT em ação no simulador da seção 5. Antes disso, vamos formalizar como ela <em>computa</em>.</p>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 4):</strong> a 7-tupla descreve a máquina. Mas como descrever o que ela está <em>fazendo</em> em um momento específico? Isso exige um conceito chamado configuração.
+  </div>
+</section>
+
+<!-- §4 COMPUTAÇÃO -->
+<section id="computacao">
+  <h2><span class="num">4</span> Como uma MT computa — configurações</h2>
+
+  <p>Uma MT em ação tem três informações em qualquer instante: <strong>conteúdo da fita</strong>, <strong>posição da cabeça</strong> e <strong>estado atual</strong>. Junte os três e você tem uma <em>configuração</em> — um instantâneo completo da máquina.</p>
+
+  <h3>Notação compacta de configuração</h3>
+
+  <div class="card">
+    <p style="margin-bottom:.6rem">A forma padrão de escrever uma configuração é <code>u q v</code>, onde:</p>
+    <ul style="padding-left:1.4rem;font-size:.88rem;line-height:1.7">
+      <li><code>u</code> = parte da fita à <em>esquerda</em> da cabeça</li>
+      <li><code>q</code> = estado atual</li>
+      <li><code>v</code> = símbolo sob a cabeça + parte à <em>direita</em></li>
+    </ul>
+    <p style="margin-top:.6rem">Por convenção, omitem-se os brancos infinitos nas pontas.</p>
+    <p style="margin-top:.6rem;font-size:.88rem">Exemplo: configuração <code>X q₁ aaY</code> significa: fita = "XaaY", cabeça sobre o primeiro 'a' depois do X, estado = q₁.</p>
+  </div>
+
+  <h3>Trace passo a passo — entrada "aabb"</h3>
+
+  <p>Vamos rodar a MT da seção 3 sobre <code>aabb</code> (que está na linguagem aⁿbⁿ com n=2). Cada linha é uma configuração resultante de aplicar δ à anterior.</p>
+
+  <div class="card" style="font-family:var(--fm);font-size:.85rem;line-height:2;background:var(--n50);overflow-x:auto">
+    <div><span style="color:var(--muted)">Configuração inicial:</span> &nbsp;<strong>q₀ aabb</strong></div>
+    <div><span style="color:var(--muted)">δ(q₀,a)=(q₁,X,R):</span> &nbsp;<strong>X q₁ abb</strong></div>
+    <div><span style="color:var(--muted)">δ(q₁,a)=(q₁,a,R):</span> &nbsp;<strong>Xa q₁ bb</strong></div>
+    <div><span style="color:var(--muted)">δ(q₁,b)=(q₂,Y,L):</span> &nbsp;<strong>X q₂ aYb</strong></div>
+    <div><span style="color:var(--muted)">δ(q₂,a)=(q₂,a,L):</span> &nbsp;<strong>q₂ XaYb</strong></div>
+    <div><span style="color:var(--muted)">δ(q₂,X)=(q₀,X,R):</span> &nbsp;<strong>X q₀ aYb</strong></div>
+    <div><span style="color:var(--muted)">δ(q₀,a)=(q₁,X,R):</span> &nbsp;<strong>XX q₁ Yb</strong></div>
+    <div><span style="color:var(--muted)">δ(q₁,Y)=(q₁,Y,R):</span> &nbsp;<strong>XXY q₁ b</strong></div>
+    <div><span style="color:var(--muted)">δ(q₁,b)=(q₂,Y,L):</span> &nbsp;<strong>XX q₂ YY</strong></div>
+    <div><span style="color:var(--muted)">δ(q₂,Y)=(q₂,Y,L):</span> &nbsp;<strong>X q₂ XYY</strong></div>
+    <div><span style="color:var(--muted)">δ(q₂,X)=(q₀,X,R):</span> &nbsp;<strong>XX q₀ YY</strong></div>
+    <div><span style="color:var(--muted)">δ(q₀,Y)=(q₃,Y,R):</span> &nbsp;<strong>XXY q₃ Y</strong></div>
+    <div><span style="color:var(--muted)">δ(q₃,Y)=(q₃,Y,R):</span> &nbsp;<strong>XXYY q₃ ⊔</strong></div>
+    <div style="color:var(--green);font-weight:700"><span style="color:var(--green)">δ(q₃,⊔)=(q_acc,⊔,R):</span> &nbsp;<strong>XXYY⊔ q_acc &nbsp;✓ ACEITA</strong></div>
+  </div>
+
+  <h3>Configuração inicial, de aceitação, de rejeição</h3>
+
+  <div class="card">
+    <p><strong>Configuração inicial</strong> com entrada <code>w</code>: <code>q₀ w</code> — a cabeça começa sobre o primeiro símbolo de <code>w</code>, no estado q₀.</p>
+    <p><strong>Configuração de aceitação:</strong> qualquer configuração com estado q_acc.</p>
+    <p><strong>Configuração de rejeição:</strong> qualquer configuração com estado q_rej.</p>
+    <p><strong>Configuração intermediária ou de loop:</strong> qualquer outra. A máquina ainda não decidiu — pode terminar mais tarde, ou pode nunca terminar.</p>
+  </div>
+
+  <h3>Linguagem reconhecida pela MT</h3>
+
+  <div class="formula-annotated">
+    <div class="fa-title">Linguagem de M</div>
+    <div class="fa-line">L(M) = { w ∈ Σ* &nbsp;:&nbsp; M com entrada w para em q_acc }</div>
+    <div class="fa-ann">
+      <div class="fa-chip">Apenas strings <strong>aceitas</strong>, nunca rejeitadas</div>
+      <div class="fa-chip">Loops infinitos <strong>não</strong> entram em L(M)</div>
+    </div>
+  </div>
+
+  <p>Note a sutileza: para que <code>w ∈ L(M)</code>, é necessário que <em>M pare em q_acc</em>. Se M entra em loop com a entrada <code>w</code>, então <code>w ∉ L(M)</code>. Isso vai ter consequências dramáticas nas seções 7 e 8.</p>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 5):</strong> chega de simbolismo. Vamos pôr essa MT no simulador e ver passo a passo cada transição na fita real.
+  </div>
+</section>
+
+<!-- §5 SIMULADOR -->
+<section id="simulador">
+  <h2><span class="num">5</span> Simulador interativo</h2>
+
+  <p>Abaixo está a MT que decide aⁿbⁿ implementada como simulador. Escolha uma string, clique em "Próximo passo" e veja: a fita, a cabeça, o estado, e a transição aplicada.</p>
+
+  <div class="sim-box">
+    <h4>🎛️ Simulador: MT que decide aⁿbⁿ</h4>
+
+    <div class="sim-presets">
+      <button class="sim-preset active" id="ps-aabb" onclick="loadPreset('aabb', this)">aabb (aceita, n=2)</button>
+      <button class="sim-preset" id="ps-abc" onclick="loadPreset('abc', this)">abc (rejeita)</button>
+      <button class="sim-preset" id="ps-aaabbb" onclick="loadPreset('aaabbb', this)">aaabbb (aceita, n=3)</button>
+      <button class="sim-preset" id="ps-aab" onclick="loadPreset('aab', this)">aab (rejeita)</button>
+      <button class="sim-preset" id="ps-empty" onclick="loadPreset('', this)">ε (string vazia, aceita)</button>
+    </div>
+
+    <div class="mt-state-display" id="mtStateDisplay">
+      <div class="mt-state-card"><div class="lbl">Estado</div><div class="val" id="mtState">q₀</div></div>
+      <div class="mt-state-card"><div class="lbl">Posição</div><div class="val" id="mtHead">0</div></div>
+      <div class="mt-state-card"><div class="lbl">Passo</div><div class="val" id="mtStep">0</div></div>
+    </div>
+
+    <div class="tape-wrap" id="mtTape"></div>
+
+    <div class="sim-controls">
+      <button class="sim-btn step" id="mtStepBtn" onclick="mtStepFn()">▶ Próximo passo</button>
+      <button class="sim-btn go" onclick="mtRunAll()">⏭ Executar tudo</button>
+      <button class="sim-btn rst" onclick="mtReset()">↺ Reiniciar</button>
+    </div>
+
+    <div class="sim-log" id="mtLog">Selecione uma entrada e clique em "Próximo passo".</div>
+  </div>
+
+  <h3>Lendo o trace</h3>
+
+  <p>Observe alguns padrões enquanto roda o simulador:</p>
+  <ul style="padding-left:1.4rem;font-size:.9rem;line-height:1.8">
+    <li>Cada vez que a MT vai de q₀ para q₁, ela <strong>marca um <code>a</code></strong> como X.</li>
+    <li>Cada vez que vai de q₁ para q₂, ela <strong>marca um <code>b</code></strong> como Y.</li>
+    <li>O estado q₂ existe só para <strong>voltar até a marca X</strong> e reposicionar.</li>
+    <li>Quando q₀ encontra Y (não <code>a</code>), significa que todos os <code>a</code>'s foram marcados — é hora de verificar (q₃).</li>
+  </ul>
+
+  <p>Compare o número de passos para entradas de mesmo tamanho aceitas/rejeitadas: a MT detecta a rejeição rapidamente quando os tipos de letras estão fora de ordem (ex: "aab" entra em q_rej cedo, sem precisar marcar tudo).</p>
+
+  <div class="callout warning">
+    <strong>Erro comum:</strong> "Como a MT é tão poderosa, ela deve ser muito rápida". Não. MTs são modelos de <em>computabilidade</em>, não de eficiência. Esta MT faz O(n²) passos para reconhecer aⁿbⁿ — porque vai e volta em cada par. Há MTs mais rápidas para a mesma linguagem, mas o foco aqui é "consegue ou não", não "em quantos passos".
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 6):</strong> a MT que você acabou de ver é a forma mais simples (uma fita, determinística). Existem variações — múltiplas fitas, não-determinismo. Será que elas são <em>mais</em> poderosas? Não — e a razão envolve um dos resultados mais importantes da computação.
+  </div>
+</section>
+
+<!-- §6 VARIAÇÕES E TESE DE CHURCH-TURING -->
+<section id="variacoes">
+  <h2><span class="num">6</span> Variações e Tese de Church-Turing</h2>
+
+  <p>A definição que você acabou de ver tem uma fita e é determinística. Mas há outras formulações na literatura — algumas parecem dar mais poder à máquina. Spoiler: <strong>todas computam exatamente as mesmas linguagens</strong>.</p>
+
+  <h3>Quatro variações comuns</h3>
+
+  <div class="card">
+    <p><strong>1. MT com fita ilimitada apenas à direita.</strong> A fita começa na posição 0 e estende-se infinitamente para a direita. Tentar mover-se para a esquerda da posição 0 é um erro (algumas definições bloqueiam, outras transformam num q_rej).<br>
+    <em>Equivalente à versão padrão</em> — você pode "dobrar" a fita bi-infinita usando dois trilhos.</p>
+
+    <p style="margin-top:.7rem"><strong>2. MT multifita.</strong> Tem k fitas independentes, cada uma com sua própria cabeça. δ recebe k símbolos e devolve k pares (escrita, direção). Permite organizar trabalho em rascunhos separados.<br>
+    <em>Equivalente</em> — uma MT de uma fita pode simular k fitas codificando todas em "trilhos" intercalados na mesma fita.</p>
+
+    <p style="margin-top:.7rem"><strong>3. MT não-determinística (NMT).</strong> Em cada (estado, símbolo), δ pode oferecer várias transições possíveis. A NMT aceita se <em>existe</em> alguma sequência de escolhas que leva a q_acc.<br>
+    <em>Equivalente</em> — uma MT determinística pode simular uma NMT explorando todas as ramificações em busca em largura. (O custo aumenta exponencialmente, mas computacionalmente é o mesmo.)</p>
+
+    <p style="margin-top:.7rem"><strong>4. MT com cabeça que pode ficar parada.</strong> Direção D ∈ {L, R, S}. <em>Equivalente</em> — qualquer "S" pode ser simulado por L seguido de R.</p>
+  </div>
+
+  <h3>Equivalência computacional</h3>
+
+  <p>Todas essas variações reconhecem exatamente o mesmo conjunto de linguagens. O que muda é a "eficiência" (passos para resolver), nunca o "que pode ser resolvido". Essa equivalência foi provada por Turing, Church, Post e outros nos anos 1930.</p>
+
+  <p>Mais ainda: <strong>outros modelos computacionais completamente diferentes</strong> também resultam no mesmo conjunto de linguagens computáveis:</p>
+
+  <ul style="padding-left:1.4rem;font-size:.9rem;line-height:1.8">
+    <li><strong>Cálculo Lambda</strong> (Church, 1936) — definição de função computável via abstração e aplicação.</li>
+    <li><strong>Funções recursivas parciais</strong> (Gödel, Kleene) — definição via composição, recursão primitiva e minimização.</li>
+    <li><strong>Máquinas de registros</strong> (Minsky) — modelo com contadores inteiros não-negativos.</li>
+    <li><strong>Linguagens de programação modernas</strong> (C, Python, Java…) — todas equivalentes a MT, modulo memória limitada na prática.</li>
+  </ul>
+
+  <h3>A Tese de Church-Turing</h3>
+
+  <div class="callout teal">
+    <strong>Tese de Church-Turing.</strong> Toda função que pode ser computada por <em>algum método mecânico bem-definido</em> pode ser computada por uma Máquina de Turing.
+  </div>
+
+  <p>Esta não é um teorema demonstrável — é uma <em>tese</em>, uma afirmação sobre a relação entre computação intuitiva e o modelo formal. Veja a estrutura do argumento:</p>
+
+  <div class="proof-steps">
+    <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">"Função computável" não é uma noção matemática precisa antes de definirmos um modelo. É um conceito intuitivo: "algo que segue regras precisas e termina".</div></div>
+    <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">Podemos formalizar essa intuição de várias formas (MT, λ-cálculo, recursivas, máquinas de Minsky, etc.).</div></div>
+    <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Todos esses modelos formais resultam exatamente no mesmo conjunto de funções.</strong> Esse fato é matemático e demonstrável.</div></div>
+    <div class="proof-step"><span class="ps-num">4</span><div class="ps-body">A Tese é a hipótese de que esse conjunto comum é exatamente o que nós, intuitivamente, chamamos de "computável". Ou seja: se algo é computável em <em>qualquer</em> sentido razoável, é computável por MT.</div></div>
+  </div>
+
+  <p>A Tese é universalmente aceita porque <em>nunca</em> ninguém propôs um modelo computacional convincente que ultrapasse MT. Cada novo formalismo proposto acaba sendo equivalente.</p>
+
+  <div class="callout warning">
+    <strong>O que a Tese permite:</strong> quando vamos provar que algo "não é computável", basta mostrar que não existe MT para resolver — pela Tese, isso já significa que <em>nenhum</em> método computacional consegue. É essa licença que torna possível o resultado da seção 8.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 7):</strong> agora que sabemos o que MT pode fazer, vamos olhar com cuidado para o "para": dado o problema da MT poder entrar em loop, surge uma distinção crucial entre dois tipos de linguagens — aquelas que a MT "decide" e aquelas que ela apenas "reconhece".
+  </div>
+</section>
+
+<!-- §7 DECIDIBILIDADE -->
+<section id="decidibilidade">
+  <h2><span class="num">7</span> Decidibilidade × Reconhecibilidade</h2>
+
+  <p>Volte à definição de L(M): "o conjunto das strings em que M para em q_acc". Note o que <em>não</em> está dito: o que acontece quando <code>w ∉ L(M)</code>?</p>
+
+  <p>Há duas possibilidades:</p>
+
+  <div class="compare-grid" style="grid-template-columns:1fr 1fr;margin-top:1rem">
+    <div class="compare-card" style="border-color:var(--blue);background:var(--blue-bg)">
+      <div class="compare-name" style="color:var(--blue)">Caso A: M para e rejeita</div>
+      <ul class="compare-list">
+        <li>M sempre dá uma resposta</li>
+        <li>"Sim" para w ∈ L(M)</li>
+        <li>"Não" para w ∉ L(M)</li>
+        <li>Entrada decidida em tempo finito</li>
+      </ul>
+    </div>
+    <div class="compare-card" style="border-color:var(--accent2);background:var(--orange-bg)">
+      <div class="compare-name" style="color:var(--accent2)">Caso B: M entra em loop</div>
+      <ul class="compare-list">
+        <li>M nunca para</li>
+        <li>Você não consegue saber se a resposta seria "sim" ou "não"</li>
+        <li>Pelo critério oficial, w ∉ L(M)</li>
+        <li>Mas operacionalmente: silêncio infinito</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>Essa diferença motiva duas classes de linguagens:</p>
+
+  <div class="sym-dict" style="margin-top:1rem">
+    <div class="sym-row highlight">
+      <div class="sym-sym">Decidível</div>
+      <div class="sym-body"><strong>Existe uma MT que para em <em>todas</em> as entradas — aceita as que estão em L, rejeita as que não estão.</strong> Essa MT é chamada de <em>decisor</em>.<br>
+        <span class="eg">Sinônimos: linguagem recursiva, linguagem Turing-decidível</span>
+        <div style="margin-top:.4rem;font-size:.84rem">
+          <strong style="color:var(--primary)">Por que importa?</strong> Decisor = algoritmo. Se sua MT sempre para, você tem um procedimento confiável para responder "w está em L?". Você pode usar isso como sub-rotina, dentro de outras computações, sem medo de loop.
+        </div>
+      </div>
+    </div>
+    <div class="sym-row highlight">
+      <div class="sym-sym">Reconhecível</div>
+      <div class="sym-body"><strong>Existe uma MT que aceita exatamente as strings em L — mas pode entrar em loop em algumas que não estão.</strong> Essa MT é chamada de <em>reconhecedor</em>.<br>
+        <span class="eg">Sinônimos: linguagem recursivamente enumerável (RE), Turing-reconhecível</span>
+        <div style="margin-top:.4rem;font-size:.84rem">
+          <strong style="color:var(--primary)">Por que importa?</strong> Toda decisor é também um reconhecedor (parar e rejeitar é um caso particular de "não aceitar"). Mas há linguagens que <em>só</em> têm reconhecedor, nunca decisor — para essas, você nunca pode ter certeza de "w não está em L" em tempo finito.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>A hierarquia das classes de linguagens</h3>
+
+  <p>Combinando o que você já sabia de F4.1 com as duas novas classes:</p>
+
+  <div class="layer-stack">
+    <div class="layer l-all">Todas as linguagens sobre Σ*<div class="layer-detail">Há mais linguagens do que MTs — algumas não são nem reconhecíveis</div></div>
+    <div class="layer l-re">Reconhecíveis (RE)<div class="layer-detail">Existe MT que aceita L; pode loopar fora de L</div></div>
+    <div class="layer l-dec">Decidíveis<div class="layer-detail">Existe MT que sempre para; aceita L, rejeita L̄</div></div>
+    <div class="layer l-llc">Livres de Contexto (LLC)<div class="layer-detail">Reconhecidas por AP — sempre decidíveis</div></div>
+    <div class="layer l-reg">Regulares<div class="layer-detail">Reconhecidas por AFD/AFN — sempre decidíveis</div></div>
+  </div>
+
+  <p>As inclusões são <strong>estritas</strong>: cada classe tem linguagens que a anterior não tem. Em particular:</p>
+
+  <ul style="padding-left:1.4rem;font-size:.9rem;line-height:1.8">
+    <li>aⁿbⁿ — LLC, mas não regular</li>
+    <li>aⁿbⁿcⁿ — decidível, mas não LLC (esta é a motivação que abriu o módulo)</li>
+    <li>HALT (problema da parada) — RE, mas <strong>não decidível</strong> (próxima seção)</li>
+    <li>HALT̄ (complemento de HALT) — <strong>não é nem reconhecível</strong></li>
+  </ul>
+
+  <h3>Propriedade central: complemento</h3>
+
+  <div class="callout">
+    <strong>Teorema do complemento.</strong> Uma linguagem L é decidível se e somente se L e L̄ são ambas reconhecíveis.
+  </div>
+
+  <p><strong>Por quê?</strong> Se L é decidível, basta inverter aceita/rejeita do decisor para decidir L̄. Reciprocamente: se M₁ reconhece L e M₂ reconhece L̄, simule as duas em paralelo — para qualquer <code>w</code>, uma das duas vai aceitar (porque <code>w</code> está em L ou em L̄). Quando isso acontecer, você tem a resposta. Como sempre acontece, a simulação combinada sempre para → decisor.</p>
+
+  <p>Isso vai ser fundamental para a próxima seção: provar que HALT̄ não é reconhecível.</p>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 8):</strong> hora da prova mais famosa da computação. Existe uma linguagem específica — a do problema da parada — que é reconhecível mas não decidível. A demonstração disso é o argumento da diagonal de Turing, de 1936.
+  </div>
+</section>
+
+<!-- §8 PROBLEMA DA PARADA -->
+<section id="parada">
+  <h2><span class="num">8</span> O Problema da Parada</h2>
+
+  <p>Voltemos a uma pergunta concreta: você tem um programa em Python e uma entrada. Você gostaria de saber, antes de rodar, se o programa vai terminar ou se vai entrar em loop infinito. Existe um algoritmo geral para responder essa pergunta?</p>
+
+  <p>Na linguagem de MT, queremos decidir a linguagem:</p>
+
+  <div class="card" style="text-align:center;background:var(--n50)">
+    <code style="font-size:.95rem">HALT = { ⟨M, w⟩ &nbsp;:&nbsp; M é uma MT e M para com entrada w }</code>
+  </div>
+
+  <p>Aqui <code>⟨M, w⟩</code> é uma codificação em string da MT M e da entrada w (cada MT pode ser representada como uma string, listando suas regras de transição). HALT é uma linguagem como qualquer outra — só que sobre um alfabeto que descreve MTs.</p>
+
+  <h3>O resultado</h3>
+
+  <div class="callout teal">
+    <strong>Teorema (Turing, 1936).</strong> HALT não é decidível. Não existe nenhuma MT que, dada qualquer ⟨M, w⟩, sempre pare e responda corretamente "M para com w?".
+  </div>
+
+  <h3>Por que parece tão impossível ser verdade</h3>
+
+  <p>Uma reação natural é: "como assim? Eu posso simular M com w e ver o que acontece!". Sim, você pode — e essa simulação dá um <em>reconhecedor</em> de HALT (se M para, sua simulação também para; aceita).</p>
+
+  <p>O problema é o caso onde M <em>não</em> para com w. Sua simulação também não para. E você nunca sabe se está prestes a parar no próximo passo, ou se vai continuar para sempre. A simulação não rejeita — ela loopa. Não dá para construir um decisor a partir dela.</p>
+
+  <p>A questão real é: <strong>existirá alguma <em>outra</em> técnica, mais esperta, que decida HALT</strong>? Turing mostrou que não — e a prova é uma das mais elegantes da matemática.</p>
+
+  <h3>A prova — argumento da diagonal</h3>
+
+  <p>A estrutura é por contradição. Suponha que existe um decisor H para HALT:</p>
+
+  <div class="card" style="background:var(--n50)">
+    <code style="font-size:.85rem">H(⟨M, w⟩) = aceita &nbsp;se M para com w<br>
+    H(⟨M, w⟩) = rejeita &nbsp;se M não para com w</code><br>
+    <span style="font-size:.84rem;color:var(--muted)">Em ambos os casos, H sempre para — é decisor por hipótese.</span>
+  </div>
+
+  <p>Vamos construir uma nova MT chamada D que usa H internamente:</p>
+
+  <div class="card">
+    <strong>MT D, com entrada ⟨M⟩ (a descrição de uma MT M):</strong>
+    <ol style="padding-left:1.4rem;margin-top:.4rem;font-size:.9rem;line-height:1.8">
+      <li>Roda H sobre ⟨M, ⟨M⟩⟩ — pergunta: "M para com sua própria descrição como entrada?"</li>
+      <li>Se H aceita (ou seja, M para com ⟨M⟩) → D entra em loop infinito.</li>
+      <li>Se H rejeita (ou seja, M não para com ⟨M⟩) → D para e aceita.</li>
+    </ol>
+  </div>
+
+  <p>D é uma MT bem definida — só usa H (que existe por hipótese) e algumas operações triviais. Note o "espelho" no comportamento: D faz o oposto do que M faria com sua própria descrição.</p>
+
+  <h3>A contradição: rode D com sua própria descrição</h3>
+
+  <p>O passo decisivo: o que acontece quando rodamos D sobre ⟨D⟩? Há duas possibilidades.</p>
+
+  <div class="proof-steps">
+    <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Possibilidade A — D para com ⟨D⟩.</strong><br>
+      Pela definição de H: H(⟨D, ⟨D⟩⟩) = aceita.<br>
+      Mas pela definição de D, quando H aceita, D entra em loop infinito.<br>
+      Então D <em>não</em> para com ⟨D⟩. <strong>Contradição.</strong></div></div>
+    <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Possibilidade B — D não para com ⟨D⟩ (looping).</strong><br>
+      Pela definição de H: H(⟨D, ⟨D⟩⟩) = rejeita.<br>
+      Mas pela definição de D, quando H rejeita, D para e aceita.<br>
+      Então D <em>para</em> com ⟨D⟩. <strong>Contradição.</strong></div></div>
+    <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Conclusão.</strong> Ambas as possibilidades levam a contradição. Logo, a hipótese inicial — "existe um decisor H para HALT" — é falsa. <strong>HALT não é decidível.</strong> ∎</div></div>
+  </div>
+
+  <h3>Por que isso é "diagonal"</h3>
+
+  <p>A construção tem um nome — argumento diagonal de Cantor adaptado por Turing. A intuição é uma matriz infinita: linhas são MTs (M₁, M₂, M₃, …), colunas são strings (que também codificam MTs: ⟨M₁⟩, ⟨M₂⟩, …). Cada célula diz "Mᵢ para com ⟨Mⱼ⟩?":</p>
+
+  <table class="diag-table">
+    <thead>
+      <tr><th>Mᵢ \ entrada</th><th>⟨M₁⟩</th><th>⟨M₂⟩</th><th>⟨M₃⟩</th><th>⟨M₄⟩</th><th>...</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>M₁</td><td class="diag-acc diag-self">para</td><td class="diag-loop">loop</td><td class="diag-acc">para</td><td class="diag-acc">para</td><td>...</td></tr>
+      <tr><td>M₂</td><td class="diag-loop">loop</td><td class="diag-loop diag-self">loop</td><td class="diag-loop">loop</td><td class="diag-acc">para</td><td>...</td></tr>
+      <tr><td>M₃</td><td class="diag-acc">para</td><td class="diag-acc">para</td><td class="diag-acc diag-self">para</td><td class="diag-loop">loop</td><td>...</td></tr>
+      <tr><td>M₄</td><td class="diag-loop">loop</td><td class="diag-acc">para</td><td class="diag-loop">loop</td><td class="diag-loop diag-self">loop</td><td>...</td></tr>
+      <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td></td></tr>
+      <tr><td><strong>D</strong></td><td class="diag-flip">loop</td><td class="diag-flip">para</td><td class="diag-flip">loop</td><td class="diag-flip">para</td><td>...</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:.85rem;color:var(--muted)">A diagonal (células com borda roxa) tem o comportamento de Mᵢ com ⟨Mᵢ⟩. D foi construída para fazer <em>o oposto</em> da diagonal: para se Mᵢ não para; loop se Mᵢ para. Por construção, D não pode estar em nenhuma das linhas — porque difere de cada Mᵢ na coluna ⟨Mᵢ⟩. Mas D é uma MT! Então D deveria estar entre as linhas (M_d para algum d). Contradição: D difere de M_d em ⟨M_d⟩.</p>
+
+  <h3>Consequências</h3>
+
+  <p>HALT é o exemplo canônico de linguagem que é <strong>reconhecível mas não decidível</strong>. Sua existência mostra que o conjunto "decidível" é estritamente menor que "reconhecível".</p>
+
+  <p>Pelo Teorema do Complemento (seção 7): se HALT̄ fosse reconhecível, HALT seria decidível. Como não é, <strong>HALT̄ não é nem reconhecível</strong>. Existe uma classe de linguagens fora até mesmo de RE.</p>
+
+  <div class="callout warning">
+    <strong>O que isso significa na prática.</strong> Não existe — e não pode existir — um analisador estático perfeito que detecte loops infinitos em programas. Não existe ferramenta perfeita de verificação de terminação. As ferramentas reais (analisadores de Rust, type checkers, etc.) trabalham com aproximações: ou são corretas mas incompletas, ou completas mas incorretas. Esse é um teorema matemático sobre os limites do que é computável, não uma limitação tecnológica.
+  </div>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 9):</strong> HALT é uma propriedade específica (parada). E sobre <em>outras</em> propriedades de programas? "Esse programa imprime 'olá'?" "Esse programa nunca acessa memória inválida?" Existe um teorema dramático que generaliza a indecidibilidade para praticamente todas as propriedades interessantes — o Teorema de Rice.
+  </div>
+</section>
+
+<!-- §9 TEOREMA DE RICE -->
+<section id="rice">
+  <h2><span class="num">9</span> Teorema de Rice e reduções</h2>
+
+  <p>HALT é apenas um exemplo. Como saber se outras perguntas sobre programas também são indecidíveis? Há duas técnicas: <strong>redução</strong> (caso a caso) e <strong>Teorema de Rice</strong> (de uma só vez).</p>
+
+  <h3>Redução — a técnica caso a caso</h3>
+
+  <p>Para mostrar que um problema novo P é indecidível, prove: "se P fosse decidível, então HALT também seria decidível". Como HALT não é decidível, P também não é. Essa é a estrutura padrão de prova.</p>
+
+  <div class="card">
+    <strong>Exemplo: o problema do "vazio".</strong> &nbsp; <code>EMPTY_MT = { ⟨M⟩ : L(M) = ∅ }</code><br>
+    "Dada uma MT M, a linguagem que ela aceita é vazia?"<br><br>
+    <strong>Redução de HALT:</strong> dado ⟨M, w⟩ (instância de HALT), construa uma nova MT M' que ignora sua entrada e simula M com w; se M aceita w, M' aceita; senão, loopa.<br><br>
+    <strong>Observe:</strong> L(M') = Σ* se M aceita w; L(M') = ∅ se M não aceita w.<br>
+    Logo: ⟨M, w⟩ ∈ HALT ⟺ ⟨M'⟩ ∉ EMPTY_MT.<br><br>
+    Se EMPTY_MT fosse decidível, conseguiríamos decidir HALT — contradição. ∎
+  </div>
+
+  <h3>O Teorema de Rice — generalização poderosa</h3>
+
+  <div class="callout teal">
+    <strong>Teorema de Rice (1953).</strong> Toda propriedade <em>não-trivial</em> da linguagem reconhecida por uma MT é indecidível.
+  </div>
+
+  <p>Antes de explicar, dois termos:</p>
+
+  <ul style="padding-left:1.4rem;font-size:.9rem;line-height:1.8">
+    <li><strong>Propriedade da linguagem L(M)</strong>: uma propriedade que depende apenas do conjunto L(M) reconhecido, não de detalhes da implementação de M. Ex: "L(M) é vazia", "L(M) contém a string 'olá'", "L(M) é finita". Não-exemplo: "M tem 17 estados" — depende da implementação, não da linguagem.</li>
+    <li><strong>Não-trivial</strong>: existe pelo menos uma MT que satisfaz a propriedade, e pelo menos uma que não satisfaz. (Propriedades trivais — "L(M) é uma linguagem" — são decidíveis trivialmente.)</li>
+  </ul>
+
+  <h3>O que o teorema diz na prática</h3>
+
+  <p>Exemplos de problemas que o Teorema de Rice mostra serem indecidíveis de uma só pancada:</p>
+
+  <table class="trans-table" style="max-width:100%">
+    <thead><tr><th style="text-align:left">Problema</th><th>Decidível?</th></tr></thead>
+    <tbody>
+      <tr><td style="text-align:left">M aceita pelo menos uma string</td><td>Não</td></tr>
+      <tr><td style="text-align:left">L(M) é finita</td><td>Não</td></tr>
+      <tr><td style="text-align:left">L(M) é regular</td><td>Não</td></tr>
+      <tr><td style="text-align:left">L(M) contém a string 'olá'</td><td>Não</td></tr>
+      <tr><td style="text-align:left">L(M₁) = L(M₂) (equivalência)</td><td>Não</td></tr>
+      <tr><td style="text-align:left">M faz pelo menos 100 passos</td><td><strong>Sim</strong> — depende de M, não de L(M)</td></tr>
+      <tr><td style="text-align:left">M tem mais de 5 estados</td><td><strong>Sim</strong> — propriedade sintática</td></tr>
+    </tbody>
+  </table>
+
+  <p>O insight: o teorema separa o que pode ser conhecido <em>analisando o código</em> (decidível) do que exige <em>conhecer o comportamento sobre todas as entradas</em> (indecidível).</p>
+
+  <h3>Por que Rice não fala sobre tudo</h3>
+
+  <div class="callout warning">
+    <strong>Rice fala apenas sobre propriedades de L(M) — ou seja, do comportamento entrada-saída.</strong> Ele <em>não</em> diz que tudo é indecidível. Propriedades sintáticas sobre o código de M (número de estados, formato de transições, presença de uma instrução específica) podem ser perfeitamente decidíveis. O que é indecidível é "M tem o comportamento X?", não "M tem o código X?".
+  </div>
+
+  <p>Essa distinção é a base de toda a engenharia de verificação moderna: ferramentas trabalham principalmente com propriedades sintáticas (lints, type systems) ou com aproximações conservadoras de propriedades semânticas (análise estática que pode falsificar mas não falsificar negativamente).</p>
+
+  <div class="callout success">
+    <strong>→ Próximo passo (seção 10):</strong> consolide o conteúdo com seis questões estilo POSCOMP — cobrindo definição formal, decidibilidade, problema da parada e reduções.
+  </div>
+</section>
+
+<!-- §10 QUIZ -->
+<section id="quiz">
+  <h2><span class="num">10</span> Quiz — estilo POSCOMP</h2>
+  <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem">Após cada resposta você verá uma explicação detalhada — incluindo o motivo pelo qual cada opção errada está errada.</p>
+
+  <div class="quiz-box" id="q1">
+    <div class="quiz-q">Qual é a diferença essencial entre uma Máquina de Turing e um Autômato de Pilha?</div>
+    <div class="quiz-option" data-qid="q1" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) MT é determinística; AP é não-determinística</div>
+    <div class="quiz-option" data-qid="q1" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) MT pode mover-se em duas direções e reescrever a fita; AP só lê e usa pilha</div>
+    <div class="quiz-option" data-qid="q1" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) MT tem alfabeto infinito; AP tem alfabeto finito</div>
+    <div class="quiz-option" data-qid="q1" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) MT não tem estado de aceitação; AP tem</div>
+    <div class="quiz-feedback" id="q1-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q2">
+    <div class="quiz-q">Considere uma Máquina de Turing M que reconhece a linguagem L = { aⁿbⁿcⁿ | n ≥ 0 }. Sobre essa linguagem, é correto afirmar:</div>
+    <div class="quiz-option" data-qid="q2" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) L é regular, pois pode ser descrita por uma expressão regular</div>
+    <div class="quiz-option" data-qid="q2" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) L é livre de contexto, pois um Autômato de Pilha consegue reconhecê-la</div>
+    <div class="quiz-option" data-qid="q2" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) L é decidível, mas não é livre de contexto</div>
+    <div class="quiz-option" data-qid="q2" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) L não é reconhecível por Máquina de Turing</div>
+    <div class="quiz-feedback" id="q2-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q3">
+    <div class="quiz-q">Sobre a Tese de Church-Turing, é correto afirmar:</div>
+    <div class="quiz-option" data-qid="q3" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) É um teorema matemático demonstrado por Church e Turing em 1936</div>
+    <div class="quiz-option" data-qid="q3" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Afirma que toda função computável por algum método mecânico bem-definido é computável por uma Máquina de Turing</div>
+    <div class="quiz-option" data-qid="q3" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) Estabelece que MTs são mais poderosas que computadores reais</div>
+    <div class="quiz-option" data-qid="q3" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Afirma que linguagens livres de contexto são equivalentes a linguagens regulares</div>
+    <div class="quiz-feedback" id="q3-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q4">
+    <div class="quiz-q">Sobre o Problema da Parada (HALT), é correto afirmar que:</div>
+    <div class="quiz-option" data-qid="q4" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) HALT é decidível, mas o algoritmo é muito ineficiente</div>
+    <div class="quiz-option" data-qid="q4" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) HALT é indecidível e também não é reconhecível</div>
+    <div class="quiz-option" data-qid="q4" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) HALT é Turing-reconhecível mas não é decidível</div>
+    <div class="quiz-option" data-qid="q4" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) HALT é decidível para máquinas determinísticas, mas indecidível para não-determinísticas</div>
+    <div class="quiz-feedback" id="q4-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q5">
+    <div class="quiz-q">Considere uma linguagem L tal que L é Turing-reconhecível e L̄ (complemento de L) também é Turing-reconhecível. O que se pode concluir?</div>
+    <div class="quiz-option" data-qid="q5" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) L é necessariamente regular</div>
+    <div class="quiz-option" data-qid="q5" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) L é necessariamente livre de contexto</div>
+    <div class="quiz-option" data-qid="q5" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) L é decidível</div>
+    <div class="quiz-option" data-qid="q5" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) Nada pode ser concluído — ser reconhecível não implica nenhuma propriedade sobre decidibilidade</div>
+    <div class="quiz-feedback" id="q5-fb"></div>
+  </div>
+
+  <div class="quiz-box" id="q6">
+    <div class="quiz-q">Considere as afirmações sobre Máquinas de Turing e suas variações:<br>
+    I. Toda MT não-determinística reconhece estritamente mais linguagens que uma MT determinística.<br>
+    II. MT com k fitas reconhece o mesmo conjunto de linguagens que MT com 1 fita.<br>
+    III. Pelo Teorema de Rice, é decidível verificar se duas MTs M₁ e M₂ têm o mesmo número de estados.<br>
+    Quais são verdadeiras?</div>
+    <div class="quiz-option" data-qid="q6" data-opt="A" onclick="ansQ(this)">○ &nbsp; A) Apenas I</div>
+    <div class="quiz-option" data-qid="q6" data-opt="B" onclick="ansQ(this)">○ &nbsp; B) Apenas II</div>
+    <div class="quiz-option" data-qid="q6" data-opt="C" onclick="ansQ(this)">○ &nbsp; C) II e III</div>
+    <div class="quiz-option" data-qid="q6" data-opt="D" onclick="ansQ(this)">○ &nbsp; D) I, II e III</div>
+    <div class="quiz-feedback" id="q6-fb"></div>
+  </div>
+</section>
+
+<!-- §11 RESUMO -->
+<section id="resumo">
+  <h2><span class="num">11</span> Resumo</h2>
+  <div class="summary-box">
+    <h3>🎯 O que você precisa dominar</h3>
+    <div class="summary-row">Máquina de Turing tem fita infinita bidirecional, cabeça que lê/escreve/move, e controle finito de estados</div>
+    <div class="summary-row">Definição formal: 7-tupla (Q, Σ, Γ, δ, q₀, q_acc, q_rej) com Σ ⊂ Γ e ⊔ ∈ Γ \ Σ</div>
+    <div class="summary-row">A função δ: Q × Γ → Q × Γ × {L, R} controla cada passo: novo estado, símbolo a escrever, direção</div>
+    <div class="summary-row">L(M) = strings em que M para em q_acc; loop infinito significa <em>não</em> aceito</div>
+    <div class="summary-row">Variações (multifita, não-determinística, fita semi-infinita) reconhecem as mesmas linguagens — só mudam eficiência</div>
+    <div class="summary-row">Tese de Church-Turing: todo método computacional bem-definido é equivalente a MT (não é teorema, é tese)</div>
+    <div class="summary-row">Decidível: MT que sempre para; Reconhecível (RE): MT que aceita L mas pode loopar fora</div>
+    <div class="summary-row">L decidível ⟺ L e L̄ são ambas reconhecíveis</div>
+    <div class="summary-row">HALT é reconhecível mas não decidível — prova por diagonalização (Turing 1936)</div>
+    <div class="summary-row">Teorema de Rice: toda propriedade não-trivial de L(M) é indecidível</div>
+
+    <table class="ref-table">
+      <thead><tr><th>Modelo</th><th>Memória</th><th>Reconhece</th><th>Sempre decide?</th></tr></thead>
+      <tbody>
+        <tr><td>AFD/AFN</td><td>Finita (estados)</td><td>Linguagens regulares</td><td>Sim</td></tr>
+        <tr><td>AP</td><td>Pilha LIFO</td><td>Livres de contexto (LLC)</td><td>Sim (versões determinísticas)</td></tr>
+        <tr><td>MT (decisor)</td><td>Fita ilimitada</td><td>Linguagens decidíveis</td><td>Sim — sempre para</td></tr>
+        <tr><td>MT (reconhecedor)</td><td>Fita ilimitada</td><td>Recursivamente enumeráveis (RE)</td><td>Não — pode loopar fora de L</td></tr>
+        <tr><td>(fora de RE)</td><td>—</td><td>Ex: HALT̄</td><td>Nem reconhecível</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout teal" style="margin-top:1.5rem">
+    <strong>→ Próximo módulo (F4.3): Complexidade Computacional.</strong> Você acabou de ver a fronteira entre <em>computável</em> e <em>incomputável</em>. Em F4.3, vamos mergulhar dentro do "computável" e separar problemas pelo seu <em>custo</em>: a diferença entre o que tem solução eficiente (classe P), o que tem verificação eficiente (classe NP), e a famosa pergunta P ≠ NP. O Problema da Parada nos disse <em>o quê</em> não pode ser feito; complexidade nos diz <em>quanto custa</em> o que pode.
+  </div>
+</section>
+
+      </div><!-- /lesson-content -->
+
+      <div class="lesson-nav">
+        <a class="btn-nav prev" href="f4-1-linguagens-formais-v2.html">← F4.1 Linguagens Formais</a>
+        <div class="lnp">
+          <div class="lnp-label">Progresso no tópico F4</div>
+          <div class="lnp-bar"><div class="lnp-fill"></div></div>
+          <div class="lnp-frac">Módulo 2 de 3</div>
+        </div>
+        <a class="btn-nav next" href="f4-3-complexidade.html">Próximo módulo →</a>
+      </div>
+    </div><!-- /lesson-area -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ─── SIDEBAR ───
+const sidebar=document.getElementById('sidebar'),progressLine=document.getElementById('progressLine'),overlay=document.getElementById('sbOverlay');
+const isMobile=()=>window.innerWidth<768;
+const saved=localStorage.getItem('sb-state');
+if(saved==='collapsed'&&!isMobile()){sidebar.classList.add('collapsed');progressLine.classList.add('visible')}
+function toggleSidebar(){
+  if(isMobile()){const o=sidebar.classList.toggle('open');overlay.classList.toggle('visible',o);return}
+  const c=sidebar.classList.toggle('collapsed');progressLine.classList.toggle('visible',c);
+  localStorage.setItem('sb-state',c?'collapsed':'expanded');
+}
+
+// ─── SECTION NAV ───
+const la=document.getElementById('lessonArea');
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault();const el=document.getElementById(a.getAttribute('href').slice(1));if(el)la.scrollTo({top:el.offsetTop-48,behavior:'smooth'})});
+});
+const secIds=[...document.querySelectorAll('section[id]')].map(s=>s.id);
+la.addEventListener('scroll',()=>{
+  const st=la.scrollTop+60;let cur=secIds[0];
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetTop<=st)cur=id});
+  document.querySelectorAll('.section-nav a').forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur)});
+});
+
+// ─── DETAILS TOGGLE ───
+function toggleDetails(trigger){
+  const content=trigger.parentElement.querySelector('.dt-content');
+  const isOpen=content.classList.toggle('show');
+  trigger.classList.toggle('open',isOpen);
+}
+
+// ─── MT SIMULATOR (decides aⁿbⁿ) ───
+// Transition table: δ(state, symbol) = [next_state, write, direction]
+// Symbols: a, b, X, Y, _ (blank)
+// States: q0, q1, q2, q3, q_acc, q_rej
+const MT_DELTA = {
+  'q0,a': ['q1', 'X', 'R'],
+  'q0,b': ['q_rej', 'b', 'R'],
+  'q0,Y': ['q3', 'Y', 'R'],
+  'q0,_': ['q_acc', '_', 'R'],
+  'q1,a': ['q1', 'a', 'R'],
+  'q1,Y': ['q1', 'Y', 'R'],
+  'q1,b': ['q2', 'Y', 'L'],
+  'q1,_': ['q_rej', '_', 'R'],
+  'q2,a': ['q2', 'a', 'L'],
+  'q2,Y': ['q2', 'Y', 'L'],
+  'q2,X': ['q0', 'X', 'R'],
+  'q3,Y': ['q3', 'Y', 'R'],
+  'q3,b': ['q_rej', 'b', 'R'],
+  'q3,a': ['q_rej', 'a', 'R'],
+  'q3,_': ['q_acc', '_', 'R'],
+};
+
+let mtTape = [], mtState = 'q0', mtHead = 0, mtStep = 0, mtDone = false, mtPreset = 'aabb';
+
+function loadPreset(input, btn){
+  document.querySelectorAll('.sim-preset').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  mtPreset = input;
+  mtReset();
+}
+
+function mtReset(){
+  mtTape = mtPreset.split('');
+  // Pad with blanks
+  while(mtTape.length < 8) mtTape.push('_');
+  mtState = 'q0';
+  mtHead = 0;
+  mtStep = 0;
+  mtDone = false;
+  document.getElementById('mtStepBtn').disabled = false;
+  renderMT();
+  document.getElementById('mtLog').innerHTML = '<div class="log-line info">Configuração inicial: q₀ ' + (mtPreset || 'ε') + '. Clique em "Próximo passo".</div>';
+  document.getElementById('mtLog').className = 'sim-log';
+}
+
+function renderMT(){
+  // Tape with pointer
+  const tapeEl = document.getElementById('mtTape');
+  let html = '<div class="tape-ptr">';
+  for(let i=0;i<mtTape.length;i++){
+    html += '<div class="tape-ptr-cell">' + (i===mtHead ? '▼' : '') + '</div>';
+  }
+  html += '</div><div class="tape-row">';
+  for(let i=0;i<mtTape.length;i++){
+    let cls = 'tape-cell';
+    const c = mtTape[i];
+    if(c === '_') cls += ' blank';
+    if(['X','Y','Z'].includes(c)) cls += ' marked';
+    if(i===mtHead && !mtDone) cls += ' active';
+    if(mtState==='q_acc' && i===mtHead) cls = 'tape-cell accepted';
+    if(mtState==='q_rej' && i===mtHead) cls = 'tape-cell rejected';
+    const display = c === '_' ? '⊔' : c;
+    html += '<div class="' + cls + '">' + display + '</div>';
+  }
+  html += '</div>';
+  tapeEl.innerHTML = html;
+
+  // State display
+  const stateEl = document.getElementById('mtState');
+  stateEl.parentElement.parentElement.classList.remove('q-acc','q-rej');
+  if(mtState === 'q_acc'){
+    stateEl.textContent = 'q_acc';
+    stateEl.parentElement.parentElement.classList.add('q-acc');
+  } else if(mtState === 'q_rej'){
+    stateEl.textContent = 'q_rej';
+    stateEl.parentElement.parentElement.classList.add('q-rej');
+  } else {
+    stateEl.textContent = mtState.replace('q','q').replace('q','q') + ' '; // already q0, q1...
+    stateEl.textContent = mtState;
+  }
+  document.getElementById('mtHead').textContent = mtHead;
+  document.getElementById('mtStep').textContent = mtStep;
+}
+
+function mtStepFn(){
+  if(mtDone) return;
+  // Check halt
+  if(mtState === 'q_acc' || mtState === 'q_rej'){
+    mtDone = true;
+    document.getElementById('mtStepBtn').disabled = true;
+    return;
+  }
+
+  const symb = mtTape[mtHead] || '_';
+  const key = mtState + ',' + symb;
+  const trans = MT_DELTA[key];
+  const log = document.getElementById('mtLog');
+  const logLine = document.createElement('div');
+  logLine.className = 'log-line info';
+
+  if(!trans){
+    mtState = 'q_rej';
+    logLine.className = 'log-line err';
+    logLine.textContent = 'Passo ' + (mtStep+1) + ': sem transição definida em (' + key + ') → rejeita';
+    log.appendChild(logLine);
+    log.scrollTop = log.scrollHeight;
+    mtStep++;
+    renderMT();
+    log.className = 'sim-log err';
+    log.innerHTML += '<div class="log-line err"><strong>✗ REJEITA</strong> — entrada não está em aⁿbⁿ</div>';
+    document.getElementById('mtStepBtn').disabled = true;
+    mtDone = true;
+    return;
+  }
+
+  const [nextSt, writeSym, dir] = trans;
+  const oldSym = symb === '_' ? '⊔' : symb;
+  const newSym = writeSym === '_' ? '⊔' : writeSym;
+  logLine.textContent = 'Passo ' + (mtStep+1) + ': δ(' + mtState + ',' + oldSym + ') = (' + nextSt + ',' + newSym + ',' + dir + ')';
+  log.appendChild(logLine);
+
+  // Apply
+  mtTape[mtHead] = writeSym;
+  mtHead = dir === 'L' ? Math.max(0, mtHead - 1) : mtHead + 1;
+  // Extend tape if needed
+  while(mtHead >= mtTape.length) mtTape.push('_');
+  mtState = nextSt;
+  mtStep++;
+
+  renderMT();
+  log.scrollTop = log.scrollHeight;
+
+  if(mtState === 'q_acc'){
+    log.className = 'sim-log ok';
+    log.innerHTML += '<div class="log-line ok"><strong>✓ ACEITA</strong> — entrada está em aⁿbⁿ</div>';
+    document.getElementById('mtStepBtn').disabled = true;
+    mtDone = true;
+  } else if(mtState === 'q_rej'){
+    log.className = 'sim-log err';
+    log.innerHTML += '<div class="log-line err"><strong>✗ REJEITA</strong> — entrada não está em aⁿbⁿ</div>';
+    document.getElementById('mtStepBtn').disabled = true;
+    mtDone = true;
+  }
+}
+
+function mtRunAll(){
+  let safety = 200;
+  while(!mtDone && safety > 0){
+    mtStepFn();
+    safety--;
+  }
+}
+
+// Init MT
+mtReset();
+
+// ─── QUIZ ───
+const QUIZ = {
+  q1: {
+    correct: 'B',
+    ok: 'Correto! Esta é a essência da Máquina de Turing: cabeça bidirecional + escrita na fita. AP só lê a fita (esquerda→direita) e manipula uma estrutura LIFO. Essa diferença é o que permite à MT reconhecer linguagens como aⁿbⁿcⁿ que AP não consegue.',
+    why: {
+      A: 'Errado em duas direções. AP pode ser determinístico ou não-determinístico (e DPDA é estritamente menos poderoso que NPDA, ao contrário de MT em que ND e D são equivalentes). Determinismo não é a diferença essencial entre os modelos.',
+      C: 'Falso. Tanto MT quanto AP têm alfabetos finitos. A diferença não está em "tamanho do alfabeto" — está em "como a memória é estruturada e acessada".',
+      D: 'Falso. Tanto MT quanto AP têm estados de aceitação. MT tem inclusive estados de aceitação E rejeição (q_acc, q_rej), enquanto AP geralmente usa "pilha vazia" ou "estado final" como critério de aceitação.',
+    }
+  },
+  q2: {
+    correct: 'C',
+    ok: 'Correto! aⁿbⁿcⁿ é decidível (existe MT que sempre para reconhecendo-a — vimos a estratégia de marcar X, Y, Z). Mas não é livre de contexto — pelo Lema do Bombeamento para LLCs (em F4.3), nenhum AP consegue contar três blocos simultaneamente.',
+    why: {
+      A: 'Falso. Linguagens regulares só sabem contar uma quantidade modular. aⁿbⁿcⁿ exige contagem real e comparação de três blocos. Pelo Lema do Bombeamento para regulares, mesmo aⁿbⁿ já não é regular — quanto mais aⁿbⁿcⁿ.',
+      B: 'Falso. AP tem pilha LIFO — consegue parear dois blocos (aⁿbⁿ ✓) mas não três. Esta é exatamente a motivação que abriu o módulo: por que precisamos de MT.',
+      D: 'Falso. MT decide aⁿbⁿcⁿ, então é tanto reconhecível quanto decidível. Toda linguagem decidível é reconhecível por definição.',
+    }
+  },
+  q3: {
+    correct: 'B',
+    ok: 'Correto! A Tese de Church-Turing afirma que toda função computável "intuitivamente" é computável por MT. Não é demonstrável porque "computável intuitivamente" não tem definição matemática prévia — é uma tese sobre a relação entre intuição e formalismo.',
+    why: {
+      A: 'Falso. Church e Turing demonstraram que λ-cálculo, funções recursivas e MT são equivalentes entre si — esse é teorema. A tese é uma afirmação adicional: que esse conjunto comum corresponde ao conceito intuitivo de computável. Como a intuição não é matemática, a tese não pode ser provada.',
+      C: 'Falso. A Tese diz o contrário: MTs e computadores reais são equivalentes em poder computacional (modulo memória finita na prática). Computadores reais não são "menos poderosos" que MTs.',
+      D: 'Falso. Linguagens regulares e LLCs são classes diferentes (regular ⊊ LLC). A Tese trata de modelos computacionais para funções, não de hierarquia de linguagens.',
+    }
+  },
+  q4: {
+    correct: 'C',
+    ok: 'Correto! HALT é reconhecível: dada ⟨M, w⟩, simule M com w; se M para, aceita. Mas não é decidível: se M não para, a simulação também não para — não dá para "rejeitar". A prova por diagonalização (Turing 1936) mostra que nenhum decisor pode existir.',
+    why: {
+      A: 'Falso. A demonstração de Turing mostra que HALT não é decidível — não há algoritmo, eficiente ou não. A indecidibilidade é fundamental, não uma questão de eficiência.',
+      B: 'Parcialmente errado. HALT é indecidível (correto), mas é reconhecível — basta simular. O complemento HALT̄ que é "nem reconhecível" — não confunda os dois.',
+      D: 'Falso. MTs determinísticas e não-determinísticas são equivalentes em poder computacional (Tese de Church-Turing implícita). Determinismo não muda decidibilidade aqui.',
+    }
+  },
+  q5: {
+    correct: 'C',
+    ok: 'Correto! Este é o Teorema do Complemento. Se M₁ reconhece L e M₂ reconhece L̄, simule as duas em paralelo (alternando passos). Como toda string está em L ou em L̄, uma das duas eventualmente para e aceita. Essa simulação combinada sempre para → decisor → L é decidível.',
+    why: {
+      A: 'Falso. "Reconhecível" é uma classe muito maior que "regular". HALT é reconhecível mas obviamente não regular. A pergunta sobre regularidade nem faz sentido aqui — depende da estrutura de L, não de propriedades de reconhecibilidade.',
+      B: 'Falso. Mesmo motivo de A — reconhecibilidade de L e L̄ não diz nada sobre estrutura sintática. Há linguagens decidíveis que não são LLC (ex: aⁿbⁿcⁿ).',
+      D: 'Falso. Há sim conclusão importante: L é decidível. O Teorema do Complemento é exatamente esta implicação. Reconhecibilidade simétrica (L e L̄) é equivalente a decidibilidade.',
+    }
+  },
+  q6: {
+    correct: 'B',
+    ok: 'Correto! Apenas II é verdadeira. I é falsa: NMT reconhece exatamente as mesmas linguagens que MT determinística (uma D simula a ND em busca em largura). III é falsa porque "ter o mesmo número de estados" é uma propriedade SINTÁTICA — depende da implementação, não de L(M). Rice fala apenas sobre propriedades de L(M), e propriedades sintáticas como contagem de estados são decidíveis.',
+    why: {
+      A: 'Errado em I. NMT e MT determinística reconhecem o mesmo conjunto de linguagens (Turing-reconhecíveis). A não-determinística pode ser exponencialmente mais rápida, mas não mais poderosa em decidibilidade.',
+      C: 'Errado em III. Rice trata de propriedades de L(M) — comportamento. "Mesmo número de estados" não depende de L(M); depende da descrição de M. É decidível: conte os estados em ambas as descrições.',
+      D: 'Errado em I (mesmo motivo de A) — e Rice não se aplica a III (contagem de estados é sintática, não semântica).',
+    }
+  },
+};
+
+function ansQ(el){
+  const qid = el.getAttribute('data-qid');
+  const chosen = el.getAttribute('data-opt');
+  const box = document.getElementById(qid);
+  if(box.dataset.answered) return;
+  box.dataset.answered = '1';
+
+  const correct = QUIZ[qid].correct;
+  const ok = chosen === correct;
+
+  box.querySelectorAll('.quiz-option').forEach(o=>{
+    o.style.pointerEvents = 'none';
+    if(o.getAttribute('data-opt') === correct) o.classList.add('correct');
+  });
+  if(!ok) el.classList.add('wrong');
+
+  const fb = document.getElementById(qid + '-fb');
+  let html = '';
+  if(ok){
+    html = '<strong>✓ Correto!</strong> ' + QUIZ[qid].ok;
+    fb.className = 'quiz-feedback show ok';
+  } else {
+    const whyWrong = QUIZ[qid].why[chosen] || '';
+    html = '<strong>✗ Incorreto.</strong><br><br>'
+      + '<strong>Por que ' + chosen + ' está errada:</strong> ' + whyWrong + '<br><br>'
+      + '<strong>Por que ' + correct + ' está certa:</strong> ' + QUIZ[qid].ok;
+    fb.className = 'quiz-feedback show fail';
+  }
+  fb.innerHTML = html;
+}
+</script>
+</body>
+</html>
