@@ -5,19 +5,20 @@
  * o contrato definido em `Spec/aprovado_ design system/MODULE-CREATION-BRIEFING.md`.
  *
  * Uso:
- *   npm run validate-module-fragment -- --slug modulo-02
- *   npm run validate-module-fragment -- --all
+ *   npm run study:modules:validate -- --slug modulo-02
+ *   npm run study:modules:validate -- --all
  *
  * Exit codes:
  *   0  todos os checks passaram
- *   1  pelo menos um ERROR encontrado
- *   2  uso incorreto / arquivo não encontrado
+ *   1  pelo menos um ERROR encontrado (ou módulo/diretório não encontrado)
+ *   2  uso incorreto (flag inválida, slug em formato proibido, allowlist
+ *      indisponível — configuração quebrada, distinto de validação falha)
  *
  * Warnings não falham build mas são reportados (use `--strict` para promover
  * warnings a errors).
  */
 
-import { readFile, readdir, stat } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { JSDOM } from 'jsdom';
 
@@ -61,6 +62,7 @@ async function collectClassAllowlist(): Promise<Set<string>> {
   ];
 
   const allowed = new Set<string>();
+  const missing: string[] = [];
 
   for (const file of cssFiles) {
     try {
@@ -72,8 +74,17 @@ async function collectClassAllowlist(): Promise<Set<string>> {
         allowed.add(match[1]);
       }
     } catch {
-      // arquivo opcional — segue
+      missing.push(file);
     }
+  }
+
+  if (allowed.size === 0) {
+    // fail-closed: sem allowlist, TODO fragmento viraria warning de classe e a
+    // regra viraria ruído. Isso é configuração quebrada, não validação falha.
+    console.error('FATAL: allowlist de classes vazia — CSS não encontrado:');
+    missing.forEach(f => console.error('  - ' + f));
+    console.error('Rode a partir da raiz do repositório.');
+    process.exit(2);
   }
 
   return allowed;
@@ -92,6 +103,10 @@ function pushWarning(issues: Issue[], rule: string, message: string, context?: s
 }
 
 function validateHeader(header: ModuleSource['header'], errors: Issue[], warnings: Issue[]) {
+  if (!header || typeof header !== 'object') {
+    pushError(errors, 'header', 'fragmento sem objeto `header` — rode o ingest antes de validar');
+    return;
+  }
   if (!header.title || header.title.trim().length === 0) {
     pushError(errors, 'header.title', 'header.title está vazio');
   }
@@ -383,7 +398,14 @@ function printReport(report: ValidationReport, strict: boolean) {
 
 async function listAllSlugs(): Promise<string[]> {
   const dir = path.join(process.cwd(), 'data', 'study', 'modules');
-  const entries = await readdir(dir);
+  let entries: string[];
+  try {
+    entries = await readdir(dir);
+  } catch (err: unknown) {
+    console.error(`diretório de módulos não encontrado: ${dir} (${(err as Error).message})`);
+    console.error('Rode a partir da raiz do repositório, ou use --slug <nome>.');
+    process.exit(2);
+  }
   return entries
     .filter((e) => e.endsWith('.source.json'))
     .map((e) => e.replace(/\.source\.json$/, ''))
@@ -402,6 +424,12 @@ async function main() {
     const slug = args[slugIdx + 1];
     if (!slug) {
       console.error('uso: --slug <nome-do-modulo>');
+      process.exit(2);
+    }
+    if (!/^[a-z0-9-]+$/.test(slug)) {
+      // slug entra em path.join e vira rota no app: formato fechado evita
+      // traversal e acento/espaço que quebrariam URL e registro.
+      console.error(`slug em formato inválido: "${slug}" — use apenas a-z, 0-9 e hífen`);
       process.exit(2);
     }
     slugs = [slug];

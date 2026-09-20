@@ -150,15 +150,15 @@ Todo módulo de tema "estrutura/algoritmo" deve ter um simulador. Padrão:
 - **Presets**: 2-4 botões `<button class="preset-btn" onclick="loadPreset('id')">` com exemplos pré-definidos (string aceita, string rejeitada, edge case).
 - **Visualização ao vivo**: estado atual destacado, tabela animada, fita de entrada com cabeçote — use componentes do DS.
 - **Status final**: badge de aceito/rejeitado com texto explícito.
-- **JS embutido**: `<script>` imediatamente após o componente. Use vanilla JS; evite dependências externas. Funções esperadas pelo pipeline: `simInit`, `simStep`, `simRun`, `simReset`, `loadPreset`, `check` (estas têm conversão automática de `onclick` → `data-*`).
+- **JS embutido (só para o estágio standalone)**: `<script>` imediatamente após o componente faz o mockup funcionar sozinho no navegador — mas o pipeline **não executa esse JS no produto**: o app renderiza o HTML ingerido sem rodar `<script>`. Um simulador novo só fica interativo no site quando ganhar seu componente React registrado no runtime (padrão do `modulo-02` em `components/study/module-page.tsx`). Ou seja: o `<script>` serve para validar a experiência no standalone; a interatividade em produção é implementação separada no app. Funções com conversão automática de `onclick` → `data-*` no ingest: `simInit`, `simStep`, `simRun`, `simReset`, `loadPreset`, `check`.
 
 ## Quiz — diretrizes
 
 - 4-6 questões.
 - Ao menos 1 questão com label `POSCOMP <ano>` ou `POSCOMP <ano> (adaptada)`.
 - Cada questão tem 4-5 alternativas.
-- Padrão do botão: `<button class="quiz-btn" onclick="check('q1','B','expQ1')">B) Texto</button>`. Pipeline converte em `data-question-id="q1" data-answer-key="B" data-explanation-id="expQ1"`.
-- Justificativa **completa**: por que a correta é correta E por que **cada** alternativa errada falha.
+- Padrão do botão: `<button class="quiz-btn" onclick="check('q1','B','expQ1')">B) Texto</button>`. Pipeline converte em `data-question-id="q1" data-answer-key="B" data-explanation-id="expQ1"`. O 3º argumento aceita **o texto completo da justificativa** (padrão do corpus) ou um id de bloco; evite aspas simples dentro do argumento (use ‘curvas’ — aspas retas escapadas quebram a conversão).
+- Justificativa **completa e visível**: por que a correta é correta E por que **cada** alternativa errada falha — escrita no `<details>` junto da questão (é o que o aluno lê no produto; o atributo é preservado para uso futuro pelo runtime).
 - Use componentes do DS para renderizar (consulte DS).
 
 ## Quando uma classe necessária não existe no DS
@@ -186,13 +186,14 @@ Se está portando um HTML legado existente para o formato canônico:
 
 1. Verificar que o legado tem `.lesson-header`, `.section-nav`, `.lesson-content`. Se não, envolver o conteúdo nessas classes.
 2. Mover título do módulo para `<h1>` dentro de `<header class="lesson-header">`.
-3. Verificar que `<h2>` em cada `<section>` segue padrão `<h2><span class="num">N</span>`.
+3. Verificar que `<h2>` em cada `<section>` segue o padrão exato `<h2><span class="num">N</span>` — o pipeline renumera **apenas** nesse formato (`<h2>` sem atributos extras; com classe, o número fica como está).
 4. Padronizar `<button class="quiz-btn" onclick="check(...)">`, `preset-btn`, `sim-btn`.
 5. Remover qualquer `<aside class="sidebar">`, `<header class="topbar">`, breadcrumb — descartado pelo pipeline mas polui o arquivo.
-6. Remover `<style>` com tokens redundantes ao DS. Manter `<style>` somente para customizações específicas do módulo (e idealmente migrar essas customizações para o DS).
-7. Rodar pipeline: `npm run ingest:study-modules -- --slug <slug>`.
-8. Conferir `data/study/modules/<slug>.source.json`: `header.title` correto? `navLinks` completos? `html` sem ruído?
-9. Rodar validação (quando o script existir): `npm run validate-module-fragment -- <slug>`.
+6. Remover **todo** `<style>`: o que está fora das `<section>` é descartado pelo ingest, e `<style>` dentro de section é **erro** no validador. Customização visual entra no DS (`globals.css`), nunca inline.
+7. Salvar o standalone em `Spec/mockup/import/<slug>.html` (é de lá que o ingest lê; `--input <caminho>` para caso especial).
+8. Rodar pipeline: `npm run study:modules:ingest -- --slug <slug>`.
+9. Conferir `data/study/modules/<slug>.source.json`: `header.title` correto? `navLinks` completos? `html` sem ruído?
+10. Rodar validação: `npm run study:modules:validate -- --slug <slug>`.
 
 ## Anti-padrões — não fazer
 

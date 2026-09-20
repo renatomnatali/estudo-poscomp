@@ -121,7 +121,9 @@
         <button class="sim-btn" onclick="simReset()">…</button>
         <button class="preset-btn" onclick="loadPreset('id')">…</button>
       Pipeline converte onclick em data-* attributes.
-      JS de simulador: <script> inline aqui é PRESERVADO no fragmento ingerido.
+      JS de simulador: <script> inline faz o STANDALONE funcionar no navegador,
+      mas o produto NÃO o executa — simulador interativo no site exige componente
+      React registrado no runtime (ver module-page.tsx).
     -->
   </section>
 

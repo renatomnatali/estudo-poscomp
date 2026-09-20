@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frações — Subtração com MMC · Aprovado</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Preview standalone — descartado pelo pipeline. Estilo final vem de app/globals.css do site. */
+:root {
+  --primary:#0d2d6b; --accent:#1a6bcc; --green:#1a8c4e; --red:#c0392b;
+  --border:#c8d8f0; --bg:#f8faff; --card:#ffffff; --text:#1a1a2e;
+  --muted:#5a6a8a; --code-bg:#e8f0fe; --accent2:#e8700a;
+  --sap-bg:#EEF1FF; --em:#00B37E; --em-bg:#E6FBF4; --n50:#F8F9FF; --n100:#EFF1FB;
+  --n200:#DDE0F0; --n300:#B8BDD8; --n400:#8A90B0; --n500:#5C6180;
+  --fb:'DM Sans',system-ui,sans-serif; --fd:'Syne',system-ui,sans-serif; --fm:'DM Mono',Menlo,monospace;
+  --r-md:10px; --r-pill:9999px; --r-sm:6px;
+}
+*,*::before,*::after { box-sizing: border-box; }
+body { font-family: var(--fb); color: var(--text); background: var(--bg); margin: 0; line-height: 1.65; font-size: 15px; }
+.lesson-header { background: linear-gradient(135deg,#0d2d6b 0%,#065f46 100%); color: white; padding: 2.2rem 2rem; text-align: center; }
+.lesson-header h1 { font-family: var(--fd); font-size: 1.8rem; font-weight: 800; margin: .5rem 0; }
+.lesson-header .subtitle { opacity: .85; max-width: 600px; margin: .5rem auto; }
+.lesson-header .module-badge { display: inline-block; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); border-radius: var(--r-pill); padding: 3px 14px; font-family: var(--fm); font-size: .72rem; letter-spacing: 1px; }
+.lesson-header .header-meta { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+.lesson-header .header-meta span { background: rgba(255,255,255,.1); padding: 4px 14px; border-radius: var(--r-pill); font-family: var(--fm); font-size: .8rem; }
+.lesson-header .progress-label { display: block; opacity: .6; font-size: .7rem; margin-top: .8rem; font-family: var(--fm); }
+.section-nav { background: #0d2d6b; display: flex; flex-wrap: wrap; gap: 4px; padding: .45rem 1.5rem; position: sticky; top: 0; z-index: 10; }
+.section-nav a { color: rgba(255,255,255,.7); text-decoration: none; padding: 4px 10px; font-size: .82rem; border-radius: 4px; }
+.section-nav a:hover { background: rgba(255,255,255,.15); color: white; }
+.lesson-content { max-width: 920px; margin: 0 auto; padding: 2rem; }
+section { margin-bottom: 3rem; scroll-margin-top: 60px; }
+h2 { color: var(--primary); font-size: 1.3rem; border-bottom: 3px solid var(--accent); padding-bottom: .4rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: .5rem; }
+h2 .num { background: var(--accent); color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .9rem; font-family: var(--fm); }
+h3 { color: var(--accent); font-size: 1rem; margin: 1.4rem 0 .5rem; }
+p { margin-bottom: .9rem; }
+code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: var(--fm); font-size: .88rem; }
+.callout { border-left: 4px solid var(--accent); background: var(--code-bg); padding: 1rem 1.2rem; border-radius: 0 8px 8px 0; margin: 1rem 0; }
+.callout.warn { border-color: var(--accent2); background: #fff3e0; }
+.callout.ok { border-color: var(--green); background: #e8f5ee; }
+.callout strong { color: var(--primary); }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; margin: 1rem 0; }
+.fbox { background: var(--primary); color: white; border-radius: 12px; padding: 1.4rem 2rem; text-align: center; margin: 1.5rem 0; }
+.fbox .ftitle { font-size: .72rem; opacity: .6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: .6rem; }
+.fbox .fline { font-size: 1.25rem; font-family: Georgia, serif; margin: .4rem 0; }
+.fbox .fsub { font-size: .84rem; opacity: .85; }
+.proof-steps { margin: 1rem 0; }
+.proof-step { display: flex; gap: 1rem; padding: .8rem 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: .4rem 0; align-items: flex-start; }
+.proof-step .ps-num { background: var(--accent); color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; flex-shrink: 0; font-family: var(--fm); }
+.proof-step .ps-body { line-height: 1.6; font-size: .9rem; }
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .88rem; }
+th { background: var(--primary); color: white; padding: .6rem .9rem; text-align: left; font-size: .82rem; }
+td { padding: .55rem .9rem; border-bottom: 1px solid var(--border); }
+tr:nth-child(even) td { background: #f5f8ff; }
+.sim-box { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; margin: 1.5rem 0; }
+.sim-box h4 { color: var(--primary); font-size: .95rem; margin-bottom: .6rem; }
+.sim-controls { display: flex; align-items: center; gap: .4rem; margin: .7rem 0; flex-wrap: wrap; }
+.sim-btn { padding: .4rem .95rem; border-radius: var(--r-pill); border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: .8rem; color: var(--primary); font-weight: 600; transition: all .15s; }
+.sim-btn:hover:not(:disabled) { background: var(--code-bg); border-color: var(--accent); color: var(--primary); }
+.sim-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.sim-btn:disabled { opacity: .4; cursor: not-allowed; }
+.sim-action-btn { display: inline-flex; align-items: center; justify-content: center; padding: .55rem 1.15rem; font-size: .84rem; font-weight: 700; font-family: var(--fb); cursor: pointer; border: 1px solid transparent; border-radius: 10px; transition: all .15s; }
+.sim-action-btn:disabled { opacity: .4; cursor: not-allowed; box-shadow: none !important; transform: none !important; }
+.sim-action-btn-primary { background: var(--accent); color: #fff; border-radius: var(--r-md); box-shadow: 0 2px 8px rgba(27,63,216,.25); }
+.sim-action-btn-primary:hover:not(:disabled) { background: var(--primary); box-shadow: 0 4px 14px rgba(27,63,216,.30); transform: translateY(-1px); }
+.sim-action-btn-secondary { background: var(--code-bg); color: var(--primary); border-color: #d0dcfb; }
+.sim-action-btn-secondary:hover:not(:disabled) { background: #d8e3fc; }
+.sim-action-btn-tertiary { background: #fff; color: var(--text); border-color: var(--border); }
+.sim-action-btn-tertiary:hover:not(:disabled) { background: var(--n50); border-color: #99a3c6; }
+.sim-action-bar { margin-top: .6rem; display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.sim-state-display { background: #f8faff; border: 1px solid var(--border); border-radius: 10px; padding: .4rem; margin: .6rem 0; overflow: auto; text-align: center; }
+.sim-status { background: var(--code-bg); border-radius: 8px; padding: .7rem .9rem; font-size: .85rem; margin-top: .5rem; line-height: 1.65; min-height: 2.4rem; font-family: var(--fm); }
+.sim-status.ok { background: #e8f5ee; color: #15803d; font-weight: 700; }
+.sim-status.fail { background: #fde8e8; color: #7a1717; font-weight: 700; }
+.sim-input-row { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; margin: .6rem 0; }
+.sim-input-row label { font-size: .82rem; color: var(--muted); font-family: var(--fm); }
+.sim-input-row input[type="number"] { font-family: var(--fm); font-size: .9rem; padding: .4rem .7rem; border: 1.5px solid var(--border); border-radius: 6px; width: 80px; color: var(--primary); }
+.quiz { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.4rem; margin: 1.5rem 0; }
+.quiz h3 { color: var(--primary); margin-top: 0; }
+.options { margin: .8rem 0; display: grid; gap: .4rem; }
+.opt { display: flex; align-items: center; gap: .6rem; padding: .55rem .8rem; border-radius: 8px; border: 1px solid var(--border); background: #f8faff; cursor: pointer; font-size: .9rem; }
+.opt:hover { background: var(--code-bg); border-color: var(--accent); }
+.opt.correct { background: #e8f5ee; border-color: var(--green); }
+.opt.wrong { background: #fde8e8; border-color: var(--red); }
+.quiz-btn { padding: .55rem 1.2rem; border-radius: var(--r-pill); background: var(--accent); color: white; border: none; cursor: pointer; font-weight: 600; }
+.quiz-btn:hover { background: var(--primary); }
+.quiz-result { margin-top: .8rem; padding: .85rem 1rem; border-radius: 8px; font-size: .9rem; min-height: 1px; }
+.quiz-result.ok { background: #e8f5ee; color: #15803d; border: 1px solid #86efac; }
+.quiz-result.fail { background: #fde8e8; color: #7a1717; border: 1px solid #fca5a5; }
+details { margin: .8rem 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: .8rem 1rem; font-size: .88rem; line-height: 1.65; }
+details summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+details[open] summary { margin-bottom: .6rem; border-bottom: 1px solid var(--border); padding-bottom: .4rem; }
+.summary-box { background: linear-gradient(135deg,#0d2d6b,#065f46); color: white; border-radius: 12px; padding: 1.8rem; margin: 2rem 0; }
+.summary-box h3 { color: white; margin-bottom: 1rem; }
+.summary-row { display: flex; gap: .6rem; margin: .45rem 0; align-items: flex-start; font-size: .9rem; }
+.summary-row::before { content: '✓'; color: #86efac; flex-shrink: 0; font-weight: 700; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 768px) {
+  .lesson-content { padding: 1.5rem 1rem; }
+  .split { grid-template-columns: 1fr; }
+}
+/* ===== Extras específicos das animações deste módulo (prefixo frac-) ===== */
+.frac-cell { min-width: 44px; height: 44px; padding: 0 6px; border: 2px solid var(--n300); border-radius: 8px; background: var(--card); display: inline-flex; align-items: center; justify-content: center; font-family: var(--fm); font-size: .92rem; font-weight: 500; color: var(--primary); margin: 3px; animation: frac-pop .35s ease both; }
+.frac-cell.match { border-color: var(--green); background: var(--em-bg); color: #0f5c36; font-weight: 700; animation: pulse .65s ease-in-out 3; }
+@keyframes frac-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(26,140,78,.45); } 50% { transform: scale(1.1); box-shadow: 0 0 0 9px rgba(26,140,78,0); } }
+.frac-rows { display: flex; flex-direction: column; gap: .4rem; padding: .5rem 0; }
+.frac-row { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; }
+.frac-row-label { font-family: var(--fm); font-size: .74rem; color: var(--muted); width: 118px; text-align: right; padding-right: .55rem; flex-shrink: 0; }
+.frac-fact-line { font-family: var(--fm); font-size: .95rem; color: var(--primary); background: var(--n50); border: 1px solid var(--n200); border-radius: 8px; padding: .5rem .9rem; margin: .35rem auto; width: fit-content; opacity: 0; transform: translateY(8px); transition: all .45s; }
+.frac-fact-line.show { opacity: 1; transform: none; }
+.frac-f { display: inline-block; min-width: 26px; text-align: center; border: 1.5px solid var(--n300); border-radius: 6px; margin: 0 2px; padding: 1px 5px; background: #fff; }
+.frac-f.win { border-color: var(--green); background: var(--em-bg); color: #0f5c36; font-weight: 700; }
+.frac-f.lose { opacity: .4; text-decoration: line-through; }
+.frac-counter { font-family: var(--fm); font-size: 1.18rem; color: var(--primary); font-weight: 500; transition: opacity .3s; }
+.frac-counter .fx { color: var(--accent2); font-size: .82em; }
+.frac-stack { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.18; font-family: var(--fm); margin: 0 .3rem; }
+.frac-stack .fn { border-bottom: 2.5px solid currentColor; padding: 0 .32rem; }
+.frac-stack .fd { padding: 0 .32rem; }
+.frac-eq-panel { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .55rem; font-size: 1.22rem; font-family: var(--fm); padding: .95rem; border-radius: 10px; background: var(--n50); border: 1px dashed var(--n300); margin-top: .8rem; opacity: 0; transform: translateY(8px); transition: all .5s; }
+.frac-eq-panel.show { opacity: 1; transform: none; border-style: solid; border-color: var(--green); background: var(--em-bg); }
+.frac-eq-panel .simplified { color: #0f5c36; font-weight: 700; animation: pulse .65s ease-in-out 2; }
+.frac-svg line { transition: opacity .45s ease; }
+.frac-svg .frac-fill { transition: width .8s ease, fill .8s ease; }
+.frac-svg .frac-hatch { transition: opacity .5s ease; }
+.frac-counters { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: .2rem .4rem .6rem; }
+.frac-counters .fc { display: flex; align-items: center; gap: .45rem; font-family: var(--fm); font-size: .92rem; color: var(--muted); }
+.frac-counters .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.frac-counters .frac-counter { font-size: 1rem; transition: opacity .35s; }
+.frac-log { background: var(--n50); border: 1px solid var(--border); border-radius: 8px; font-family: var(--fm); font-size: .76rem; padding: .6rem .8rem; max-height: 180px; overflow-y: auto; margin-top: .8rem; line-height: 1.75; color: var(--n500); text-align: left; }
+.bar-fig figcaption { font-family: var(--fm); font-size: .76rem; color: var(--muted); text-align: center; margin-top: .3rem; }
+
+/* ===== notação vertical de fração (aplicada em todo o módulo) ===== */
+.fracv { display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; line-height:1.05; font-family:var(--fm); margin:0 .15em; }
+.fracv .fn { padding:0 .25em; }
+.fracv .fd { border-top:2px solid currentColor; padding:0 .25em; }
+.fracv.lg .fn, .fracv.lg .fd { font-size:1.5rem; padding:.1em .4em; }
+.m3c-op { vertical-align:middle; font-family:var(--fm); font-size:1.3rem; color:var(--primary); margin:0 .2em; }
+/* ===== sim 4 — da barra para o caderno (prefixo m3c-) ===== */
+.m3c-grid { display:grid; grid-template-columns:1fr 1.35fr 1fr; gap:.8rem; align-items:stretch; padding:.4rem .4rem 4rem; position:relative; }
+@media (max-width:768px){ .m3c-grid { grid-template-columns:1fr; } }
+.m3c-stage { background:var(--n50); border:1px solid var(--n200); border-radius:10px; padding:.7rem .6rem; display:flex; flex-direction:column; align-items:center; gap:.35rem; }
+.m3c-stage-title { font-family:var(--fm); font-size:.68rem; letter-spacing:1px; text-transform:uppercase; color:var(--n400); }
+.m3c-expr { display:flex; align-items:center; justify-content:center; gap:.3rem; min-height:96px; flex-wrap:nowrap; padding:0 1rem; }
+.m3c-old { padding:0 .65rem; }
+.m3c-blank { display:inline-block; min-width:2.4em; border-bottom:3px dashed var(--n300); height:1.1em; vertical-align:middle; }
+.m3c-blank-lg { display:inline-block; min-width:3.2em; border-bottom:3px dashed var(--n300); height:2.6em; vertical-align:middle; }
+.m3c-slot { display:inline-block; min-width:1.3em; text-align:center; }
+.m3c-tgt { position:relative; }
+.m3c-ctl-label { font-family:var(--fm); font-size:.78rem; color:var(--muted); }
+.m3c-sep { width:1px; align-self:stretch; background:var(--n200); margin:.15rem .55rem; }
+.m3c-custom { display:inline-flex; align-items:center; gap:.5rem; }
+.m3c-fracinput { display:inline-flex; flex-direction:column; align-items:center; }
+.m3c-fracinput input { width:2.9em; text-align:center; font-family:var(--fm); font-size:.95rem; padding:.24rem .1rem; border:1.5px solid var(--n300); border-radius:8px; background:#fff; color:var(--primary); transition:border-color .25s, box-shadow .25s, opacity .25s; }
+.m3c-fracinput .m3c-fibar { width:86%; border-top:2.5px solid var(--primary); margin:2px 0; }
+.m3c-custom:not(.on) input { opacity:.5; }
+.m3c-custom.on input { border-color:var(--accent); box-shadow:0 0 0 3px rgba(26,107,204,.14); }
+.sim-btn.m3c-preset.dim, .m3c-ctl-label.dim { opacity:.45; }
+.m3c-hl { animation: m3cPulse 1.1s ease-in-out infinite; border-radius:6px; }
+@keyframes m3cPulse { 0%,100% { box-shadow:0 0 0 3px rgba(232,112,10,.35); background:rgba(232,112,10,.12); } 50% { box-shadow:0 0 0 8px rgba(232,112,10,.08); background:rgba(232,112,10,.22); } }
+.m3c-pop { animation: frac-pop .4s ease both; }
+.m3c-fracslot { transition: all .5s; border-radius:8px; padding:.05em .15em; }
+.m3c-fracslot.m3c-glow { border:2px solid var(--green); background:var(--em-bg); box-shadow:0 0 14px rgba(26,140,78,.28); }
+.m3c-done { background:var(--em-bg); border-radius:10px; padding:.25em .35em; animation:frac-pop .5s ease both; }
+.m3c-simp { font-family:var(--fm); font-size:.72rem; color:#0f5c36; font-weight:700; }
+svg.m3c-arrows { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:3; }
+.m3c-arc { fill:none; stroke:var(--accent); stroke-width:2.5; transition:stroke-dashoffset .7s ease; }
+.m3c-arc-label { font-family:var(--fm); font-size:13px; font-weight:700; fill:var(--accent); paint-order:stroke; stroke:#fff; stroke-width:4px; stroke-linejoin:round; transition:opacity .3s; }
+.m3c-arc-hi-c { fill:var(--em-bg); stroke:var(--green); stroke-width:2; transition:opacity .3s; }
+.m3c-arc-hi-t { font-family:var(--fm); font-size:15px; font-weight:700; fill:#0f5c36; paint-order:stroke; stroke:#fff; stroke-width:3px; stroke-linejoin:round; transition:opacity .3s; }
+.m3c-arc-label .m3c-arc-hl { fill:#0f5c36; font-size:16px; }
+</style>
+</head>
+<body>
+<header class="lesson-header">
+  <span class="module-badge">Módulo 1 de 1</span>
+  <h1>Subtração de Frações com Denominadores Diferentes</h1>
+  <p class="subtitle">Quando as fatias não são do mesmo tamanho, não dá para subtrair direto. Descubra o MMC, monte frações equivalentes e subtraia vendo cada fatia sair da barra.</p>
+  <div class="header-meta">
+    <span>~50 min</span>
+    <span>Nível: 5º ano</span>
+    <span>4 simuladores interativos</span>
+  </div>
+  <span class="progress-label">Módulo 1 de 1 — Frações: Subtração com MMC</span>
+</header>
+
+<nav class="section-nav">
+  <a href="#problema">O problema</a>
+  <a href="#chave">A chave</a>
+  <a href="#mmc">Encontrando o MMC</a>
+  <a href="#equivalentes">Frações equivalentes</a>
+  <a href="#subtraindo">Subtraindo</a>
+  <a href="#simplificando">Simplificando</a>
+  <a href="#casos">Casos especiais</a>
+  <a href="#aplicacoes">Mundo real</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#resumo">Resumo</a>
+</nav>
+
+<main class="lesson-content">
+<!-- ===== SECAO 1: O PROBLEMA ===== -->
+<section id="problema">
+  <h2><span class="num">1</span> Por que não dá para subtrair direto?</h2>
+  <p>Imagine este problema: você tem <strong><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> de uma barra de chocolate</strong> e come <strong><span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> dela</strong>. Quanto sobra? A conta parece simples — <code><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> − <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span></code> — mas esconda a resposta e tente de cabeça: quanto é isso?</p>
+  <p>A dificuldade não é a subtração. É que as duas frações estão falando de <strong>fatias de tamanhos diferentes</strong>. Veja:</p>
+  <div class="split">
+    <figure class="bar-fig card" style="margin:0">
+      <svg viewBox="0 0 560 70" width="100%" role="img" aria-label="Barra dividida em 4 fatias iguais, com 3 fatias pintadas de azul">
+        <rect x="1" y="8" width="558" height="52" rx="6" fill="#ffffff" stroke="var(--border)" stroke-width="2"/>
+        <rect x="2" y="9" width="418.2" height="50" rx="5" fill="var(--accent)" opacity=".92"/>
+        <line x1="140.5" y1="9" x2="140.5" y2="59" stroke="var(--primary)" stroke-width="3"/>
+        <line x1="280" y1="9" x2="280" y2="59" stroke="var(--primary)" stroke-width="3"/>
+        <line x1="419.5" y1="9" x2="419.5" y2="59" stroke="var(--primary)" stroke-width="3"/>
+      </svg>
+      <figcaption><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> — a unidade cortada em 4 fatias grandes, 3 pintadas</figcaption>
+    </figure>
+    <figure class="bar-fig card" style="margin:0">
+      <svg viewBox="0 0 560 70" width="100%" role="img" aria-label="Barra dividida em 6 fatias iguais, com 1 fatia pintada de laranja">
+        <rect x="1" y="8" width="558" height="52" rx="6" fill="#ffffff" stroke="var(--border)" stroke-width="2"/>
+        <rect x="2" y="9" width="92.2" height="50" rx="5" fill="var(--accent2)" opacity=".92"/>
+        <line x1="94" y1="9" x2="94" y2="59" stroke="var(--primary)" stroke-width="3"/>
+        <line x1="187" y1="9" x2="187" y2="59" stroke="var(--primary)" stroke-width="3"/>
+        <line x1="280" y1="9" x2="280" y2="59" stroke="var(--primary)" stroke-width="3"/>
+        <line x1="373" y1="9" x2="373" y2="59" stroke="var(--primary)" stroke-width="3"/>
+        <line x1="466" y1="9" x2="466" y2="59" stroke="var(--primary)" stroke-width="3"/>
+      </svg>
+      <figcaption><span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> — a MESMA unidade cortada em 6 fatias menores, 1 pintada</figcaption>
+    </figure>
+  </div>
+  <p>O <strong>denominador</strong> (o número de baixo) responde a uma pergunta: <em>em quantas fatias iguais a unidade foi cortada?</em> Em <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span>, foram 4 fatias. Em <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span>, foram 6 fatias. Como as fatias de uma barra não têm o mesmo tamanho das fatias da outra, <strong>comparar ou subtrair fatias de tamanhos diferentes não faz sentido</strong> — é como subtrair 3 bananas de 6 maçãs.</p>
+  <div class="callout warn">
+    <strong>⚠️ A armadilha clássica:</strong> subtrair tudo direto — numerador com numerador, denominador com denominador — dá <code><span class="fracv"><span class="fn">3−1</span><span class="fd">4−6</span></span> = <span class="fracv"><span class="fn">2</span><span class="fd">−2</span></span></code>. Um resultado absurdo, com até denominador negativo! Se a conta der sem sentido, o aviso é um só: as fatias ainda não são do mesmo tamanho. O segredo é <strong>primeiro transformar as duas frações em fatias do MESMO tamanho</strong> — e é exatamente isso que este módulo ensina.
+  </div>
+</section>
+
+<!-- ===== SECAO 2: A CHAVE ===== -->
+<section id="chave">
+  <h2><span class="num">2</span> A chave: um denominador comum</h2>
+  <p>Antes de subtrair, vamos <strong>reescrever as duas frações com o mesmo denominador, sem mudar a quantidade</strong> que cada uma representa. Isso é possível graças às <strong>frações equivalentes</strong>: frações diferentes na escrita que representam a mesma parte da unidade.</p>
+  <p>O exemplo mais famoso: <span class="fracv"><span class="fn">1</span><span class="fd">2</span></span> e <span class="fracv"><span class="fn">2</span><span class="fd">4</span></span> são a mesma quantidade. Confira com seus olhos — a área pintada é idêntica nas duas barras:</p>
+  <div class="split">
+    <figure class="bar-fig card" style="margin:0">
+      <svg viewBox="0 0 560 70" width="100%" role="img" aria-label="Barra dividida ao meio, com metade pintada de azul">
+        <rect x="1" y="8" width="558" height="52" rx="6" fill="#ffffff" stroke="var(--border)" stroke-width="2"/>
+        <rect x="2" y="9" width="278" height="50" rx="5" fill="var(--accent)" opacity=".92"/>
+        <line x1="280" y1="9" x2="280" y2="59" stroke="var(--primary)" stroke-width="3"/>
+      </svg>
+      <figcaption><span class="fracv"><span class="fn">1</span><span class="fd">2</span></span> — a unidade cortada em 2, uma fatia pintada</figcaption>
+    </figure>
+    <figure class="bar-fig card" style="margin:0">
+      <svg viewBox="0 0 560 70" width="100%" role="img" aria-label="Mesma barra dividida em 4, com 2 fatias pintadas de azul — mesma área pintada">
+        <rect x="1" y="8" width="558" height="52" rx="6" fill="#ffffff" stroke="var(--border)" stroke-width="2"/>
+        <rect x="2" y="9" width="278" height="50" rx="5" fill="var(--accent)" opacity=".92"/>
+        <line x1="140.5" y1="9" x2="140.5" y2="59" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6 4"/>
+        <line x1="280" y1="9" x2="280" y2="59" stroke="var(--primary)" stroke-width="3"/>
+        <line x1="419.5" y1="9" x2="419.5" y2="59" stroke="var(--primary)" stroke-width="3"/>
+      </svg>
+      <figcaption><span class="fracv"><span class="fn">2</span><span class="fd">4</span></span> — cortada em 4, duas fatias pintadas: área IDÊNTICA</figcaption>
+    </figure>
+  </div>
+  <p>Se <span class="fracv"><span class="fn">1</span><span class="fd">2</span></span> pode virar <span class="fracv"><span class="fn">2</span><span class="fd">4</span></span>, então <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> e <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> também podem ser reescritas com um denominador em comum. Mas qual número escolher? Ele precisa ser <strong>múltiplo dos dois denominadores</strong> ao mesmo tempo — afinal, só conseguimos cortar a barra em 12 fatias se 12 for múltiplo de 4 <em>e</em> de 6. Entre todos os múltiplos comuns possíveis, o mais esperto de escolher é o <strong>menor deles: o MMC</strong> (mínimo múltiplo comum). Menor número, contas mais fáceis.</p>
+  <div class="callout">
+    <strong>💡 A estratégia completa em 3 movimentos:</strong> (1) ache o MMC dos denominadores; (2) reescreva as duas frações com esse denominador comum; (3) subtraia só os numeradores. As próximas seções percorrem cada movimento — com simuladores para você ver acontecendo.
+  </div>
+</section>
+
+<!-- ===== SECAO 3: MMC ===== -->
+<section id="mmc">
+  <h2><span class="num">3</span> Encontrando o MMC (mínimo múltiplo comum)</h2>
+  <p>O MMC de dois números é o <strong>menor número que é múltiplo dos dois ao mesmo tempo</strong>. O caminho mais natural para achá-lo é listar os múltiplos dos dois números até o primeiro comum aparecer.</p>
+
+  <h3>Listas de múltiplos</h3>
+  <div class="proof-steps">
+    <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">Liste os múltiplos de 4 (o resultado de 4×1, 4×2, 4×3…): <strong>4, 8, 12, 16, 20, 24…</strong></div></div>
+    <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">Liste os múltiplos de 6: <strong>6, 12, 18, 24…</strong></div></div>
+    <div class="proof-step"><span class="ps-num">3</span><div class="ps-body">Procure o <strong>primeiro número que aparece nas duas listas</strong>: o 12. Pronto — <strong>MMC(4, 6) = 12</strong>. 🎯</div></div>
+  </div>
+
+  <div class="callout ok">
+    <strong>💡 Atalho valioso:</strong> quando um denominador é <strong>múltiplo do outro</strong>, o MMC é simplesmente o <strong>maior deles</strong>. Exemplo: 5 e 10 → 10 já é múltiplo de 5, então MMC(5, 10) = 10, sem nenhuma conta. Nos simuladores abaixo, experimente o preset <code>5 e 10</code> e veja as listas se encontrarem rápido.
+  </div>
+
+  <div class="sim-box">
+    <h4>🎛️ Simulador 1 — Descobrindo o MMC</h4>
+    <p>Escolha dois denominadores e vá avançando passo a passo: as duas fileiras de múltiplos crescem, e o primeiro número que aparecer nas duas — pulsando em verde — é o MMC.</p>
+    <div class="sim-state-display">
+      <div class="frac-rows" id="mmcRows"></div>
+      <div class="sim-status" id="mmcStatus"></div>
+    </div>
+    <div class="sim-controls">
+      <span style="font-family:var(--fm);font-size:.78rem;color:var(--muted)">Sugestões:</span>
+      <button class="sim-btn mmc-preset active" data-a="4" data-b="6">4 e 6</button>
+      <button class="sim-btn mmc-preset" data-a="6" data-b="8">6 e 8</button>
+      <button class="sim-btn mmc-preset" data-a="5" data-b="10">5 e 10</button>
+    </div>
+    <div class="sim-input-row">
+      <label for="mmcA">Denominador 1 (2–12):</label>
+      <input id="mmcA" type="number" min="2" max="12" value="4">
+      <label for="mmcB">Denominador 2 (2–12):</label>
+      <input id="mmcB" type="number" min="2" max="12" value="6">
+    </div>
+    <div class="sim-action-bar">
+      <button class="sim-action-btn sim-action-btn-primary" id="mmcRun">▶ Executar tudo</button>
+      <button class="sim-action-btn sim-action-btn-secondary" id="mmcBack">⏮ Anterior</button>
+      <button class="sim-action-btn sim-action-btn-secondary" id="mmcStep">⏭ Próximo</button>
+      <button class="sim-action-btn sim-action-btn-tertiary" id="mmcReset">↺ Reiniciar</button>
+    </div>
+    <div class="frac-log" id="mmcLog" hidden></div>
+  </div>
+</section>
+
+<!-- ===== SECAO 4: EQUIVALENTES ===== -->
+<section id="equivalentes">
+  <h2><span class="num">4</span> Montando as frações equivalentes</h2>
+  <p>Achado o MMC, cada fração precisa ser <strong>reescrita com o novo denominador sem mudar de valor</strong>. A regra é sempre a mesma: descubra <strong>por quanto o denominador foi multiplicado</strong> para chegar ao MMC — e multiplique o numerador <strong>pelo mesmo fator</strong>. Vamos reescrever <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> e <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> com denominador 12:</p>
+  <div class="proof-steps">
+    <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Fração <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> → denominador alvo 12.</strong> O fator é 12 ÷ 4 = <strong>3</strong>. Multiplique numerador E denominador por 3: <code><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> = <span class="fracv"><span class="fn">3×3</span><span class="fd">4×3</span></span> = <span class="fracv"><span class="fn">9</span><span class="fd">12</span></span></code>. Cada fatia virou 3 fatias menores — as 3 pintadas viraram 9 pintadas.</div></div>
+    <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Fração <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> → denominador alvo 12.</strong> O fator é 12 ÷ 6 = <strong>2</strong>. Multiplique os dois por 2: <code><span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">1×2</span><span class="fd">6×2</span></span> = <span class="fracv"><span class="fn">2</span><span class="fd">12</span></span></code>. Cada fatia virou 2 fatias menores — a 1 pintada virou 2 pintadas.</div></div>
+    <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Confira:</strong> agora as duas frações falam em dozeavos. A subtração virou um problema fácil: <code><span class="fracv"><span class="fn">9</span><span class="fd">12</span></span> − <span class="fracv"><span class="fn">2</span><span class="fd">12</span></span></code>. É só subtrair as pintadas — 9 dozeavos menos 2 dozeavos.</div></div>
+  </div>
+  <div class="callout warn">
+    <strong>⚠️ Multiplicar só o numerador MUDA a fração!</strong> <span class="fracv"><span class="fn">3</span><span class="fd">12</span></span> não vale <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> — <span class="fracv"><span class="fn">3</span><span class="fd">12</span></span> vale <span class="fracv"><span class="fn">1</span><span class="fd">4</span></span>. O valor só se preserva quando numerador e denominador são multiplicados <strong>pelo mesmo número</strong>. É como trocar uma nota de R$ 2 por duas moedas de R$ 1: muda a "embalagem", não o valor.
+  </div>
+  <div class="callout ok">
+    <strong>✅ Teste de honestidade visual:</strong> depois de converter, a área pintada da barra continua EXATAMENTE a mesma — só as fatias ficaram menores e mais numerosas. É isso que o simulador abaixo mostra: subdivida a barra e procure qualquer mudança na área pintada. Não vai encontrar. 😉
+  </div>
+
+  <div class="sim-box">
+    <h4>🎛️ Simulador 2 — Frações equivalentes</h4>
+    <p>Escolha uma fração e um fator. As linhas de subdivisão surgem uma a uma, a barra ganha mais fatias — e a área pintada permanece idêntica do início ao fim. A equivalência você vê, não só calcula.</p>
+    <div class="sim-state-display">
+      <div style="padding:.5rem 0 .2rem"><span class="frac-counter" id="eqvCounter"><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span></span></div>
+      <svg id="eqvSvg" class="frac-svg" viewBox="0 0 560 70" width="100%" role="img" aria-label="Barra da unidade dividida em fatias, com a área da fração pintada"></svg>
+      <div class="sim-status" id="eqvStatus"></div>
+    </div>
+    <div class="sim-controls">
+      <span style="font-family:var(--fm);font-size:.78rem;color:var(--muted)">Sugestões:</span>
+      <button class="sim-btn eqv-preset active" data-n="3" data-d="4" data-f="3"><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> com fator 3</button>
+      <button class="sim-btn eqv-preset" data-n="1" data-d="2" data-f="4"><span class="fracv"><span class="fn">1</span><span class="fd">2</span></span> com fator 4</button>
+      <button class="sim-btn eqv-preset" data-n="2" data-d="3" data-f="2"><span class="fracv"><span class="fn">2</span><span class="fd">3</span></span> com fator 2</button>
+    </div>
+    <div class="sim-controls">
+      <span style="font-family:var(--fm);font-size:.78rem;color:var(--muted)">Fator (2–4):</span>
+      <button class="sim-btn eqv-f" data-f="2">×2</button>
+      <button class="sim-btn eqv-f" data-f="3">×3</button>
+      <button class="sim-btn eqv-f" data-f="4">×4</button>
+    </div>
+    <div class="sim-action-bar">
+      <button class="sim-action-btn sim-action-btn-primary" id="eqvRun">▶ Executar tudo</button>
+      <button class="sim-action-btn sim-action-btn-secondary" id="eqvBack">⏮ Anterior</button>
+      <button class="sim-action-btn sim-action-btn-secondary" id="eqvStep">⏭ Próximo</button>
+      <button class="sim-action-btn sim-action-btn-tertiary" id="eqvReset">↺ Reiniciar</button>
+    </div>
+    <div class="frac-log" id="eqvLog" hidden></div>
+  </div>
+
+<h3>✏️ Da barra para o caderno</h3>
+<p>No simulador de cima você <strong>viu</strong> as fatias virarem 12 na barra; aqui a conta se escreve sozinha, como no seu caderno — com os espaços vazios preenchendo na ordem certa, um a um.</p>
+
+<div class="sim-box">
+  <h4>✏️ Montando a conta passo a passo</h4>
+  <div class="sim-state-display">
+    <div class="m3c-grid">
+      <div class="m3c-stage">
+        <div class="m3c-stage-title">Passo 1 · A conta que temos</div>
+        <div class="m3c-expr">
+          <span class="m3c-old"><span class="fracv lg"><span class="fn" id="m3cA1n">3</span><span class="fd" id="m3cA1d">4</span></span></span>
+          <span class="m3c-op">−</span>
+          <span class="m3c-old"><span class="fracv lg"><span class="fn" id="m3cA2n">1</span><span class="fd" id="m3cA2d">6</span></span></span>
+          <span class="m3c-op">=</span>
+          <span class="m3c-blank">&nbsp;</span>
+        </div>
+      </div>
+      <div class="m3c-stage">
+        <div class="m3c-stage-title">Passo 2 · Frações equivalentes</div>
+        <div class="m3c-expr">
+          <span class="fracv lg m3c-fracslot" id="m3cF1"><span class="fn"><span class="m3c-slot" id="m3cN1">&nbsp;</span></span><span class="fd m3c-tgt"><span class="m3c-slot" id="m3cD1">&nbsp;</span></span></span>
+          <span class="m3c-op">−</span>
+          <span class="fracv lg m3c-fracslot" id="m3cF2"><span class="fn"><span class="m3c-slot" id="m3cN2">&nbsp;</span></span><span class="fd m3c-tgt"><span class="m3c-slot" id="m3cD2">&nbsp;</span></span></span>
+        </div>
+      </div>
+      <div class="m3c-stage">
+        <div class="m3c-stage-title">Passo 3 · O resultado</div>
+        <div class="m3c-expr" id="m3cResBox"><span class="m3c-blank-lg" id="m3cRes">&nbsp;</span></div>
+      </div>
+      <svg class="m3c-arrows" id="m3cArrows" aria-hidden="true">
+        <defs><marker id="m3cArrowHead" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="0.5" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="var(--accent)"/></marker></defs>
+        <g id="m3cArrowLayer"></g>
+      </svg>
+    </div>
+    <div class="sim-status m3c-msg" id="m3cStatus"></div>
+  </div>
+  <div class="sim-controls">
+    <span class="m3c-ctl-label" id="m3cLbl">Sugestões:</span>
+    <button class="sim-btn m3c-preset active" data-n1="3" data-d1="4" data-n2="1" data-d2="6"><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> − <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span></button>
+    <button class="sim-btn m3c-preset" data-n1="5" data-d1="6" data-n2="3" data-d2="4"><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span></button>
+    <button class="sim-btn m3c-preset" data-n1="5" data-d1="6" data-n2="1" data-d2="3"><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span></button>
+    <span class="m3c-sep" aria-hidden="true"></span>
+    <span class="m3c-custom" id="m3cCustom">
+      <span class="m3c-fracinput">
+        <input id="m3cIn1" type="number" min="1" max="12" value="3" aria-label="numerador da 1ª fração" disabled>
+        <span class="m3c-fibar" aria-hidden="true"></span>
+        <input id="m3cId1" type="number" min="1" max="12" value="4" aria-label="denominador da 1ª fração" disabled>
+      </span>
+      <span class="m3c-op">−</span>
+      <span class="m3c-fracinput">
+        <input id="m3cIn2" type="number" min="1" max="12" value="1" aria-label="numerador da 2ª fração" disabled>
+        <span class="m3c-fibar" aria-hidden="true"></span>
+        <input id="m3cId2" type="number" min="1" max="12" value="6" aria-label="denominador da 2ª fração" disabled>
+      </span>
+      <button class="sim-btn" id="m3cEdit" title="Escrever as suas próprias frações">✏️ Personalizar</button>
+    </span>
+  </div>
+  <div class="sim-action-bar">
+    <button class="sim-action-btn sim-action-btn-primary" id="m3cRun">▶ Executar tudo</button>
+    <button class="sim-action-btn sim-action-btn-secondary" id="m3cBack">⏮ Anterior</button>
+    <button class="sim-action-btn sim-action-btn-secondary" id="m3cStep">⏭ Próximo</button>
+    <button class="sim-action-btn sim-action-btn-tertiary" id="m3cReset">↺ Reiniciar</button>
+  </div>
+  <div class="frac-log" id="m3cLog" hidden></div>
+</div>
+</section>
+
+<!-- ===== SECAO 5: SUBTRAINDO ===== -->
+<section id="subtraindo">
+  <h2><span class="num">5</span> Agora sim: subtraindo</h2>
+  <p>Com os denominadores iguais, a subtração fica trivial — porque agora as fatias têm o mesmo tamanho, e subtrair é literalmente <strong>tirar fatias pintadas</strong>:</p>
+  <div class="fbox">
+    <div class="ftitle">Regra geral</div>
+    <div class="fline">Denominadores iguais → subtraia os numeradores e mantenha o denominador</div>
+    <div class="fline" style="font-family:var(--fm);font-size:1.05rem"><span class="fracv"><span class="fn">a</span><span class="fd">b</span></span> <span class="m3c-op">−</span> <span class="fracv"><span class="fn">c</span><span class="fd">b</span></span> <span class="m3c-op">=</span> <span class="fracv"><span class="fn">a − c</span><span class="fd">b</span></span></div>
+    <div class="fsub">O denominador não muda: as fatias continuam do mesmo tamanho, só sai quantidade.</div>
+  </div>
+  <p>Exemplo completo, do enunciado à resposta — <code><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span></code>:</p>
+  <div class="proof-steps">
+    <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>MMC dos denominadores:</strong> MMC(6, 4) = <strong>12</strong>. (múltiplos de 6: 6, <strong>12</strong>… · múltiplos de 4: 4, 8, <strong>12</strong>…)</div></div>
+    <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Frações equivalentes:</strong> <span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> × (2 em cima e embaixo) = <strong><span class="fracv"><span class="fn">10</span><span class="fd">12</span></span></strong>; <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> × (3 em cima e embaixo) = <strong><span class="fracv"><span class="fn">9</span><span class="fd">12</span></span></strong>.</div></div>
+    <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Subtraia os numeradores:</strong> <span class="fracv"><span class="fn">10</span><span class="fd">12</span></span> − <span class="fracv"><span class="fn">9</span><span class="fd">12</span></span> = <span class="fracv"><span class="fn">10 − 9</span><span class="fd">12</span></span> = <strong><span class="fracv"><span class="fn">1</span><span class="fd">12</span></span></strong>. Sobrou exatamente um dozeavo. 🎯</div></div>
+  </div>
+  <p>No simulador abaixo, cada etapa da regra ganha vida: o MMC é calculado, as duas barras se subdividem ao vivo para o mesmo número de fatias, as fatias do subtraendo são arrancadas da barra de cima — e o que sobra é pintado de verde: o resultado.</p>
+
+  <div class="sim-box">
+    <h4>🎛️ Simulador 3 — Subtração passo a passo</h4>
+    <p>Escolha duas frações (a primeira deve valer pelo menos tanto quanto a segunda — estamos aprendendo subtração com resultado não-negativo). Avance passo a passo: MMC → subdivisão das barras → remoção das fatias → resultado → simplificação.</p>
+    <div class="sim-state-display">
+      <div class="frac-counters">
+        <span class="fc"><span class="dot" style="background:var(--accent)"></span>Fração 1: <span class="frac-counter" id="subC1"><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span></span></span>
+        <span class="fc"><span class="dot" style="background:var(--accent2)"></span>Fração 2: <span class="frac-counter" id="subC2"><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span></span></span>
+        <span class="fc"><span class="dot" style="background:var(--green)"></span>Resultado: <span class="frac-counter" id="subC3">—</span></span>
+      </div>
+      <svg id="subSvg" class="frac-svg" viewBox="0 0 560 246" width="100%" role="img" aria-label="Três barras empilhadas: a 1ª fração, a 2ª fração e o resultado da subtração"></svg>
+      <div class="frac-eq-panel" id="subEq"></div>
+      <div class="sim-status" id="subStatus"></div>
+    </div>
+    <div class="sim-controls">
+      <span style="font-family:var(--fm);font-size:.78rem;color:var(--muted)">Sugestões:</span>
+      <button class="sim-btn sub-preset active" data-n1="5" data-d1="6" data-n2="3" data-d2="4"><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span></button>
+      <button class="sim-btn sub-preset" data-n1="3" data-d1="4" data-n2="1" data-d2="6"><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> − <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span></button>
+      <button class="sim-btn sub-preset" data-n1="5" data-d1="6" data-n2="1" data-d2="3"><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span></button>
+    </div>
+    <div class="sim-input-row">
+      <label for="subN1">1ª numerador</label><input id="subN1" type="number" min="1" max="12" value="5">
+      <label for="subD1">1ª denominador</label><input id="subD1" type="number" min="1" max="12" value="6">
+      <label for="subN2">2ª numerador</label><input id="subN2" type="number" min="1" max="12" value="3">
+      <label for="subD2">2ª denominador</label><input id="subD2" type="number" min="1" max="12" value="4">
+    </div>
+    <div class="sim-action-bar">
+      <button class="sim-action-btn sim-action-btn-primary" id="subRun">▶ Executar tudo</button>
+      <button class="sim-action-btn sim-action-btn-secondary" id="subBack">⏮ Anterior</button>
+      <button class="sim-action-btn sim-action-btn-secondary" id="subStep">⏭ Próximo</button>
+      <button class="sim-action-btn sim-action-btn-tertiary" id="subReset">↺ Reiniciar</button>
+      <button class="sim-action-btn sim-action-btn-primary" id="subSimplify" hidden>✨ Simplificar</button>
+    </div>
+    <div class="frac-log" id="subLog" hidden></div>
+  </div>
+</section>
+
+<!-- ===== SECAO 6: SIMPLIFICANDO ===== -->
+<section id="simplificando">
+  <h2><span class="num">6</span> Simplificando o resultado (quando couber)</h2>
+  <p>Depois de subtrair, dê uma última olhada no resultado: se o numerador e o denominador tiverem um <strong>divisor comum</strong> (um número que divide os dois), divida os dois por ele. A fração fica mais enxuta, valendo o mesmo. Dois desfechos possíveis, lado a lado:</p>
+  <div class="split">
+    <div class="card" style="margin:0">
+      <h3 style="margin-top:0">✂️ Caso que simplifica</h3>
+      <div class="proof-steps">
+        <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">MMC(6, 3) = 6 → <code><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">2</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">3</span><span class="fd">6</span></span></code></div></div>
+        <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">3 divide numerador e denominador → <code><span class="fracv"><span class="fn">3÷3</span><span class="fd">6÷3</span></span></code></div></div>
+        <div class="proof-step"><span class="ps-num">3</span><div class="ps-body">Resultado final: <strong><span class="fracv"><span class="fn">1</span><span class="fd">2</span></span></strong> ✨</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin:0">
+      <h3 style="margin-top:0">🔒 Caso já enxuto</h3>
+      <div class="proof-steps">
+        <div class="proof-step"><span class="ps-num">1</span><div class="ps-body">MMC(4, 6) = 12 → <code><span class="fracv"><span class="fn">9</span><span class="fd">12</span></span> − <span class="fracv"><span class="fn">2</span><span class="fd">12</span></span> = <span class="fracv"><span class="fn">7</span><span class="fd">12</span></span></code></div></div>
+        <div class="proof-step"><span class="ps-num">2</span><div class="ps-body">7 é primo e não divide 12 → não há divisor comum</div></div>
+        <div class="proof-step"><span class="ps-num">3</span><div class="ps-body">Resultado final: <strong><span class="fracv"><span class="fn">7</span><span class="fd">12</span></span></strong>, forma mais simples 🔒</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>💡 Calma ao comparar:</strong> um resultado simplificado não é "mais certo" que o não-simplificado — os dois valem exatamente o mesmo (<span class="fracv"><span class="fn">3</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">1</span><span class="fd">2</span></span>). A forma simplificada é apenas a <strong>versão mais enxuta</strong> de escrever. Em provas, quando o enunciado pede "a forma mais simples", aí sim simplificar é obrigatório.
+  </div>
+</section>
+
+<!-- ===== SECAO 7: CASOS ESPECIAIS ===== -->
+<section id="casos">
+  <h2><span class="num">7</span> Casos especiais que economizam tempo</h2>
+  <p>Três padrões aparecem o tempo todo. Reconhecê-los no ato evita contas desnecessárias:</p>
+  <div class="card">
+    <h3 style="margin-top:0">⚡ 1. Um denominador é múltiplo do outro → o MMC é o maior deles</h3>
+    <p>Em <code><span class="fracv"><span class="fn">7</span><span class="fd">10</span></span> − <span class="fracv"><span class="fn">2</span><span class="fd">5</span></span></code>, o 10 já é múltiplo de 5. Nada de procurar MMC: o denominador comum é o próprio 10. Basta converter a fração menor: <code><span class="fracv"><span class="fn">2</span><span class="fd">5</span></span> = <span class="fracv"><span class="fn">4</span><span class="fd">10</span></span></code> (fator 10÷5 = 2). Então <code><span class="fracv"><span class="fn">7</span><span class="fd">10</span></span> − <span class="fracv"><span class="fn">4</span><span class="fd">10</span></span> = <span class="fracv"><span class="fn">3</span><span class="fd">10</span></span></code>. Duas contas, direto ao ponto.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">🎯 2. Numeradores iguais no mesmo denominador → sobra zero</h3>
+    <p>Em <code><span class="fracv"><span class="fn">5</span><span class="fd">8</span></span> − <span class="fracv"><span class="fn">5</span><span class="fd">8</span></span></code>, você tira exatamente o que tinha: <code><span class="fracv"><span class="fn">0</span><span class="fd">8</span></span> = 0</code>. Sobra nada — e está tudo bem. Zero é um numerador perfeitamente válido; a fração "vazia" vale zero.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">🧱 3. Numerador igual ao denominador → vale a unidade inteira</h3>
+    <p>Em <code><span class="fracv"><span class="fn">7</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">6</span><span class="fd">6</span></span> = 1</code>. Quando o numerador chega ao denominador, todas as fatias estão pintadas: a barra inteira. <span class="fracv"><span class="fn">6</span><span class="fd">6</span></span>, <span class="fracv"><span class="fn">4</span><span class="fd">4</span></span>, <span class="fracv"><span class="fn">12</span><span class="fd">12</span></span> — tudo isso é apenas <strong>1</strong>.</p>
+  </div>
+</section>
+
+<!-- ===== SECAO 8: APLICACOES ===== -->
+<section id="aplicacoes">
+  <h2><span class="num">8</span> Problemas do mundo real</h2>
+  <p>A parte mais importante: reconhecer <strong>quando</strong> um problema de história está pedindo uma subtração de frações. O sinal quase sempre é a palavra <strong>"falta" / "sobra" / "ainda tem"</strong> — comparar o que se quer com o que já se tem.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0">🍰 Exemplo construído 1 — A receita do bolo</h3>
+    <div class="proof-steps">
+      <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Enunciado:</strong> uma receita de bolo pede <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> de xícara de açúcar. Na tigela já estão <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> de xícara. Quanto de açúcar ainda falta colocar?</div></div>
+      <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Estratégia:</strong> "quanto falta" = total pedido − que já está = <code><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> − <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span></code>. Denominadores diferentes → MMC.</div></div>
+      <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Conta:</strong> MMC(4, 6) = 12 → <code><span class="fracv"><span class="fn">9</span><span class="fd">12</span></span> − <span class="fracv"><span class="fn">2</span><span class="fd">12</span></span> = <span class="fracv"><span class="fn">7</span><span class="fd">12</span></span></code>. (7 é primo — não simplifica.)</div></div>
+      <div class="proof-step"><span class="ps-num">4</span><div class="ps-body"><strong>Resposta:</strong> faltam <strong><span class="fracv"><span class="fn">7</span><span class="fd">12</span></span> de xícara de açúcar</strong>. 🎉</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">🎀 Exemplo construído 2 — A fita do presente</h3>
+    <div class="proof-steps">
+      <div class="proof-step"><span class="ps-num">1</span><div class="ps-body"><strong>Enunciado:</strong> um rolo de fita tem <span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> de metro. Para o laço, são cortados <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> de metro. Quanto de fita sobra no rolo?</div></div>
+      <div class="proof-step"><span class="ps-num">2</span><div class="ps-body"><strong>Estratégia:</strong> "quanto sobra" = que tinha − que saiu = <code><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span></code>. Aqui mora um atalho: 6 já é múltiplo de 3!</div></div>
+      <div class="proof-step"><span class="ps-num">3</span><div class="ps-body"><strong>Conta:</strong> MMC = 6 → <code><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">2</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">3</span><span class="fd">6</span></span></code>. E agora simplifica por 3 → <code><span class="fracv"><span class="fn">1</span><span class="fd">2</span></span></code>.</div></div>
+      <div class="proof-step"><span class="ps-num">4</span><div class="ps-body"><strong>Resposta:</strong> sobra <strong><span class="fracv"><span class="fn">1</span><span class="fd">2</span></span> metro de fita</strong>. ✨</div></div>
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <strong>✅ Receita de leitura para qualquer problema:</strong> (1) circule as duas frações; (2) procure a palavra que revela a operação — falta/sobra → subtração; (3) confira os denominadores: diferentes → MMC antes de tudo; (4) resolva e simplifique se der; (5) releia a pergunta e responda com a unidade (xícara, metro, pizza…).
+  </div>
+</section>
+
+<!-- ===== SECAO 9: QUIZ ===== -->
+<section id="quiz">
+  <h2><span class="num">9</span> Quiz: teste sua compreensão</h2>
+  <p>Seis questões no estilo do que você vai encontrar na prova. Responda sem calcularadora — e leia as explicações das alternativas erradas: é nelas que mora o aprendizado.</p>
+
+  <div class="quiz">
+    <h3>Questão 1</h3>
+    <p>Qual é o MMC de 4 e 6?</p>
+    <div class="options" id="q1">
+      <label class="opt"><input type="radio" name="q1" value="A"> A) 24</label>
+      <label class="opt"><input type="radio" name="q1" value="B"> B) 12</label>
+      <label class="opt"><input type="radio" name="q1" value="C"> C) 6</label>
+      <label class="opt"><input type="radio" name="q1" value="D"> D) 10</label>
+      <label class="opt"><input type="radio" name="q1" value="E"> E) 18</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q1','B','e1')">Verificar</button>
+    <div class="quiz-result" id="q1-res"></div>
+    <details id="e1"><summary>Ver explicação completa</summary>
+      <strong>Resposta: B.</strong> Múltiplos de 4: 4, 8, <strong>12</strong>, 16… Múltiplos de 6: 6, <strong>12</strong>, 18… O primeiro número das duas listas é 12 — esse é o <em>mínimo</em> múltiplo comum. ✅<br><br>
+      <strong>Por que A está errada:</strong> 24 é múltiplo comum de 4 e 6 (24 = 4×6), mas não é o MENOR — o 12 vem antes. O "M" de MMC exige o mínimo.<br>
+      <strong>Por que C está errada:</strong> 6 é múltiplo de 6, mas não de 4 (6 ÷ 4 não é inteiro). Um candidato a MMC precisa ser múltiplo dos DOIS números.<br>
+      <strong>Por que D está errada:</strong> 10 não é múltiplo de 4 (10 ÷ 4 = 2,5) nem de 6. Não é múltiplo comum de jeito nenhum.<br>
+      <strong>Por que E está errada:</strong> 18 é múltiplo de 6 (6×3), mas não de 4 (18 ÷ 4 = 4,5). Falta a metade "comum" do nome.
+    </details>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 2</h3>
+    <p>A fração <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span>, escrita com denominador 12, fica:</p>
+    <div class="options" id="q2">
+      <label class="opt"><input type="radio" name="q2" value="A"> A) <span class="fracv"><span class="fn">3</span><span class="fd">12</span></span></label>
+      <label class="opt"><input type="radio" name="q2" value="B"> B) <span class="fracv"><span class="fn">6</span><span class="fd">12</span></span></label>
+      <label class="opt"><input type="radio" name="q2" value="C"> C) <span class="fracv"><span class="fn">9</span><span class="fd">12</span></span></label>
+      <label class="opt"><input type="radio" name="q2" value="D"> D) <span class="fracv"><span class="fn">12</span><span class="fd">12</span></span></label>
+      <label class="opt"><input type="radio" name="q2" value="E"> E) <span class="fracv"><span class="fn">4</span><span class="fd">12</span></span></label>
+    </div>
+    <button class="quiz-btn" onclick="check('q2','C','e2')">Verificar</button>
+    <div class="quiz-result" id="q2-res"></div>
+    <details id="e2"><summary>Ver explicação completa</summary>
+      <strong>Resposta: C.</strong> O fator é 12 ÷ 4 = 3. Multiplique numerador E denominador por 3: <code><span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> = <span class="fracv"><span class="fn">9</span><span class="fd">12</span></span></code>. Só assim o valor se mantém. ✅<br><br>
+      <strong>Por que A está errada:</strong> <span class="fracv"><span class="fn">3</span><span class="fd">12</span></span> equivale a <span class="fracv"><span class="fn">1</span><span class="fd">4</span></span> — trocou o denominador mas esqueceu de multiplicar o numerador, mudando o valor da fração (<span class="fracv"><span class="fn">3</span><span class="fd">12</span></span> é bem menor que <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span>).<br>
+      <strong>Por que B está errada:</strong> <span class="fracv"><span class="fn">6</span><span class="fd">12</span></span> vale <span class="fracv"><span class="fn">1</span><span class="fd">2</span></span>, não <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span>. Daria certo se a fração original fosse <span class="fracv"><span class="fn">1</span><span class="fd">2</span></span> com fator 6.<br>
+      <strong>Por que D está errada:</strong> <span class="fracv"><span class="fn">12</span><span class="fd">12</span></span> = 1, a barra inteira — muito mais que <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> da barra.<br>
+      <strong>Por que E está errada:</strong> <span class="fracv"><span class="fn">4</span><span class="fd">12</span></span> = <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span>. Parece "apimentado" (aparece o 4 do denominador), mas é só coincidência de números: o valor não bate.
+    </details>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 3</h3>
+    <p>Quanto é <span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span>?</p>
+    <div class="options" id="q3">
+      <label class="opt"><input type="radio" name="q3" value="A"> A) <span class="fracv"><span class="fn">2</span><span class="fd">2</span></span></label>
+      <label class="opt"><input type="radio" name="q3" value="B"> B) <span class="fracv"><span class="fn">1</span><span class="fd">12</span></span></label>
+      <label class="opt"><input type="radio" name="q3" value="C"> C) <span class="fracv"><span class="fn">2</span><span class="fd">10</span></span></label>
+      <label class="opt"><input type="radio" name="q3" value="D"> D) <span class="fracv"><span class="fn">8</span><span class="fd">10</span></span></label>
+      <label class="opt"><input type="radio" name="q3" value="E"> E) <span class="fracv"><span class="fn">3</span><span class="fd">12</span></span></label>
+    </div>
+    <button class="quiz-btn" onclick="check('q3','B','e3')">Verificar</button>
+    <div class="quiz-result" id="q3-res"></div>
+    <details id="e3"><summary>Ver explicação completa</summary>
+      <strong>Resposta: B.</strong> MMC(6, 4) = 12 → <span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">10</span><span class="fd">12</span></span> (fator 2) e <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> = <span class="fracv"><span class="fn">9</span><span class="fd">12</span></span> (fator 3) → <code><span class="fracv"><span class="fn">10</span><span class="fd">12</span></span> − <span class="fracv"><span class="fn">9</span><span class="fd">12</span></span> = <span class="fracv"><span class="fn">1</span><span class="fd">12</span></span></code>. Como 1 só tem o divisor 1, não simplifica. ✅<br><br>
+      <strong>Por que A está errada:</strong> <span class="fracv"><span class="fn">2</span><span class="fd">2</span></span> (= 1) vem de subtrair tudo direto: (5−3)/(6−4) = <span class="fracv"><span class="fn">2</span><span class="fd">2</span></span>. Denominadores diferentes nunca se subtraem entre si — as fatias têm tamanhos diferentes.<br>
+      <strong>Por que C está errada:</strong> <span class="fracv"><span class="fn">2</span><span class="fd">10</span></span> também vem do "tudo direto" com outro arranjo de erro — subtraiu numeradores e denominadores sem converter nada. Nem 2 nem 10 têm a ver com o MMC 12.<br>
+      <strong>Por que D está errada:</strong> <span class="fracv"><span class="fn">8</span><span class="fd">10</span></span> parece "5+3 em cima, algo embaixo" — veio de somar em vez de subtrair, com denominador inventado. E o problema pede subtração.<br>
+      <strong>Por que E está errada:</strong> <span class="fracv"><span class="fn">3</span><span class="fd">12</span></span> vem de errar o fator da conversão (por exemplo, transformar <span class="fracv"><span class="fn">3</span><span class="fd">4</span></span> em <span class="fracv"><span class="fn">6</span><span class="fd">12</span></span> em vez de <span class="fracv"><span class="fn">9</span><span class="fd">12</span></span>). Os fatores certos são 12÷6 = 2 e 12÷4 = 3.
+    </details>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 4</h3>
+    <p>Quanto é <span class="fracv"><span class="fn">7</span><span class="fd">10</span></span> − <span class="fracv"><span class="fn">2</span><span class="fd">5</span></span>?</p>
+    <div class="options" id="q4">
+      <label class="opt"><input type="radio" name="q4" value="A"> A) <span class="fracv"><span class="fn">5</span><span class="fd">5</span></span></label>
+      <label class="opt"><input type="radio" name="q4" value="B"> B) <span class="fracv"><span class="fn">5</span><span class="fd">10</span></span></label>
+      <label class="opt"><input type="radio" name="q4" value="C"> C) <span class="fracv"><span class="fn">3</span><span class="fd">10</span></span></label>
+      <label class="opt"><input type="radio" name="q4" value="D"> D) <span class="fracv"><span class="fn">9</span><span class="fd">10</span></span></label>
+      <label class="opt"><input type="radio" name="q4" value="E"> E) <span class="fracv"><span class="fn">5</span><span class="fd">15</span></span></label>
+    </div>
+    <button class="quiz-btn" onclick="check('q4','C','e4')">Verificar</button>
+    <div class="quiz-result" id="q4-res"></div>
+    <details id="e4"><summary>Ver explicação completa</summary>
+      <strong>Resposta: C.</strong> 10 já é múltiplo de 5 — nem precisa procurar MMC, o denominador comum é o próprio 10. Convertendo: <span class="fracv"><span class="fn">2</span><span class="fd">5</span></span> = <span class="fracv"><span class="fn">4</span><span class="fd">10</span></span> (fator 10÷5 = 2). Então <code><span class="fracv"><span class="fn">7</span><span class="fd">10</span></span> − <span class="fracv"><span class="fn">4</span><span class="fd">10</span></span> = <span class="fracv"><span class="fn">3</span><span class="fd">10</span></span></code>. ✅<br><br>
+      <strong>Por que A está errada:</strong> <span class="fracv"><span class="fn">5</span><span class="fd">5</span></span> (= 1) vem de subtrair numeradores E denominadores: (7−2)/(10−5) = <span class="fracv"><span class="fn">5</span><span class="fd">5</span></span>. O denominador nunca entra na subtração.<br>
+      <strong>Por que B está errada:</strong> <span class="fracv"><span class="fn">5</span><span class="fd">10</span></span> é o erro clássico de conversão pela metade: subtraiu 7−2 = 5 como se o <span class="fracv"><span class="fn">2</span><span class="fd">5</span></span> já estivesse em décimos. Mas <span class="fracv"><span class="fn">2</span><span class="fd">5</span></span> vale <span class="fracv"><span class="fn">4</span><span class="fd">10</span></span>, não <span class="fracv"><span class="fn">2</span><span class="fd">10</span></span>.<br>
+      <strong>Por que D está errada:</strong> <span class="fracv"><span class="fn">9</span><span class="fd">10</span></span> vem de erro de fator e de conta — convertendo errado o <span class="fracv"><span class="fn">2</span><span class="fd">5</span></span> e ainda misturando operação. Com a conversão certa (<span class="fracv"><span class="fn">4</span><span class="fd">10</span></span>), a subtração dá <span class="fracv"><span class="fn">3</span><span class="fd">10</span></span>.<br>
+      <strong>Por que E está errada:</strong> <span class="fracv"><span class="fn">5</span><span class="fd">15</span></span> traz o "5" do denominador menor para o resultado — pura distração com os números da conta. 15 nem é múltiplo de 10; não poderia ser denominador comum.
+    </details>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 5</h3>
+    <p>A fração <span class="fracv"><span class="fn">3</span><span class="fd">6</span></span>, na forma mais simples, é:</p>
+    <div class="options" id="q5">
+      <label class="opt"><input type="radio" name="q5" value="A"> A) <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span></label>
+      <label class="opt"><input type="radio" name="q5" value="B"> B) <span class="fracv"><span class="fn">3</span><span class="fd">2</span></span></label>
+      <label class="opt"><input type="radio" name="q5" value="C"> C) <span class="fracv"><span class="fn">1</span><span class="fd">2</span></span></label>
+      <label class="opt"><input type="radio" name="q5" value="D"> D) <span class="fracv"><span class="fn">2</span><span class="fd">3</span></span></label>
+      <label class="opt"><input type="radio" name="q5" value="E"> E) <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span></label>
+    </div>
+    <button class="quiz-btn" onclick="check('q5','C','e5')">Verificar</button>
+    <div class="quiz-result" id="q5-res"></div>
+    <details id="e5"><summary>Ver explicação completa</summary>
+      <strong>Resposta: C.</strong> O maior divisor comum de 3 e 6 é 3. Dividindo os dois: <code><span class="fracv"><span class="fn">3÷3</span><span class="fd">6÷3</span></span> = <span class="fracv"><span class="fn">1</span><span class="fd">2</span></span></code>. Pense na barra: 3 fatias de 6 pintadas é metade da barra — <span class="fracv"><span class="fn">1</span><span class="fd">2</span></span>. ✅<br><br>
+      <strong>Por que A está errada:</strong> <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> viria de dividir SÓ o numerador por 3 (3→1) e esquecer o denominador. Divisor comum tem que dividir os DOIS.<br>
+      <strong>Por que B está errada:</strong> <span class="fracv"><span class="fn">3</span><span class="fd">2</span></span> é a fração invertida — vale 1 inteiro e meio, muito mais que metade. Simplificar não inverte nada.<br>
+      <strong>Por que D está errada:</strong> <span class="fracv"><span class="fn">2</span><span class="fd">3</span></span> é uma aproximação "bonitinha" que não sai de nenhuma conta honesta com <span class="fracv"><span class="fn">3</span><span class="fd">6</span></span>. Simplificar é dividir pelo mesmo número, e nenhum divisor leva de <span class="fracv"><span class="fn">3</span><span class="fd">6</span></span> a <span class="fracv"><span class="fn">2</span><span class="fd">3</span></span>.<br>
+      <strong>Por que E está errada:</strong> <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> viria de dividir SÓ o numerador... e ainda errar o resultado. De todo jeito, mexer em um lado só muda o valor da fração.
+    </details>
+  </div>
+
+  <div class="quiz">
+    <h3>Questão 6</h3>
+    <p>Uma fita tem <span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> de metro e são cortados <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> de metro. Quanto sobra, na forma mais simples?</p>
+    <div class="options" id="q6">
+      <label class="opt"><input type="radio" name="q6" value="A"> A) <span class="fracv"><span class="fn">4</span><span class="fd">3</span></span> m</label>
+      <label class="opt"><input type="radio" name="q6" value="B"> B) <span class="fracv"><span class="fn">2</span><span class="fd">3</span></span> m</label>
+      <label class="opt"><input type="radio" name="q6" value="C"> C) <span class="fracv"><span class="fn">1</span><span class="fd">2</span></span> m</label>
+      <label class="opt"><input type="radio" name="q6" value="D"> D) <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> m</label>
+      <label class="opt"><input type="radio" name="q6" value="E"> E) <span class="fracv"><span class="fn">4</span><span class="fd">6</span></span> m</label>
+    </div>
+    <button class="quiz-btn" onclick="check('q6','C','e6')">Verificar</button>
+    <div class="quiz-result" id="q6-res"></div>
+    <details id="e6"><summary>Ver explicação completa</summary>
+      <strong>Resposta: C.</strong> 6 já é múltiplo de 3, então o denominador comum é 6: <code><span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> = <span class="fracv"><span class="fn">2</span><span class="fd">6</span></span></code> → <code><span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">2</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">3</span><span class="fd">6</span></span></code> → simplificando por 3 → <strong><span class="fracv"><span class="fn">1</span><span class="fd">2</span></span> metro</strong>. A questão pede a forma mais simples — e <span class="fracv"><span class="fn">3</span><span class="fd">6</span></span> ainda não é. ✅<br><br>
+      <strong>Por que A está errada:</strong> <span class="fracv"><span class="fn">4</span><span class="fd">3</span></span> m é mais que a fita inteira — impossível SOBRAR mais do que existia depois de CORTAR. Veio de somar e ainda misturar denominadores.<br>
+      <strong>Por que B está errada:</strong> <span class="fracv"><span class="fn">2</span><span class="fd">3</span></span> m vem de converter errado: tratou <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> como se fosse <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> e fez <span class="fracv"><span class="fn">5</span><span class="fd">6</span></span> − <span class="fracv"><span class="fn">1</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">4</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">2</span><span class="fd">3</span></span>. Mas <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> são DOIS sextos (<span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> = <span class="fracv"><span class="fn">2</span><span class="fd">6</span></span>), não um.<br>
+      <strong>Por que D está errada:</strong> <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> m vem da conta certa até a metade e errada no fim: 5 − 2 = 3 (não 2); ou de parar em <span class="fracv"><span class="fn">2</span><span class="fd">6</span></span> achando que terminou. O numerador certo é 3.<br>
+      <strong>Por que E está errada:</strong> <span class="fracv"><span class="fn">4</span><span class="fd">6</span></span> subtraiu os numeradores SEM converter o <span class="fracv"><span class="fn">1</span><span class="fd">3</span></span> (5 − 1 = 4). É a resposta "quase lá": converteu nada, e ainda teria que simplificar (<span class="fracv"><span class="fn">4</span><span class="fd">6</span></span> = <span class="fracv"><span class="fn">2</span><span class="fd">3</span></span>) para atender ao "forma mais simples" do enunciado.
+    </details>
+  </div>
+</section>
+
+<!-- ===== SECAO 10: RESUMO ===== -->
+<section id="resumo">
+  <h2><span class="num">10</span> Resumo e próximos passos</h2>
+  <div class="summary-box">
+    <h3>🧭 O método completo em 4 linhas</h3>
+    <div class="summary-row">Denominadores diferentes? Comece achando o <strong>MMC</strong> dos denominadores — listando os múltiplos até o primeiro comum.</div>
+    <div class="summary-row">Monte as <strong>frações equivalentes</strong>: multiplique numerador e denominador pelo mesmo fator (fator = MMC ÷ denominador).</div>
+    <div class="summary-row">Com denominadores iguais, <strong>subtraia só os numeradores</strong> — o denominador comum permanece intocado.</div>
+    <div class="summary-row"><strong>Simplifique</strong> dividindo pelos divisores comuns — quando houver. Se não houver, a fração já está na forma mais simples.</div>
+  </div>
+  <div class="callout ok">
+    <strong>🚀 Próximo módulo (em breve):</strong> somar frações usa exatamente a mesma estratégia — MMC, equivalentes, e aí SOMAR os numeradores. Quem dominou a subtração já sabe 90% da soma. E mais adiante, multiplicação e divisão de frações são ainda mais fáceis: nem precisam de MMC. Nos vemos lá!
+  </div>
+</section>
+</main>
+
+<script>
+/* ===== Quiz ===== */
+function check(qid, correctKey, expId){
+  const optsBox = document.getElementById(qid);
+  const result = document.getElementById(qid + '-res');
+  const explanation = document.getElementById(expId);
+  if(!optsBox || !result || !explanation) return;
+  if(optsBox.dataset.answered) return;
+  const chosen = optsBox.querySelector('input[type="radio"]:checked');
+  if(!chosen){
+    result.innerHTML = '<em>Selecione uma alternativa antes de verificar.</em>';
+    result.className = 'quiz-result';
+    return;
+  }
+  optsBox.dataset.answered = '1';
+  const ok = chosen.value === correctKey;
+  optsBox.querySelectorAll('input[type="radio"]').forEach(r => { r.disabled = true; });
+  optsBox.querySelectorAll('label.opt').forEach(l => {
+    const v = l.querySelector('input').value;
+    if(v === correctKey) l.classList.add('correct');
+    if(v === chosen.value && !ok) l.classList.add('wrong');
+  });
+  explanation.hidden = false;
+  result.innerHTML = ok
+    ? '<strong>✓ Correto!</strong> Veja a explicação completa abaixo.'
+    : '<strong>✗ Incorreto.</strong> Você marcou <strong>' + chosen.value + '</strong>; a resposta correta é <strong>' + correctKey + '</strong>. Veja a explicação completa abaixo.';
+  result.className = ok ? 'quiz-result ok' : 'quiz-result fail';
+}
+
+/* ===== Nav suave ===== */
+document.querySelectorAll('.section-nav a').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const el=document.getElementById(a.getAttribute('href').slice(1));
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+/* ===== Utilitários ===== */
+const $id = i => document.getElementById(i);
+const gcd = (a,b) => b ? gcd(b, a % b) : a;
+const lcm = (a,b) => (a / gcd(a,b)) * b;
+const clamp = (v,lo,hi) => Math.min(hi, Math.max(lo, v));
+function fracStack(n, d, cls){
+  return '<span class="frac-stack ' + (cls||'') + '"><span class="fn">' + n + '</span><span class="fd">' + d + '</span></span>';
+}
+
+/* ================================================================
+   SIMULADOR 1 — Descobrindo o MMC
+================================================================ */
+const S1 = { a:4, b:6, iA:0, iB:0, valsA:[], valsB:[], done:false, running:false, timers:[] };
+
+function s1ClearTimers(){ S1.timers.forEach(clearTimeout); S1.timers = []; }
+function s1Log(msg){
+  const el = $id('mmcLog'); if (!el || el.hidden) return;
+  const line = document.createElement('div');
+  line.innerHTML = msg;
+  el.appendChild(line); el.scrollTop = el.scrollHeight;
+}
+function s1Status(html, cls){
+  const s = $id('mmcStatus');
+  s.innerHTML = html;
+  s.className = 'sim-status' + (cls ? ' ' + cls : '');
+}
+function s1Buttons(){
+  const block = S1.done || S1.running;
+  $id('mmcStep').disabled = block;
+  $id('mmcRun').disabled = block;
+  $id('mmcBack').disabled = S1.running || (S1.iA + S1.iB) === 0;
+}
+function s1AddCell(row, v){
+  const cell = document.createElement('span');
+  cell.className = 'frac-cell';
+  cell.dataset.v = v;
+  cell.textContent = v;
+  $id(row).appendChild(cell);
+}
+function s1CheckMatch(justAdded, where){
+  const other = where === 'A' ? S1.valsB : S1.valsA;
+  if(!other.includes(justAdded)) return false;
+  S1.done = true;
+  document.querySelectorAll('#mmcRows .frac-cell').forEach(c => {
+    if(Number(c.dataset.v) === justAdded) c.classList.add('match');
+  });
+  s1Status('🎉 <strong>' + justAdded + '</strong> é múltiplo de ' + S1.a + ' e de ' + S1.b + ' → MMC(' + S1.a + ', ' + S1.b + ') = ' + justAdded + '!', 'ok');
+  s1Log('[fim] MMC(' + S1.a + ', ' + S1.b + ') = ' + justAdded + ' — primeiro múltiplo comum encontrado 🎉');
+  return true;
+}
+function s1Step(auto){
+  if(S1.done) return;
+  if(S1.running && !auto) return;
+  const lastA = S1.iA ? S1.a * S1.iA : 0;
+  const lastB = S1.iB ? S1.b * S1.iB : 0;
+  if(lastA <= lastB){
+    S1.iA++; const v = S1.a * S1.iA; S1.valsA.push(v);
+    s1AddCell('mmcRowA', v);
+    s1Log('[passo] múltiplos de ' + S1.a + ': +' + v);
+    s1Status('Somei <strong>' + S1.a + '×' + S1.iA + ' = ' + v + '</strong> na fileira de ' + S1.a + '.');
+    s1CheckMatch(v, 'A');
+  } else {
+    S1.iB++; const v = S1.b * S1.iB; S1.valsB.push(v);
+    s1AddCell('mmcRowB', v);
+    s1Log('[passo] múltiplos de ' + S1.b + ': +' + v);
+    s1Status('Somei <strong>' + S1.b + '×' + S1.iB + ' = ' + v + '</strong> na fileira de ' + S1.b + '.');
+    s1CheckMatch(v, 'B');
+  }
+  s1Buttons();
+}
+function s1Run(){
+  if(S1.running || S1.done) return;
+  S1.running = true; s1Buttons();
+  (function chain(){
+    if(S1.done){ S1.running = false; s1Buttons(); return; }
+    s1Step(true);
+    S1.timers.push(setTimeout(chain, 350));
+  })();
+}
+/* Anterior: re-executa do zero até o passo anterior (steps síncronos) */
+function s1Replay(upto){
+  s1Init();
+  for(let k = 0; k < upto; k++) s1Step(true);
+  s1Buttons();
+}
+function s1Back(){
+  if (S1.running) return;
+  const t = S1.iA + S1.iB;
+  if (t <= 0) return;
+  s1Replay(t - 1);
+}
+function s1Init(){
+  s1ClearTimers();
+  S1.iA = 0; S1.iB = 0; S1.valsA = []; S1.valsB = [];
+  S1.done = false; S1.running = false;
+  $id('mmcLog').innerHTML = '';
+  {
+    $id('mmcRows').hidden = false;
+    $id('mmcRows').innerHTML =
+      '<div class="frac-row"><span class="frac-row-label">Múltiplos de ' + S1.a + ':</span><span id="mmcRowA" class="frac-row"></span></div>' +
+      '<div class="frac-row"><span class="frac-row-label">Múltiplos de ' + S1.b + ':</span><span id="mmcRowB" class="frac-row"></span></div>';
+    s1Status('Pronto! Clique em <strong>⏭ Próximo</strong> para listar os múltiplos de ' + S1.a + ' e de ' + S1.b + ' — ou em <strong>▶ Executar tudo</strong>.');
+    s1Log('[início] procurando MMC(' + S1.a + ', ' + S1.b + ') pelo método das listas');
+  }
+  s1Buttons();
+}
+
+/* — wiring SIM 1 — */
+document.querySelectorAll('.mmc-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mmc-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    S1.a = Number(btn.dataset.a); S1.b = Number(btn.dataset.b);
+    $id('mmcA').value = S1.a; $id('mmcB').value = S1.b;
+    s1Init();
+  });
+});
+['mmcA','mmcB'].forEach(id => {
+  $id(id).addEventListener('change', () => {
+    S1.a = clamp(Number($id('mmcA').value) || 2, 2, 12);
+    S1.b = clamp(Number($id('mmcB').value) || 2, 2, 12);
+    $id('mmcA').value = S1.a; $id('mmcB').value = S1.b;
+    document.querySelectorAll('.mmc-preset').forEach(b => b.classList.remove('active'));
+    s1Init();
+  });
+});
+$id('mmcStep').addEventListener('click', () => s1Step(false));
+$id('mmcBack').addEventListener('click', s1Back);
+$id('mmcRun').addEventListener('click', s1Run);
+$id('mmcReset').addEventListener('click', s1Init);
+
+/* ================================================================
+   SIMULADOR 2 — Frações equivalentes
+================================================================ */
+const S2 = { n:3, d:4, f:3, lines:0, phase:'linhas', running:false, timers:[], k:0, fast:false };
+const S2W = 560, S2X = 2, S2Y = 9, S2H = 50, S2Wl = 556; /* geometria da barra */
+
+function s2ClearTimers(){ S2.timers.forEach(clearTimeout); S2.timers = []; }
+function s2Log(msg){
+  const el = $id('eqvLog'); if (!el || el.hidden) return;
+  const line = document.createElement('div');
+  line.innerHTML = msg;
+  el.appendChild(line); el.scrollTop = el.scrollHeight;
+}
+function s2Status(html, cls){
+  const s = $id('eqvStatus');
+  s.innerHTML = html;
+  s.className = 'sim-status' + (cls ? ' ' + cls : '');
+}
+function s2Total(){ return S2.d * S2.f; }
+function s2Counter(html){
+  const c = $id('eqvCounter');
+  c.style.opacity = 0;
+  if (S2.fast){ c.innerHTML = html; c.style.opacity = 1; return; }
+  S2.timers.push(setTimeout(() => { c.innerHTML = html; c.style.opacity = 1; }, 170));
+}
+function s2Render(){
+  /* fill contínuo: a área pintada N/D não muda — as linhas é que se multiplicam */
+  const fillW = S2X + (S2.n / S2.d) * S2Wl;
+  let lines = '';
+  const total = s2Total();
+  for(let k = 1; k < total; k++){
+    if(k > S2.lines) break;
+    const x = S2X + (k / total) * S2Wl;
+    const orig = (k % S2.f === 0);
+    lines += '<line x1="' + x.toFixed(1) + '" y1="' + S2Y + '" x2="' + x.toFixed(1) + '" y2="' + (S2Y + S2H) + '" stroke="var(--primary)" stroke-width="' + (orig ? 3 : 1.6) + '" opacity="' + (orig ? 1 : .55) + '" stroke-dasharray="' + (orig ? 'none' : '5 4') + '"/>';
+  }
+  $id('eqvSvg').innerHTML =
+    '<defs><linearGradient id="eqvGrad" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#2f7de1"/><stop offset="1" stop-color="#1a6bcc"/></linearGradient></defs>' +
+    '<rect x="1" y="8" width="558" height="52" rx="6" fill="#ffffff" stroke="var(--border)" stroke-width="2"/>' +
+    '<rect x="' + S2X + '" y="' + S2Y + '" width="' + (fillW - S2X).toFixed(1) + '" height="' + S2H + '" fill="url(#eqvGrad)" opacity=".92"/>' +
+    lines;
+}
+function s2Buttons(){
+  const block = S2.phase === 'fim' || S2.running;
+  $id('eqvStep').disabled = block;
+  $id('eqvRun').disabled = block;
+  $id('eqvBack').disabled = S2.running || S2.k === 0;
+}
+function s2Step(auto){
+  if(S2.running && !auto) return;
+  if(S2.phase === 'fim') return;
+  S2.k++;
+  const total = s2Total();
+  if(S2.phase === 'linhas'){
+    if(S2.lines < total - 1){
+      S2.lines++;
+      s2Render();
+      s2Status('Nova linha de subdivisão ✂️ — a barra ganhou mais uma divisão interna. A área pintada continua <strong>exatamente a mesma</strong>!');
+      s2Log('[passo] linha ' + S2.lines + ' de ' + (total - 1) + ' adicionada — área pintada intacta');
+      if(S2.lines >= total - 1){
+        S2.phase = 'multiplica';
+        s2Status('Todas as subdivisões prontas: a barra agora tem <strong>' + total + ' fatias</strong> (' + S2.d + ' × ' + S2.f + '). A área pintada mudou? Não! Agora vamos renomear a fração. ➡️');
+        s2Log('[passo] subdivisão completa: ' + S2.d + ' fatias × ' + S2.f + ' = ' + total + ' fatias');
+      }
+    }
+  } else if(S2.phase === 'multiplica'){
+    S2.phase = 'resultado';
+    s2Counter(fr(S2.n + '<span class="fx">×' + S2.f + '</span>', S2.d + '<span class="fx">×' + S2.f + '</span>'));
+    s2Status('Multipliquei numerador E denominador por <strong>' + S2.f + '</strong>. Confira a conta: ' + S2.n + '×' + S2.f + ' = ' + (S2.n * S2.f) + ' e ' + S2.d + '×' + S2.f + ' = ' + (S2.d * S2.f) + '.');
+    s2Log('[passo] multiplicando os dois termos por ' + S2.f);
+  } else if(S2.phase === 'resultado'){
+    S2.phase = 'fim';
+    s2Counter('<strong>' + fr(S2.n * S2.f, S2.d * S2.f) + '</strong>');
+    s2Status('✨ <strong>' + fr(S2.n, S2.d) + ' = ' + fr(S2.n * S2.f, S2.d * S2.f) + '</strong> — frações equivalentes! A área pintada continua a mesma, só a fatia ficou menor e mais numerosa.', 'ok');
+    s2Log('[fim] ' + fr(S2.n, S2.d) + ' = ' + fr(S2.n * S2.f, S2.d * S2.f) + ' 🎉');
+  }
+  s2Buttons();
+}
+function s2Run(){
+  if(S2.running || S2.phase === 'fim') return;
+  S2.running = true; s2Buttons();
+  const total = s2Total();
+  const passos = (total - 1 - S2.lines) + 2; /* linhas restantes + multiplica + resultado */
+  let i = 0;
+  (function chain(){
+    if(S2.phase === 'fim' || i >= passos){ S2.running = false; s2Buttons(); return; }
+    s2Step(true); i++;
+    S2.timers.push(setTimeout(chain, 380));
+  })();
+}
+/* Anterior: re-executa do zero até o passo anterior (steps síncronos) */
+function s2Replay(upto){
+  S2.fast = true;
+  s2Init();
+  for(let k = 0; k < upto; k++) s2Step(true);
+  S2.fast = false;
+  s2Buttons();
+}
+function s2Back(){
+  if (S2.running || S2.k <= 0) return;
+  s2Replay(S2.k - 1);
+}
+function s2Init(){
+  s2ClearTimers();
+  S2.lines = 0; S2.phase = 'linhas'; S2.running = false; S2.k = 0;
+  $id('eqvLog').innerHTML = '';
+  $id('eqvCounter').innerHTML = fr(S2.n, S2.d);
+  $id('eqvCounter').style.opacity = 1;
+  s2Render();
+  s2Status('Barra pronta: <strong>' + S2.d + ' fatias, ' + S2.n + ' pintadas</strong>. Clique em <strong>⏭ Próximo</strong> para subdividir cada fatia em ' + S2.f + '.');
+  s2Log('[início] ' + fr(S2.n, S2.d) + ' com fator ' + S2.f + ' — alvo: ' + fr(S2.n * S2.f, S2.d * S2.f));
+  s2Buttons();
+}
+document.querySelectorAll('.eqv-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.eqv-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    S2.n = Number(btn.dataset.n); S2.d = Number(btn.dataset.d); S2.f = Number(btn.dataset.f);
+    document.querySelectorAll('.eqv-f').forEach(b => b.classList.toggle('active', Number(b.dataset.f) === S2.f));
+    s2Init();
+  });
+});
+document.querySelectorAll('.eqv-f').forEach(btn => {
+  btn.addEventListener('click', () => {
+    S2.f = Number(btn.dataset.f);
+    document.querySelectorAll('.eqv-f').forEach(b => b.classList.toggle('active', b === btn));
+    s2Init();
+  });
+});
+$id('eqvStep').addEventListener('click', () => s2Step(false));
+$id('eqvBack').addEventListener('click', s2Back);
+$id('eqvRun').addEventListener('click', s2Run);
+$id('eqvReset').addEventListener('click', s2Init);
+
+/* ================================================================
+   SIMULADOR 3 — Subtração passo a passo (carro-chefe)
+================================================================ */
+const S3 = { n1:5, d1:6, n2:3, d2:4, phase:0, running:false, timers:[], fast:false,
+             L:12, f1:2, f2:3, r:1, simplified:false };
+const S3X = 2, S3Wl = 556, S3YA = 14, S3YB = 98, S3YC = 182, S3H = 50;
+
+function s3ClearTimers(){ S3.timers.forEach(clearTimeout); S3.timers = []; }
+function s3Log(msg){
+  const el = $id('subLog'); if (!el || el.hidden) return;
+  const line = document.createElement('div');
+  line.innerHTML = msg;
+  el.appendChild(line); el.scrollTop = el.scrollHeight;
+}
+function s3Status(html, cls){
+  const s = $id('subStatus');
+  s.innerHTML = html;
+  s.className = 'sim-status' + (cls ? ' ' + cls : '');
+}
+function s3SetC(id, html){
+  const c = $id(id);
+  c.style.opacity = 0;
+  if (S3.fast){ c.innerHTML = html; c.style.opacity = 1; return; }
+  S3.timers.push(setTimeout(() => { c.innerHTML = html; c.style.opacity = 1; }, 180));
+}
+function s3Buttons(){
+  $id('subStep').disabled = S3.running || S3.phase >= 6;
+  $id('subRun').disabled = S3.running || S3.phase >= 6;
+  $id('subBack').disabled = S3.running || S3.phase === 0;
+}
+function s3Line(x, y, orig){
+  return '<line x1="' + x.toFixed(1) + '" y1="' + y + '" x2="' + x.toFixed(1) + '" y2="' + (y + S3H) + '" stroke="var(--primary)" stroke-width="' + (orig ? 3 : 1.4) + '" opacity="1"/>';
+}
+function s3RenderBase(){
+  const wA = (S3.n1 / S3.d1) * S3Wl, wB = (S3.n2 / S3.d2) * S3Wl;
+  let lA = '', lB = '';
+  for(let k = 1; k < S3.d1; k++) lA += s3Line(S3X + (k / S3.d1) * S3Wl, S3YA, true);
+  for(let k = 1; k < S3.d2; k++) lB += s3Line(S3X + (k / S3.d2) * S3Wl, S3YB, true);
+  $id('subSvg').innerHTML =
+    '<defs>' +
+    '<linearGradient id="subGA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f7de1"/><stop offset="1" stop-color="#1a6bcc"/></linearGradient>' +
+    '<linearGradient id="subGB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0820f"/><stop offset="1" stop-color="#e8700a"/></linearGradient>' +
+    '<linearGradient id="subGC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34b368"/><stop offset="1" stop-color="#1a8c4e"/></linearGradient>' +
+    '<pattern id="subHatchPat" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
+    '<line x1="0" y1="0" x2="0" y2="9" stroke="#c0392b" stroke-width="2.6"/></pattern>' +
+    '</defs>' +
+    '<text x="280" y="88" text-anchor="middle" font-family="DM Mono,monospace" font-size="20" fill="var(--n400)">−</text>' +
+    '<rect x="1" y="' + (S3YA - 1) + '" width="558" height="52" rx="6" fill="#ffffff" stroke="var(--border)" stroke-width="2"/>' +
+    '<rect id="subFillA" class="frac-fill" x="' + S3X + '" y="' + S3YA + '" width="' + wA.toFixed(1) + '" height="' + S3H + '" fill="url(#subGA)" opacity=".92"/>' +
+    '<g id="subLinesA">' + lA + '</g>' +
+    '<rect id="subHatch" class="frac-hatch" x="0" y="' + S3YA + '" width="0" height="' + S3H + '" fill="url(#subHatchPat)" opacity="0"/>' +
+    '<rect x="1" y="' + (S3YB - 1) + '" width="558" height="52" rx="6" fill="#ffffff" stroke="var(--border)" stroke-width="2"/>' +
+    '<rect id="subFillB" x="' + S3X + '" y="' + S3YB + '" width="' + wB.toFixed(1) + '" height="' + S3H + '" fill="url(#subGB)" opacity=".92"/>' +
+    '<g id="subLinesB">' + lB + '</g>' +
+    '<text x="280" y="172" text-anchor="middle" font-family="DM Mono,monospace" font-size="20" fill="var(--n400)">=</text>' +
+    '<rect id="subBoxC" x="1" y="' + (S3YC - 1) + '" width="558" height="52" rx="6" fill="#ffffff" stroke="var(--n300)" stroke-width="2" stroke-dasharray="7 5"/>' +
+    '<g id="subLinesC" style="opacity:0; transition:opacity .5s"></g>' +
+    '<rect id="subFillC" class="frac-fill" x="' + S3X + '" y="' + S3YC + '" width="0" height="' + S3H + '" fill="url(#subGC)" opacity="0"/>';
+}
+/* adiciona as linhas novas de uma barra (k não múltiplo do fator) uma a uma */
+function s3Subdivide(gid, L, fator, done){
+  const g = $id(gid);
+  const novos = [];
+  for(let k = 1; k < L; k++){ if(k % fator !== 0) novos.push(k); }
+  if(!novos.length){
+    s3Status('A barra já está dividida em ' + L + ' fatias — nada a subdividir (o próprio denominador já é o MMC). 🙂');
+    done(0); return;
+  }
+  if(S3.fast){
+    novos.forEach(k => {
+      g.insertAdjacentHTML('beforeend', s3Line(S3X + (k / L) * S3Wl, gid === 'subLinesA' ? S3YA : S3YB, false));
+    });
+    done(0); return;
+  }
+  novos.forEach((k, i) => {
+    S3.timers.push(setTimeout(() => {
+      g.insertAdjacentHTML('beforeend', s3Line(S3X + (k / L) * S3Wl, gid === 'subLinesA' ? S3YA : S3YB, false));
+    }, 90 * (i + 1)));
+  });
+  S3.timers.push(setTimeout(() => done(novos.length * 90 + 350), 90 * novos.length + 250));
+}
+/* executa a fase `p` (1..6); `done(dur)` devolve a duração para o encadeamento */
+function s3Phase(p, done){
+  if(p === 1){
+    S3.L = lcm(S3.d1, S3.d2); S3.f1 = S3.L / S3.d1; S3.f2 = S3.L / S3.d2;
+    S3.r = S3.n1 * S3.f1 - S3.n2 * S3.f2;
+    const mult = (S3.d1 % S3.d2 === 0) || (S3.d2 % S3.d1 === 0);
+    s3Status('🧮 <strong>Passo 1 — MMC:</strong> MMC(' + S3.d1 + ', ' + S3.d2 + ') = <strong>' + S3.L + '</strong>' +
+      (mult ? ' (o próprio ' + Math.max(S3.d1, S3.d2) + ' já serve — um é múltiplo do outro!)' : ''));
+    s3Log('[passo 1] MMC(' + S3.d1 + ', ' + S3.d2 + ') = ' + S3.L);
+    done(300);
+  } else if(p === 2){
+    s3Status('✂️ <strong>Passo 2 — subdividir a barra de cima:</strong> cada fatia vira ' + S3.f1 + '. ' + fr(S3.n1, S3.d1) + ' = ' + fr(S3.n1 * S3.f1, S3.L) + '.');
+    s3Subdivide('subLinesA', S3.L, S3.f1, dur => {
+      s3SetC('subC1', fr(S3.n1, S3.d1) + ' → <strong>' + fr(S3.n1 * S3.f1, S3.L) + '</strong>');
+      s3Log('[passo 2] ' + fr(S3.n1, S3.d1) + ' = ' + fr(S3.n1 * S3.f1, S3.L) + ' (×' + S3.f1 + ')');
+      done(dur);
+    });
+  } else if(p === 3){
+    s3Status('✂️ <strong>Passo 3 — subdividir a barra de baixo:</strong> cada fatia vira ' + S3.f2 + '. ' + fr(S3.n2, S3.d2) + ' = ' + fr(S3.n2 * S3.f2, S3.L) + '.');
+    s3Subdivide('subLinesB', S3.L, S3.f2, dur => {
+      s3SetC('subC2', fr(S3.n2, S3.d2) + ' → <strong>' + fr(S3.n2 * S3.f2, S3.L) + '</strong>');
+      s3Log('[passo 3] ' + fr(S3.n2, S3.d2) + ' = ' + fr(S3.n2 * S3.f2, S3.L) + ' (×' + S3.f2 + ')');
+      done(dur);
+    });
+  } else if(p === 4){
+    s3Status('🗑️ <strong>Passo 4 — subtrair:</strong> as <strong>' + (S3.n2 * S3.f2) + ' fatias</strong> da barra de baixo são arrancadas do fim da barra de cima (hachura vermelha). O que sobra ganha a própria barra, em verde: <strong>' + fr(S3.r, S3.L) + '</strong>.');
+    const x0 = S3X + (S3.r / S3.L) * S3Wl;
+    const wRem = ((S3.n2 * S3.f2) / S3.L) * S3Wl;
+    const h = $id('subHatch');
+    h.setAttribute('x', x0.toFixed(1));
+    h.setAttribute('width', Math.max(0, wRem).toFixed(1));
+    const reveal = () => {
+      /* a barra do resultado acorda: divisões de L fatias + preenchimento verde */
+      let lC = '';
+      for(let k = 1; k < S3.L; k++) lC += s3Line(S3X + (k / S3.L) * S3Wl, S3YC, false);
+      $id('subLinesC').innerHTML = lC;
+      $id('subLinesC').style.opacity = 1;
+      $id('subBoxC').removeAttribute('stroke-dasharray');
+      const fc = $id('subFillC');
+      fc.setAttribute('width', (S3.r / S3.L * S3Wl).toFixed(1));
+      fc.style.opacity = '.95';
+      s3SetC('subC3', '<strong>' + fr(S3.r, S3.L) + '</strong>');
+    };
+    if (S3.fast){ h.style.opacity = .8; reveal(); }
+    else {
+      S3.timers.push(setTimeout(() => { h.style.opacity = .8; }, 60));
+      S3.timers.push(setTimeout(reveal, 750));
+    }
+    s3Log('[passo 4] ' + fr(S3.n1 * S3.f1, S3.L) + ' − ' + fr(S3.n2 * S3.f2, S3.L) + ' = ' + fr(S3.r, S3.L));
+    done(1600);
+  } else if(p === 5){
+    const eq = $id('subEq');
+    eq.innerHTML = fracStack(S3.n1 * S3.f1, S3.L) +
+      '<span>−</span>' + fracStack(S3.n2 * S3.f2, S3.L) +
+      '<span>=</span>' + fracStack(S3.r, S3.L);
+    eq.classList.add('show');
+    s3Status('🎉 <strong>Resultado: ' + fr(S3.r, S3.L) + '</strong>. Agora falta só a última olhada — dá para simplificar?', 'ok');
+    s3Log('[passo 5] conta completa: ' + fr(S3.n1 * S3.f1, S3.L) + ' − ' + fr(S3.n2 * S3.f2, S3.L) + ' = ' + fr(S3.r, S3.L));
+    done(600);
+  } else if(p === 6){
+    const g = gcd(S3.r, S3.L);
+    if(g > 1){
+      $id('subSimplify').hidden = false;
+      s3Status('✨ ' + S3.r + ' e ' + S3.L + ' têm o divisor comum <strong>' + g + '</strong> → clique em <strong>✨ Simplificar</strong> para a forma mais enxuta!');
+      s3Log('[passo 6] divisor comum encontrado: ' + g + ' — simplificação disponível');
+    } else {
+      if (!S3.fast) S3.phase = 7; /* no replay (Anterior), a fase 6 fica visitável */
+      s3Status('🔒 <strong>' + fr(S3.r, S3.L) + ' já está na forma mais simples</strong> (' + S3.r + ' e ' + S3.L + ' só têm o divisor 1 em comum). Fim! ↺ Reiniciar para testar outras frações.', 'ok');
+      s3Log('[passo 6] gcd(' + S3.r + ', ' + S3.L + ') = 1 — forma mais simples, fim ✓');
+    }
+    done(300);
+  }
+}
+
+function s3Step(auto){
+  if(S3.running && !auto) return;
+  if(S3.phase >= 6) return;
+  S3.phase++;
+  const p = S3.phase;
+  s3Phase(p, () => s3Buttons());
+}
+/* Anterior: re-executa as fases 1..k em modo fast (sem animação) */
+function s3Replay(upto){
+  S3.fast = true;
+  s3Init();
+  for(let p = 1; p <= upto; p++){
+    S3.phase = p;
+    s3Phase(p, () => {});
+  }
+  S3.fast = false;
+  s3Buttons();
+}
+function s3Back(){
+  if (S3.running || S3.phase <= 0) return;
+  s3Replay(S3.phase - 1);
+}
+function s3Run(){
+  if(S3.running || S3.phase >= 6) return;
+  S3.running = true; s3Buttons();
+  (function chain(){
+    if(S3.phase >= 6 || S3.phase === 7){
+      S3.running = false;
+      /* se a simplificação ficou disponível, completa a demonstração sozinha */
+      if(!$id('subSimplify').hidden){
+        S3.timers.push(setTimeout(() => { if(!$id('subSimplify').hidden) s3DoSimplify(true); }, 1100));
+      }
+      s3Buttons(); return;
+    }
+    S3.phase++;
+    s3Phase(S3.phase, dur => {
+      S3.timers.push(setTimeout(chain, dur + 750));
+    });
+  })();
+}
+function s3DoSimplify(auto){
+  const g = gcd(S3.r, S3.L);
+  if(g <= 1) return;
+  const eq = $id('subEq');
+  eq.insertAdjacentHTML('beforeend',
+    '<span>=</span>' + fracStack(S3.r / g, S3.L / g, 'simplified') +
+    '<span class="simplified" style="font-size:.62em">÷' + g + '</span>');
+  $id('subSimplify').hidden = true;
+  S3.phase = 7;
+  s3Status('✨ Simplifiquei dividindo numerador e denominador por ' + g + ': <strong>' + fr(S3.r, S3.L) + ' = ' + fr(S3.r / g, S3.L / g) + '</strong> — forma mais simples! Fim! ↺ Reiniciar para testar outras frações.', 'ok');
+  s3Log((auto ? '[auto] ' : '[passo 6] ') + 'simplificando: ' + fr(S3.r, S3.L) + ' = ' + fr(S3.r / g, S3.L / g) + ' (÷' + g + ') ✓');
+  s3Buttons();
+}
+function s3ReadInputs(){
+  S3.n1 = clamp(Math.round(Number($id('subN1').value) || 1), 1, 12);
+  S3.d1 = clamp(Math.round(Number($id('subD1').value) || 1), 1, 12);
+  S3.n2 = clamp(Math.round(Number($id('subN2').value) || 1), 1, 12);
+  S3.d2 = clamp(Math.round(Number($id('subD2').value) || 1), 1, 12);
+  $id('subN1').value = S3.n1; $id('subD1').value = S3.d1;
+  $id('subN2').value = S3.n2; $id('subD2').value = S3.d2;
+}
+function s3Valid(){
+  return S3.n1 * S3.d2 >= S3.n2 * S3.d1;
+}
+function s3Init(){
+  s3ClearTimers();
+  s3ReadInputs();
+  S3.phase = 0; S3.running = false;
+  $id('subLog').innerHTML = '';
+  $id('subEq').className = 'frac-eq-panel';
+  $id('subEq').innerHTML = '';
+  $id('subEq').classList.remove('show');
+  $id('subSimplify').hidden = true;
+  $id('subC1').style.opacity = 1; $id('subC2').style.opacity = 1; $id('subC3').style.opacity = 1;
+  $id('subC3').innerHTML = '—';
+  $id('subC1').innerHTML = fr(S3.n1, S3.d1);
+  $id('subC2').innerHTML = fr(S3.n2, S3.d2);
+  if(!s3Valid()){
+    s3RenderBase();
+    s3Status('⚠️ Aqui a segunda fração (' + fr(S3.n2, S3.d2) + ') é maior que a primeira (' + fr(S3.n1, S3.d1) + ') — o resultado seria negativo. Ajuste os valores: este módulo trabalha com resultados não-negativos.', 'fail');
+    $id('subStep').disabled = true; $id('subRun').disabled = true;
+    return;
+  }
+  s3RenderBase();
+  s3Status('Pronto! <strong>' + fr(S3.n1, S3.d1) + ' − ' + fr(S3.n2, S3.d2) + '</strong>. Clique em <strong>⏭ Próximo</strong> para começar pelo MMC — ou <strong>▶ Executar tudo</strong>.');
+  s3Log('[início] ' + fr(S3.n1, S3.d1) + ' − ' + fr(S3.n2, S3.d2));
+  s3Buttons();
+}
+document.querySelectorAll('.sub-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sub-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    $id('subN1').value = btn.dataset.n1; $id('subD1').value = btn.dataset.d1;
+    $id('subN2').value = btn.dataset.n2; $id('subD2').value = btn.dataset.d2;
+    s3Init();
+  });
+});
+['subN1','subD1','subN2','subD2'].forEach(id => {
+  $id(id).addEventListener('change', () => {
+    document.querySelectorAll('.sub-preset').forEach(b => b.classList.remove('active'));
+    s3Init();
+  });
+});
+$id('subStep').addEventListener('click', () => s3Step(false));
+$id('subBack').addEventListener('click', s3Back);
+$id('subRun').addEventListener('click', s3Run);
+$id('subReset').addEventListener('click', s3Init);
+$id('subSimplify').addEventListener('click', () => s3DoSimplify(false));
+
+</script>
+
+<script>
+/* ================================================================
+   SIMULADOR 4 — Da barra para o caderno (prefixo m3c-)
+================================================================ */
+function fr(n, d){
+  return '<span class="fracv"><span class="fn">' + n + '</span><span class="fd">' + d + '</span></span>';
+}
+
+const M3 = { n1:3, d1:4, n2:1, d2:6, L:12, f1:3, f2:2, r:7, g:1, steps:[], i:0, running:false, valid:true, timers:[], fast:false, custom:false };
+
+function m3ClearTimers(){ M3.timers.forEach(clearTimeout); M3.timers = []; }
+function m3Log(html){
+  const el = $id('m3cLog'); if (!el || el.hidden) return;
+  const line = document.createElement('div');
+  line.innerHTML = html; el.appendChild(line); el.scrollTop = el.scrollHeight;
+}
+function m3Status(html, cls){
+  const s = $id('m3cStatus'); s.innerHTML = html;
+  s.className = 'sim-status m3c-msg' + (cls ? ' ' + cls : '');
+}
+function m3Pop(el, txt){
+  el.innerHTML = txt;
+  el.classList.remove('m3c-pop'); void el.offsetWidth; el.classList.add('m3c-pop');
+}
+/* pop/label adiados: instantâneo no modo fast (botão Anterior re-executa tudo) */
+function m3Later(fn){ if (M3.fast){ fn(); } else { M3.timers.push(setTimeout(fn, 380)); } }
+/* rótulo do passo corrente: o novo apaga o anterior — menos poluição no desenho */
+function m3ClearLabels(){
+  $id('m3cArrowLayer').querySelectorAll('.m3c-arc-label, .m3c-arc-hi-c, .m3c-arc-hi-t').forEach(el => el.remove());
+}
+/* arco genérico: apenas o path animado (coordenadas relativas ao svg).
+   A ponta é um marker ancorado pela BASE: o traço termina onde o triângulo
+   começa — por isso cada seta encurta o destino em 12px, que o marker devora. */
+function m3Arc(d){
+  const layer = $id('m3cArrowLayer');
+  const NS = 'http://www.w3.org/2000/svg';
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('d', d);
+  path.setAttribute('class', 'm3c-arc');
+  path.setAttribute('marker-end', 'url(#m3cArrowHead)');
+  layer.appendChild(path);
+  if (!M3.fast && path.getTotalLength) {
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
+    void path.getBoundingClientRect();
+    requestAnimationFrame(() => requestAnimationFrame(() => { path.style.strokeDashoffset = 0; }));
+  }
+  return path;
+}
+/* rótulo de conta com o resultado circulrado: "12 ÷ 4 = (3)"
+   cx = centro do bloco, cy = linha de base do texto; o (3) é o mesmo
+   destaque que viaja na seta seguinte. */
+function m3LabelEq(cx, cy, eq, hi){
+  m3ClearLabels();
+  const layer = $id('m3cArrowLayer');
+  const NS = 'http://www.w3.org/2000/svg';
+  const t = document.createElementNS(NS, 'text');
+  t.setAttribute('x', cx - 16); t.setAttribute('y', cy);
+  t.setAttribute('class', 'm3c-arc-label'); t.setAttribute('text-anchor', 'end');
+  t.textContent = eq + ' =';
+  const c = document.createElementNS(NS, 'circle');
+  c.setAttribute('cx', cx + 16); c.setAttribute('cy', cy - 5); c.setAttribute('r', 12);
+  c.setAttribute('class', 'm3c-arc-hi-c');
+  const h = document.createElementNS(NS, 'text');
+  h.setAttribute('x', cx + 16); h.setAttribute('y', cy);
+  h.setAttribute('class', 'm3c-arc-hi-t'); h.setAttribute('text-anchor', 'middle');
+  h.textContent = hi;
+  [t, c, h].forEach(el => { el.style.opacity = 0; layer.appendChild(el); });
+  if (M3.fast){ t.style.opacity = 1; c.style.opacity = 1; h.style.opacity = 1; return; }
+  M3.timers.push(setTimeout(() => { t.style.opacity = 1; c.style.opacity = 1; h.style.opacity = 1; }, 460));
+}
+/* o número destacado viajando sozinho sobre uma seta */
+function m3LabelBadge(x, my, txt){
+  m3ClearLabels();
+  const layer = $id('m3cArrowLayer');
+  const NS = 'http://www.w3.org/2000/svg';
+  const c = document.createElementNS(NS, 'circle');
+  c.setAttribute('cx', x); c.setAttribute('cy', my); c.setAttribute('r', 12);
+  c.setAttribute('class', 'm3c-arc-hi-c');
+  const h = document.createElementNS(NS, 'text');
+  h.setAttribute('x', x); h.setAttribute('y', my + 5.5);
+  h.setAttribute('class', 'm3c-arc-hi-t'); h.setAttribute('text-anchor', 'middle');
+  h.textContent = txt;
+  [c, h].forEach(el => { el.style.opacity = 0; layer.appendChild(el); });
+  if (M3.fast){ c.style.opacity = 1; h.style.opacity = 1; return; }
+  M3.timers.push(setTimeout(() => { c.style.opacity = 1; h.style.opacity = 1; }, 460));
+}
+/* conta com o resultado em verde (sem círculo) — para lugares apertados */
+function m3LabelEqPlain(cx, cy, eq, hi){
+  m3ClearLabels();
+  const layer = $id('m3cArrowLayer');
+  const NS = 'http://www.w3.org/2000/svg';
+  const t = document.createElementNS(NS, 'text');
+  t.setAttribute('x', cx); t.setAttribute('y', cy);
+  t.setAttribute('class', 'm3c-arc-label'); t.setAttribute('text-anchor', 'middle');
+  const a = document.createElementNS(NS, 'tspan');
+  a.textContent = eq + ' = ';
+  const b = document.createElementNS(NS, 'tspan');
+  b.setAttribute('class', 'm3c-arc-hl'); b.textContent = hi;
+  t.appendChild(a); t.appendChild(b);
+  t.style.opacity = 0; layer.appendChild(t);
+  if (M3.fast){ t.style.opacity = 1; return; }
+  M3.timers.push(setTimeout(() => { t.style.opacity = 1; }, 460));
+}
+/* Seta A — a divisão: do denominador NOVO (12, Passo 2) desce, atravessa o
+   corredor abaixo dos cards e sobe até a base do denominador ANTIGO (4,
+   Passo 1) — U simétrico. Rótulo "12 ÷ 4 = (3)": o resultado já nasce
+   destacado, porque é ele que viaja na seta seguinte.
+   Cards empilhados (mobile): contorna pela lateral esquerda. */
+function m3ArrowFactor(fromNew, toOld, eq, hi){
+  const box = $id('m3cArrows').getBoundingClientRect();
+  const f = fromNew.getBoundingClientRect(), t = toOld.getBoundingClientRect();
+  const sf = fromNew.closest('.m3c-stage').getBoundingClientRect();
+  const st = toOld.closest('.m3c-stage').getBoundingClientRect();
+  const stacked = sf.bottom <= st.top + 4 || st.bottom <= sf.top + 4;
+  if (!stacked){
+    const x1 = f.left - box.left + f.width / 2;
+    const y1 = f.bottom - box.top + 6;
+    const x2 = t.left - box.left + t.width / 2;
+    const y2 = t.bottom - box.top + 6 + 12; /* o marker come 12px: a ponta encosta no 6 */
+    const valley = Math.max(y1, y2 - 12) + 34;
+    m3Arc('M ' + x1 + ' ' + y1 + ' C ' + x1 + ' ' + valley + ', ' + x2 + ' ' + valley + ', ' + x2 + ' ' + y2);
+    m3LabelEq((x1 + x2) / 2, valley + 19, eq, hi);
+  } else {
+    const x1 = f.left - box.left - 8;
+    const y1 = f.top - box.top + f.height / 2;
+    const x2 = t.left - box.left - 8 - 12;
+    const y2 = t.top - box.top + t.height / 2;
+    const bx = Math.min(x1, x2) - 24;
+    m3Arc('M ' + x1 + ' ' + y1 + ' C ' + bx + ' ' + y1 + ', ' + bx + ' ' + y2 + ', ' + x2 + ' ' + y2);
+    m3LabelEq(bx - 44, (y1 + y2) / 2 + 4, eq, hi);
+  }
+}
+/* Seta B — o fator viaja: do denominador ANTIGO (4) até o numerador ANTIGO
+   (3), contornando a própria fração pelo lado externo — carregando o número
+   destacado que a seta da divisão acabou de revelar. */
+function m3ArrowUp(denEl, numEl, side, badge){
+  const box = $id('m3cArrows').getBoundingClientRect();
+  const sg = denEl.closest('.m3c-stage').getBoundingClientRect();
+  const f = denEl.getBoundingClientRect(), t = numEl.getBoundingClientRect();
+  const dir = side === 'right' ? 1 : -1;
+  const x1 = f.left - box.left + (side === 'right' ? f.width : 0) + dir * 8;
+  const y1 = f.top - box.top + f.height / 2;
+  const x2 = t.left - box.left + (side === 'right' ? t.width : 0) + dir * (8 + 12);
+  const y2 = t.top - box.top + t.height / 2;
+  const bx = (side === 'right' ? Math.max(x1, x2) : Math.min(x1, x2)) + dir * 28;
+  m3Arc('M ' + x1 + ' ' + y1 + ' C ' + bx + ' ' + (y1 - 2) + ', ' + bx + ' ' + (y2 + 2) + ', ' + x2 + ' ' + y2);
+  /* o badge fica no bulge, mas nunca fora do card (não pode ser cortado) */
+  const bxx = side === 'right'
+    ? Math.min(bx, sg.right - box.left - 15)
+    : Math.max(bx, sg.left - box.left + 15);
+  m3LabelBadge(bxx, (y1 + y2) / 2, badge);
+}
+/* Seta C — o transporte: do numerador original (3, Passo 1) por cima até o
+   numerador novo (9, Passo 2), que preenche ao receber a ponta. */
+function m3ArrowCarry(fromNum, toSlot, eq, hi){
+  const box = $id('m3cArrows').getBoundingClientRect();
+  const f = fromNum.getBoundingClientRect(), t = toSlot.getBoundingClientRect();
+  const sf = fromNum.closest('.m3c-stage').getBoundingClientRect();
+  const st = toSlot.closest('.m3c-stage').getBoundingClientRect();
+  const x1 = f.left - box.left + f.width / 2;
+  const y1 = f.top - box.top - 6;
+  const x2 = t.left - box.left + t.width / 2;
+  const y2 = t.top - box.top - 6 - 12; /* marker come 12px: a ponta encosta a 6 do slot */
+  const stacked = st.top >= sf.bottom - 4;
+  /* o ápice fica acima da origem E da chegada: a tangente final desce —
+     o bico do triângulo chega apontando para baixo, nunca invertido */
+  const top = Math.min(y1, y2) - 8 - (stacked ? 12 : 0);
+  m3Arc('M ' + x1 + ' ' + y1 + ' C ' + x1 + ' ' + top + ', ' + x2 + ' ' + top + ', ' + x2 + ' ' + y2);
+  m3LabelEqPlain((x1 + x2) / 2, top + 14, eq, hi);
+}
+
+function m3BuildSteps(){
+  const s = [];
+  s.push(() => {
+    $id('m3cA1d').classList.add('m3c-hl'); $id('m3cA2d').classList.add('m3c-hl');
+    m3Status('Denominadores diferentes: <strong>' + M3.d1 + ' e ' + M3.d2 + '</strong>. Não dá para subtrair direto — precisamos de fatias do mesmo tamanho!');
+    m3Log('[1] os denominadores ' + M3.d1 + ' e ' + M3.d2 + ' são diferentes');
+  });
+  s.push(() => {
+    $id('m3cA1d').classList.remove('m3c-hl'); $id('m3cA2d').classList.remove('m3c-hl');
+    const isMultiple = (M3.d1 % M3.d2 === 0) || (M3.d2 % M3.d1 === 0);
+    m3Status('🧮 O terreno comum é o <strong>MMC(' + M3.d1 + ', ' + M3.d2 + ') = ' + M3.L + '</strong>' + (isMultiple ? ' (o ' + Math.max(M3.d1, M3.d2) + ' já serve: ' + Math.max(M3.d1, M3.d2) + ' é múltiplo de ' + Math.min(M3.d1, M3.d2) + '!)' : ''), 'ok');
+    m3Log('[2] MMC(' + M3.d1 + ', ' + M3.d2 + ') = ' + M3.L);
+  });
+  s.push(() => {
+    m3Pop($id('m3cD1'), M3.L);
+    m3Status('O novo denominador da 1ª fração: <strong>' + M3.L + '</strong>. Fatias menores, mesma barra inteira.');
+    m3Log('[3] 1ª fração vira com denominador ' + M3.L);
+  });
+  s.push(() => {
+    m3Pop($id('m3cD2'), M3.L);
+    m3Status('O novo denominador da 2ª fração: <strong>' + M3.L + '</strong>.');
+    m3Log('[4] 2ª fração vira com denominador ' + M3.L);
+  });
+  s.push(() => {
+    m3ArrowFactor($id('m3cD1'), $id('m3cA1d'), M3.L + ' ÷ ' + M3.d1, String(M3.f1));
+    m3Status('A conta dos denominadores da 1ª fração: <strong>' + M3.L + ' ÷ ' + M3.d1 + ' = ' + M3.f1 + '</strong>. Esse <strong>' + M3.f1 + '</strong> destacado é o fator — é ele que vai multiplicar o número de cima.');
+    m3Log('[5] ' + M3.L + ' ÷ ' + M3.d1 + ' = ' + M3.f1 + ' (fator da 1ª)');
+  });
+  s.push(() => {
+    m3ArrowUp($id('m3cA1d'), $id('m3cA1n'), 'left', String(M3.f1));
+    m3Status('O <strong>' + M3.f1 + '</strong> destacado sobe e multiplica o número de cima da fração: <strong>' + M3.n1 + ' × ' + M3.f1 + '</strong>.');
+    m3Log('[6] o fator ' + M3.f1 + ' multiplica o numerador ' + M3.n1);
+  });
+  s.push(() => {
+    m3ArrowCarry($id('m3cA1n'), $id('m3cN1'), M3.n1 + ' × ' + M3.f1, String(M3.n1 * M3.f1));
+    m3Later(() => m3Pop($id('m3cN1'), M3.n1 * M3.f1)); /* o 9 chega junto com a ponta da seta */
+    m3Status('A conta completa: <strong>' + M3.n1 + ' × ' + M3.f1 + ' = ' + (M3.n1 * M3.f1) + '</strong> — o resultado é transportado para o numerador novo.');
+    m3Log('[7] ' + M3.n1 + ' × ' + M3.f1 + ' = ' + (M3.n1 * M3.f1) + ' — transportado para o numerador novo');
+  });
+  s.push(() => {
+    m3ArrowFactor($id('m3cD2'), $id('m3cA2d'), M3.L + ' ÷ ' + M3.d2, String(M3.f2));
+    m3Status('Agora a conta dos denominadores da 2ª fração: <strong>' + M3.L + ' ÷ ' + M3.d2 + ' = ' + M3.f2 + '</strong> — o fator <strong>' + M3.f2 + '</strong> destacado.');
+    m3Log('[8] ' + M3.L + ' ÷ ' + M3.d2 + ' = ' + M3.f2 + ' (fator da 2ª)');
+  });
+  s.push(() => {
+    m3ArrowUp($id('m3cA2d'), $id('m3cA2n'), 'right', String(M3.f2));
+    m3Status('O <strong>' + M3.f2 + '</strong> destacado sobe e multiplica o número de cima: <strong>' + M3.n2 + ' × ' + M3.f2 + '</strong>.');
+    m3Log('[9] o fator ' + M3.f2 + ' multiplica o numerador ' + M3.n2);
+  });
+  s.push(() => {
+    m3ArrowCarry($id('m3cA2n'), $id('m3cN2'), M3.n2 + ' × ' + M3.f2, String(M3.n2 * M3.f2));
+    m3Later(() => m3Pop($id('m3cN2'), M3.n2 * M3.f2));
+    m3Status('E o transporte: <strong>' + M3.n2 + ' × ' + M3.f2 + ' = ' + (M3.n2 * M3.f2) + '</strong>.');
+    m3Log('[10] ' + M3.n2 + ' × ' + M3.f2 + ' = ' + (M3.n2 * M3.f2) + ' — transportado para o numerador novo');
+  });
+  s.push(() => {
+    $id('m3cF1').classList.add('m3c-glow'); $id('m3cF2').classList.add('m3c-glow');
+    m3Status('Agora as fatias são do mesmo tamanho: ' + fr(M3.n1 * M3.f1, M3.L) + ' − ' + fr(M3.n2 * M3.f2, M3.L) + '.', 'ok');
+    m3Log('[11] equivalentes prontas: ' + fr(M3.n1 * M3.f1, M3.L) + ' − ' + fr(M3.n2 * M3.f2, M3.L));
+  });
+  s.push(() => {
+    $id('m3cResBox').innerHTML = '<span class="m3c-done"><span class="fracv lg"><span class="fn">' + M3.r + '</span><span class="fd">' + M3.L + '</span></span></span>';
+    m3Status((M3.n1 * M3.f1) + ' − ' + (M3.n2 * M3.f2) + ' = <strong>' + M3.r + '</strong>, denominador continua ' + M3.L + ' → ' + fr(M3.r, M3.L) + ' 🎉', 'ok');
+    m3Log('[fim] ' + fr(M3.n1 * M3.f1, M3.L) + ' − ' + fr(M3.n2 * M3.f2, M3.L) + ' = ' + fr(M3.r, M3.L));
+  });
+  if (M3.g > 1) s.push(() => {
+    $id('m3cResBox').insertAdjacentHTML('beforeend',
+      '<span class="m3c-op">=</span><span class="m3c-done"><span class="fracv lg"><span class="fn">' + (M3.r / M3.g) + '</span><span class="fd">' + (M3.L / M3.g) + '</span></span></span><span class="m3c-simp">(dividi por ' + M3.g + ')</span>');
+    m3Status('✨ E dá para simplificar: ' + fr(M3.r, M3.L) + ' = ' + fr(M3.r / M3.g, M3.L / M3.g) + ' (dividi por ' + M3.g + ').', 'ok');
+    m3Log('[extra] ' + fr(M3.r, M3.L) + ' = ' + fr(M3.r / M3.g, M3.L / M3.g) + ' (dividi por ' + M3.g + ')');
+  });
+  return s;
+}
+
+/* executa um passo apagando o rótulo do passo anterior: cada label vive
+   só durante o seu próprio passo */
+function m3Exec(k){ m3ClearLabels(); M3.steps[k](); }
+function m3Step(){
+  if (M3.running || M3.i >= M3.steps.length) return;
+  m3Exec(M3.i); M3.i++; m3Buttons();
+}
+function m3Run(){
+  if (M3.running || M3.i >= M3.steps.length) return;
+  M3.running = true; m3Buttons();
+  (function chain(){
+    if (M3.i >= M3.steps.length){ M3.running = false; m3Buttons(); return; }
+    m3Exec(M3.i); M3.i++;
+    M3.timers.push(setTimeout(chain, 900));
+  })();
+}
+/* Anterior: re-executa do zero até o passo anterior, em modo fast (sem animação) */
+function m3Replay(upto){
+  M3.fast = true;
+  m3Init();
+  for (let k = 0; k < upto; k++) m3Exec(k);
+  M3.i = upto;
+  M3.fast = false;
+  m3Buttons();
+}
+function m3Back(){
+  if (M3.running || M3.i <= 0) return;
+  m3Replay(M3.i - 1);
+}
+function m3Buttons(){
+  const block = M3.running || !M3.valid || M3.i >= M3.steps.length;
+  $id('m3cStep').disabled = block; $id('m3cRun').disabled = block;
+  $id('m3cBack').disabled = M3.running || !M3.valid || M3.i <= 0;
+}
+function m3Init(){
+  m3ClearTimers(); M3.i = 0; M3.running = false;
+  M3.n1 = clamp(parseInt($id('m3cIn1').value, 10) || 1, 1, 12);
+  M3.d1 = clamp(parseInt($id('m3cId1').value, 10) || 1, 1, 12);
+  M3.n2 = clamp(parseInt($id('m3cIn2').value, 10) || 1, 1, 12);
+  M3.d2 = clamp(parseInt($id('m3cId2').value, 10) || 1, 1, 12);
+  M3.L  = lcm(M3.d1, M3.d2);
+  M3.f1 = M3.L / M3.d1; M3.f2 = M3.L / M3.d2;
+  M3.r  = M3.n1 * M3.f1 - M3.n2 * M3.f2;
+  M3.g  = M3.r === 0 ? 1 : gcd(Math.abs(M3.r), M3.L);
+
+  $id('m3cA1n').textContent = M3.n1; $id('m3cA1d').textContent = M3.d1;
+  $id('m3cA2n').textContent = M3.n2; $id('m3cA2d').textContent = M3.d2;
+  $id('m3cA1d').classList.remove('m3c-hl'); $id('m3cA2d').classList.remove('m3c-hl');
+  $id('m3cN1').innerHTML = '&nbsp;'; $id('m3cD1').innerHTML = '&nbsp;';
+  $id('m3cN2').innerHTML = '&nbsp;'; $id('m3cD2').innerHTML = '&nbsp;';
+  $id('m3cF1').classList.remove('m3c-glow'); $id('m3cF2').classList.remove('m3c-glow');
+  $id('m3cArrowLayer').innerHTML = '';
+  $id('m3cResBox').innerHTML = '<span class="m3c-blank-lg" id="m3cRes">&nbsp;</span>';
+  $id('m3cLog').innerHTML = '';
+
+  const proper = M3.n1 <= M3.d1 && M3.n2 <= M3.d2;
+  const nonNeg = M3.n1 * M3.d2 >= M3.n2 * M3.d1;
+  M3.valid = proper && nonNeg;
+  if (!M3.valid){
+    if (!proper) m3Status('Este simulador trabalha com frações próprias: numerador ≤ denominador. Ajuste os números e tente de novo.', 'fail');
+    else m3Status('A 1ª fração precisa ser maior ou igual à 2ª (resultado não pode ficar negativo). Tente, por exemplo, trocar a ordem das frações.', 'fail');
+    M3.steps = []; m3Buttons(); return;
+  }
+  M3.steps = m3BuildSteps();
+  m3Status('Pronto! A conta é ' + fr(M3.n1, M3.d1) + ' − ' + fr(M3.n2, M3.d2) + '. Use ⏭ para avançar um passo, ou ▶ para ver tudo acontecer.');
+  m3Log('[início] montar ' + fr(M3.n1, M3.d1) + ' − ' + fr(M3.n2, M3.d2));
+  m3Buttons();
+}
+
+/* modo Personalizar: caixas-fração acendem e recebem foco; sugestões esmaecem
+   (mas continuam clicáveis — é o caminho natural de voltar) */
+function m3SetCustom(on){
+  M3.custom = on;
+  $id('m3cCustom').classList.toggle('on', on);
+  $id('m3cEdit').classList.toggle('active', on);
+  ['m3cIn1', 'm3cId1', 'm3cIn2', 'm3cId2'].forEach(idv => { $id(idv).disabled = !on; });
+  document.querySelectorAll('.m3c-preset').forEach(b => b.classList.toggle('dim', on));
+  $id('m3cLbl').classList.toggle('dim', on);
+  if (on) $id('m3cIn1').focus();
+}
+document.querySelectorAll('.m3c-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.m3c-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    $id('m3cIn1').value = btn.dataset.n1; $id('m3cId1').value = btn.dataset.d1;
+    $id('m3cIn2').value = btn.dataset.n2; $id('m3cId2').value = btn.dataset.d2;
+    if (M3.custom) m3SetCustom(false);
+    m3Init();
+  });
+});
+['m3cIn1', 'm3cId1', 'm3cIn2', 'm3cId2'].forEach(idv => $id(idv).addEventListener('change', () => {
+  document.querySelectorAll('.m3c-preset').forEach(b => b.classList.remove('active'));
+  m3Init();
+}));
+$id('m3cEdit').addEventListener('click', () => m3SetCustom(!M3.custom));
+$id('m3cStep').addEventListener('click', m3Step);
+$id('m3cBack').addEventListener('click', m3Back);
+$id('m3cRun').addEventListener('click', m3Run);
+$id('m3cReset').addEventListener('click', m3Init);
+
+/* ===== inicialização ===== */
+s1Init();
+s2Init();
+s3Init();
+m3Init();
+</script>
+</body>
+</html>

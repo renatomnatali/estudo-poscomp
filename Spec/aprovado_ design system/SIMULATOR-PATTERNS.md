@@ -20,7 +20,7 @@ A versão anterior deste documento (v1.0) tinha 6 padrões com referências a ar
 |---|---|---|
 | `simInit()` `simStep()` `simRun()` `simReset()` | `data-sim-action="init/step/run/reset"` | modulo-02 (4 ocorrências) |
 | `loadPreset('id')` | `data-preset-id="id"` | modulo-02 (4), modulo-05 (3) |
-| `check('qid','A','expid')` | `data-question-id`, `data-answer-key`, `data-explanation-id` | todos os 9 módulos F6 (5-7 quiz-btn cada) |
+| `check('qid','A','expid')` | `data-question-id`, `data-answer-key`, `data-explanation-id` | todos os 9 módulos F6 (5-7 quiz-btn cada). O 3º argumento pode ser o texto completo da justificativa ou um id de bloco; aspas simples internas quebram a conversão — use ‘aspas curvas’. |
 
 **Achado relevante:** outros módulos (modulo-03, 04, 06, 07, 08) usam `<canvas>` interativo mas **não** seguem a convenção `simInit/simStep/simRun/simReset`. Usam handlers próprios via `addEventListener` (sem `onclick` reconhecido). Isso é aceito pelo pipeline — `onclick` reconhecido é opcional, não obrigatório. **Use a convenção quando os botões fazem init/step/run/reset clássicos; use `addEventListener` direto quando o controle é mais customizado.**
 
