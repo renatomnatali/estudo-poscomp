@@ -10,9 +10,10 @@
  *
  * Exit codes:
  *   0  todos os checks passaram
- *   1  pelo menos um ERROR encontrado (ou módulo/diretório não encontrado)
- *   2  uso incorreto (flag inválida, slug em formato proibido, allowlist
- *      indisponível — configuração quebrada, distinto de validação falha)
+ *   1  pelo menos um ERROR encontrado (ou source.json do --slug não existe)
+ *   2  uso incorreto (flag inválida, slug em formato proibido, diretório de
+ *      módulos ausente, allowlist indisponível — configuração quebrada,
+ *      distinto de validação falha)
  *
  * Warnings não falham build mas são reportados (use `--strict` para promover
  * warnings a errors).
@@ -377,12 +378,16 @@ async function validateOne(slug: string, allowlist: Set<string>): Promise<Valida
 
 function printReport(report: ValidationReport, strict: boolean) {
   const totalIssues = report.errors.length + report.warnings.length;
-  const status =
-    report.errors.length === 0 && (!strict || report.warnings.length === 0)
-      ? '✓ OK'
-      : '✗ FAILED';
+  const failed = report.errors.length > 0 || (strict && report.warnings.length > 0);
+  const status = failed ? '✗ FAILED' : '✓ OK';
+  // Em --strict os warnings falham o gate: a contagem precisa refletir isso,
+  // senão o CI sai vermelho com um relatório dizendo "0 errors".
+  const errCount = report.errors.length + (strict ? report.warnings.length : 0);
+  const strictNote = strict && report.warnings.length > 0
+    ? ` (inclui ${report.warnings.length} warnings promovidos a error)`
+    : '';
 
-  console.log(`\n${status}  ${report.slug}  (${report.errors.length} errors, ${report.warnings.length} warnings)`);
+  console.log(`\n${status}  ${report.slug}  (${errCount} errors${strictNote}, ${report.warnings.length} warnings)`);
 
   for (const e of report.errors) {
     console.log(`  ERROR    [${e.rule}] ${e.message}${e.context ? ` — "${e.context}"` : ''}`);
@@ -426,7 +431,7 @@ async function main() {
       console.error('uso: --slug <nome-do-modulo>');
       process.exit(2);
     }
-    if (!/^[a-z0-9-]+$/.test(slug)) {
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) {
       // slug entra em path.join e vira rota no app: formato fechado evita
       // traversal e acento/espaço que quebrariam URL e registro.
       console.error(`slug em formato inválido: "${slug}" — use apenas a-z, 0-9 e hífen`);
@@ -454,12 +459,12 @@ async function main() {
   for (const slug of slugs) {
     const report = await validateOne(slug, allowlist);
     printReport(report, strict);
-    totalErrors += report.errors.length;
+    totalErrors += report.errors.length + (strict ? report.warnings.length : 0);
     totalWarnings += report.warnings.length;
   }
 
   console.log(`\n────────────────────────────────────────`);
-  console.log(`Total: ${totalErrors} errors, ${totalWarnings} warnings em ${slugs.length} módulo(s)`);
+  console.log(`Total: ${totalErrors} errors${strict ? ' (modo strict: warnings promovidos)' : ''}, ${totalWarnings} warnings em ${slugs.length} módulo(s)`);
 
   const failed = totalErrors > 0 || (strict && totalWarnings > 0);
   process.exit(failed ? 1 : 0);

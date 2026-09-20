@@ -157,7 +157,7 @@ Todo módulo de tema "estrutura/algoritmo" deve ter um simulador. Padrão:
 - 4-6 questões.
 - Ao menos 1 questão com label `POSCOMP <ano>` ou `POSCOMP <ano> (adaptada)`.
 - Cada questão tem 4-5 alternativas.
-- Padrão do botão: `<button class="quiz-btn" onclick="check('q1','B','expQ1')">B) Texto</button>`. Pipeline converte em `data-question-id="q1" data-answer-key="B" data-explanation-id="expQ1"`. O 3º argumento aceita **o texto completo da justificativa** (padrão do corpus) ou um id de bloco; evite aspas simples dentro do argumento (use ‘curvas’ — aspas retas escapadas quebram a conversão).
+- Padrão do botão: `<button class="quiz-btn" onclick="check('q1','B','expQ1')">B) Texto</button>`. Pipeline converte em `data-question-id="q1" data-answer-key="B" data-explanation-id="expQ1"`. O 3º argumento aceita **o texto completo da justificativa** (padrão do corpus) ou um id de bloco; evite aspas retas (simples ou duplas) dentro do argumento (use ‘curvas’ — aspas retas quebram a conversão).
 - Justificativa **completa e visível**: por que a correta é correta E por que **cada** alternativa errada falha — escrita no `<details>` junto da questão (é o que o aluno lê no produto; o atributo é preservado para uso futuro pelo runtime).
 - Use componentes do DS para renderizar (consulte DS).
 
@@ -169,6 +169,8 @@ Todo módulo de tema "estrutura/algoritmo" deve ter um simulador. Padrão:
 4. Só então usar no módulo.
 
 **Não criar classe inline ou com prefixo `_temp` no fragmento.** O DS é o registro autoritativo.
+
+**Exceção standalone:** módulo ainda não registrado no app (spike de validação) pode usar classes locais no próprio `<style>` do head para viver sozinho no navegador — elas são descartadas pelo ingest e **precisam migrar ao DS** (ou virar estilo de componente React) no PR que registrar o módulo no produto. O validador as reporta como warning `classes.not-in-ds` até lá.
 
 ## Assets
 
