@@ -146,7 +146,7 @@ async function list(prisma: PrismaClient, args: ArgMap) {
   const userId = asString(args['user-id']);
 
   const where = {
-    scope: 'premium_access',
+    scope: 'premium_access' as const,
     OR: [
       ...(emailNormalized ? [{ emailNormalized }] : []),
       ...(userId ? [{ userId }] : []),

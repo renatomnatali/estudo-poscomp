@@ -321,3 +321,31 @@ export async function getTopicProgress(userId: string, topicSlug: string): Promi
 
   return memoryProgress.get(`${userId}:${topicSlug}`) ?? null;
 }
+
+/**
+ * Todo o progresso de tópicos de um usuário (usado pelo dashboard).
+ * Junta o banco (fonte primária) com o fallback em memória quando o
+ * DATABASE_URL não está disponível.
+ */
+export async function listTopicProgressByUser(userId: string): Promise<TopicProgress[]> {
+  if (process.env.DATABASE_URL) {
+    try {
+      const rows = await db.userTopicProgress.findMany({
+        where: { userId },
+        include: { topic: { select: { slug: true } } },
+        orderBy: { updatedAt: 'desc' },
+      });
+      return rows.map((row) =>
+        mapProgressRecord(row.userId, row.topic.slug, row.status, row.score, row.updatedAt),
+      );
+    } catch {
+      // fallback em memória
+    }
+  }
+
+  const fallback: TopicProgress[] = [];
+  memoryProgress.forEach((progress, key) => {
+    if (key.startsWith(`${userId}:`)) fallback.push(progress);
+  });
+  return fallback;
+}
