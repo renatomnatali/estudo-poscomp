@@ -30,7 +30,9 @@ export async function generateMetadata({ params }: LessonRouteProps): Promise<Me
   const lesson = theme ? getInfantilLesson(theme, aula) : undefined;
   const year = getInfantilYear(ano);
   const subject = getInfantilSubject(ano, materia);
-  if (!theme || !lesson || !year || !subject) {
+  if (!theme || !lesson || !lesson.moduleSlug || !year || !subject) {
+    // aula em-breve (sem moduleSlug) devolve 404 na page — metadata vazia
+    // por simetria, nada de title/description órfãos numa página que não existe
     return {};
   }
 
