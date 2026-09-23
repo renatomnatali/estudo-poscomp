@@ -21,6 +21,7 @@
     "content:ingest": "tsx scripts/ingest-topic-content.ts",
     "content:ingest:dry": "tsx scripts/ingest-topic-content.ts --dry-run",
     "study:modules:ingest": "tsx scripts/ingest-study-modules.ts",
+    "study:modules:validate": "tsx scripts/validate-module-fragment.ts",
     "access:grant": "tsx scripts/access-grants.ts",
     "flashcards:ingest": "tsx scripts/ingest-flashcards.ts",
     "flashcards:ingest:dry": "tsx scripts/ingest-flashcards.ts --dry-run"

@@ -1,0 +1,179 @@
+<!--
+  MODULE-TEMPLATE.html — v1.1 (2026-05-10)
+
+  Template canônico para criação de módulos novos, alinhado ao pipeline
+  `scripts/ingest-study-modules.ts`.
+
+  PIPELINE — O QUE EXTRAI
+  =======================
+  O ingest faz parsing de HTML standalone e extrai:
+
+    1. .lesson-header > .module-badge        → header.badge
+    2. .lesson-header > h1                   → header.title
+    3. .lesson-header > .subtitle            → header.subtitle
+    4. .lesson-header > .header-meta > span* → header.meta[]
+       (fallback: .lesson-header > span*)
+    5. .lesson-header > .progress-label      → header.progressLabel
+    6. .section-nav > a[href^="#"]           → navLinks[]
+    7. .lesson-content > section[id]*        → html (concatenado)
+
+  Fallbacks: <header>, <nav>, <main> são aceitos sem a classe.
+  Mas USE as classes canônicas — o fallback existe para módulos legados.
+
+  TRATAMENTOS AUTOMÁTICOS DO PIPELINE
+  ====================================
+  - <h2><span class="num">N</span>  é renumerado sequencial 1..N.
+    Não se preocupe com o número que você colocar; será reescrito.
+  - <button class="quiz-btn" onclick="check('qid','A','explainId')">
+    vira data-question-id/data-answer-key/data-explanation-id.
+  - <button class="preset-btn" onclick="loadPreset('id')">
+    vira data-preset-id.
+  - <button class="sim-btn" onclick="simInit()|simStep()|simRun()|simReset()">
+    vira data-sim-action.
+  - Qualquer onclick restante é removido.
+
+  DESIGN SYSTEM — FONTE DA VERDADE
+  ================================
+  Classes CSS, tokens, paleta, tipografia: `Spec/aprovado_ design system/`.
+  Consulte ANTES de escrever HTML. Se uma classe necessária não existe lá,
+  abra PR ao DS antes de usar — não invente classe nova no fragmento.
+
+  =====================================================================
+  ESTRUTURA HTML — copiar e preencher
+  =====================================================================
+-->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Módulo — Título · POSCOMP aprovado.xyz</title>
+  <!--
+    O <head>, links de fonte, e <style> inline são DESCARTADOS pelo pipeline.
+    Mantenha minimalista: o produto aplica o CSS canônico em runtime.
+    Inclua <style> só se for necessário para visualização local antes da ingestão.
+  -->
+</head>
+<body>
+
+<!-- ============================================================
+     1. HEADER do módulo (extraído pelo pipeline)
+     ============================================================ -->
+<header class="lesson-header">
+  <span class="module-badge">Módulo N de M</span>
+  <h1>Título do Módulo</h1>
+  <p class="subtitle">Uma frase clara explicando o que o aluno vai dominar.</p>
+  <div class="header-meta">
+    <span>~XX min</span>
+    <span>Nível: Iniciante|Fundamental|Intermediário|Avançado</span>
+    <span>Característica-chave (ex.: Simulador interativo)</span>
+  </div>
+  <span class="progress-label">Módulo N de M — Slug Curto</span>
+</header>
+
+<!-- ============================================================
+     2. NAVEGAÇÃO interna (âncoras)
+     IDs aqui devem bater com IDs das <section> abaixo.
+     ============================================================ -->
+<nav class="section-nav">
+  <a href="#conceito">Conceito</a>
+  <a href="#definicao">Definição</a>
+  <a href="#exemplo">Exemplo</a>
+  <a href="#execucao">Execução</a>
+  <a href="#simulador">Simulador</a>
+  <a href="#linguagem">Linguagem</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#resumo">Resumo</a>
+</nav>
+
+<!-- ============================================================
+     3. CONTEÚDO PRINCIPAL — sequência de <section id="...">
+     ============================================================ -->
+<main class="lesson-content">
+
+  <section id="conceito">
+    <h2><span class="num">1</span> O que é &lt;tema&gt;?</h2>
+    <p>Definição em linguagem natural com analogia concreta.</p>
+    <!-- use componentes do DS aqui (ex.: callout, card) -->
+  </section>
+
+  <section id="definicao">
+    <h2><span class="num">2</span> Definição formal</h2>
+    <p>Notação rigorosa.</p>
+  </section>
+
+  <section id="exemplo">
+    <h2><span class="num">3</span> Exemplo construído passo-a-passo</h2>
+    <p>Problema concreto, resolução etapa por etapa.</p>
+  </section>
+
+  <section id="execucao">
+    <h2><span class="num">4</span> Execução manual</h2>
+    <p>2-3 traces completos com comentários.</p>
+  </section>
+
+  <section id="simulador">
+    <h2><span class="num">5</span> Simulador interativo</h2>
+    <!--
+      Convenções JS aceitas pelo pipeline:
+        <button class="sim-btn" onclick="simInit()">…</button>
+        <button class="sim-btn" onclick="simStep()">…</button>
+        <button class="sim-btn" onclick="simRun()">…</button>
+        <button class="sim-btn" onclick="simReset()">…</button>
+        <button class="preset-btn" onclick="loadPreset('id')">…</button>
+      Pipeline converte onclick em data-* attributes.
+      JS de simulador: <script> inline faz o STANDALONE funcionar no navegador,
+      mas o produto NÃO o executa — simulador interativo no site exige componente
+      React registrado no runtime (ver module-page.tsx).
+    -->
+  </section>
+
+  <section id="linguagem">
+    <h2><span class="num">6</span> O que esse formalismo reconhece</h2>
+    <p>Generalização teórica.</p>
+  </section>
+
+  <section id="quiz">
+    <h2><span class="num">7</span> Quiz — estilo POSCOMP</h2>
+    <!--
+      Convenções aceitas pelo pipeline:
+        <button class="quiz-btn" onclick="check('q1','B','expQ1')">…</button>
+      Pipeline converte para:
+        data-question-id="q1" data-answer-key="B" data-explanation-id="expQ1"
+      Exigido: 4-6 questões; ao menos 1 com label "POSCOMP <ano>";
+      cada questão com justificativa completa (correta + por que cada errada falha).
+    -->
+  </section>
+
+  <section id="resumo">
+    <h2><span class="num">8</span> Resumo</h2>
+    <p>O que você agora domina + ponte para o próximo módulo.</p>
+  </section>
+
+</main>
+
+</body>
+</html>
+
+<!--
+  ANTI-PADRÕES — NÃO FAZER
+  =========================
+  - Não numerar <h2> manualmente esperando que o número fique.
+    O pipeline renumera automaticamente. Use 1, 2, 3... apenas como guia.
+  - Não inventar classes. DS é a fonte da verdade.
+    Falta? Abra PR ao DS antes de usar.
+  - Não usar cor hex inline. Tokens via classes.
+  - Não duplicar header.title no <main>.
+  - Não usar <h1> dentro do <main> (h1 só no header.lesson-header).
+  - Não escrever pt-BR sem acentos ("Nao", "voce", "matematica").
+  - Não criar quiz sem justificativa de cada alternativa.
+  - Não criar simulador sem presets (2-4 exemplos pré-definidos).
+
+  CHANGELOG
+  =========
+  v1.1 (2026-05-10): refeito após audit. Formato standalone (lesson-header /
+                     section-nav / lesson-content) alinhado ao pipeline.
+                     Removida lista de classes (DS é fonte da verdade).
+                     Documentadas convenções JS do pipeline (check, simInit, etc.).
+  v1.0 (2026-05-10): primeira versão (formato fragmento + lista de classes).
+                     Deprecada — não compatível com o pipeline atual.
+-->
