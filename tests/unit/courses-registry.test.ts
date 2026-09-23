@@ -134,6 +134,22 @@ describe('contrato dos cursos registrados', () => {
     });
   });
 
+  it('todo slug de curso segue o formato fechado de URL (a-z, 0-9 e hífen)', () => {
+    // Arrange — mesma régua do validador de módulos
+    // (scripts/validate-module-fragment.ts): slug vira rota no app e
+    // chave de entitlement, então acento, espaço ou maiúscula aqui
+    // quebrariam URL e abririam caminho de traversal.
+    const slugPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+    // Act
+    const offenders = getCourses()
+      .map((course) => course.slug)
+      .filter((slug) => !slugPattern.test(slug));
+
+    // Assert
+    expect(offenders).toEqual([]);
+  });
+
   it('nenhum curso se resolve por host: o contrato não tem campo de host/domínio', () => {
     // Arrange — arquitetura: site único, curso é dimensão de conteúdo,
     // não de DNS. Se um dia aparecer host/domain/url aqui, o registry
@@ -154,11 +170,12 @@ describe('contrato dos cursos registrados', () => {
 
   it('todo curso registrado tem os dados de exibição preenchidos', () => {
     for (const course of getCourses()) {
-      expect(course.slug, `slug de ${course.name}`).not.toBe('');
-      expect(course.name, `name de ${course.slug}`).not.toBe('');
-      expect(course.tagline, `tagline de ${course.slug}`).not.toBe('');
-      expect(course.description, `description de ${course.slug}`).not.toBe('');
-      expect(course.audience, `audience de ${course.slug}`).not.toBe('');
+      // trim(): string só de espaços não passa como dado preenchido.
+      expect(course.slug.trim(), `slug de ${course.name}`).not.toBe('');
+      expect(course.name.trim(), `name de ${course.slug}`).not.toBe('');
+      expect(course.tagline.trim(), `tagline de ${course.slug}`).not.toBe('');
+      expect(course.description.trim(), `description de ${course.slug}`).not.toBe('');
+      expect(course.audience.trim(), `audience de ${course.slug}`).not.toBe('');
     }
   });
 });
