@@ -222,7 +222,7 @@ export function PoscompApp({ auth }: PoscompAppProps) {
 
           <nav aria-label="Menu principal">
             {menuItems.map((item) => {
-              const ItemIcon = item.Icon;
+              const ItemIcon = 'Icon' in item ? item.Icon : null;
               return (
                 <button
                   key={item.id}
@@ -232,7 +232,11 @@ export function PoscompApp({ auth }: PoscompAppProps) {
                 >
                   <span className="nav-link-label">{item.label}</span>
                   <span className="nav-link-icon" aria-hidden="true">
-                    <ItemIcon width={16} height={16} strokeWidth={1.75} />
+                    {ItemIcon ? (
+                      <ItemIcon width={16} height={16} strokeWidth={1.75} />
+                    ) : (
+                      'icon' in item ? item.icon : null
+                    )}
                   </span>
                 </button>
               );
