@@ -1,7 +1,13 @@
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 
 import { Lockup } from '@/components/marketing/lockup';
+
+/** Base para canonical/OG das páginas do curso infantil (mesma origem do sitemap). */
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://aprovado.xyz'),
+};
 
 /**
  * Chrome público do curso infantil: páginas gratuitas e anônimas, sem auth —
@@ -25,7 +31,7 @@ export default function InfantilLayout({ children }: { children: ReactNode }) {
 
       <footer className="border-t border-n-200 bg-white">
         <div className="mx-auto w-full max-w-[920px] px-4 py-6 text-xs text-n-500 sm:px-6">
-          © 2026 aprovado.xyz · aulas de matemática gratuitas para estudar em casa
+          © {new Date().getFullYear()} aprovado.xyz · aulas de matemática gratuitas para estudar em casa
         </div>
       </footer>
     </div>

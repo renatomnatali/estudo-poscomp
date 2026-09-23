@@ -50,6 +50,7 @@ const FONTE_MARCADOR_DESCONHECIDO: InfantilLessonSource = {
     '<section id="mmc">',
     '<div class="sim-box" data-simulator="afd">',
     '<h4>Simulador de outro curso</h4>',
+    '<p>Frase de abertura do simulador que não temos.</p>',
     '<div>skeleton estático do simulador</div>',
     '</div>',
     '</section>',
@@ -106,14 +107,23 @@ describe('InfantilLessonView — aula do curso infantil', () => {
     expect(screen.queryByText(/skeleton estático/i)).not.toBeInTheDocument();
   });
 
-  it('marcador de simulador desconhecido mantém o skeleton estático em vez de quebrar a aula', async () => {
+  it('marcador desconhecido passa pelo mount: sobrevivem título e abertura, controles mortos do skeleton saem', async () => {
     renderView(FONTE_MARCADOR_DESCONHECIDO);
 
-    // Nada de componente React montado…
-    expect(screen.queryByRole('button', { name: /executar tudo/i })).not.toBeInTheDocument();
-    // …e o conteúdo estático ingerido segue visível para o aluno.
-    expect(screen.getByText(/skeleton estático/i)).toBeInTheDocument();
+    // Título e frase de abertura do HTML original sobrevivem ao mount.
     expect(screen.getByRole('heading', { level: 4, name: 'Simulador de outro curso' })).toBeInTheDocument();
+    expect(screen.getByText(/frase de abertura do simulador/i)).toBeInTheDocument();
+
+    // Nada de simulador React (kind desconhecido não tem componente)…
+    expect(screen.queryByRole('button', { name: /executar tudo/i })).not.toBeInTheDocument();
+    // …e os controles estáticos mortos do skeleton saem do box.
+    expect(screen.queryByText(/skeleton estático/i)).not.toBeInTheDocument();
+
+    // O box é marcado como degradado — contrato para estilo/telemetria.
+    expect(document.querySelector('[data-simulator="afd"]')).toHaveAttribute(
+      'data-degraded',
+      'simulator',
+    );
   });
 
   it('o quiz do HTML ingerido corrige alternativa errada e abre a explicação', async () => {

@@ -108,7 +108,12 @@ export function SimActionBar({
 
 /** Caixa de mensagem de status dentro da área de animação. */
 export function SimStatusBox({ tone = '', children }: { tone?: '' | 'ok' | 'fail'; children: ReactNode }) {
-  return <div className={`sim-status${tone ? ` ${tone}` : ''}`}>{children}</div>;
+  /* role=status: leitores de tela anunciam a mensagem do passo (SC 4.1.3) */
+  return (
+    <div role="status" className={`sim-status${tone ? ` ${tone}` : ''}`}>
+      {children}
+    </div>
+  );
 }
 
 /** Rótulo de grupo de controles (o mesmo estilo dos "Sugestões:" do mockup). */

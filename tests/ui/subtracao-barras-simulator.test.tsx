@@ -203,4 +203,18 @@ describe('SubtracaoBarrasSimulator — subtração com as 3 barras', () => {
     // Aviso obrigatório para o aluno entender por que está travado.
     expect(status()).toMatch(/resultado seria negativo/i);
   });
+
+  it('bloqueia a exploração e avisa quando a fração é imprópria (numerador > denominador)', () => {
+    render(<SubtracaoBarrasSimulator />);
+
+    // 7/6 é imprópria: mesma régua da conta passo a passo (frações próprias).
+    const n1 = screen.getByLabelText(/1ª numerador/i);
+    fireEvent.change(n1, { target: { value: '7' } });
+    fireEvent.blur(n1);
+
+    expect(screen.getByRole('button', { name: /próximo/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /executar tudo/i })).toBeDisabled();
+    // Aviso obrigatório com a regra do módulo, para o aluno entender a trava.
+    expect(status()).toMatch(/frações próprias: numerador ≤ denominador/i);
+  });
 });

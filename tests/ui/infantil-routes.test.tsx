@@ -36,11 +36,14 @@ describe('rota da porta do tema /infantil/[ano]/[materia]/[tema]', () => {
     cleanup();
   });
 
-  it('gera metadata com título composto do catálogo e a habilidade BNCC na descrição', async () => {
+  it('gera metadata com título composto do catálogo, BNCC na descrição e canonical da porta', async () => {
     const metadata = await generateThemeMetadata(temaParams());
 
     expect(metadata.title).toBe('Frações · Matemática 5º ano — aprovado.xyz');
+    // year.title dinâmico: a descrição cita o ano do catálogo, não texto fixo.
+    expect(metadata.description).toContain('Aulas do 5º ano');
     expect(metadata.description).toContain('EF05MA07');
+    expect(metadata.alternates).toEqual({ canonical: '/infantil/5-ano/matematica/fracoes' });
   });
 
   it('pré-gera exatamente os temas do catálogo', () => {
@@ -95,6 +98,10 @@ describe('rota da aula /infantil/[ano]/[materia]/[tema]/[aula]', () => {
       'Subtraindo frações com denominadores diferentes | Frações · Matemática 5º ano',
     );
     expect(metadata.description).toBe(fragmento?.header.subtitle);
+    expect(metadata.alternates).toEqual({
+      canonical:
+        '/infantil/5-ano/matematica/fracoes/subtraindo-fracoes-com-denominadores-diferentes',
+    });
   });
 
   it('aula em-breve não gera metadata órfã — 404 e metadata vazia por simetria', async () => {

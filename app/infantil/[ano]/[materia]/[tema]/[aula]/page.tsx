@@ -43,6 +43,7 @@ export async function generateMetadata({ params }: LessonRouteProps): Promise<Me
   return {
     title: `${lesson.title} | ${theme.title} · ${subject.title} ${year.title}`,
     description: source?.header.subtitle || theme.description,
+    alternates: { canonical: `/infantil/${ano}/${materia}/${tema}/${aula}` },
   };
 }
 

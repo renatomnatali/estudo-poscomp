@@ -5,6 +5,7 @@ import { INFANTIL_CATALOG } from '@/lib/courses/infantil-catalog';
 import { getCourse } from '@/lib/courses/registry';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/infantil' },
   title: 'Infantil · matemática do 5º ano — aprovado.xyz',
   description:
     'Aulas gratuitas de matemática para o 5º ano do ensino fundamental, com simuladores interativos para ver cada fração se mexer. Sem cadastro, sem cartão.',

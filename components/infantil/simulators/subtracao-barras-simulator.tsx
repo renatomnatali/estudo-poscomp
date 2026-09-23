@@ -61,7 +61,11 @@ export function SubtracaoBarrasSimulator() {
   const f1 = L / d1;
   const f2 = L / d2;
   const resultNumerator = n1 * f1 - n2 * f2;
-  const valid = n1 * d2 >= n2 * d1;
+  /* mesma régua do simulador da conta passo a passo: frações próprias
+     (n ≤ d — senão a barra pintaria além da unidade) e resultado não-negativo */
+  const proper = n1 <= d1 && n2 <= d2;
+  const nonNegative = n1 * d2 >= n2 * d1;
+  const valid = proper && nonNegative;
   const g = gcd(resultNumerator, L);
   const canSimplify = g > 1;
 
@@ -422,11 +426,18 @@ export function SubtracaoBarrasSimulator() {
           }
         >
           {!valid ? (
-            <>
-              ⚠️ Aqui a segunda fração (<Fraction n={n2} d={d2} />) é maior que a primeira (
-              <Fraction n={n1} d={d1} />) — o resultado seria negativo. Ajuste os valores: este
-              módulo trabalha com resultados não-negativos.
-            </>
+            !proper ? (
+              <>
+                ⚠️ Este simulador trabalha com frações próprias: numerador ≤ denominador. Ajuste
+                os números e tente de novo.
+              </>
+            ) : (
+              <>
+                ⚠️ Aqui a segunda fração (<Fraction n={n2} d={d2} />) é maior que a primeira (
+                <Fraction n={n1} d={d1} />) — o resultado seria negativo. Ajuste os valores: este
+                módulo trabalha com resultados não-negativos.
+              </>
+            )
           ) : phase === 0 ? (
             <>
               Pronto! <strong>

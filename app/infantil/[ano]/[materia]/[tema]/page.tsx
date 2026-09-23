@@ -28,7 +28,8 @@ export async function generateMetadata({ params }: ThemeRouteProps): Promise<Met
 
   return {
     title: `${theme.title} · ${subject.title} ${year.title} — aprovado.xyz`,
-    description: `${theme.description} Aulas do 5º ano alinhadas à habilidade ${theme.bnccCode} da BNCC.`,
+    description: `${theme.description} Aulas do ${year.title} alinhadas à habilidade ${theme.bnccCode} da BNCC.`,
+    alternates: { canonical: `/infantil/${ano}/${materia}/${tema}` },
   };
 }
 

@@ -40,16 +40,17 @@ export function InfantilLessonView({ source, themeHref, themeTitle }: InfantilLe
 
     root.querySelectorAll<HTMLElement>('[data-simulator]').forEach((box) => {
       const kind = box.dataset.simulator ?? '';
-      if (!getSimulatorComponent(kind)) {
-        return; // marcador desconhecido: mantém o skeleton estático
-      }
+      const known = Boolean(getSimulatorComponent(kind));
       const title = box.querySelector('h4')?.textContent ?? '';
       const intro = box.querySelector('p')?.textContent ?? null;
       const originalHtml = box.innerHTML;
       const container = document.createElement('div');
       box.replaceChildren(container);
       const reactRoot = createRoot(container);
+      /* marcador desconhecido: também passa pelo mount — sobrevive o título e a
+         frase de abertura, e os controles estáticos mortos do skeleton saem */
       reactRoot.render(<SimulatorMount kind={kind} title={title} intro={intro} />);
+      if (!known) box.dataset.degraded = 'simulator';
       mounts.push({ reactRoot, box, originalHtml });
     });
 
@@ -100,7 +101,10 @@ export function InfantilLessonView({ source, themeHref, themeTitle }: InfantilLe
       <div className="module-lesson-content">
         <div
           ref={bodyRef}
-          className="module-import-body"
+          /* infantil-lesson-body: escopo EXCLUSIVO do curso infantil — as regras
+             deste módulo em globals.css miram nela, nunca em .module-import-body
+             (compartilhada com o POSCOMP; bloqueador do review do PR #31) */
+          className="module-import-body infantil-lesson-body"
           dangerouslySetInnerHTML={{ __html: source.html }}
         />
       </div>
