@@ -525,3 +525,50 @@ export async function getFlashcardProgressSummary(userId: string): Promise<Flash
     reviewedToday,
   };
 }
+
+export interface FlashcardReviewActivityItem {
+  /** dia no formato YYYY-MM-DD */
+  date: string;
+  /** nº de revisões naquele dia */
+  count: number;
+}
+
+/**
+ * Atividade de revisão por dia, para o heatmap do dashboard.
+ * `days` conta a partir de hoje (inclusive).
+ */
+export async function listFlashcardReviewActivity(
+  userId: string,
+  days: number,
+): Promise<FlashcardReviewActivityItem[]> {
+  const since = startOfToday();
+  since.setDate(since.getDate() - Math.max(0, days - 1));
+
+  const countByDate = (events: Array<{ reviewedAt: Date }>): FlashcardReviewActivityItem[] => {
+    const byDate = new Map<string, number>();
+    events.forEach((event) => {
+      if (event.reviewedAt < since) return;
+      const key = event.reviewedAt.toISOString().slice(0, 10);
+      byDate.set(key, (byDate.get(key) ?? 0) + 1);
+    });
+    return [...byDate.entries()]
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  };
+
+  if (process.env.DATABASE_URL) {
+    try {
+      const rows = await db.flashcardReviewEvent.findMany({
+        where: { userId, reviewedAt: { gte: since } },
+        select: { reviewedAt: true },
+      });
+      return countByDate(rows);
+    } catch {
+      // fallback em memória
+    }
+  }
+
+  return countByDate(
+    memoryReviewEvents.filter((event) => event.userId === userId).map((event) => ({ reviewedAt: event.reviewedAt })),
+  );
+}

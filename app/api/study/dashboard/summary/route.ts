@@ -4,7 +4,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isClerkEnabledServer } from '@/lib/auth-config';
 import { getDashboardSummaryForUser } from '@/lib/dashboard-repo';
 
+/**
+ * Lê userId de fontes do cliente (query/header). USADO APENAS EM DEV.
+ * Fora de development retorna null para forçar 401 — sem Clerk configurado
+ * em produção, aceitar identidade do cliente seria vetor de spoofing
+ * (mesmo guard do resolveRouteIdentity, commit a601ab6).
+ */
 function getFallbackUserId(request: NextRequest) {
+  if (process.env.NODE_ENV !== 'development') {
+    return null;
+  }
+
   const fromQuery = String(request.nextUrl.searchParams.get('userId') || '').trim();
   if (fromQuery) return fromQuery;
 
@@ -28,7 +38,13 @@ export async function GET(request: NextRequest) {
     }
     userId = session.userId;
   } else {
-    userId = getFallbackUserId(request);
+    userId = getFallbackUserId(request) ?? '';
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Autenticação necessária para consultar o dashboard.' },
+        { status: 401 }
+      );
+    }
   }
 
   const payload = await getDashboardSummaryForUser(userId);
