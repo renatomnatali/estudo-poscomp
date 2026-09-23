@@ -27,6 +27,17 @@ function parseAdminEmails() {
 
 export async function resolveAdminAccess(): Promise<AdminAccessResolution> {
   if (!isClerkEnabledServer()) {
+    // Sem autenticação configurada, o painel fica FECHADO fora de dev: as
+    // rotas /api/admin expõem e-mails e concedem premium_access — não podem
+    // depender só do middleware (bypass de middleware é CVE conhecido do
+    // Next < 15.5.18; ver review do PR #30). Autenticação própria: APR-03.
+    if (process.env.NODE_ENV !== 'development') {
+      return {
+        allowed: false,
+        status: 503,
+        error: 'Painel administrativo temporariamente indisponível.',
+      };
+    }
     return {
       allowed: true,
       status: 200,
