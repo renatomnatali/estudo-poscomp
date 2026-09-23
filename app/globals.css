@@ -7516,3 +7516,99 @@ body {
     transform: none;
   }
 }
+
+/* ===== Módulo fracoes-subtracao-mmc (curso infantil) — sim-box e simuladores =====
+   Migrado do standalone (Spec/mockup/import/fracoes-subtracao-mmc.html) junto
+   com o registro do módulo: o pipeline descarta o <style> do mockup, então as
+   classes de conteúdo acompanham o DS. Mesmo padrão dos simuladores POSCOMP
+   (#kleene-sim, #simulator): escopo .infantil-lesson-body, tokens canônicos. */
+
+/* — notação vertical de fração, usada no corpo de texto de todo o módulo — */
+.infantil-lesson-body .fracv { display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; line-height:1.05; font-family:var(--fm); margin:0 .15em; }
+.infantil-lesson-body .fracv .fn { padding:0 .25em; }
+.infantil-lesson-body .fracv .fd { border-top:2px solid currentColor; padding:0 .25em; }
+.infantil-lesson-body .fracv.lg .fn, .infantil-lesson-body .fracv.lg .fd { font-size:1.5rem; padding:.1em .4em; }
+
+/* — sim-box de aula (o .sim-box genérico é widget do dashboard) — */
+.infantil-lesson-body .sim-box { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; margin: 1.5rem 0; }
+.infantil-lesson-body .sim-box h4 { color: var(--primary); font-size: .95rem; margin-bottom: .6rem; }
+.infantil-lesson-body .sim-controls { display: flex; align-items: center; gap: .4rem; margin: .7rem 0; flex-wrap: wrap; }
+.infantil-lesson-body .sim-btn { padding: .4rem .95rem; border-radius: var(--r-pill); border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: .8rem; color: var(--primary); font-weight: 600; transition: all .15s; }
+.infantil-lesson-body .sim-btn:hover:not(:disabled) { background: var(--code-bg); border-color: var(--accent); }
+.infantil-lesson-body .sim-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.infantil-lesson-body .sim-btn:disabled { opacity: .4; cursor: not-allowed; }
+.infantil-lesson-body .sim-state-display { background: #f8faff; border: 1px solid var(--border); border-radius: 10px; padding: .4rem; margin: .6rem 0; overflow: auto; text-align: center; }
+.infantil-lesson-body .sim-status { background: var(--code-bg); border-radius: 8px; padding: .7rem .9rem; font-size: .85rem; margin-top: .5rem; line-height: 1.65; min-height: 2.4rem; font-family: var(--fm); text-align: left; }
+.infantil-lesson-body .sim-status.ok { background: #e8f5ee; color: #15803d; font-weight: 700; }
+.infantil-lesson-body .sim-status.fail { background: #fde8e8; color: #7a1717; font-weight: 700; }
+.infantil-lesson-body .sim-input-row { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; margin: .6rem 0; }
+.infantil-lesson-body .sim-input-row label { font-size: .82rem; color: var(--muted); font-family: var(--fm); }
+.infantil-lesson-body .sim-input-row input[type='number'] { font-family: var(--fm); font-size: .9rem; padding: .4rem .7rem; border: 1.5px solid var(--border); border-radius: 6px; width: 80px; color: var(--primary); }
+
+/* — fórmula em destaque (fbox) e legendas de figura — */
+.infantil-lesson-body .fbox .ftitle { font-size: .72rem; opacity: .6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: .6rem; }
+.infantil-lesson-body .fbox .fline { font-size: 1.25rem; font-family: Georgia, serif; margin: .4rem 0; }
+.infantil-lesson-body .bar-fig figcaption { font-family: var(--fm); font-size: .76rem; color: var(--muted); text-align: center; margin-top: .3rem; }
+
+/* — sim 1: fileiras de múltiplos — */
+.infantil-lesson-body .frac-rows { display: flex; flex-direction: column; gap: .4rem; padding: .5rem 0; }
+.infantil-lesson-body .frac-row { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; }
+.infantil-lesson-body .frac-row-label { font-family: var(--fm); font-size: .74rem; color: var(--muted); width: 118px; text-align: right; padding-right: .55rem; flex-shrink: 0; }
+.infantil-lesson-body .frac-cell { min-width: 44px; height: 44px; padding: 0 6px; border: 2px solid var(--n300); border-radius: 8px; background: var(--card); display: inline-flex; align-items: center; justify-content: center; font-family: var(--fm); font-size: .92rem; font-weight: 500; color: var(--primary); margin: 3px; animation: frac-pop .35s ease both; }
+.infantil-lesson-body .frac-cell.match { border-color: var(--green); background: var(--em-bg); color: #0f5c36; font-weight: 700; animation: pulse .65s ease-in-out 3; }
+@keyframes frac-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(26,140,78,.45); } 50% { transform: scale(1.1); box-shadow: 0 0 0 9px rgba(26,140,78,0); } }
+
+/* — sims 2 e 3: barra SVG, contadores e painel de igualdade — */
+.infantil-lesson-body .frac-counter { font-family: var(--fm); font-size: 1.18rem; color: var(--primary); font-weight: 500; transition: opacity .3s; }
+.infantil-lesson-body .frac-counter .fx { color: var(--accent2); font-size: .82em; }
+.infantil-lesson-body .frac-stack { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.18; font-family: var(--fm); margin: 0 .3rem; }
+.infantil-lesson-body .frac-stack .fn { border-bottom: 2.5px solid currentColor; padding: 0 .32rem; }
+.infantil-lesson-body .frac-stack .fd { padding: 0 .32rem; }
+.infantil-lesson-body .frac-eq-panel { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .55rem; font-size: 1.22rem; font-family: var(--fm); padding: .95rem; border-radius: 10px; background: var(--n50); border: 1px dashed var(--n300); margin-top: .8rem; opacity: 0; transform: translateY(8px); transition: all .5s; }
+.infantil-lesson-body .frac-eq-panel.show { opacity: 1; transform: none; border-style: solid; border-color: var(--green); background: var(--em-bg); }
+.infantil-lesson-body .frac-eq-panel .simplified { color: #0f5c36; font-weight: 700; animation: pulse .65s ease-in-out 2; }
+.infantil-lesson-body .frac-svg line { transition: opacity .45s ease; }
+.infantil-lesson-body .frac-svg .frac-fill { transition: width .8s ease, fill .8s ease; }
+.infantil-lesson-body .frac-svg .frac-hatch { transition: opacity .5s ease; }
+.infantil-lesson-body .frac-counters { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: .2rem .4rem .6rem; }
+.infantil-lesson-body .frac-counters .fc { display: flex; align-items: center; gap: .45rem; font-family: var(--fm); font-size: .92rem; color: var(--muted); }
+.infantil-lesson-body .frac-counters .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.infantil-lesson-body .frac-counters .frac-counter { font-size: 1rem; transition: opacity .35s; }
+
+/* — sim 4: da barra para o caderno (prefixo m3c-) — */
+.infantil-lesson-body .m3c-grid { display: grid; grid-template-columns: 1fr 1.35fr 1fr; gap: .8rem; align-items: stretch; padding: .4rem .4rem 4rem; position: relative; }
+@media (max-width: 768px) { .infantil-lesson-body .m3c-grid { grid-template-columns: 1fr; } }
+.infantil-lesson-body .m3c-stage { background: var(--n50); border: 1px solid var(--n200); border-radius: 10px; padding: .7rem .6rem; display: flex; flex-direction: column; align-items: center; gap: .35rem; }
+.infantil-lesson-body .m3c-stage-title { font-family: var(--fm); font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; color: var(--n400); }
+.infantil-lesson-body .m3c-expr { display: flex; align-items: center; justify-content: center; gap: .3rem; min-height: 96px; flex-wrap: nowrap; padding: 0 1rem; }
+.infantil-lesson-body .m3c-old { padding: 0 .65rem; }
+.infantil-lesson-body .m3c-op { vertical-align: middle; font-family: var(--fm); font-size: 1.3rem; color: var(--primary); margin: 0 .2em; }
+.infantil-lesson-body .m3c-blank { display: inline-block; min-width: 2.4em; border-bottom: 3px dashed var(--n300); height: 1.1em; vertical-align: middle; }
+.infantil-lesson-body .m3c-blank-lg { display: inline-block; min-width: 3.2em; border-bottom: 3px dashed var(--n300); height: 2.6em; vertical-align: middle; }
+.infantil-lesson-body .m3c-slot { display: inline-block; min-width: 1.3em; text-align: center; }
+.infantil-lesson-body .m3c-tgt { position: relative; }
+.infantil-lesson-body .m3c-ctl-label { font-family: var(--fm); font-size: .78rem; color: var(--muted); }
+.infantil-lesson-body .m3c-sep { width: 1px; align-self: stretch; background: var(--n200); margin: .15rem .55rem; }
+.infantil-lesson-body .m3c-custom { display: inline-flex; align-items: center; gap: .5rem; }
+.infantil-lesson-body .m3c-fracinput { display: inline-flex; flex-direction: column; align-items: center; }
+.infantil-lesson-body .m3c-fracinput input { width: 2.9em; text-align: center; font-family: var(--fm); font-size: .95rem; padding: .24rem .1rem; border: 1.5px solid var(--n300); border-radius: 8px; background: #fff; color: var(--primary); transition: border-color .25s, box-shadow .25s, opacity .25s; }
+.infantil-lesson-body .m3c-fracinput .m3c-fibar { width: 86%; border-top: 2.5px solid var(--primary); margin: 2px 0; }
+.infantil-lesson-body .m3c-custom:not(.on) input { opacity: .5; }
+.infantil-lesson-body .m3c-custom.on input { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,107,204,.14); }
+.infantil-lesson-body .sim-btn.m3c-preset.dim, .infantil-lesson-body .m3c-ctl-label.dim { opacity: .45; }
+.infantil-lesson-body .m3c-hl { animation: m3cPulse 1.1s ease-in-out infinite; border-radius: 6px; }
+@keyframes m3cPulse { 0%,100% { box-shadow: 0 0 0 3px rgba(232,112,10,.35); background: rgba(232,112,10,.12); } 50% { box-shadow: 0 0 0 8px rgba(232,112,10,.08); background: rgba(232,112,10,.22); } }
+.infantil-lesson-body .m3c-pop { animation: frac-pop .4s ease both; }
+.infantil-lesson-body .m3c-fracslot { transition: all .5s; border-radius: 8px; padding: .05em .15em; }
+.infantil-lesson-body .m3c-fracslot.m3c-glow { border: 2px solid var(--green); background: var(--em-bg); box-shadow: 0 0 14px rgba(26,140,78,.28); }
+.infantil-lesson-body .m3c-done { background: var(--em-bg); border-radius: 10px; padding: .25em .35em; animation: frac-pop .5s ease both; }
+.infantil-lesson-body .m3c-simp { font-family: var(--fm); font-size: .72rem; color: #0f5c36; font-weight: 700; }
+.infantil-lesson-body svg.m3c-arrows { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 3; }
+.infantil-lesson-body .m3c-arc { fill: none; stroke: var(--accent); stroke-width: 2.5; transition: stroke-dashoffset .7s ease; }
+.infantil-lesson-body .m3c-arc.m3c-arc-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: m3cDraw .7s ease forwards; }
+@keyframes m3cDraw { to { stroke-dashoffset: 0; } }
+.infantil-lesson-body .m3c-arc-label { font-family: var(--fm); font-size: 13px; font-weight: 700; fill: var(--accent); paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; transition: opacity .3s; }
+.infantil-lesson-body .m3c-arc-hi-c { fill: var(--em-bg); stroke: var(--green); stroke-width: 2; transition: opacity .3s; }
+.infantil-lesson-body .m3c-arc-hi-t { font-family: var(--fm); font-size: 15px; font-weight: 700; fill: #0f5c36; paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round; transition: opacity .3s; }
+.infantil-lesson-body .m3c-arc-label .m3c-arc-hl { fill: #0f5c36; font-size: 16px; }
