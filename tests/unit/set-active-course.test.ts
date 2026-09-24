@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Fronteiras do framework mockadas: cookies() (escopo de escrita) e
 // revalidatePath (cache do App Router). A regra de validação (isCourseSlug)
@@ -48,7 +48,31 @@ describe('server action de troca de curso ativo', () => {
       path: '/',
       maxAge: 31536000, // 60 * 60 * 24 * 365
       sameSite: 'lax',
+      // secure: false porque o vitest roda com NODE_ENV=test; em produção
+      // o mesmo cookie nasce HTTPS-only (ver teste abaixo).
+      secure: false,
     });
     expect(revalidatePathSpy).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('grava cookie HTTPS-only quando a action roda em produção', async () => {
+    // Arrange — NODE_ENV é lido no momento da chamada (não no import),
+    // então o stub vale para esta action.
+    vi.stubEnv('NODE_ENV', 'production');
+
+    // Act
+    await setActiveCourse('infantil');
+
+    // Assert — em produção a preferência de curso nunca trafega em claro.
+    expect(cookieStore.set).toHaveBeenCalledWith('aprovado.curso', 'infantil', {
+      path: '/',
+      maxAge: 31536000, // 60 * 60 * 24 * 365
+      sameSite: 'lax',
+      secure: true,
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 });

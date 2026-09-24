@@ -27,6 +27,8 @@ export async function setActiveCourse(slug: string): Promise<SetActiveCourseResu
     path: '/',
     maxAge: ACTIVE_COURSE_MAX_AGE_SECONDS,
     sameSite: 'lax',
+    // HTTPS-only em produção: preferência de curso não deve trafegar em claro.
+    secure: process.env.NODE_ENV === 'production',
   });
 
   revalidatePath('/dashboard');

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 interface CookieRow {
   name: string;
   purpose: string;
-  type: 'essential' | 'analytics';
+  type: 'essential' | 'functional' | 'analytics';
   duration: string;
 }
 
@@ -36,6 +36,13 @@ const COOKIES: CookieRow[] = [
     type: 'essential',
     duration: 'Sessão',
   },
+  {
+    name: 'aprovado.curso',
+    purpose:
+      'Guarda qual curso você está estudando na área logada (ex.: POSCOMP ou Infantil), para o site abrir já no contexto certo. É apenas uma preferência — não contém dados pessoais nem identificadores.',
+    type: 'functional',
+    duration: '1 ano',
+  },
 ];
 
 export default function CookiesPage() {
@@ -47,14 +54,16 @@ export default function CookiesPage() {
         <p className="lead">
           Os cookies que usamos, pra que servem, e como você pode desativar.
         </p>
-        <div className="meta">Versão 1.0 · vigente desde 1 de janeiro de 2026</div>
+        <div className="meta">Versão 1.1 · vigente desde 23 de setembro de 2026</div>
       </header>
 
       <article className="legal-body">
         <div className="callout">
-          <strong>Resumo:</strong> hoje usamos apenas cookies essenciais — os do nosso
-          provedor de autenticação (Clerk). Não rodamos cookies analíticos nem de marketing
-          neste momento. Se isso mudar, mostraremos um banner pedindo seu consentimento antes.
+          <strong>Resumo:</strong> hoje usamos cookies essenciais — os do nosso provedor de
+          autenticação (Clerk) — e um cookie funcional, <code>aprovado.curso</code>, que
+          lembra o curso que você está estudando. Não rodamos cookies analíticos nem de
+          marketing neste momento. Se isso mudar, mostraremos um banner pedindo seu
+          consentimento antes.
         </div>
 
         <h2>
@@ -85,7 +94,11 @@ export default function CookiesPage() {
                 <td>{c.purpose}</td>
                 <td>
                   <span className={`badge ${c.type}`}>
-                    {c.type === 'essential' ? 'Essencial' : 'Analítica'}
+                    {c.type === 'essential'
+                      ? 'Essencial'
+                      : c.type === 'functional'
+                        ? 'Funcional'
+                        : 'Analítica'}
                   </span>
                 </td>
                 <td>{c.duration}</td>
@@ -102,6 +115,11 @@ export default function CookiesPage() {
           <code>__clerk_db_jwt</code>) são necessários pra o site funcionar com login e
           segurança. Sem eles, você não consegue usar o aprovado.xyz. Por isso não há opção
           de recusá-los — eles não são usados pra rastreamento, apenas pra autenticação.
+        </p>
+        <p>
+          Já o <code>aprovado.curso</code> é opcional: se você apagá-lo ou bloqueá-lo, a
+          área logada simplesmente abre no curso padrão (POSCOMP) — nada quebra, e você
+          ainda pode trocar de curso pelo seletor a qualquer momento.
         </p>
 
         <h2>
