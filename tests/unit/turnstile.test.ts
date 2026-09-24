@@ -4,7 +4,7 @@ import { silenceConsole } from '@/tests/test-utils/silence-console';
 
 // Fronteira externa: o endpoint siteverify da Cloudflare (fetch global
 // mockado). verifyTurnstile roda real — o contrato fail-closed é o alvo.
-import { verifyTurnstile } from '@/lib/turnstile';
+import { isTurnstileConfigured, verifyTurnstile } from '@/lib/turnstile';
 
 const ORIG_ENV = { ...process.env };
 
@@ -109,5 +109,17 @@ describe('verifyTurnstile — sem TURNSTILE_SECRET_KEY (config ausente)', () => 
 
   it('em dev: bypass silencioso', async () => {
     expect(await verifyTurnstile('qualquer-token')).toBe(true);
+  });
+});
+
+describe('isTurnstileConfigured', () => {
+  it('retorna true quando TURNSTILE_SECRET_KEY está configurada', () => {
+    process.env.TURNSTILE_SECRET_KEY = 'secret-teste';
+    expect(isTurnstileConfigured()).toBe(true);
+  });
+
+  it('retorna false quando TURNSTILE_SECRET_KEY está ausente', () => {
+    delete process.env.TURNSTILE_SECRET_KEY;
+    expect(isTurnstileConfigured()).toBe(false);
   });
 });

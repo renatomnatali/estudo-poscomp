@@ -59,6 +59,18 @@ describe('api routes de estudo', () => {
     }
   });
 
+  it('rejeita userId vindo do cliente fora de development (guard anti-spoofing)', async () => {
+    // Sem stub de NODE_ENV (vitest roda com 'test') e sem Clerk configurado:
+    // identidade lida de query/header é recusada com 401 — aceitá-la fora
+    // de dev seria vetor de spoofing. É o inverso do caso acima, que cobre
+    // o caminho de dev com o stub.
+    const response = await getDashboardSummary(
+      new NextRequest('http://localhost/api/study/dashboard/summary?userId=user-summary-1')
+    );
+
+    expect(response.status).toBe(401);
+  });
+
   it('retorna catálogo das trilhas com estados', async () => {
     const response = await getTracksCatalog(new NextRequest('http://localhost/api/study/tracks/catalog'));
     const payload = await response.json();
@@ -112,9 +124,11 @@ describe('api routes de estudo', () => {
     }
 
     // A trilha de entrada (onboarding) precisa de link clicável para o
-    // primeiro módulo. Estimativas (estimatedModules/estimatedHours) são
-    // dado estático de produto em TRACK_CARDS — não contrato desta rota —
-    // e por isso não ficam pinadas aqui.
+    // primeiro módulo. Estimativas (estimatedModules/estimatedHours) e os
+    // hrefs de F2–F4 removidos no conserto desta suíte são igualmente dado
+    // estático de produto em TRACK_CARDS (o href só existe para trilhas
+    // com contentReady, hoje F1 e F6) — não contrato desta rota — e por
+    // isso não ficam pinados aqui.
     expect(byCode.get('F1')?.href).toBe('/trilhas/f1/f1-1-analise-notacoes');
   });
 
