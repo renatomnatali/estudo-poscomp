@@ -22,12 +22,16 @@ vi.mock('@/app/actions/set-active-course', () => ({
 }));
 
 import { CourseSwitcher } from '@/components/study/course-switcher';
-import { POSCOMP_COURSE } from '@/lib/courses/poscomp';
 import { getCourses } from '@/lib/courses/registry';
 
-function renderSwitcher() {
+function renderSwitcher(activeSlug: string = 'poscomp') {
   // Cursos reais do registry — o menu lista o que existe de verdade.
-  render(<CourseSwitcher course={POSCOMP_COURSE} courses={getCourses()} />);
+  const courses = getCourses();
+  const course = courses.find((entry) => entry.slug === activeSlug);
+  if (!course) {
+    throw new Error(`Curso desconhecido na fixture do seletor: ${activeSlug}`);
+  }
+  render(<CourseSwitcher course={course} courses={courses} />);
 }
 
 async function openMenu() {
@@ -133,5 +137,161 @@ describe('seletor de curso da sidebar', () => {
     await waitFor(() => expect(setActiveCourseSpy).toHaveBeenCalledWith('infantil'));
     await act(async () => {});
     expect(refreshSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('seletor de curso — teclado do listbox (WAI-ARIA)', () => {
+  beforeEach(() => {
+    setActiveCourseSpy.mockReset();
+    setActiveCourseSpy.mockResolvedValue({ ok: true });
+    refreshSpy.mockClear();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('abre com Enter no gatilho e a primeira seta foca a option do curso em estudo', async () => {
+    // Arrange — curso em estudo é o SEGUNDO da lista: prova que a seta
+    // parte do curso em estudo, não da primeira option.
+    renderSwitcher('infantil');
+    const trigger = screen.getByRole('button', { name: /trocar de curso/i });
+    trigger.focus();
+
+    // Act — abrir por teclado (ativação nativa de button) e descer.
+    await userEvent.keyboard('{Enter}');
+    expect(screen.getByRole('listbox', { name: /seus cursos/i })).toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+
+    await userEvent.keyboard('{ArrowDown}');
+
+    // Assert
+    const menu = screen.getByRole('listbox', { name: /seus cursos/i });
+    expect(within(menu).getByRole('option', { name: /infantil/i })).toHaveFocus();
+    expect(within(menu).getByRole('option', { name: /poscomp/i })).not.toHaveFocus();
+  });
+
+  it('ArrowDown e ArrowUp movem o foco entre as options', async () => {
+    // Arrange
+    renderSwitcher('infantil');
+    await openMenu();
+    const menu = screen.getByRole('listbox', { name: /seus cursos/i });
+    const poscomp = within(menu).getByRole('option', { name: /poscomp/i });
+    const infantil = within(menu).getByRole('option', { name: /infantil/i });
+
+    // Act — o foco parte do gatilho: ↓ vai ao curso em estudo, ↑ sobe uma.
+    await userEvent.keyboard('{ArrowDown}');
+    expect(infantil).toHaveFocus();
+
+    await userEvent.keyboard('{ArrowUp}');
+
+    // Assert
+    expect(poscomp).toHaveFocus();
+  });
+
+  it('Home e End levam à primeira e à última option', async () => {
+    // Arrange
+    renderSwitcher('infantil');
+    await openMenu();
+    const menu = screen.getByRole('listbox', { name: /seus cursos/i });
+    const poscomp = within(menu).getByRole('option', { name: /poscomp/i });
+    const infantil = within(menu).getByRole('option', { name: /infantil/i });
+
+    // Act
+    await userEvent.keyboard('{End}');
+    expect(infantil).toHaveFocus();
+
+    await userEvent.keyboard('{Home}');
+
+    // Assert
+    expect(poscomp).toHaveFocus();
+  });
+
+  it('setas nas extremidades mantêm o foco na option atual', async () => {
+    // Arrange
+    renderSwitcher('infantil');
+    await openMenu();
+    const menu = screen.getByRole('listbox', { name: /seus cursos/i });
+    const poscomp = within(menu).getByRole('option', { name: /poscomp/i });
+    const infantil = within(menu).getByRole('option', { name: /infantil/i });
+
+    // Act — ↓ na última e ↑ na primeira não escapam da lista.
+    await userEvent.keyboard('{End}');
+    await userEvent.keyboard('{ArrowDown}');
+    expect(infantil).toHaveFocus();
+
+    await userEvent.keyboard('{Home}');
+    await userEvent.keyboard('{ArrowUp}');
+
+    // Assert
+    expect(poscomp).toHaveFocus();
+  });
+
+  it('Enter na option focada seleciona o curso', async () => {
+    // Arrange
+    renderSwitcher();
+    await openMenu();
+    await userEvent.keyboard('{End}'); // foca a option do Infantil
+
+    // Act — ativação nativa de button.
+    await userEvent.keyboard('{Enter}');
+
+    // Assert
+    await waitFor(() => expect(setActiveCourseSpy).toHaveBeenCalledWith('infantil'));
+  });
+
+  it('Espaço na option focada seleciona o curso', async () => {
+    // Arrange
+    renderSwitcher();
+    await openMenu();
+    await userEvent.keyboard('{End}'); // foca a option do Infantil
+
+    // Act — ativação nativa de button.
+    await userEvent.keyboard(' ');
+
+    // Assert
+    await waitFor(() => expect(setActiveCourseSpy).toHaveBeenCalledWith('infantil'));
+  });
+
+  it('Tab com o menu aberto fecha sem selecionar', async () => {
+    // Arrange
+    renderSwitcher();
+    await openMenu();
+    await userEvent.keyboard('{End}'); // foca a option do Infantil
+
+    // Act
+    await userEvent.keyboard('{Tab}');
+    await act(async () => {});
+
+    // Assert — Tab sai do conjunto apenas fechando o menu: sem seleção.
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(setActiveCourseSpy).not.toHaveBeenCalled();
+  });
+
+  it('anuncia a troca em andamento (role=status) e retira o aviso ao concluir', async () => {
+    // Arrange — fronteira que demora a responder.
+    let resolveAction!: (value: { ok: boolean }) => void;
+    setActiveCourseSpy.mockImplementation(
+      () =>
+        new Promise<{ ok: boolean }>((resolve) => {
+          resolveAction = resolve;
+        })
+    );
+    renderSwitcher();
+    const menu = await openMenu();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+    // Act — usuário escolhe o Infantil; a confirmação ainda não veio.
+    await userEvent.click(within(menu).getByRole('option', { name: /infantil/i }));
+    await waitFor(() => expect(screen.getByRole('status')).toBeInTheDocument());
+
+    // Act — a fronteira confirma a troca.
+    await act(async () => {
+      resolveAction({ ok: true });
+    });
+
+    // Assert — refresh disparado e o aviso sai do DOM.
+    await waitFor(() => expect(refreshSpy).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
   });
 });
