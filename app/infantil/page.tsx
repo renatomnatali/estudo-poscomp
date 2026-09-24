@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { INFANTIL_CATALOG } from '@/lib/courses/infantil-catalog';
-import { getCourse } from '@/lib/courses/registry';
+import { getCourseOrThrow, getCourses } from '@/lib/courses/registry';
+import { StudyShell } from '@/components/study/study-shell';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/infantil' },
@@ -11,20 +12,28 @@ export const metadata: Metadata = {
     'Aulas gratuitas de matemática para o 5º ano do ensino fundamental, com simuladores interativos para ver cada fração se mexer. Sem cadastro, sem cartão.',
 };
 
-/** Índice do curso infantil: ano → matéria → tema (porta de navegação/SEO). */
+/**
+ * Índice do curso infantil: ano → matéria → tema (porta de navegação/SEO).
+ * Monta o StudyShell — o padrão do site — com o curso FIXO DA ROTA
+ * (sem cookie: página estática, porta de busca do Google).
+ */
 export default function InfantilIndexPage() {
-  const course = getCourse('infantil');
+  const course = getCourseOrThrow('infantil');
 
   return (
-    <div className="mx-auto w-full max-w-[920px] px-4 py-10 sm:px-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-em">Curso gratuito</p>
-      <h1 className="mt-2 font-display text-3xl font-bold text-ink">
-        {course?.name ?? 'Infantil · 5º ano'}
-      </h1>
-      <p className="mt-3 max-w-2xl leading-relaxed text-n-600">
-        {course?.description ??
-          'Trilhas de matemática para crianças no 5º ano do ensino fundamental, com linguagem e ritmo adequados à idade.'}
-      </p>
+    <StudyShell
+      activeNav="trilhas"
+      pageTitle="Infantil"
+      pageSubtitle="Índice do curso: ano, matéria e temas"
+      breadcrumb={['App', 'Infantil']}
+      searchPlaceholder="Buscar aula ou tema..."
+      course={course}
+      courses={getCourses()}
+    >
+      <div className="mx-auto w-full max-w-[920px] px-4 py-10 sm:px-6">
+        <p className="text-xs font-bold uppercase tracking-widest text-em">Curso gratuito</p>
+        <h1 className="mt-2 font-display text-3xl font-bold text-ink">{course.name}</h1>
+        <p className="mt-3 max-w-2xl leading-relaxed text-n-600">{course.description}</p>
 
       {INFANTIL_CATALOG.map((year) => (
         <section key={year.slug} aria-labelledby={`ano-${year.slug}`} className="mt-10">
@@ -62,6 +71,7 @@ export default function InfantilIndexPage() {
           ))}
         </section>
       ))}
-    </div>
+      </div>
+    </StudyShell>
   );
 }
