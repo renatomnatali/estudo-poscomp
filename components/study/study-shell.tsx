@@ -81,19 +81,13 @@ type NavSection = {
 };
 
 /**
- * Nav lateral derivada do curso ativo — sem ramificação por slug:
- *
- * - O item de trilhas vem do `studyEntry` do curso (rótulo + rota do
- *   catálogo daquele curso).
- * - Flashcards/Simulado seguem as features do curso.
- * - As seções de prática, progresso e premium pertencem à suíte de
- *   estudo completa: cursos só-trilha (simulado e flashcards desligados,
- *   como o Infantil hoje) não as têm.
- * - O badge de trilhas ("25") e o bloco de progresso geral descrevem o
- *   catálogo de study-data; só existem nele.
+ * Nav lateral do site — COMPLETA em qualquer curso (é o mesmo site:
+ * trocar de curso não esconde seções). A única variação por curso é o
+ * item de Trilhas: label/href do `studyEntry` do curso, com o badge
+ * "25" apenas quando o catálogo vem de study-data.
  */
 function buildNavSections(course: Course): NavSection[] {
-  const sections: NavSection[] = [
+  return [
     {
       key: 'inicio',
       label: 'Início',
@@ -117,27 +111,15 @@ function buildNavSections(course: Course): NavSection[] {
                 { label: '25', tone: 'green' }
               : undefined,
         },
-        ...(course.features.flashcards
-          ? [
-              {
-                id: 'flashcards' as const,
-                label: 'Flashcards',
-                href: '/flashcards',
-                Icon: Layers,
-                tooltip: 'Flashcards',
-              },
-            ]
-          : []),
+        {
+          id: 'flashcards',
+          label: 'Flashcards',
+          href: '/flashcards',
+          Icon: Layers,
+          tooltip: 'Flashcards',
+        },
       ],
     },
-  ];
-
-  if (!course.features.simulado && !course.features.flashcards) {
-    return sections;
-  }
-
-  return [
-    ...sections,
     {
       key: 'praticar',
       label: 'Praticar',
@@ -149,17 +131,13 @@ function buildNavSections(course: Course): NavSection[] {
           Icon: BookOpen,
           tooltip: 'Exercícios',
         },
-        ...(course.features.simulado
-          ? [
-              {
-                id: 'simulado' as const,
-                label: 'Simulado POSCOMP',
-                href: '/simulado',
-                Icon: Timer,
-                tooltip: 'Simulado',
-              },
-            ]
-          : []),
+        {
+          id: 'simulado',
+          label: 'Simulado POSCOMP',
+          href: '/simulado',
+          Icon: Timer,
+          tooltip: 'Simulado',
+        },
       ],
     },
     {
