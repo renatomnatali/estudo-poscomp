@@ -171,6 +171,74 @@ describe('seletor de curso — teclado do listbox (WAI-ARIA)', () => {
     expect(within(menu).getByRole('option', { name: /poscomp/i })).not.toHaveFocus();
   });
 
+  it('ArrowDown com o menu fechado abre e foca a option do curso em estudo', async () => {
+    // Arrange — ativo na segunda posição: o foco pós-abertura prova que
+    // parte do curso em estudo, não da primeira option.
+    renderSwitcher('infantil');
+    screen.getByRole('button', { name: /trocar de curso/i }).focus();
+
+    // Act — o foco é aplicado em efeito após a montagem das options.
+    await userEvent.keyboard('{ArrowDown}');
+    const menu = await screen.findByRole('listbox', { name: /seus cursos/i });
+
+    // Assert
+    const infantil = within(menu).getByRole('option', { name: /infantil/i });
+    await waitFor(() => expect(infantil).toHaveFocus());
+  });
+
+  it('ArrowUp com o menu fechado abre e foca a option do curso em estudo', async () => {
+    // Arrange
+    renderSwitcher('infantil');
+    screen.getByRole('button', { name: /trocar de curso/i }).focus();
+
+    // Act
+    await userEvent.keyboard('{ArrowUp}');
+    const menu = await screen.findByRole('listbox', { name: /seus cursos/i });
+
+    // Assert — padrão do listbox colapsável: ↑ também parte do em estudo.
+    const infantil = within(menu).getByRole('option', { name: /infantil/i });
+    await waitFor(() => expect(infantil).toHaveFocus());
+  });
+
+  it('Home e End com o menu fechado abrem focando a primeira e a última option', async () => {
+    // Arrange
+    renderSwitcher('infantil');
+    const trigger = screen.getByRole('button', { name: /trocar de curso/i });
+    trigger.focus();
+
+    // Act — End abre na última option.
+    await userEvent.keyboard('{End}');
+    let menu = await screen.findByRole('listbox', { name: /seus cursos/i });
+    const infantil = within(menu).getByRole('option', { name: /infantil/i });
+    await waitFor(() => expect(infantil).toHaveFocus());
+
+    // Act — fecha; o usuário volta ao gatilho (o foco não é restaurado
+    // automaticamente) e reabre com Home.
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    trigger.focus();
+    await userEvent.keyboard('{Home}');
+    menu = screen.getByRole('listbox', { name: /seus cursos/i });
+
+    // Assert — primeira option, distinta do curso em estudo.
+    const poscomp = within(menu).getByRole('option', { name: /poscomp/i });
+    await waitFor(() => expect(poscomp).toHaveFocus());
+  });
+
+  it('Tab com o menu fechado não abre o menu', async () => {
+    // Arrange
+    renderSwitcher();
+    screen.getByRole('button', { name: /trocar de curso/i }).focus();
+
+    // Act
+    await userEvent.keyboard('{Tab}');
+    await act(async () => {});
+
+    // Assert — Tab segue a ordem natural de tabulação: nada abre, nada troca.
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(setActiveCourseSpy).not.toHaveBeenCalled();
+  });
+
   it('ArrowDown e ArrowUp movem o foco entre as options', async () => {
     // Arrange
     renderSwitcher('infantil');
