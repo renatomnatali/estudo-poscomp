@@ -73,7 +73,9 @@ beforeEach(() => {
   dbMock.user.update.mockReset();
   dbMock.passwordResetToken.findUnique.mockReset();
   dbMock.passwordResetToken.update.mockReset();
-  dbMock.passwordResetToken.updateMany.mockReset().mockResolvedValue({});
+  // Claim atômico do token single-use (dbd4694): caminho feliz acerta
+  // exatamente 1 linha. Casos concorrentes sobrescrevem para { count: 0 }.
+  dbMock.passwordResetToken.updateMany.mockReset().mockResolvedValue({ count: 1 });
   dbMock.passwordResetToken.create.mockReset().mockResolvedValue({});
   dbMock.$transaction.mockReset().mockImplementation(async (arg: unknown) => {
     // Callback mode (reset/set-password): repassa o próprio db como `tx`.
@@ -216,10 +218,34 @@ describe('POST /api/auth/reset-password', () => {
       // Posse do link prova o e-mail: promovido quando ainda era nulo.
       expect(update.data.emailVerified).toBeInstanceOf(Date);
 
-      expect(dbMock.passwordResetToken.update).toHaveBeenCalledWith({
-        where: { token: TOKEN },
+      // Token consumido pelo claim atômico dentro da transação.
+      expect(dbMock.passwordResetToken.updateMany).toHaveBeenCalledWith({
+        where: { token: TOKEN, usedAt: null },
         data: { usedAt: expect.any(Date) },
       });
+    } finally {
+      silence.restore();
+    }
+  });
+
+  it('perde a corrida do claim (count=0) e responde 400 SEM trocar a senha', async () => {
+    // Dois requests concorrentes com o mesmo token: exatamente um vence. O
+    // perdedor vê o claim alcançar 0 linhas e a transação reverter — o hash
+    // novo e o passwordChangedAt nunca são gravados.
+    dbMock.passwordResetToken.findUnique.mockResolvedValueOnce(tokenReset());
+    dbMock.passwordResetToken.updateMany.mockResolvedValueOnce({ count: 0 });
+
+    const silence = silenceConsole('log');
+    try {
+      const response = await postReset(
+        requisicao('/api/auth/reset-password', { token: TOKEN, password: NOVA_SENHA }, { ip: '198.51.100.46' })
+      );
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toMatchObject({
+        error: expect.stringMatching(/token inválido ou já utilizado/i),
+      });
+      expect(dbMock.user.update).not.toHaveBeenCalled();
     } finally {
       silence.restore();
     }
@@ -343,10 +369,30 @@ describe('POST /api/auth/set-password', () => {
       expect(update.data.passwordHash).toMatch(/^\$2[aby]\$/);
       expect(update.data.passwordChangedAt).toBeInstanceOf(Date);
       expect('emailVerified' in update.data).toBe(false);
-      expect(dbMock.passwordResetToken.update).toHaveBeenCalledWith({
-        where: { token: TOKEN },
+      expect(dbMock.passwordResetToken.updateMany).toHaveBeenCalledWith({
+        where: { token: TOKEN, usedAt: null },
         data: { usedAt: expect.any(Date) },
       });
+    } finally {
+      silence.restore();
+    }
+  });
+
+  it('perde a corrida do claim (count=0) e responde 400 SEM definir a senha', async () => {
+    dbMock.passwordResetToken.findUnique.mockResolvedValueOnce(tokenReset());
+    dbMock.passwordResetToken.updateMany.mockResolvedValueOnce({ count: 0 });
+
+    const silence = silenceConsole('log');
+    try {
+      const response = await postSet(
+        requisicao('/api/auth/set-password', { token: TOKEN, password: NOVA_SENHA }, { ip: '198.51.100.52' })
+      );
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toMatchObject({
+        error: expect.stringMatching(/token inválido ou já utilizado/i),
+      });
+      expect(dbMock.user.update).not.toHaveBeenCalled();
     } finally {
       silence.restore();
     }

@@ -211,6 +211,54 @@ describe('POST /api/auth/login', () => {
     }
   });
 
+  it('trata password não-string (número no JSON) como credencial inválida — 401, nunca 500', async () => {
+    // JSON admite number: sem a coerção, bcrypt.compare lançaria e a rota
+    // viraria 500. O contrato é o 401 genérico.
+    dbMock.user.findUnique.mockResolvedValueOnce(
+      usuario({ passwordHash: await hash(SENHA, 10), emailVerified: new Date() })
+    );
+
+    const silence = silenceConsole('log');
+    try {
+      const response = await POST(
+        post({ email: 'usuario@teste.com', password: 123 }, { ip: '198.51.100.19' })
+      );
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toMatchObject({ error: expect.stringMatching(/inválidas/i) });
+      expect(response.headers.get('set-cookie')).toBeNull();
+    } finally {
+      silence.restore();
+    }
+  });
+
+  it('conta excluída (soft-delete) recebe o MESMO 401 genérico, sem cookie', async () => {
+    // Senha correta e e-mail verificado, mas deletedAt preenchido: nenhuma
+    // sessão é emitida e o corpo é idêntico ao do user-not-found.
+    dbMock.user.findUnique
+      .mockResolvedValueOnce({
+        ...usuario({ passwordHash: await hash(SENHA, 10), emailVerified: new Date() }),
+        deletedAt: new Date('2026-09-20T00:00:00.000Z'),
+      })
+      .mockResolvedValueOnce(null);
+
+    const silence = silenceConsole('log');
+    try {
+      const excluida = await POST(
+        post({ email: 'usuario@teste.com', password: SENHA }, { ip: '198.51.100.20' })
+      );
+      const inexistente = await POST(
+        post({ email: 'ghost@teste.com', password: SENHA }, { ip: '198.51.100.21' })
+      );
+
+      expect(excluida.status).toBe(401);
+      expect(await excluida.json()).toEqual(await inexistente.json());
+      expect(excluida.headers.get('set-cookie')).toBeNull();
+    } finally {
+      silence.restore();
+    }
+  });
+
   it('responde 429 na 11ª tentativa do mesmo IP no minuto (10/min)', async () => {
     dbMock.user.findUnique.mockResolvedValue(null);
     const silence = silenceConsole('log');

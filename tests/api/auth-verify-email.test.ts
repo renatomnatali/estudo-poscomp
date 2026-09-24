@@ -69,12 +69,13 @@ function tokenVerificacao(overrides: Partial<{ usedAt: Date | null; expiresAt: D
 beforeEach(() => {
   dbMock.verificationToken.findUnique.mockReset();
   dbMock.verificationToken.update.mockReset();
-  dbMock.verificationToken.updateMany.mockReset().mockResolvedValue({});
+  // Claim atômico do token single-use (dbd4694): caminho feliz acerta
+  // exatamente 1 linha. Casos concorrentes sobrescrevem para { count: 0 }.
+  dbMock.verificationToken.updateMany.mockReset().mockResolvedValue({ count: 1 });
   dbMock.verificationToken.create.mockReset().mockResolvedValue({});
   dbMock.user.findUnique.mockReset();
   dbMock.user.update.mockReset();
   dbMock.$transaction.mockReset().mockImplementation(async (arg: unknown) => {
-    // Batch mode (verify-email): executa as operações do array em ordem.
     if (Array.isArray(arg)) {
       for (const op of arg) await op;
       return;
@@ -90,7 +91,7 @@ afterEach(() => {
 });
 
 describe('POST /api/auth/verify-email', () => {
-  it('marca emailVerified e consome o token na MESMA transação', async () => {
+  it('marca emailVerified e reclama o token na MESMA transação', async () => {
     dbMock.verificationToken.findUnique.mockResolvedValueOnce(tokenVerificacao());
     const silence = silenceConsole('log');
     try {
@@ -101,22 +102,38 @@ describe('POST /api/auth/verify-email', () => {
       expect(response.status).toBe(200);
       expect(await response.json()).toEqual({ verified: true });
 
-      // Uma única transação carregando AMBOS os writes.
+      // Uma única transação (callback) carregando claim + update do usuário.
       expect(dbMock.$transaction).toHaveBeenCalledTimes(1);
-      const operacoes = (dbMock.$transaction as Mock).mock.calls[0][0];
-      expect(Array.isArray(operacoes)).toBe(true);
-      expect(operacoes).toHaveLength(2);
 
+      expect(dbMock.verificationToken.updateMany).toHaveBeenCalledWith({
+        where: { token: TOKEN, usedAt: null },
+        data: { usedAt: expect.any(Date) },
+      });
       expect(dbMock.user.update).toHaveBeenCalledTimes(1);
       expect((dbMock.user.update as Mock).mock.calls[0][0]).toEqual({
         where: { id: 'u-verify-1' },
         data: { emailVerified: expect.any(Date) },
       });
-      expect(dbMock.verificationToken.update).toHaveBeenCalledTimes(1);
-      expect((dbMock.verificationToken.update as Mock).mock.calls[0][0]).toEqual({
-        where: { token: TOKEN },
-        data: { usedAt: expect.any(Date) },
-      });
+    } finally {
+      silence.restore();
+    }
+  });
+
+  it('perde a corrida do claim (count=0) e responde 400 SEM tocar o usuário', async () => {
+    // Dois requests concorrentes com o mesmo token: exatamente um vence.
+    // O perdedor vê o updateMany alcançar 0 linhas e a transação reverter —
+    // nenhum write no usuário acontece.
+    dbMock.verificationToken.findUnique.mockResolvedValueOnce(tokenVerificacao());
+    dbMock.verificationToken.updateMany.mockResolvedValueOnce({ count: 0 });
+    const silence = silenceConsole('log');
+    try {
+      const response = await postVerifyEmail(
+        requisicao('/api/auth/verify-email', { token: TOKEN }, { ip: '192.0.2.14' })
+      );
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toMatchObject({ error: expect.stringMatching(/token inválido/i) });
+      expect(dbMock.user.update).not.toHaveBeenCalled();
     } finally {
       silence.restore();
     }
