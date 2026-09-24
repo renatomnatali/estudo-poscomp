@@ -6,6 +6,14 @@ import { db } from "@/lib/db";
 export { getSecret };
 
 /**
+ * Sessão JWT espelhada do sem-cilada (src/lib/auth.ts) com adaptações APR-3:
+ * sem AGENCY/EDITOR (Role = USER|ADMIN) e SEM `userAuthTag(userId)` — lá é um
+ * no-op defensivo para chamadores de `revalidateTag`; reintroduzir aqui apenas
+ * quando um PR passar a usar `revalidateTag` (manter o diff-arquivo-a-arquivo
+ * honesto).
+ */
+
+/**
  * Níveis de acesso da aplicação. Espelha o enum `Role` do Prisma; mantido
  * como union de string literais porque o JWT é serializado.
  * (Adaptação APR-3: sem AGENCY/EDITOR — escopos do outro produto.)

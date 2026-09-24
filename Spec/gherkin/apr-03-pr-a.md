@@ -65,10 +65,15 @@ Funcionalidade: sessão
 
 ```gherkin
 Funcionalidade: proteção
-  Cenário: POST de outro site
-    Dado um POST sem o cabeçalho Sec-Fetch-Site indicando mesma origem
+  Cenário: POST vindo de outro site
+    Dado um POST com o cabeçalho Sec-Fetch-Site apontando origem estranha (ex.: "evil.com")
     Quando a verificação CSRF roda
-    Então a requisição é bloqueada
+    Então a requisição é bloqueada com 403
+
+  Cenário: POST sem o cabeçalho Sec-Fetch-Site
+    Dado um POST de cliente legado (curl/server-side) que não envia o cabeçalho
+    Quando a verificação CSRF roda
+    Então a requisição PASSA e o evento CSRF_HEADER_ABSENT é registrado no log de segurança
 
   Cenário: limite de tentativas excedido
     Dado que o IP já fez o limite de chamadas no minuto para o fluxo
