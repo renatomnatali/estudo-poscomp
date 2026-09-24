@@ -358,3 +358,64 @@ model UserAccessGrant {
   @@index([emailNormalized, scope, revokedAt])
   @@index([scope, revokedAt, endsAt])
 }
+
+// ─── Autenticação própria (APR-3, PR A) ─────────────────────────────
+// Espelho do sem-cilada (schema.prisma:423-460 e 1869-1893), com as
+// adaptações declaradas na spec: sem `createdVia` (não há compra neste
+// produto) e Role sem AGENCY/EDITOR (escopos do outro produto).
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id                String    @id @default(cuid())
+  /// E-mail já normalizado (trim + lowercase — lib/email.ts) no momento da
+  /// gravação. `String @unique` no Postgres é case-sensitive: gravar
+  /// normalizado é o que impede contas duplicadas por variação de caixa.
+  email             String    @unique
+  /// Senha com bcrypt. `String?` porque a conta pode nascer antes da
+  /// definição de senha no fluxo de criação/reset.
+  passwordHash      String?
+  emailVerified     DateTime?
+  role              Role      @default(USER)
+  /// Timestamp da última troca de senha. JWTs emitidos antes deste valor
+  /// são rejeitados (floor(passwordChangedAt/1000) >= iat — lib/auth.ts).
+  passwordChangedAt DateTime?
+  /// Timestamp de exclusão self-service (LGPD Art. 18 VI). Usuário com
+  /// deletedAt definido tem sessões rejeitadas.
+  deletedAt         DateTime?
+  displayName       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  tokens         VerificationToken[]
+  passwordResets PasswordResetToken[]
+}
+
+model VerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+}
