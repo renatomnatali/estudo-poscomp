@@ -1,7 +1,16 @@
 /** @vitest-environment jsdom */
 
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+// As páginas do infantil agora montam o StudyShell (client): fora do App
+// Router não há contexto de router. importOriginal preserva o notFound
+// REAL — o digest dele é o contrato de 404 assertado abaixo.
+vi.mock('next/navigation', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
+  usePathname: () => '/infantil/5-ano/matematica/fracoes',
+}));
 
 import ThemePage, {
   generateMetadata as generateThemeMetadata,

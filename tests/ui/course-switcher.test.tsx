@@ -5,13 +5,17 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { refreshSpy, setActiveCourseSpy } = vi.hoisted(() => ({
+const { refreshSpy, pushSpy, setActiveCourseSpy, navigationState } = vi.hoisted(() => ({
   refreshSpy: vi.fn(),
+  pushSpy: vi.fn(),
   setActiveCourseSpy: vi.fn(),
+  // Rota atual do usuário: decide refresh (já no dashboard) vs push.
+  navigationState: { pathname: '/dashboard' },
 }));
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ refresh: refreshSpy }),
+  useRouter: () => ({ refresh: refreshSpy, push: pushSpy }),
+  usePathname: () => navigationState.pathname,
 }));
 
 // Server action é a fronteira RPC do client (o 'use server' vira stub de
@@ -44,6 +48,8 @@ describe('seletor de curso da sidebar', () => {
     setActiveCourseSpy.mockReset();
     setActiveCourseSpy.mockResolvedValue({ ok: true });
     refreshSpy.mockClear();
+    pushSpy.mockClear();
+    navigationState.pathname = '/dashboard';
   });
 
   afterEach(() => {
@@ -96,18 +102,34 @@ describe('seletor de curso da sidebar', () => {
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
-  it('troca de curso: chama a action com o slug escolhido e refresca a página ao confirmar', async () => {
-    // Arrange
+  it('troca de curso já no dashboard: action com o slug certo, refresh e sem push', async () => {
+    // Arrange — usuário está na home da área logada.
     renderSwitcher();
     const menu = await openMenu();
 
     // Act — usuário escolhe o curso Infantil.
     await userEvent.click(within(menu).getByRole('option', { name: /infantil/i }));
 
-    // Assert — a troca pede a gravação do slug certo e o refresh re-renderiza
-    // a área logada no novo contexto.
+    // Assert — grava o slug certo e re-renderiza no novo contexto; já está
+    // na home do curso, então não há navegação.
     await waitFor(() => expect(setActiveCourseSpy).toHaveBeenCalledWith('infantil'));
     await waitFor(() => expect(refreshSpy).toHaveBeenCalledTimes(1));
+    expect(pushSpy).not.toHaveBeenCalled();
+  });
+
+  it('troca de curso fora do dashboard: leva à home do curso com push, sem refresh', async () => {
+    // Arrange — usuário numa rota pública do infantil.
+    navigationState.pathname = '/infantil/5-ano/matematica/fracoes';
+    renderSwitcher();
+    const menu = await openMenu();
+
+    // Act
+    await userEvent.click(within(menu).getByRole('option', { name: /infantil/i }));
+
+    // Assert — confirmada a troca, a home do curso é a próxima parada.
+    await waitFor(() => expect(setActiveCourseSpy).toHaveBeenCalledWith('infantil'));
+    await waitFor(() => expect(pushSpy).toHaveBeenCalledWith('/dashboard'));
+    expect(refreshSpy).not.toHaveBeenCalled();
   });
 
   it('clicar no curso já ativo não dispara troca', async () => {
@@ -122,9 +144,10 @@ describe('seletor de curso da sidebar', () => {
     // Assert — reabrir o menu no curso atual é navegação, não mutação.
     expect(setActiveCourseSpy).not.toHaveBeenCalled();
     expect(refreshSpy).not.toHaveBeenCalled();
+    expect(pushSpy).not.toHaveBeenCalled();
   });
 
-  it('troca recusada pela action (ok: false) não refresca a página', async () => {
+  it('troca recusada pela action (ok: false) não navega nem refresca', async () => {
     // Arrange — a fronteira recusa (ex.: slug que saiu do registry).
     setActiveCourseSpy.mockResolvedValue({ ok: false });
     renderSwitcher();
@@ -133,10 +156,11 @@ describe('seletor de curso da sidebar', () => {
     // Act
     await userEvent.click(within(menu).getByRole('option', { name: /infantil/i }));
 
-    // Assert — sem confirmação, a página não refresca com estado velho.
+    // Assert — sem confirmação, nada muda na tela.
     await waitFor(() => expect(setActiveCourseSpy).toHaveBeenCalledWith('infantil'));
     await act(async () => {});
     expect(refreshSpy).not.toHaveBeenCalled();
+    expect(pushSpy).not.toHaveBeenCalled();
   });
 });
 
@@ -145,6 +169,8 @@ describe('seletor de curso — teclado do listbox (WAI-ARIA)', () => {
     setActiveCourseSpy.mockReset();
     setActiveCourseSpy.mockResolvedValue({ ok: true });
     refreshSpy.mockClear();
+    pushSpy.mockClear();
+    navigationState.pathname = '/dashboard';
   });
 
   afterEach(() => {

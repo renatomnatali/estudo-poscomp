@@ -14,7 +14,8 @@ vi.mock('next/headers', () => ({
 }));
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ refresh: vi.fn() }),
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
+  usePathname: () => '/dashboard',
 }));
 
 import DashboardRoutePage from '@/app/dashboard/page';
