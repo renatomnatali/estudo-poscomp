@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 
 import { isClerkEnabledClient } from '@/lib/auth-config';
+import type { Course } from '@/lib/courses/types';
+import { CourseSwitcher } from '@/components/study/course-switcher';
 
 type IconComponent = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
@@ -48,6 +50,10 @@ interface StudyShellProps {
   mainVariant?: 'default' | 'lesson';
   children: React.ReactNode;
   onSignOut?: () => void;
+  /** Curso ativo da sessão — decide nav, progresso e contexto do shell. */
+  course: Course;
+  /** Todos os cursos registrados — alimentam o seletor da sidebar. */
+  courses: Course[];
   viewer?: {
     displayName?: string;
     email?: string;
@@ -67,89 +73,125 @@ interface SidebarItem {
   premium?: boolean;
 }
 
-const NAV_SECTIONS: Array<{
+type NavSection = {
   key: string;
   label?: string;
   separatorBefore?: boolean;
   items: SidebarItem[];
-}> = [
-  {
-    key: 'inicio',
-    label: 'Início',
-    items: [
-      { id: 'dashboard', label: 'Dashboard', href: '/dashboard', Icon: LayoutDashboard, tooltip: 'Dashboard' },
-    ],
-  },
-  {
-    key: 'estudar',
-    label: 'Estudar',
-    items: [
-      {
-        id: 'trilhas',
-        label: 'Trilhas de Estudo',
-        href: '/trilhas',
-        Icon: Route,
-        tooltip: 'Trilhas',
-        badge: { label: '25', tone: 'green' },
-      },
-      {
-        id: 'flashcards',
-        label: 'Flashcards',
-        href: '/flashcards',
-        Icon: Layers,
-        tooltip: 'Flashcards',
-      },
-    ],
-  },
-  {
-    key: 'praticar',
-    label: 'Praticar',
-    items: [
-      {
-        id: 'exercicios',
-        label: 'Exercícios',
-        href: '/premium',
-        Icon: BookOpen,
-        tooltip: 'Exercícios',
-      },
-      {
-        id: 'simulado',
-        label: 'Simulado POSCOMP',
-        href: '/simulado',
-        Icon: Timer,
-        tooltip: 'Simulado',
-      },
-    ],
-  },
-  {
-    key: 'progresso',
-    separatorBefore: true,
-    items: [
-      {
-        id: 'progresso',
-        label: 'Meu Progresso',
-        href: '/premium',
-        Icon: TrendingUp,
-        tooltip: 'Progresso',
-        badge: { label: 'PRO', tone: 'amber' },
-      },
-    ],
-  },
-  {
-    key: 'premium',
-    separatorBefore: true,
-    items: [
-      {
-        id: 'premium',
-        label: 'Seja Premium',
-        href: '/premium',
-        Icon: Sparkles,
-        tooltip: 'Premium',
-        premium: true,
-      },
-    ],
-  },
-];
+};
+
+/**
+ * Nav lateral derivada do curso ativo — sem ramificação por slug:
+ *
+ * - O item de trilhas vem do `studyEntry` do curso (rótulo + rota do
+ *   catálogo daquele curso).
+ * - Flashcards/Simulado seguem as features do curso.
+ * - As seções de prática, progresso e premium pertencem à suíte de
+ *   estudo completa: cursos só-trilha (simulado e flashcards desligados,
+ *   como o Infantil hoje) não as têm.
+ * - O badge de trilhas ("25") e o bloco de progresso geral descrevem o
+ *   catálogo de study-data; só existem nele.
+ */
+function buildNavSections(course: Course): NavSection[] {
+  const sections: NavSection[] = [
+    {
+      key: 'inicio',
+      label: 'Início',
+      items: [
+        { id: 'dashboard', label: 'Dashboard', href: '/dashboard', Icon: LayoutDashboard, tooltip: 'Dashboard' },
+      ],
+    },
+    {
+      key: 'estudar',
+      label: 'Estudar',
+      items: [
+        {
+          id: 'trilhas',
+          label: course.studyEntry.label,
+          href: course.studyEntry.href,
+          Icon: Route,
+          tooltip: 'Trilhas',
+          badge:
+            course.trackSource === 'study-data'
+              ? // 25 trilhas do edital em study-data (TRACK_CARDS).
+                { label: '25', tone: 'green' }
+              : undefined,
+        },
+        ...(course.features.flashcards
+          ? [
+              {
+                id: 'flashcards' as const,
+                label: 'Flashcards',
+                href: '/flashcards',
+                Icon: Layers,
+                tooltip: 'Flashcards',
+              },
+            ]
+          : []),
+      ],
+    },
+  ];
+
+  if (!course.features.simulado && !course.features.flashcards) {
+    return sections;
+  }
+
+  return [
+    ...sections,
+    {
+      key: 'praticar',
+      label: 'Praticar',
+      items: [
+        {
+          id: 'exercicios',
+          label: 'Exercícios',
+          href: '/premium',
+          Icon: BookOpen,
+          tooltip: 'Exercícios',
+        },
+        ...(course.features.simulado
+          ? [
+              {
+                id: 'simulado' as const,
+                label: 'Simulado POSCOMP',
+                href: '/simulado',
+                Icon: Timer,
+                tooltip: 'Simulado',
+              },
+            ]
+          : []),
+      ],
+    },
+    {
+      key: 'progresso',
+      separatorBefore: true,
+      items: [
+        {
+          id: 'progresso',
+          label: 'Meu Progresso',
+          href: '/premium',
+          Icon: TrendingUp,
+          tooltip: 'Progresso',
+          badge: { label: 'PRO', tone: 'amber' },
+        },
+      ],
+    },
+    {
+      key: 'premium',
+      separatorBefore: true,
+      items: [
+        {
+          id: 'premium',
+          label: 'Seja Premium',
+          href: '/premium',
+          Icon: Sparkles,
+          tooltip: 'Premium',
+          premium: true,
+        },
+      ],
+    },
+  ];
+}
 
 export function StudyShell({
   activeNav,
@@ -161,6 +203,8 @@ export function StudyShell({
   contentMode = 'default',
   mainVariant = 'default',
   children,
+  course,
+  courses,
   onSignOut,
   viewer,
 }: StudyShellProps) {
@@ -169,6 +213,11 @@ export function StudyShell({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const clerkEnabled = isClerkEnabledClient();
+  const navSections = buildNavSections(course);
+  // O bloco "Progresso geral" descreve o catálogo de study-data (25
+  // tópicos do POSCOMP); cursos com catálogo próprio ainda não têm fonte
+  // real de progresso — nada de número inventado.
+  const showProgressStrip = course.trackSource === 'study-data';
   const viewerName = viewer?.displayName || 'Estudante';
   const viewerPlan =
     viewer?.planLabel ||
@@ -302,19 +351,23 @@ export function StudyShell({
             </button>
           </div>
 
-          <div className="sb-progress-strip">
-            <div className="sb-ps-header">
-              <span className="sb-ps-label">Progresso geral</span>
-              <span className="sb-ps-pct">4%</span>
+          <CourseSwitcher course={course} courses={courses} />
+
+          {showProgressStrip ? (
+            <div className="sb-progress-strip">
+              <div className="sb-ps-header">
+                <span className="sb-ps-label">Progresso geral</span>
+                <span className="sb-ps-pct">4%</span>
+              </div>
+              <div className="sb-ps-bar-bg">
+                <div className="sb-ps-bar-fill" />
+              </div>
+              <div className="sb-ps-caption">1 de 25 tópicos concluídos</div>
             </div>
-            <div className="sb-ps-bar-bg">
-              <div className="sb-ps-bar-fill" />
-            </div>
-            <div className="sb-ps-caption">1 de 25 tópicos concluídos</div>
-          </div>
+          ) : null}
 
           <nav aria-label="Menu principal" className="sb-nav">
-            {NAV_SECTIONS.map((section) => (
+            {navSections.map((section) => (
               <div key={section.key} className="sb-nav-wrapper">
                 {section.separatorBefore ? <div className="sb-sep" /> : null}
                 <div className="sb-nav-section">

@@ -109,11 +109,16 @@ describe('Página de Cookies — tabela de cookies', () => {
     cleanup();
   });
 
-  it('lista os cookies do app, todos classificados como essencial ou analítica', () => {
+  it('lista os cookies do app, todos classificados como essencial, funcional ou analítica', () => {
     const { container } = render(<CookiesPage />);
 
     const table = container.querySelector('table.cookies-table') as HTMLTableElement | null;
     expect(table).not.toBeNull();
+
+    // O cookie funcional de preferência de curso precisa estar declarado na
+    // tabela — é o contrato de transparência da página (dado renderizado,
+    // não microcopy).
+    expect(table!.textContent).toContain('aprovado.curso');
 
     const rows = table!.querySelectorAll('tbody tr');
     // O comportamento que protegemos: a tabela existe e tem pelo menos um cookie listado.
@@ -122,8 +127,8 @@ describe('Página de Cookies — tabela de cookies', () => {
     rows.forEach((row) => {
       const badge = row.querySelector('.badge') as HTMLElement | null;
       expect(badge).not.toBeNull();
-      // Cada cookie é classificado como uma das duas categorias.
-      expect(badge!.className).toMatch(/\b(essential|analytics)\b/);
+      // Cada cookie é classificado como uma das três categorias.
+      expect(badge!.className).toMatch(/\b(essential|functional|analytics)\b/);
     });
   });
 });

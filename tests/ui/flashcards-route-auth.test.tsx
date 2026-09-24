@@ -16,6 +16,16 @@ vi.mock('@clerk/nextjs/server', () => ({
   auth: authSpy,
 }));
 
+// getActiveCourseContext é fronteira server-only do Next (cookies() lança
+// fora de request scope); o mock devolve os cursos reais do registry.
+vi.mock('@/lib/active-course', async () => {
+  const { POSCOMP_COURSE } = await import('@/lib/courses/poscomp');
+  const { getCourses } = await import('@/lib/courses/registry');
+  return {
+    getActiveCourseContext: async () => ({ course: POSCOMP_COURSE, courses: getCourses() }),
+  };
+});
+
 vi.mock('@/components/auth/study-route-guard', () => ({
   StudyRouteGuard: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));

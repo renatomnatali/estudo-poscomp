@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>aprovado.xyz — home logada · seletor de curso (protótipo)</title>
+<style>
+/* ===== tokens do DS (components/marketing/aprovado-tokens.css) ===== */
+:root {
+  --ink:#0a0f1e; --ink-2:#1c2333;
+  --sap:#1b3fd8; --sap-d:#1230a8; --sap-l:#4b6bf5; --sap-bg:#eef1ff; --sap-bg-2:#e4e9ff;
+  --em:#00b37e; --em-d:#009968; --em-bg:#e6fbf4;
+  --amb:#f59e0b; --amb-bg:#fef3c7; --amb-d:#b45309;
+  --n-50:#f8f9ff; --n-100:#eff1fb; --n-200:#dde0f0; --n-300:#c9cdea; --n-400:#9aa2c6; --n-500:#6b7399; --n-600:#4a5078; --n-700:#333a5c;
+  --white:#fff; --border:var(--n-200); --muted:var(--n-500);
+  --fm:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--n-50);line-height:1.55}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ============ SHELL: sidebar + conteúdo ============ */
+.shell{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
+@media (max-width:860px){.shell{grid-template-columns:1fr}.sidebar{display:none}.mobile-bar{display:flex}}
+
+/* — sidebar — */
+.sidebar{background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.side-top{display:flex;align-items:center;gap:.55rem;padding:1rem 1.1rem .9rem}
+.logo{display:flex;align-items:center;gap:.5rem;font-weight:800;font-size:1.05rem;letter-spacing:-.02em}
+.logo-dot{width:26px;height:26px;border-radius:50%;background:var(--em);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.85rem}
+.logo .ok{color:var(--em)}
+.burger{margin-left:auto;color:var(--n-400);font-size:1.1rem;padding:.25rem .5rem;border-radius:8px}
+.burger:hover{background:var(--n-100)}
+
+/* — SELETOR DE CURSO (a peça nova) — */
+.course-switch{padding:0 .9rem .95rem;border-bottom:1px solid var(--border)}
+.cs-btn{width:100%;display:flex;align-items:center;gap:.65rem;background:var(--n-50);border:1.5px solid var(--border);border-radius:14px;padding:.6rem .7rem;text-align:left;transition:border-color .15s, box-shadow .15s}
+.cs-btn:hover{border-color:var(--n-400)}
+.cs-btn:focus-visible{outline:2px solid var(--sap-l);outline-offset:2px}
+.cs-ico{width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:1.15rem;flex:none}
+.cs-ico.poscomp{background:var(--sap-bg)}
+.cs-ico.infantil{background:var(--em-bg)}
+.cs-meta{min-width:0;flex:1}
+.cs-label{font-family:var(--fm);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--n-400)}
+.cs-name{font-weight:800;font-size:.92rem;letter-spacing:-.01em}
+.cs-caret{color:var(--n-400);font-size:.7rem;transition:transform .18s}
+.cs-btn[aria-expanded="true"] .cs-caret{transform:rotate(180deg)}
+.cs-menu{display:none;margin-top:.45rem;background:var(--white);border:1px solid var(--border);border-radius:14px;box-shadow:0 16px 40px rgba(10,15,30,.14);overflow:hidden}
+.cs-menu.open{display:block}
+.cs-opt{width:100%;display:flex;align-items:center;gap:.6rem;padding:.6rem .75rem;text-align:left}
+.cs-opt:hover{background:var(--n-50)}
+.cs-opt .cs-name{font-size:.88rem}
+.cs-opt small{display:block;color:var(--muted);font-size:.72rem;font-weight:500}
+.cs-opt .check{margin-left:auto;color:var(--em);font-weight:800;opacity:0}
+.cs-opt[aria-current] .check{opacity:1}
+.cs-opt + .cs-opt{border-top:1px solid var(--n-100)}
+.cs-more{display:flex;align-items:center;gap:.5rem;padding:.55rem .75rem;color:var(--n-600);font-size:.82rem;font-weight:600}
+.cs-more:hover{background:var(--n-50)}
+
+/* — progresso do curso ativo — */
+.side-progress{margin:.9rem;background:var(--em-bg);border-radius:14px;padding:.8rem .9rem}
+.side-progress.poscomp{background:var(--sap-bg)}
+.sp-kicker{font-family:var(--fm);font-size:.62rem;letter-spacing:.12em;color:var(--n-500)}
+.sp-val{font-size:1.5rem;font-weight:800;letter-spacing:-.02em}
+.sp-val small{font-size:.8rem;color:var(--n-500);font-weight:600}
+.sp-bar{height:7px;border-radius:99px;background:rgba(10,15,30,.09);margin:.45rem 0 .3rem;overflow:hidden}
+.sp-fill{height:100%;border-radius:99px;background:var(--em-d)}
+.side-progress.poscomp .sp-fill{background:var(--sap)}
+.sp-note{font-size:.72rem;color:var(--n-600)}
+
+/* — nav do curso — */
+.side-nav{flex:1;padding:.4rem .6rem}
+.nav-group{font-family:var(--fm);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--n-400);padding:.9rem .55rem .35rem}
+.nav-item{display:flex;align-items:center;gap:.6rem;padding:.55rem .65rem;border-radius:10px;color:var(--ink-2);font-size:.88rem;font-weight:600}
+.nav-item:hover{background:var(--n-100)}
+.nav-item.active{background:var(--sap-bg);color:var(--sap-d);box-shadow:inset 3px 0 0 var(--sap)}
+.nav-item .ic{width:20px;text-align:center}
+.nav-item .bdg{margin-left:auto;font-family:var(--fm);font-size:.68rem;font-weight:700;background:var(--em-bg);color:var(--em-d);border-radius:99px;padding:.1rem .5rem}
+.nav-item .bdg.pro{background:var(--amb-bg);color:var(--amb-d)}
+.sep{height:1px;background:var(--n-100);margin:.55rem .55rem}
+
+/* — rodapé da sidebar — */
+.side-foot{display:flex;align-items:center;gap:.6rem;padding:.9rem 1rem;border-top:1px solid var(--border)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--n-600);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;flex:none}
+.sf-meta{min-width:0}
+.sf-name{font-weight:700;font-size:.85rem}
+.sf-plan{font-family:var(--fm);font-size:.62rem;letter-spacing:.1em;color:var(--n-400)}
+
+/* — header do conteúdo — */
+.content{display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;gap:1rem;padding:.85rem 1.6rem;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+.crumb{font-size:.8rem;color:var(--n-500)}
+.crumb b{color:var(--ink)}
+.search{flex:1;max-width:420px;display:flex;align-items:center;gap:.5rem;background:var(--n-50);border:1px solid var(--border);border-radius:999px;padding:.5rem .95rem;color:var(--n-400);font-size:.85rem}
+.top-actions{margin-left:auto;display:flex;gap:.5rem}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;color:var(--n-600);position:relative}
+.icon-btn:hover{background:var(--n-50)}
+.dot-red{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:#f04e37;border:1.5px solid #fff}
+
+.mobile-bar{display:none;align-items:center;gap:.6rem;padding:.7rem 1rem;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:6}
+
+/* — área principal — */
+.main{padding:1.6rem;max-width:1060px;width:100%;margin:0:auto;display:flex;flex-direction:column;gap:1.1rem}
+@media (max-width:860px){.main{padding:1rem}}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem 1.3rem}
+
+/* hero saudação */
+.hero{background:linear-gradient(135deg,var(--sap-bg),var(--white));border:1px solid var(--n-200)}
+.hero.inf{background:linear-gradient(135deg,var(--em-bg),var(--white))}
+.hero-eyebrow{font-family:var(--fm);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--n-500)}
+.hero h1{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:.15rem 0 .3rem}
+.hero p{color:var(--n-600);font-size:.92rem;max-width:44rem}
+.hero .cta{display:inline-flex;align-items:center;gap:.4rem;margin-top:.8rem;background:var(--sap);color:#fff;font-weight:700;font-size:.88rem;padding:.6rem 1.15rem;border-radius:999px}
+.hero.inf .cta{background:var(--em-d)}
+.hero .cta:hover{filter:brightness(.92)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem}
+@media (max-width:980px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.stats{grid-template-columns:1fr}}
+.stat .lab{display:block;font-size:.74rem;font-weight:700;color:var(--n-500)}
+.stat .val{display:block;font-size:1.6rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat .sub{display:block;font-size:.74rem;color:var(--n-500)}
+
+/* tracks POSCOMP */
+.tracks{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media (max-width:760px){.tracks{grid-template-columns:1fr}}
+.track{border:1px solid var(--border);border-radius:14px;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.35rem}
+.track .tk-tag{width:fit-content;font-family:var(--fm);font-size:.68rem;font-weight:700;border-radius:99px;padding:.18rem .7rem}
+.tk-tag.prog{background:var(--sap-bg);color:var(--sap-d)}
+.tk-tag.lock{background:var(--n-100);color:var(--n-500)}
+.track h3{font-size:1rem;font-weight:800}
+.track p{font-size:.82rem;color:var(--n-500)}
+.pbar{height:8px;border-radius:99px;background:var(--n-100);overflow:hidden;margin-top:.35rem}
+.pbar>i{display:block;height:100%;background:var(--sap)}
+
+/* heatmap mini */
+.heat{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px;width:fit-content}
+.heat i{width:13px;height:13px;border-radius:3px;background:var(--n-100)}
+.heat i.l1{background:var(--em-bg)} .heat i.l2{background:var(--em)} .heat i.l3{background:var(--em-d)}
+
+/* colunas 2/3 */
+.cols{display:grid;grid-template-columns:1.4fr 1fr;gap:.9rem}
+@media (max-width:860px){.cols{grid-template-columns:1fr}}
+.card h4{font-size:.85rem;font-weight:800;margin-bottom:.65rem;display:flex;align-items:center;gap:.4rem}
+.card h4 .pill{margin-left:auto;font-family:var(--fm);font-size:.66rem;color:var(--n-500);font-weight:600}
+.next-item{display:flex;gap:.7rem;align-items:center;padding:.55rem 0;border-top:1px solid var(--n-100)}
+.next-item:first-of-type{border-top:none}
+.next-ic{width:34px;height:34px;border-radius:10px;background:var(--n-100);display:flex;align-items:center;justify-content:center;font-size:1rem;flex:none}
+.next-t{font-size:.85rem;font-weight:700}
+.next-s{font-size:.74rem;color:var(--n-500)}
+.next-go{margin-left:auto;font-size:.78rem;font-weight:800;color:var(--sap)}
+.fcb{display:flex;align-items:center;gap:.7rem}
+.fcb .val{font-size:1.7rem;font-weight:800;color:var(--em-d)}
+
+/* — dashboard infantil: trilha de aulas (Duolingo-style) — */
+.year-badge{display:inline-flex;align-items:center;gap:.45rem;background:var(--n-100);border-radius:99px;padding:.35rem .9rem;font-family:var(--fm);font-size:.74rem;font-weight:700;color:var(--n-600)}
+.path{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1.5rem 1rem;margin-top:1rem}
+.aula{display:flex;flex-direction:column;align-items:center;gap:.45rem;text-align:center}
+.aula .node{width:64px;height:64px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border:2px solid var(--border);background:var(--white);transition:transform .15s}
+.aula[data-state="done"] .node{background:var(--em-bg);border-color:var(--em)}
+.aula[data-state="next"] .node{background:var(--em);border-color:var(--em-d);box-shadow:0 10px 24px rgba(0,179,126,.35)}
+.aula[data-state="soon"] .node{opacity:.55}
+.aula:hover .node{transform:translateY(-2px)}
+.aula .a-t{font-size:.76rem;font-weight:700;line-height:1.25}
+.aula .a-s{font-family:var(--fm);font-size:.64rem;color:var(--n-400)}
+.aula[data-state="next"] .a-s{color:var(--em-d);font-weight:700}
+
+/* estados de tela */
+.screen{display:none}
+.screen.active{display:flex;flex-direction:column;flex:1;min-width:0}
+.proto-note{position:fixed;right:14px;bottom:14px;z-index:50;background:var(--ink);color:#fff;font-family:var(--fm);font-size:.68rem;padding:.5rem .8rem;border-radius:10px;opacity:.92;max-width:340px}
+.proto-note b{color:#7ef0c0}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- ==================== SIDEBAR (compartilhada, conteúdo troca por curso) ==================== -->
+  <aside class="sidebar">
+    <div class="side-top">
+      <span class="logo"><span class="logo-dot">✓</span>aprovado<span class="ok">.xyz</span></span>
+      <button class="burger" aria-label="Recolher menu">☰</button>
+    </div>
+
+    <!-- SELETOR DE CURSO: o curso ativo em evidência + troca -->
+    <div class="course-switch">
+      <button class="cs-btn" id="csBtn" aria-expanded="false" aria-haspopup="listbox">
+        <span class="cs-ico poscomp" id="csIco">🎓</span>
+        <span class="cs-meta">
+          <span class="cs-label">estudando agora</span>
+          <span class="cs-name" id="csName">POSCOMP</span>
+        </span>
+        <span class="cs-caret">▼</span>
+      </button>
+      <div class="cs-menu" id="csMenu" role="listbox" aria-label="Seus cursos">
+        <button class="cs-opt" data-course="poscomp" role="option" aria-current="true">
+          <span class="cs-ico poscomp">🎓</span>
+          <span class="cs-meta"><span class="cs-name">POSCOMP</span><small>Exame · pós em Computação</small></span>
+          <span class="check">✓</span>
+        </button>
+        <button class="cs-opt" data-course="infantil" role="option">
+          <span class="cs-ico infantil">✏️</span>
+          <span class="cs-meta"><span class="cs-name">Infantil</span><small>Matemática · 5º ano · grátis</small></span>
+          <span class="check">✓</span>
+        </button>
+        <a class="cs-more" href="#">✚ Explorar cursos</a>
+      </div>
+    </div>
+
+    <!-- progresso do curso ATIVO -->
+    <div class="side-progress poscomp" id="sideProg">
+      <div class="sp-kicker">progresso no curso</div>
+      <div class="sp-val">4<small>%</small></div>
+      <div class="sp-bar"><i class="sp-fill" style="width:4%"></i></div>
+      <div class="sp-note">1 de 25 trilhas concluídas</div>
+    </div>
+
+    <!-- nav do curso ATIVO -->
+    <nav class="side-nav" id="sideNav">
+      <div class="nav-group">Início</div>
+      <a class="nav-item active" href="#"><span class="ic">🏠</span>Dashboard</a>
+      <div class="nav-group">Estudar</div>
+      <a class="nav-item" href="#"><span class="ic">🗺️</span>Trilhas de estudo <span class="bdg">25</span></a>
+      <a class="nav-item" href="#"><span class="ic">🃏</span>Flashcards</a>
+      <div class="nav-group">Praticar</div>
+      <a class="nav-item" href="#"><span class="ic">📝</span>Exercícios</a>
+      <a class="nav-item" href="#"><span class="ic">⏱️</span>Simulado POSCOMP</a>
+      <a class="nav-item" href="#"><span class="ic">📊</span>Meu progresso <span class="bdg pro">PRO</span></a>
+      <div class="sep"></div>
+      <a class="nav-item" href="#"><span class="ic">✨</span>Seja Premium</a>
+    </nav>
+
+    <div class="side-foot">
+      <span class="avatar">EE</span>
+      <span class="sf-meta">
+        <span class="sf-name">Estudante</span><br>
+        <span class="sf-plan">PLANO FREE</span>
+      </span>
+    </div>
+  </aside>
+
+  <!-- ==================== CONTEÚDO ==================== -->
+  <div class="content">
+
+    <!-- barra mobile (protótipo responde) -->
+    <div class="mobile-bar">
+      <button class="cs-btn" style="flex:1" id="csBtnM" aria-expanded="false">
+        <span class="cs-ico poscomp" id="csIcoM">🎓</span>
+        <span class="cs-meta"><span class="cs-label">estudando agora</span><span class="cs-name" id="csNameM">POSCOMP</span></span>
+        <span class="cs-caret">▼</span>
+      </button>
+    </div>
+
+    <div class="topbar">
+      <span class="crumb">App › <b>Dashboard</b></span>
+      <span class="search">🔍 Buscar trilha ou módulo...</span>
+      <span class="top-actions">
+        <button class="icon-btn" aria-label="Notificações">🔔<span class="dot-red"></span></button>
+        <button class="icon-btn" aria-label="Configurações">⚙️</button>
+      </span>
+    </div>
+
+    <!-- ============ TELA: POSCOMP (curso ativo) ============ -->
+    <main class="screen active" id="scr-poscomp">
+      <div class="main">
+        <div class="card hero">
+          <span class="hero-eyebrow">POSCOMP · trilha atual</span>
+          <h1>Bom dia, Estudante 👋</h1>
+          <p>Você concluiu <strong>1 de 9 módulos</strong> da trilha <strong>F6 · Linguagens Regulares</strong>. A próxima parada é Expressões Regulares — a 20 min de distância.</p>
+          <a class="cta" href="#">Continuar F6 · Módulo 6 →</a>
+        </div>
+
+        <div class="stats">
+          <div class="card stat"><span class="lab">Módulos concluídos</span><span class="val">1</span><span class="sub">de 9 na trilha F6</span></div>
+          <div class="card stat"><span class="lab">Currículo coberto</span><span class="val">4%</span><span class="sub">1 de 25 trilhas</span></div>
+          <div class="card stat"><span class="lab">Simulados realizados</span><span class="val">2</span><span class="sub">melhor: 62% (parcial)</span></div>
+          <div class="card stat"><span class="lab">Sequência de estudo</span><span class="val">3</span><span class="sub">dias seguidos 🔥</span></div>
+        </div>
+
+        <div class="tracks">
+          <div class="card track">
+            <span class="tk-tag prog">Em progresso · 11%</span>
+            <h3>F6 · Linguagens Regulares</h3>
+            <p>9 módulos · ~14h · autômatos, regex e GLC do básico ao aprofundado</p>
+            <div class="pbar"><i style="width:11%"></i></div>
+          </div>
+          <div class="card track">
+            <span class="tk-tag lock">🔒 Premium</span>
+            <h3>M1 · Matemática Discreta</h3>
+            <p>Próxima parada depois de F6 · 7 módulos · ~11h</p>
+            <div class="pbar"><i style="width:0%"></i></div>
+          </div>
+        </div>
+
+        <div class="cols">
+          <div class="card">
+            <h4>🗓️ Atividade — últimas 8 semanas <span class="pill">cada célula = 1 dia</span></h4>
+            <div class="heat">
+              <i></i><i></i><i class="l1"></i><i></i><i></i><i></i><i></i><i></i>
+              <i></i><i class="l1"></i><i></i><i></i><i class="l2"></i><i></i><i></i><i></i>
+              <i></i><i></i><i class="l1"></i><i></i><i></i><i class="l3"></i><i></i><i></i>
+              <i></i><i></i><i></i><i class="l2"></i><i></i><i></i><i class="l1"></i><i></i>
+              <i></i><i class="l1"></i><i></i><i></i><i></i><i></i><i class="l3"></i><i></i>
+              <i></i><i></i><i></i><i class="l1"></i><i></i><i></i><i></i><i></i>
+              <i></i><i class="l2"></i><i></i><i></i><i class="l1"></i><i></i><i></i><i class="l3"></i>
+            </div>
+          </div>
+          <div class="card">
+            <h4>✅ Próximos passos</h4>
+            <div class="next-item"><span class="next-ic">📖</span><span><span class="next-t">Continuar F6 · Módulo 6</span><br><span class="next-s">Expressões Regulares · 20 min</span></span><span class="next-go">→</span></div>
+            <div class="next-item"><span class="next-ic">🃏</span><span><span class="next-t">12 revisões pendentes</span><br><span class="next-s">flashcards vencidos hoje</span></span><span class="next-go">→</span></div>
+            <div class="next-item"><span class="next-ic">⏱️</span><span><span class="next-t">Simulado parcial</span><br><span class="next-s">20 questões · ~45 min</span></span><span class="next-go">→</span></div>
+          </div>
+        </div>
+
+        <div class="card fcb">
+          <span class="next-ic" style="background:var(--em-bg)">🃏</span>
+          <span><span class="next-t">Flashcards</span><br><span class="next-s">repetição espaçada · 12 vencidos hoje</span></span>
+          <span class="val" style="margin-left:auto">12</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- ============ TELA: INFANTIL (curso ativo) ============ -->
+    <main class="screen" id="scr-infantil">
+      <div class="main">
+        <div class="card hero inf">
+          <span class="hero-eyebrow">Infantil · Matemática · 5º ano</span>
+          <h1>Oi! Vamos aprender frações? ✏️</h1>
+          <p>Você já sabe <strong>subtrair frações com denominadores diferentes</strong> — que orgulho! A próxima aula do tema Frações chega em breve.</p>
+          <a class="cta" href="https://www.aprovado.xyz/infantil/5-ano/matematica/fracoes/subtraindo-fracoes-com-denominadores-diferentes" target="_blank" rel="noopener">Revisar a aula de subtrair frações →</a>
+        </div>
+
+        <div class="stats">
+          <div class="card stat"><span class="lab">Aulas concluídas</span><span class="val">1</span><span class="sub">de 8 no tema Frações</span></div>
+          <div class="card stat"><span class="lab">Tema atual</span><span class="val" style="font-size:1.15rem">Frações</span><span class="sub">5º ano · EF05MA07</span></div>
+          <div class="card stat"><span class="lab">Quiz acertou</span><span class="val">5/6</span><span class="sub">na última aula 🎉</span></div>
+          <div class="card stat"><span class="lab">Dias estudando</span><span class="val">4</span><span class="sub">continue assim! ⭐</span></div>
+        </div>
+
+        <div class="card">
+          <h4>🗺️ Trilha Matemática · <span class="year-badge">5º ano</span> · tema Frações</h4>
+          <div class="path">
+            <div class="aula" data-state="soon"><span class="node">🧩</span><span class="a-t">O que é uma fração</span><span class="a-s">em breve</span></div>
+            <div class="aula" data-state="soon"><span class="node">🍕</span><span class="a-t">Maiores que a unidade</span><span class="a-s">em breve</span></div>
+            <div class="aula" data-state="soon"><span class="node">⚖️</span><span class="a-t">Frações equivalentes</span><span class="a-s">em breve</span></div>
+            <div class="aula" data-state="soon"><span class="node">📊</span><span class="a-t">Comparar e ordenar</span><span class="a-s">em breve</span></div>
+            <div class="aula" data-state="soon"><span class="node">➕</span><span class="a-t">Somar frações</span><span class="a-s">em breve</span></div>
+            <a class="aula" data-state="next" href="https://www.aprovado.xyz/infantil/5-ano/matematica/fracoes/subtraindo-fracoes-com-denominadores-diferentes" target="_blank" rel="noopener"><span class="node">➖</span><span class="a-t">Subtrair frações</span><span class="a-s">concluída · revisar</span></a>
+            <div class="aula" data-state="soon"><span class="node">🔁</span><span class="a-t">Frações e decimais</span><span class="a-s">em breve</span></div>
+            <div class="aula" data-state="soon"><span class="node">🏆</span><span class="a-t">Revisão do tema</span><span class="a-s">em breve</span></div>
+          </div>
+        </div>
+
+        <div class="cols">
+          <div class="card">
+            <h4>👨‍👩‍👧 Para o responsável</h4>
+            <div class="next-item"><span class="next-ic">📈</span><span><span class="next-t">A criança concluiu a 1ª aula do tema</span><br><span class="next-s">subtração de frações com MMC · 40 min de estudo</span></span></div>
+            <div class="next-item"><span class="next-ic">🎯</span><span><span class="next-t">Próximo marco: concluir o tema Frações</span><br><span class="next-s">7 aulas restantes · ~4h no ritmo atual</span></span></div>
+          </div>
+          <div class="card fcb" style="align-items:flex-start">
+            <span class="next-ic" style="background:var(--em-bg)">✨</span>
+            <span><span class="next-t">Tudo grátis</span><br><span class="next-s">o Infantil é gratuito durante a fase de lançamento — sem cartão, sem assinatura</span></span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="proto-note">PROTÓTIPO · <b>clique no seletor “estudando agora”</b> (sidebar ou barra mobile) para trocar de curso — o contexto inteiro troca, o progresso de cada um fica salvo</div>
+
+<script>
+(function(){
+  const btns = [document.getElementById('csBtn'), document.getElementById('csBtnM')];
+  const menu = document.getElementById('csMenu');
+
+  function setCourse(course){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(course === 'infantil' ? 'scr-infantil' : 'scr-poscomp').classList.add('active');
+
+    const isInf = course === 'infantil';
+    ['csIco','csIcoM'].forEach(id => { const el = document.getElementById(id); el.textContent = isInf ? '✏️' : '🎓'; el.className = 'cs-ico ' + (isInf ? 'infantil' : 'poscomp'); });
+    ['csName','csNameM'].forEach(id => document.getElementById(id).textContent = isInf ? 'Infantil' : 'POSCOMP');
+
+    document.querySelectorAll('.cs-opt').forEach(o => o.toggleAttribute('aria-current', o.dataset.course === course));
+
+    /* progresso do curso ativo */
+    const prog = document.getElementById('sideProg');
+    prog.classList.toggle('poscomp', !isInf);
+    prog.querySelector('.sp-val').innerHTML = isInf ? '12<small>%</small>' : '4<small>%</small>';
+    prog.querySelector('.sp-fill').style.width = isInf ? '12%' : '4%';
+    prog.querySelector('.sp-note').textContent = isInf ? '1 de 8 aulas do tema Frações' : '1 de 25 trilhas concluídas';
+
+    /* nav do curso ativo */
+    const nav = document.getElementById('sideNav');
+    nav.innerHTML = isInf ? `
+      <div class="nav-group">Início</div>
+      <a class="nav-item active" href="#"><span class="ic">🏠</span>Meu painel</a>
+      <div class="nav-group">Estudar</div>
+      <a class="nav-item" href="https://www.aprovado.xyz/infantil/5-ano/matematica/fracoes" target="_blank" rel="noopener"><span class="ic">🗺️</span>Trilha Matemática <span class="bdg">5º</span></a>
+      <a class="nav-item" href="#"><span class="ic">✏️</span>Minhas aulas</a>
+      <div class="nav-group">Responsável</div>
+      <a class="nav-item" href="#"><span class="ic">📈</span>Progresso da criança</a>` : `
+      <div class="nav-group">Início</div>
+      <a class="nav-item active" href="#"><span class="ic">🏠</span>Dashboard</a>
+      <div class="nav-group">Estudar</div>
+      <a class="nav-item" href="#"><span class="ic">🗺️</span>Trilhas de estudo <span class="bdg">25</span></a>
+      <a class="nav-item" href="#"><span class="ic">🃏</span>Flashcards</a>
+      <div class="nav-group">Praticar</div>
+      <a class="nav-item" href="#"><span class="ic">📝</span>Exercícios</a>
+      <a class="nav-item" href="#"><span class="ic">⏱️</span>Simulado POSCOMP</a>
+      <a class="nav-item" href="#"><span class="ic">📊</span>Meu progresso <span class="bdg pro">PRO</span></a>
+      <div class="sep"></div>
+      <a class="nav-item" href="#"><span class="ic">✨</span>Seja Premium</a>`;
+
+    menu.classList.remove('open');
+    btns.forEach(b => b.setAttribute('aria-expanded', 'false'));
+  }
+
+  btns.forEach(b => b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = menu.classList.toggle('open');
+    btns.forEach(x => x.setAttribute('aria-expanded', String(open)));
+  }));
+  document.addEventListener('click', () => { menu.classList.remove('open'); btns.forEach(b => b.setAttribute('aria-expanded', 'false')); });
+  document.querySelectorAll('.cs-opt').forEach(o => o.addEventListener('click', () => setCourse(o.dataset.course)));
+
+  /* deep-link p/ estados diretos: #infantil · #menu */
+  const h = location.hash;
+  if (h === '#infantil' || h === '#menu-infantil') setCourse('infantil');
+  if (h === '#menu' || h === '#menu-infantil') { menu.classList.add('open'); btns.forEach(b => b.setAttribute('aria-expanded', 'true')); }
+})();
+</script>
+</body>
+</html>

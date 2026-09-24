@@ -207,6 +207,19 @@ export function getInfantilThemes(): Array<{
   return themes;
 }
 
+/**
+ * Rota do primeiro tema do catálogo — porta de entrada do estudo no curso
+ * infantil (item "Trilha" da navegação lateral). Derivada do catálogo para
+ * acompanhar a ordem de exibição; catálogo vazio é erro de programação.
+ */
+export function getInfantilStudyEntryHref(): string {
+  const first = getInfantilThemes()[0];
+  if (!first) {
+    throw new Error('Catálogo do Infantil vazio: não há tema para servir de porta de entrada do estudo.');
+  }
+  return `/infantil/${first.ano}/${first.materia}/${first.tema}`;
+}
+
 /** Fragmentos referenciados pelo catálogo — allowlist do loader de arquivos. */
 export function getInfantilLessonModuleSlugs(): Set<string> {
   const slugs = new Set<string>();

@@ -561,6 +561,7 @@
   letter-spacing: 0.5px;
 }
 .cookies-table .badge.essential { background: var(--em-bg); color: var(--em-d); }
+.cookies-table .badge.functional { background: var(--bg-3); color: var(--fg-2); }
 .cookies-table .badge.analytics { background: var(--sap-bg); color: var(--sap); }
 
 /* ============================================================

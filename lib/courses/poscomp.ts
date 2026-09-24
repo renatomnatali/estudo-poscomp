@@ -11,6 +11,12 @@ export const POSCOMP_COURSE: Course = {
   description:
     'Preparação para o POSCOMP, o exame nacional usado como critério de ingresso em programas de pós-graduação em Computação no Brasil. Trilhas visuais pelos tópicos do edital, simulados no formato do exame e flashcards com repetição espaçada — tudo em português.',
   audience: 'Candidatos a mestrado e doutorado em Computação',
+  icon: '🎓',
+  switcherSubtitle: 'Exame · pós em Computação',
+  studyEntry: {
+    label: 'Trilhas de Estudo',
+    href: '/trilhas',
+  },
   features: {
     simulado: true,
     flashcards: true,
