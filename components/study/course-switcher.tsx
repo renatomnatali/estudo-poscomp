@@ -22,7 +22,9 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const router = useRouter();
+  const selectedOptionIndex = courses.findIndex((entry) => entry.slug === course.slug);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -59,9 +61,60 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
     });
   }
 
+  // Teclado do listbox (WAI-ARIA): setas/Home/End movem o foco entre as
+  // options (foco programático; options ficam fora da ordem de Tab),
+  // Enter/Espaço ativam a option focada (botão nativo) e Tab sai do
+  // conjunto sem selecionar — só fechando o menu. Escape fecha (global).
+  function focusedOptionIndex(): number {
+    return optionRefs.current.findIndex((option) => option === document.activeElement);
+  }
+
+  function focusOption(index: number) {
+    optionRefs.current[index]?.focus();
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (!open) {
+      return;
+    }
+
+    const lastIndex = courses.length - 1;
+    const current = focusedOptionIndex();
+    // Sem foco em option (foco no gatilho), a primeira seta parte do
+    // curso em estudo — como o padrão listbox espera.
+    const startIndex = selectedOptionIndex >= 0 ? selectedOptionIndex : 0;
+
+    switch (event.key) {
+      case 'ArrowDown': {
+        event.preventDefault();
+        focusOption(current === -1 ? startIndex : Math.min(current + 1, lastIndex));
+        break;
+      }
+      case 'ArrowUp': {
+        event.preventDefault();
+        focusOption(current === -1 ? startIndex : Math.max(current - 1, 0));
+        break;
+      }
+      case 'Home': {
+        event.preventDefault();
+        focusOption(0);
+        break;
+      }
+      case 'End': {
+        event.preventDefault();
+        focusOption(lastIndex);
+        break;
+      }
+      case 'Tab': {
+        setOpen(false);
+        break;
+      }
+    }
+  }
+
   return (
     <div className="sb-course-switch" ref={rootRef}>
-      <div className="sb-cs-wrap">
+      <div className="sb-cs-wrap" onKeyDown={handleKeyDown}>
         <button
           type="button"
           className="sb-cs-btn"
@@ -82,13 +135,17 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
 
         {open ? (
           <div className="sb-cs-menu" role="listbox" aria-label="Seus cursos">
-            {courses.map((entry) => {
+            {courses.map((entry, index) => {
               const isActive = entry.slug === course.slug;
               return (
                 <button
                   key={entry.slug}
+                  ref={(node) => {
+                    optionRefs.current[index] = node;
+                  }}
                   type="button"
                   role="option"
+                  tabIndex={-1}
                   aria-selected={isActive}
                   aria-current={isActive ? 'true' : undefined}
                   className="sb-cs-opt"
@@ -110,7 +167,11 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
           </div>
         ) : null}
       </div>
-      {isPending ? <span className="sr-only">Trocando de curso…</span> : null}
+      {isPending ? (
+        <span role="status" className="sr-only">
+          Trocando de curso…
+        </span>
+      ) : null}
     </div>
   );
 }

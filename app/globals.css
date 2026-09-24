@@ -86,6 +86,12 @@ body {
   letter-spacing: 1.5px;
   color: var(--n400);
 }
+/* Variante AA do eyebrow (n-500): o tom padrão (n-400, ~3:1) reprova em
+   texto pequeno — usar sobre tints da área logada (ex.: hero do dashboard
+   infantil). Mesma tipografia, só a cor muda. */
+.eyebrow.eyebrow-aa {
+  color: var(--n500);
+}
 .tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
@@ -1926,7 +1932,9 @@ body {
   font-size: 0.62rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--n400);
+  /* n-500 (não n-400): kicker pequeno precisa de AA ≥4,5:1 sobre o fundo
+     do botão (n-400 dá ~3:1). */
+  color: var(--n500);
 }
 
 .sb-cs-name {

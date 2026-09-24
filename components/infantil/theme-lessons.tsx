@@ -71,8 +71,11 @@ export function ThemeLessons({ theme, themeHref }: ThemeLessonsProps) {
               </span>
             </div>
             <h3 className="mt-3 leading-snug text-ink">{lesson.title}</h3>
+            {/* #007a52 (em-d escurecido) no CTA de entrada: texto pequeno
+                sobre branco exige AA ≥4,5:1 — em-d dá 3,65:1. Só a cor muda,
+                sem tocar no layout. */}
             <p
-              className={`mt-3 text-sm font-semibold ${isEntry ? 'text-em-d' : 'text-sap'}`}
+              className={`mt-3 text-sm font-semibold ${isEntry ? 'text-[#007a52]' : 'text-sap'}`}
             >
               {isEntry ? 'Começar por aqui →' : 'Continuar →'}
             </p>

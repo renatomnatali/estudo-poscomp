@@ -21,7 +21,7 @@ export function InfantilDashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <section className="section-card border-em bg-em-bg">
-        <span className="eyebrow">
+        <span className="eyebrow eyebrow-aa">
           Infantil · {subject.title} · {year.title}
         </span>
         <h1 className="font-display mt-1 text-2xl font-bold text-ink">
@@ -34,9 +34,11 @@ export function InfantilDashboardPage() {
               tem simuladores para ver cada fatia se mexer e dá para rever quantas
               vezes quiser.
             </p>
+            {/* bg #007a52 (não --em-d): branco sobre em-d dá 3,65:1 — reprova
+                AA para texto pequeno; sobre #007a52 atinge ~5,4:1. */}
             <Link
               href={`${themeHref}/${entryLesson.slug}`}
-              className="mt-4 inline-flex items-center gap-2 rounded-pill bg-em-d px-5 py-2.5 text-sm font-bold text-white transition hover:brightness-95"
+              className="mt-4 inline-flex items-center gap-2 rounded-pill bg-[#007a52] px-5 py-2.5 text-sm font-bold text-white transition hover:brightness-95"
             >
               Começar: {entryLesson.title} →
             </Link>
@@ -87,7 +89,9 @@ export function InfantilDashboardPage() {
           BNCC, na trilha de {subject.title} do {year.title}.
         </p>
         <p className="mt-2 leading-relaxed text-n-600">{theme.description}</p>
-        <p className="mt-3 text-sm font-semibold text-em-d">
+        {/* #007a52 (em-d escurecido): texto pequeno sobre branco precisa de
+            AA ≥4,5:1 — em-d sobre branco dá 3,65:1. */}
+        <p className="mt-3 text-sm font-semibold text-[#007a52]">
           Tudo grátis — sem cartão, sem assinatura.
         </p>
       </section>
