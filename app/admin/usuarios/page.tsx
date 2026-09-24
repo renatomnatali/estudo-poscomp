@@ -4,10 +4,15 @@ import { StudyRouteGuard } from '@/components/auth/study-route-guard';
 import { AdminUsersPage } from '@/components/admin/admin-users-page';
 import { StudyShell } from '@/components/study/study-shell';
 import { resolveAdminAccess } from '@/lib/admin-auth';
+import { getActiveCourseContext } from '@/lib/active-course';
 import { getServerViewer } from '@/lib/server-viewer';
 
 export default async function AdminUsersRoutePage() {
-  const [viewer, admin] = await Promise.all([getServerViewer(), resolveAdminAccess()]);
+  const [viewer, admin, courseContext] = await Promise.all([
+    getServerViewer(),
+    resolveAdminAccess(),
+    getActiveCourseContext(),
+  ]);
 
   if (!admin.allowed) {
     redirect('/dashboard');
@@ -25,6 +30,8 @@ export default async function AdminUsersRoutePage() {
           'Usuários',
         ]}
         viewer={viewer}
+        course={courseContext.course}
+        courses={courseContext.courses}
       >
         <AdminUsersPage />
       </StudyShell>

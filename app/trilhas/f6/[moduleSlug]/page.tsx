@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { isClerkEnabledServer } from '@/lib/auth-config';
+import { getActiveCourseContext } from '@/lib/active-course';
 import { getStudyModule, getStudyTrackCards } from '@/lib/study-data';
 import { StudyRouteGuard } from '@/components/auth/study-route-guard';
 import { ModulePage } from '@/components/study/module-page';
@@ -43,6 +44,7 @@ export default async function TrilhasF6ModuleRoutePage({ params }: ModuleRoutePr
   }
 
   const userId = isClerkEnabledServer() ? undefined : 'local-dev-user';
+  const { course, courses } = await getActiveCourseContext();
   const isImportedLesson = LESSON_MODULE_SLUGS.has(moduleSlug);
   const canonicalModuleTitle = CANONICAL_MODULE_TITLES[moduleSlug] || moduleData.title;
   const trackTitle =
@@ -65,6 +67,8 @@ export default async function TrilhasF6ModuleRoutePage({ params }: ModuleRoutePr
         contentMode={isImportedLesson ? 'flush' : 'default'}
         mainVariant={isImportedLesson ? 'lesson' : 'default'}
         searchPlaceholder={isImportedLesson ? null : undefined}
+        course={course}
+        courses={courses}
       >
         <ModulePage moduleSlug={moduleSlug} userId={userId} />
       </StudyShell>
