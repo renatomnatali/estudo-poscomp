@@ -6,6 +6,14 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StudyShell } from '@/components/study/study-shell';
+import { POSCOMP_COURSE } from '@/lib/courses/poscomp';
+import { getCourses } from '@/lib/courses/registry';
+
+// O CourseSwitcher usa useRouter do next/navigation; fora do App Router não
+// há contexto de router, então o mock fornece o refresh que o shell usa.
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
 
 describe('shell de estudo com navegação por rotas', () => {
   beforeEach(() => {
@@ -24,6 +32,8 @@ describe('shell de estudo com navegação por rotas', () => {
         pageTitle="Dashboard"
         pageSubtitle="Resumo"
         breadcrumb={['App', 'Dashboard']}
+        course={POSCOMP_COURSE}
+        courses={getCourses()}
       >
         <div>conteudo</div>
       </StudyShell>
@@ -58,6 +68,8 @@ describe('shell de estudo com navegação por rotas', () => {
           { label: 'Linguagens Formais e Autômatos', href: '/trilhas' },
           { label: 'Módulo 03 — AFN e epsilon-Transicoes' },
         ]}
+        course={POSCOMP_COURSE}
+        courses={getCourses()}
       >
         <div>conteudo</div>
       </StudyShell>
@@ -86,6 +98,8 @@ describe('shell de estudo com navegação por rotas', () => {
         pageTitle="Dashboard"
         pageSubtitle="Resumo"
         breadcrumb={['App', 'Dashboard']}
+        course={POSCOMP_COURSE}
+        courses={getCourses()}
       >
         <div>conteudo</div>
       </StudyShell>
@@ -109,6 +123,8 @@ describe('shell de estudo com navegação por rotas', () => {
         pageTitle="Dashboard"
         pageSubtitle="Resumo"
         breadcrumb={['App', 'Dashboard']}
+        course={POSCOMP_COURSE}
+        courses={getCourses()}
         onSignOut={onSignOut}
       >
         <div>conteudo</div>
