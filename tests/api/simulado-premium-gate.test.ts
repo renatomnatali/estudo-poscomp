@@ -13,6 +13,10 @@ describe('simulado premium gate no backend', () => {
 
   beforeEach(() => {
     vi.resetModules();
+    // Os casos exercitam o fallback de identidade de DEV do
+    // resolveRouteIdentity (userId via header). Fora de development o
+    // guard anti-spoofing recusa identidade do cliente com 401.
+    vi.stubEnv('NODE_ENV', 'development');
     entitlementSpy.mockReset();
     delete process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
     delete process.env.CLERK_SECRET_KEY;
@@ -20,6 +24,7 @@ describe('simulado premium gate no backend', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = originalPk;
     process.env.CLERK_SECRET_KEY = originalSk;
   });

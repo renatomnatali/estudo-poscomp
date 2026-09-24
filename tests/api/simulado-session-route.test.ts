@@ -18,6 +18,10 @@ describe('rota de sessão de simulado', () => {
 
   beforeEach(() => {
     vi.resetModules();
+    // Os casos exercitam o fallback de identidade de DEV do
+    // resolveRouteIdentity (userId via header). Fora de development o
+    // guard anti-spoofing recusa identidade do cliente com 401.
+    vi.stubEnv('NODE_ENV', 'development');
     entitlementSpy.mockReset();
     questionsSpy.mockReset();
     questionsSpy.mockResolvedValue([
@@ -45,6 +49,7 @@ describe('rota de sessão de simulado', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = originalPk;
     process.env.CLERK_SECRET_KEY = originalSk;
   });
