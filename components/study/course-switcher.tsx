@@ -50,7 +50,7 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
 
   function handleSelect(nextCourse: Course) {
     setOpen(false);
-    if (nextCourse.slug === course.slug) {
+    if (isPending || nextCourse.slug === course.slug) {
       return;
     }
 
@@ -156,6 +156,7 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
           aria-expanded={open}
           aria-haspopup="listbox"
           aria-label={`Curso em estudo: ${course.name}. Trocar de curso`}
+          aria-busy={isPending}
           onClick={() => setOpen((value) => !value)}
         >
           <span className={`sb-cs-ico tone-${course.slug}`} aria-hidden="true">

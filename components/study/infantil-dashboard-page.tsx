@@ -38,7 +38,7 @@ export function InfantilDashboardPage() {
                 AA para texto pequeno; sobre #007a52 atinge ~5,4:1. */}
             <Link
               href={`${themeHref}/${entryLesson.slug}`}
-              className="mt-4 inline-flex items-center gap-2 rounded-pill bg-[#007a52] px-5 py-2.5 text-sm font-bold text-white transition hover:brightness-95"
+              className="mt-4 inline-flex items-center gap-2 rounded-pill bg-[#007a52] px-5 py-2.5 text-sm font-bold text-white transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sap-l)]"
             >
               Começar: {entryLesson.title} →
             </Link>
