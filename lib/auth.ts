@@ -217,7 +217,10 @@ export async function getSession(): Promise<JwtPayload | null> {
   if (!token) return null;
 
   const result = await verifySessionWithDb(token);
-  return result.valid ? result.payload : null;
+  if (!result.valid) return null;
+  // O role autoritativo é o do banco (tokens legacy sem `role` caem aqui):
+  // nunca expor o role do payload sem sobrescrevê-lo pelo validado.
+  return { ...result.payload, role: result.dbRole };
 }
 
 export async function requireAuth(): Promise<JwtPayload> {

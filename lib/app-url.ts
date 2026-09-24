@@ -13,8 +13,11 @@
  * (fora do escopo deste PR).
  */
 export function getAppUrl(): string {
+  // Vazio/whitespace (ex.: .env.example copiado sem preencher) conta como
+  // ausente — segue o fallback chain em vez de lançar na validação.
+  const appUrl = process.env.APP_URL?.trim();
   const url =
-    process.env.APP_URL ??
+    (appUrl ? appUrl : undefined) ??
     (process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:3000");
