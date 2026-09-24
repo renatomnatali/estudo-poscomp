@@ -23,6 +23,9 @@ const resetLimiter = createRateLimiter(5, 60 * 1000, {
   name: "reset-password",
 });
 
+/** Marcador interno: token single-use já reclamado por request concorrente. */
+class TokenClaimError extends Error {}
+
 export async function POST(request: NextRequest) {
   // CSRF defense-in-depth: troca de senha é state-changing crítico.
   const csrfBlock = requireSameOrigin(request);
@@ -80,31 +83,53 @@ export async function POST(request: NextRequest) {
   // Atualizar senha + invalidar sessões antigas + marcar token como usado.
   // Usa callback de transação (atomicidade real) em vez do batch mode.
   const now = new Date();
-  await db.$transaction(async (tx) => {
-    // Estado ANTES do update: emailVerified null = nunca verificou.
-    const before = await tx.user.findUnique({
-      where: { id: resetToken.userId },
-      select: { emailVerified: true },
-    });
+  try {
+    await db.$transaction(async (tx) => {
+      // Claim atômico do single-use: o updateMany só alcança o token se
+      // usedAt ainda é null — dois requests concorrentes com o mesmo token,
+      // exatamente um obtém count=1; o outro reverte tudo e recebe 400.
+      const claimed = await tx.passwordResetToken.updateMany({
+        where: { token, usedAt: null },
+        data: { usedAt: now },
+      });
+      if (claimed.count !== 1) {
+        throw new TokenClaimError();
+      }
 
-    await tx.user.update({
-      where: { id: resetToken.userId },
-      // passwordChangedAt invalida todos os JWTs emitidos antes deste momento
-      // (validado em getSession()).
-      data: {
-        passwordHash,
-        passwordChangedAt: now,
-        // Clicar o link recebido no inbox é prova de posse do e-mail — mesmo
-        // precedente de set-password/route.ts. Só promove quando ainda era
-        // null (nunca sobrescreve a data real de verificação anterior).
-        ...(before?.emailVerified ? {} : { emailVerified: now }),
-      },
+      // Estado ANTES do update: emailVerified null = nunca verificou.
+      const before = await tx.user.findUnique({
+        where: { id: resetToken.userId },
+        select: { emailVerified: true },
+      });
+
+      await tx.user.update({
+        where: { id: resetToken.userId },
+        // passwordChangedAt invalida todos os JWTs emitidos antes deste momento
+        // (validado em getSession()).
+        data: {
+          passwordHash,
+          passwordChangedAt: now,
+          // Clicar o link recebido no inbox é prova de posse do e-mail — mesmo
+          // precedente de set-password/route.ts. Só promove quando ainda era
+          // null (nunca sobrescreve a data real de verificação anterior).
+          ...(before?.emailVerified ? {} : { emailVerified: now }),
+        },
+      });
     });
-    await tx.passwordResetToken.update({
-      where: { token },
-      data: { usedAt: now },
-    });
-  });
+  } catch (err) {
+    if (err instanceof TokenClaimError) {
+      securityLog({
+        event: "PASSWORD_RESET_FAILED",
+        ip,
+        detail: "token claimed concurrently",
+      });
+      return NextResponse.json(
+        { error: "Token inválido ou já utilizado" },
+        { status: 400 },
+      );
+    }
+    throw err;
+  }
 
   securityLog({
     event: "PASSWORD_RESET_SUCCESS",

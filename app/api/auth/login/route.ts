@@ -102,12 +102,25 @@ export async function POST(request: NextRequest) {
     throw err;
   }
 
-  // Resposta genérica para: user não existe ou senha errada.
-  // Isso previne account enumeration.
+  // password não-string (ex.: number no JSON) faria bcrypt.compare lançar
+  // (500). Coagir para string vazia mantém o caminho genérico do 401.
+  const passwordStr = typeof password === "string" ? password : "";
+
+  // Resposta genérica para: user não existe, senha errada ou conta excluída
+  // (soft-delete). Isso previne account enumeration — conta deletada não pode
+  // se distinguir de inexistente.
   // Dummy compare para manter timing constante (evita timing side-channel)
-  if (!user || !user.passwordHash) {
-    await compare(password, "$2a$10$1ZxEuoem9p0E52gYee/MF.RIMFdbS5VJMgodyYOTZ/DUZ6Z/nQNFS");
-    if (user && !user.passwordHash) {
+  if (!user || !user.passwordHash || user.deletedAt) {
+    await compare(passwordStr, "$2a$10$1ZxEuoem9p0E52gYee/MF.RIMFdbS5VJMgodyYOTZ/DUZ6Z/nQNFS");
+    if (user && user.deletedAt) {
+      securityLog({
+        event: "LOGIN_FAILED",
+        ip,
+        email,
+        userId: user.id,
+        detail: "deleted",
+      });
+    } else if (user && !user.passwordHash) {
       securityLog({
         event: "LOGIN_FAILED",
         ip,
@@ -124,7 +137,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const ok = await compare(password, user.passwordHash);
+  const ok = await compare(passwordStr, user.passwordHash);
   if (!ok) {
     securityLog({
       event: "LOGIN_FAILED",

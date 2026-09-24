@@ -14,6 +14,9 @@ const verifyLimiter = createRateLimiter(5, 60 * 1000, {
   name: "verify-email",
 });
 
+/** Marcador interno: token single-use já reclamado por request concorrente. */
+class TokenClaimError extends Error {}
+
 export async function POST(request: NextRequest) {
   // CSRF defense-in-depth: consumo de token cross-site permitiria que um
   // site externo "queimasse" verificações arbitrárias se obtivesse o token.
@@ -58,16 +61,35 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Token expirado" }, { status: 400 });
   }
 
-  await db.$transaction([
-    db.user.update({
-      where: { id: verification.userId },
-      data: { emailVerified: new Date() },
-    }),
-    db.verificationToken.update({
-      where: { token },
-      data: { usedAt: new Date() },
-    }),
-  ]);
+  const now = new Date();
+  try {
+    await db.$transaction(async (tx) => {
+      // Claim atômico do single-use: o updateMany só alcança o token se
+      // usedAt ainda é null — dois requests concorrentes com o mesmo token,
+      // exatamente um obtém count=1; o outro reverte tudo e recebe 400.
+      const claimed = await tx.verificationToken.updateMany({
+        where: { token, usedAt: null },
+        data: { usedAt: now },
+      });
+      if (claimed.count !== 1) {
+        throw new TokenClaimError();
+      }
+      await tx.user.update({
+        where: { id: verification.userId },
+        data: { emailVerified: now },
+      });
+    });
+  } catch (err) {
+    if (err instanceof TokenClaimError) {
+      securityLog({
+        event: "VERIFY_EMAIL_FAILED",
+        ip,
+        detail: "token claimed concurrently",
+      });
+      return NextResponse.json({ error: "Token inválido" }, { status: 400 });
+    }
+    throw err;
+  }
 
   securityLog({
     event: "VERIFY_EMAIL_SUCCESS",
