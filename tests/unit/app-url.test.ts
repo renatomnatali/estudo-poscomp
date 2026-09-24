@@ -41,4 +41,17 @@ describe('getAppUrl', () => {
     process.env.APP_URL = 'poscomp.aprovado.xyz';
     expect(() => getAppUrl()).toThrow(/APP_URL inválida/);
   });
+
+  it('trata APP_URL com só whitespace como ausente e segue para VERCEL_URL (não lança)', () => {
+    // Gotcha do .env.example copiado sem preencher: valor em branco não
+    // pode derrubar a resolução de URL na validação.
+    process.env.APP_URL = '   ';
+    process.env.VERCEL_URL = 'estudo-poscomp.vercel.app';
+    expect(getAppUrl()).toBe('https://estudo-poscomp.vercel.app');
+  });
+
+  it('trata APP_URL com só whitespace como ausente e cai para localhost sem VERCEL_URL', () => {
+    process.env.APP_URL = '   ';
+    expect(getAppUrl()).toBe('http://localhost:3000');
+  });
 });

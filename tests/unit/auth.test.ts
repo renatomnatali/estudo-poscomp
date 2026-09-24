@@ -307,6 +307,35 @@ describe('getSession e requireAuth', () => {
     expect(sessao?.email).toBe('usuario@teste.com');
   });
 
+  it('retorna o role do banco (nunca undefined) quando o token é legacy sem role', async () => {
+    // Token emitido antes do role existir: payload.role ausente. A sessão
+    // exposta ao caller carrega o dbRole validado no lugar do cru. (Legacy +
+    // DB ADMIN não chega aqui: verifySessionWithDb rejeita com role_changed
+    // antes do overwrite — guard coberto na suíte de papel divergente.)
+    const token = await tokenComIat(Math.floor(Date.now() / 1000) - 60);
+    cookiesMock.mockResolvedValue({ get: () => ({ value: token }) });
+    userFindUniqueMock.mockResolvedValue(usuarioDoBanco({ role: 'USER' }));
+
+    const sessao = await getSession();
+
+    expect(sessao?.role).toBe('USER');
+  });
+
+  it('expõe o role ADMIN validado no banco na sessão de um admin', async () => {
+    const token = await signToken({
+      sub: 'admin-1',
+      email: 'admin@teste.com',
+      emailVerified: true,
+      role: 'ADMIN',
+    });
+    cookiesMock.mockResolvedValue({ get: () => ({ value: token }) });
+    userFindUniqueMock.mockResolvedValue(usuarioDoBanco({ role: 'ADMIN' }));
+
+    const sessao = await getSession();
+
+    expect(sessao?.role).toBe('ADMIN');
+  });
+
   it('requireAuth lança quando não há sessão', async () => {
     cookiesMock.mockResolvedValue({ get: () => undefined });
     await expect(requireAuth()).rejects.toThrow(/não autorizado/i);
