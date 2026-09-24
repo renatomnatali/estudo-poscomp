@@ -20,6 +20,7 @@ interface CourseSwitcherProps {
  */
 export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
   const [open, setOpen] = useState(false);
+  const [pendingFocusIndex, setPendingFocusIndex] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -65,6 +66,8 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
   // options (foco programático; options ficam fora da ordem de Tab),
   // Enter/Espaço ativam a option focada (botão nativo) e Tab sai do
   // conjunto sem selecionar — só fechando o menu. Escape fecha (global).
+  // Com o menu fechado, setas/Home/End ABREM o listbox (padrão do APG
+  // para listbox colapsável) já focando a option-alvo.
   function focusedOptionIndex(): number {
     return optionRefs.current.findIndex((option) => option === document.activeElement);
   }
@@ -73,16 +76,48 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
     optionRefs.current[index]?.focus();
   }
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if (!open) {
+  // Foco pedido enquanto o menu ainda estava fechado: as options só
+  // existem depois da montagem, então o foco roda em efeito.
+  useEffect(() => {
+    if (!open || pendingFocusIndex === null) {
       return;
     }
+    focusOption(pendingFocusIndex);
+    setPendingFocusIndex(null);
+  }, [open, pendingFocusIndex]);
 
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     const lastIndex = courses.length - 1;
-    const current = focusedOptionIndex();
     // Sem foco em option (foco no gatilho), a primeira seta parte do
     // curso em estudo — como o padrão listbox espera.
     const startIndex = selectedOptionIndex >= 0 ? selectedOptionIndex : 0;
+
+    if (!open) {
+      switch (event.key) {
+        case 'ArrowDown':
+        case 'ArrowUp': {
+          event.preventDefault();
+          setOpen(true);
+          setPendingFocusIndex(startIndex);
+          break;
+        }
+        case 'Home': {
+          event.preventDefault();
+          setOpen(true);
+          setPendingFocusIndex(0);
+          break;
+        }
+        case 'End': {
+          event.preventDefault();
+          setOpen(true);
+          setPendingFocusIndex(lastIndex);
+          break;
+        }
+      }
+      return;
+    }
+
+    const current = focusedOptionIndex();
 
     switch (event.key) {
       case 'ArrowDown': {
