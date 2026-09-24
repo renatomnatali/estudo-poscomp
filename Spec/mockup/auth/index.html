@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Telas de conta · aprovado.xyz — mockups APR-3 · PR B</title>
+  <!--
+    HUB DE NAVEGAÇÃO dos mockups das 5 telas de conta do aprovado.xyz.
+    Fonte visual da implementação (fluxo do repo: mockup → gherkin →
+    teste → código). Comportamento: Spec/gherkin/apr-03-pr-b.md.
+
+    COMO USAR: cada tela abre no estado padrão; os demais estados
+    abrem acrescentando ?estado=… à URL (links abaixo).
+  -->
+  <link rel="stylesheet" href="_auth.css">
+  <style>
+    /* Estilos exclusivos deste hub — não fazem parte da proposta de DS. */
+    .hub {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 28px 80px;
+    }
+    .hub-title {
+      font-family: var(--fd);
+      font-weight: 800;
+      font-size: 2rem;
+      letter-spacing: -0.02em;
+      color: var(--fg-1);
+      margin: 0 0 6px;
+    }
+    .hub-sub { color: var(--fg-3); font-size: 0.9rem; margin: 0 0 32px; }
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .hub-card {
+      background: var(--white);
+      border: 1px solid var(--n-200);
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh-xs);
+      padding: 20px;
+    }
+    .hub-card .rota {
+      font-family: var(--fm);
+      font-size: 0.72rem;
+      color: var(--sap-d);
+      background: var(--sap-bg);
+      border-radius: var(--r-pill);
+      padding: 3px 10px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .hub-card h2 {
+      font-family: var(--fd);
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin: 0 0 4px;
+    }
+    .hub-card .arquivo { font-family: var(--fm); font-size: 0.72rem; color: var(--fg-4); margin: 0 0 12px; }
+    .hub-estados { list-style: none; padding: 0; margin: 0; }
+    .hub-estados li {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      padding: 5px 0;
+      border-top: 1px solid var(--n-100);
+      font-size: 0.82rem;
+      color: var(--fg-2);
+    }
+    .hub-estados li:first-child { border-top: none; }
+    .hub-estados a { color: var(--sap); font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .hub-estados a:hover { text-decoration: underline; }
+    .hub-nota {
+      margin-top: 28px;
+      font-size: 0.8rem;
+      color: var(--fg-3);
+      border-left: 3px solid var(--n-200);
+      padding-left: 14px;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body class="auth-page">
+
+  <nav class="page-nav" aria-label="Navegação principal">
+    <div class="page-nav-inner">
+      <a href="../../aprovado_%20landing-page/Landing.html" style="text-decoration:none" aria-label="aprovado — página inicial">
+        <span class="aprovado-lockup is-sm">
+          <span class="aprovado-ring">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span class="aprovado-word">aprov<span class="a">a</span>do</span>
+        </span>
+      </a>
+      <a class="back" href="../../aprovado_%20landing-page/Landing.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        voltar para a home
+      </a>
+    </div>
+  </nav>
+
+  <main class="hub">
+    <span class="eyebrow">APR-3 · PR B · Mockups</span>
+    <h1 class="hub-title">Telas de conta</h1>
+    <p class="hub-sub">Cinco telas públicas de autenticação do aprovado.xyz.
+       Cada tela abre no estado padrão; os demais estados abrem com
+       <code>?estado=…</code> nos links abaixo.</p>
+
+    <div class="hub-grid">
+
+      <section class="hub-card">
+        <span class="rota">/entrar</span>
+        <h2>Entrar</h2>
+        <p class="arquivo">entrar.html</p>
+        <ul class="hub-estados">
+          <li><a href="entrar.html">padrão</a> formulário limpo com widget anti-bot</li>
+          <li><a href="entrar.html?estado=erro">erro</a> 401 — credenciais inválidas (resposta genérica)</li>
+          <li><a href="entrar.html?estado=nao-verificado">não verificado</a> 403 — instrução + reenvio do link</li>
+          <li><a href="entrar.html?estado=reenviado">reenviado</a> confirmação do reenvio da verificação</li>
+          <li><a href="entrar.html?estado=limite">limite</a> 429 — muitas tentativas, aguarde</li>
+          <li><a href="entrar.html?estado=carregando">carregando</a> submit em andamento</li>
+        </ul>
+      </section>
+
+      <section class="hub-card">
+        <span class="rota">/cadastro</span>
+        <h2>Criar conta</h2>
+        <p class="arquivo">cadastro.html</p>
+        <ul class="hub-estados">
+          <li><a href="cadastro.html">padrão</a> formulário com requisitos de senha vivos</li>
+          <li><a href="cadastro.html?estado=erro-senha">erro de senha</a> 400 — política fora do padrão</li>
+          <li><a href="cadastro.html?estado=sucesso">sucesso</a> "verifique seu e-mail", sem login automático</li>
+          <li><a href="cadastro.html?estado=existente">já cadastrado</a> conta existe — entrar ou recuperar</li>
+          <li><a href="cadastro.html?estado=limite">limite</a> 429 — muitas tentativas</li>
+          <li><a href="cadastro.html?estado=carregando">carregando</a> submit em andamento</li>
+        </ul>
+      </section>
+
+      <section class="hub-card">
+        <span class="rota">/verificar-email</span>
+        <h2>Verificar e-mail</h2>
+        <p class="arquivo">verificar-email.html</p>
+        <ul class="hub-estados">
+          <li><a href="verificar-email.html">verificando</a> consumindo o token da URL (padrão)</li>
+          <li><a href="verificar-email.html?estado=confirmado">confirmado</a> verificado — vai pro login em 3s</li>
+          <li><a href="verificar-email.html?estado=invalido">inválido</a> link inválido/expirado + reenvio</li>
+          <li><a href="verificar-email.html?estado=invalido">reenviado</a> resposta genérica após pedir reenvio (no próprio card)</li>
+        </ul>
+      </section>
+
+      <section class="hub-card">
+        <span class="rota">/esqueci-senha</span>
+        <h2>Esqueci a senha</h2>
+        <p class="arquivo">esqueci-senha.html</p>
+        <ul class="hub-estados">
+          <li><a href="esqueci-senha.html">padrão</a> formulário de e-mail</li>
+          <li><a href="esqueci-senha.html?estado=enviado">enviado</a> resposta genérica — sem oráculo de enumeração</li>
+          <li><a href="esqueci-senha.html?estado=limite">limite</a> 429 — muitas tentativas</li>
+          <li><a href="esqueci-senha.html?estado=carregando">carregando</a> submit em andamento</li>
+        </ul>
+      </section>
+
+      <section class="hub-card">
+        <span class="rota">/redefinir-senha</span>
+        <h2>Criar nova senha</h2>
+        <p class="arquivo">redefinir-senha.html</p>
+        <ul class="hub-estados">
+          <li><a href="redefinir-senha.html">padrão</a> token válido — política visível + confirmação</li>
+          <li><a href="redefinir-senha.html?estado=invalido">link inválido</a> unificado — solicitar novo</li>
+          <li><a href="redefinir-senha.html?estado=erro-politica">erro de política</a> 400 — senha fora do padrão</li>
+          <li><a href="redefinir-senha.html?estado=erro-coincidencia">não coincidem</a> confirmação diverge (vivo ao digitar)</li>
+          <li><a href="redefinir-senha.html?estado=erro-token">token expirou</a> falha só no submit (defesa em profundidade)</li>
+          <li><a href="redefinir-senha.html?estado=sucesso">sucesso</a> senha trocada — vai pro login em 3s</li>
+          <li><a href="redefinir-senha.html?estado=carregando">carregando</a> submit em andamento</li>
+        </ul>
+      </section>
+    </div>
+
+    <p class="hub-nota">
+      Sistema visual: DS aprovado (Geist + Geist Mono, tokens de
+      <code>Spec/aprovado_ design system/colors_and_type.css</code>) — telas de conta são
+      públicas, contexto da landing. Botões de ação semi-retangulares (12px, nunca pill);
+      chips de requisito são pill + mono, semântica distinta de botão. Vazio não se aplica
+      (nenhuma tela lista dados). Visitante já com sessão que abre /entrar é levado ao
+      /dashboard no produto (não simulado aqui).
+    </p>
+  </main>
+
+  <footer class="page-foot">
+    <span>© 2026 aprovado.xyz · independente · não afiliado à SBC</span>
+    <div>
+      <a href="../../aprovado_%20landing-page/pages/sobre.html">Sobre</a>
+      <a href="../../aprovado_%20landing-page/pages/contato.html">Contato</a>
+      <a href="../../aprovado_%20landing-page/pages/termos.html">Termos</a>
+      <a href="../../aprovado_%20landing-page/pages/privacidade.html">Privacidade</a>
+      <a href="../../aprovado_%20landing-page/pages/cookies.html">Cookies</a>
+    </div>
+  </footer>
+</body>
+</html>

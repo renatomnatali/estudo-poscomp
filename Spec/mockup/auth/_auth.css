@@ -18,6 +18,12 @@
 
 @import url("../../aprovado_%20design%20system/colors_and_type.css");
 
+/* ── Base ───────────────────────────────────────────────── */
+/* Regra de guarda: classes com display explícito (flex/grid)
+   precisam disto para o atributo hidden continuar funcionando. */
+
+[hidden] { display: none !important; }
+
 /* ── Página ─────────────────────────────────────────────── */
 
 .auth-page {
