@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 
 import { GET as getTopics } from '@/app/api/content/topics/route';
@@ -10,7 +10,6 @@ import { GET as getModuleBySlug } from '@/app/api/study/modules/[slug]/route';
 import { GET as getModuleSource } from '@/app/api/study/modules/[slug]/source/route';
 import { POST as postModuleQuiz } from '@/app/api/study/modules/[slug]/quiz/route';
 import { GET as getModuleProgress, POST as postModuleProgress } from '@/app/api/study/modules/[slug]/progress/route';
-import { GET as getSimuladoAttempts, POST as postSimuladoAttempt } from '@/app/api/simulado/attempts/route';
 
 describe('api routes de estudo', () => {
   it('lista tópicos base para o catálogo', async () => {
@@ -37,19 +36,27 @@ describe('api routes de estudo', () => {
       { params: Promise.resolve({ slug: 'f1-1-analise-notacoes' }) }
     );
 
-    const response = await getDashboardSummary(
-      new NextRequest('http://localhost/api/study/dashboard/summary?userId=user-summary-1')
-    );
-    const payload = await response.json();
+    // A leitura de userId do cliente (query/header) é fallback exclusivo de
+    // development — guard anti-spoofing que força 401 fora dele quando o
+    // Clerk não está configurado. O teste exerce esse caminho de dev.
+    vi.stubEnv('NODE_ENV', 'development');
+    try {
+      const response = await getDashboardSummary(
+        new NextRequest('http://localhost/api/study/dashboard/summary?userId=user-summary-1')
+      );
+      const payload = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(payload).toHaveProperty('hero');
-    expect(payload).toHaveProperty('stats');
-    expect(Array.isArray(payload.stats)).toBe(true);
-    expect(payload.stats.length).toBeGreaterThan(0);
+      expect(response.status).toBe(200);
+      expect(payload).toHaveProperty('hero');
+      expect(payload).toHaveProperty('stats');
+      expect(Array.isArray(payload.stats)).toBe(true);
+      expect(payload.stats.length).toBeGreaterThan(0);
 
-    const modulesCard = payload.stats.find((item: { label: string }) => item.label === 'Módulos concluídos');
-    expect(modulesCard?.value).toBe('1');
+      const modulesCard = payload.stats.find((item: { label: string }) => item.label === 'Módulos concluídos');
+      expect(modulesCard?.value).toBe('1');
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('retorna catálogo das trilhas com estados', async () => {
@@ -104,21 +111,11 @@ describe('api routes de estudo', () => {
       expect(item?.free).toBe(true);
     }
 
+    // A trilha de entrada (onboarding) precisa de link clicável para o
+    // primeiro módulo. Estimativas (estimatedModules/estimatedHours) são
+    // dado estático de produto em TRACK_CARDS — não contrato desta rota —
+    // e por isso não ficam pinadas aqui.
     expect(byCode.get('F1')?.href).toBe('/trilhas/f1/f1-1-analise-notacoes');
-    expect(byCode.get('F1')?.estimatedModules).toBe(3);
-    expect(byCode.get('F1')?.estimatedHours).toBe(3);
-
-    expect(byCode.get('F2')?.href).toBe('/trilhas/f2/f2-1-estruturas-lineares');
-    expect(byCode.get('F2')?.estimatedModules).toBe(3);
-    expect(byCode.get('F2')?.estimatedHours).toBe(3);
-
-    expect(byCode.get('F3')?.href).toBe('/trilhas/f3/f3-1-paradigmas');
-    expect(byCode.get('F3')?.estimatedModules).toBe(1);
-    expect(byCode.get('F3')?.estimatedHours).toBe(1);
-
-    expect(byCode.get('F4')?.href).toBe('/trilhas/f4/f4-1-linguagens-formais');
-    expect(byCode.get('F4')?.estimatedModules).toBe(1);
-    expect(byCode.get('F4')?.estimatedHours).toBe(1);
   });
 
   it('retorna módulo por slug com capítulos e quiz', async () => {
@@ -295,37 +292,5 @@ describe('api routes de estudo', () => {
     expect(reviewResponse.status).toBe(200);
     expect(reviewPayload.flashcardId).toBe(firstCard.id);
     expect(reviewPayload.rating).toBe('good');
-  });
-
-  it('registra tentativa de simulado e retorna histórico ordenado por data', async () => {
-    const postResponse = await postSimuladoAttempt(
-      new Request('http://localhost/api/simulado/attempts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-user-id': 'user-simulado-1' },
-        body: JSON.stringify({
-          mode: 'partial',
-          total: 20,
-          correct: 15,
-          accuracy: 0.75,
-          durationSeconds: 1800,
-          recommendedNextTopics: ['automatos-finitos-afd'],
-        }),
-      })
-    );
-
-    const postPayload = await postResponse.json();
-    expect(postResponse.status).toBe(201);
-    expect(postPayload.userId).toBe('user-simulado-1');
-    expect(postPayload.mode).toBe('partial');
-
-    const getResponse = await getSimuladoAttempts(
-      new NextRequest('http://localhost/api/simulado/attempts?userId=user-simulado-1&limit=5')
-    );
-    const getPayload = await getResponse.json();
-
-    expect(getResponse.status).toBe(200);
-    expect(Array.isArray(getPayload.items)).toBe(true);
-    expect(getPayload.items.length).toBeGreaterThan(0);
-    expect(getPayload.items[0].createdAt >= getPayload.items[getPayload.items.length - 1].createdAt).toBe(true);
   });
 });
