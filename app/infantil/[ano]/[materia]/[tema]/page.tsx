@@ -8,6 +8,8 @@ import {
   getInfantilThemes,
   getInfantilYear,
 } from '@/lib/courses/infantil-catalog';
+import { getCourseOrThrow, getCourses } from '@/lib/courses/registry';
+import { StudyShell } from '@/components/study/study-shell';
 import { ThemeLessons } from '@/components/infantil/theme-lessons';
 
 interface ThemeRouteProps {
@@ -34,7 +36,11 @@ export async function generateMetadata({ params }: ThemeRouteProps): Promise<Met
   };
 }
 
-/** Página do tema (porta): título, descrição e a grade de aulas. */
+/**
+ * Página do tema (porta): título, descrição e a grade de aulas. Monta o
+ * StudyShell — o padrão do site — com o curso FIXO DA ROTA (sem cookie:
+ * página estática, porta de busca do Google).
+ */
 export default async function InfantilThemePage({ params }: ThemeRouteProps) {
   const { ano, materia, tema } = await params;
   const theme = getInfantilTheme(ano, materia, tema);
@@ -48,7 +54,21 @@ export default async function InfantilThemePage({ params }: ThemeRouteProps) {
   const availableCount = theme.lessons.filter((lesson) => lesson.status === 'disponivel').length;
 
   return (
-    <div className="mx-auto w-full max-w-[920px] px-4 py-10 sm:px-6">
+    <StudyShell
+      activeNav="trilhas"
+      pageTitle={`${theme.title} · ${subject.title} · ${year.title}`}
+      pageSubtitle={`Aulas do tema ${theme.title}`}
+      breadcrumb={[
+        { label: 'App', href: '/dashboard' },
+        { label: 'Infantil', href: '/infantil' },
+        { label: `${subject.title} ${year.title}`, href: '/infantil' },
+        { label: theme.title },
+      ]}
+      searchPlaceholder="Buscar aula ou tema..."
+      course={getCourseOrThrow('infantil')}
+      courses={getCourses()}
+    >
+      <div className="mx-auto w-full max-w-[920px] px-4 py-10 sm:px-6">
       <nav aria-label="Trilha até este tema" className="text-sm text-n-500">
         <Link href="/infantil" className="hover:underline">
           Infantil
@@ -82,6 +102,7 @@ export default async function InfantilThemePage({ params }: ThemeRouteProps) {
           <ThemeLessons theme={theme} themeHref={themeHref} />
         </div>
       </section>
-    </div>
+      </div>
+    </StudyShell>
   );
 }

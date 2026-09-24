@@ -1,8 +1,18 @@
 /** @vitest-environment jsdom */
 
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// As páginas do infantil agora montam o StudyShell (client): fora do App
+// Router não há contexto de router. importOriginal preserva o notFound
+// REAL — o digest dele é o contrato de 404 assertado abaixo.
+vi.mock('next/navigation', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
+  usePathname: () => '/infantil/5-ano/matematica/fracoes',
+}));
+
+import InfantilIndexPage from '@/app/infantil/page';
 import ThemePage, {
   generateMetadata as generateThemeMetadata,
   generateStaticParams as themeStaticParams,
@@ -76,6 +86,27 @@ describe('rota da porta do tema /infantil/[ano]/[materia]/[tema]', () => {
 
     const nav = screen.getByRole('navigation', { name: /trilha até este tema/i });
     expect(within(nav).getByRole('link', { name: 'Infantil' })).toHaveAttribute('href', '/infantil');
+  });
+
+  it('monta o shell padrão do site com a nav e o seletor no contexto do curso da rota', async () => {
+    // Arrange — página estática: curso FIXO da rota, sem ler cookie.
+    const ui = await ThemePage(temaParams());
+    render(ui);
+
+    // Act
+    const nav = screen.getByRole('navigation', { name: /menu principal/i });
+    const switcher = screen.getByRole('button', { name: /trocar de curso/i });
+
+    // Assert — nav lateral com o item de trilhas do curso infantil
+    // (studyEntry do catálogo)...
+    expect(within(nav).getByRole('link', { name: /trilha matemática/i })).toHaveAttribute(
+      'href',
+      '/infantil/5-ano/matematica/fracoes',
+    );
+    // ...e o seletor de curso anunciando a lista (nome do curso = dado do
+    // registry, exibindo o contexto da rota).
+    expect(switcher).toHaveAttribute('aria-haspopup', 'listbox');
+    expect(within(switcher).getByText('Infantil · 5º ano')).toBeInTheDocument();
   });
 
   it('tema desconhecido devolve 404 (notFound), sem página inventada', async () => {
@@ -165,5 +196,29 @@ describe('rota da aula /infantil/[ano]/[materia]/[tema]/[aula]', () => {
     await waitFor(() => {
       expect(screen.getAllByRole('button', { name: /executar tudo/i })).toHaveLength(4);
     });
+  });
+});
+
+describe('porta /infantil (índice do curso)', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('monta o shell padrão do site: nav com a trilha do curso e seletor de curso', () => {
+    // Arrange — porta pública: o curso da rota é fixo (sem cookie).
+    render(InfantilIndexPage());
+
+    // Act
+    const nav = screen.getByRole('navigation', { name: /menu principal/i });
+    const switcher = screen.getByRole('button', { name: /trocar de curso/i });
+
+    // Assert — mesma nav lateral do resto do site, com o item de trilhas do
+    // curso infantil apontando o studyEntry do catálogo, e o seletor de
+    // curso no contexto da rota.
+    expect(within(nav).getByRole('link', { name: /trilha matemática/i })).toHaveAttribute(
+      'href',
+      '/infantil/5-ano/matematica/fracoes',
+    );
+    expect(within(switcher).getByText('Infantil · 5º ano')).toBeInTheDocument();
   });
 });

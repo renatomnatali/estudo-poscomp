@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Check, ChevronDown } from 'lucide-react';
 
 import type { Course } from '@/lib/courses/types';
@@ -15,8 +15,8 @@ interface CourseSwitcherProps {
 /**
  * Seletor de curso do topo da sidebar (modelo Duolingo): exibe o curso
  * em estudo e, ao abrir, a lista de cursos com o ativo marcado. Trocar
- * de curso grava o cookie via server action e refresca o shell — o
- * servidor re-renderiza a área logada no novo contexto.
+ * de curso grava o cookie via server action e leva à home do curso —
+ * o dashboard re-renderiza no novo contexto.
  */
 export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
   const [open, setOpen] = useState(false);
@@ -25,6 +25,7 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const router = useRouter();
+  const pathname = usePathname();
   const selectedOptionIndex = courses.findIndex((entry) => entry.slug === course.slug);
 
   useEffect(() => {
@@ -57,7 +58,13 @@ export function CourseSwitcher({ course, courses }: CourseSwitcherProps) {
     startTransition(async () => {
       const result = await setActiveCourse(nextCourse.slug);
       if (result.ok) {
-        router.refresh();
+        // Trocou de curso → home do curso (dashboard renderizado no novo
+        // contexto). Já ESTAR nela só pede o refresh do servidor.
+        if (pathname === '/dashboard') {
+          router.refresh();
+        } else {
+          router.push('/dashboard');
+        }
       }
     });
   }

@@ -9,10 +9,11 @@ import { StudyShell } from '@/components/study/study-shell';
 import { POSCOMP_COURSE } from '@/lib/courses/poscomp';
 import { getCourses } from '@/lib/courses/registry';
 
-// O CourseSwitcher usa useRouter do next/navigation; fora do App Router não
-// há contexto de router, então o mock fornece o refresh que o shell usa.
+// O CourseSwitcher usa useRouter/usePathname do next/navigation; fora do
+// App Router não há contexto de router — o mock fornece ambos.
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ refresh: vi.fn() }),
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
+  usePathname: () => '/dashboard',
 }));
 
 describe('shell de estudo com navegação por rotas', () => {
