@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Criar conta · aprovado.xyz</title>
+  <!--
+    MOCKUP — APR-3 · PR B — rota real: /cadastro
+    Espelho funcional: sem-cilada /cadastro.
+    Sucesso NÃO faz login automático: mostra "verifique seu e-mail".
+
+    ESTADOS SIMULADOS (via querystring ?estado=…):
+      (padrão)      formulário com requisitos de senha visíveis
+      sucesso       conta criada — "verifique seu e-mail" (sem sessão)
+      existente     e-mail já cadastrado com senha (decisão de produto)
+      limite        429 — muitas tentativas
+      carregando    submit em andamento
+  -->
+  <link rel="stylesheet" href="_auth.css">
+</head>
+<body class="auth-page">
+
+  <nav class="page-nav" aria-label="Navegação principal">
+    <div class="page-nav-inner">
+      <a href="../../aprovado_%20landing-page/Landing.html" style="text-decoration:none" aria-label="aprovado — página inicial">
+        <span class="aprovado-lockup is-sm">
+          <span class="aprovado-ring">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span class="aprovado-word">aprov<span class="a">a</span>do</span>
+        </span>
+      </a>
+      <a class="back" href="../../aprovado_%20landing-page/Landing.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        voltar para a home
+      </a>
+    </div>
+  </nav>
+
+  <main class="auth-main">
+    <div class="auth-wrap">
+      <span class="eyebrow auth-eyebrow">Conta · Cadastro</span>
+
+      <!-- Formulário (padrão) -->
+      <div data-estado="form">
+        <h1 class="auth-title">Criar sua conta</h1>
+
+        <form class="auth-card" novalidate>
+          <div class="auth-field">
+            <label for="cadastro-email">E-mail</label>
+            <input class="auth-input" id="cadastro-email" name="email" type="email"
+                   autocomplete="email" inputmode="email" placeholder="seu-email@exemplo.com" required>
+          </div>
+
+          <div class="auth-field">
+            <label for="cadastro-senha">Senha</label>
+            <div class="auth-input-wrap">
+              <input class="auth-input" id="cadastro-senha" name="password" type="password"
+                     autocomplete="new-password" minlength="8" required
+                     aria-describedby="cadastro-regras">
+              <button type="button" class="pwd-toggle" aria-label="Mostrar senha" aria-pressed="false">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+
+            <!-- Requisitos visíveis — validação viva enquanto digita.
+                 Política: 8–128 caracteres, 1 maiúscula, 1 minúscula, 1 número. -->
+            <ul class="pwd-rules" id="cadastro-regras" aria-label="Requisitos da senha">
+              <li class="pwd-chip" data-rule="len">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                8 a 128 caracteres
+              </li>
+              <li class="pwd-chip" data-rule="upper">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                1 maiúscula
+              </li>
+              <li class="pwd-chip" data-rule="lower">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                1 minúscula
+              </li>
+              <li class="pwd-chip" data-rule="digit">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                1 número
+              </li>
+            </ul>
+          </div>
+
+          <!-- 400 — política de senha fora do padrão -->
+          <div class="auth-alert auth-alert-error" role="alert" data-subestado="erro-senha" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m12 8-4 4 4 4"/><path d="m16 8-4 4 4 4"/></svg>
+            <span>Senha deve ter entre 8 e 128 caracteres, com 1 maiúscula, 1 minúscula e 1 número.</span>
+          </div>
+
+          <!-- 429 — rate limit (5 cadastros/min por IP) -->
+          <div class="auth-alert auth-alert-warn" role="alert" data-subestado="limite" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6"/><path d="M12 16h.01"/></svg>
+            <span>Muitas tentativas. Aguarde um momento.</span>
+          </div>
+
+          <!-- Desafio anti-bot (Turnstile) — placeholder discreto -->
+          <div class="auth-turnstile" role="group" aria-label="Verificação de segurança">
+            <svg class="t-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span class="t-label">Verificação de segurança</span>
+            <span class="t-state">
+              <span class="spinner" data-t-spin hidden aria-hidden="true"></span>
+              <svg class="is-ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-t-ok aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <span data-t-text>Cloudflare</span>
+            </span>
+          </div>
+
+          <button type="submit" class="auth-btn auth-btn-pri" id="btn-cadastro">
+            <span class="spinner" hidden data-btn-spin aria-hidden="true"></span>
+            <span data-btn-text>Criar conta</span>
+          </button>
+        </form>
+
+        <p class="auth-alt">Já tem conta? <a href="entrar.html">Entrar</a></p>
+      </div>
+
+      <!-- Sucesso: conta criada, SEM login automático. Token de verificação 24h. -->
+      <div data-estado="sucesso" hidden>
+        <h1 class="auth-title">Verifique seu e-mail</h1>
+        <div class="auth-result" tabindex="-1" role="status" aria-live="polite">
+          <div class="icon-box is-em">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </div>
+          <h2>Link enviado</h2>
+          <p>Enviamos um link de verificação para <strong data-email>maria@exemplo.com</strong>.
+             Verifique sua caixa de entrada e spam.</p>
+          <a class="auth-btn auth-btn-pri" href="entrar.html">Ir para o login</a>
+          <small class="auth-result-note">O link vale por 24 horas. Sem verificação, não é possível entrar.</small>
+        </div>
+        <p class="auth-alt"><a href="entrar.html">Já verificou? Entrar</a></p>
+      </div>
+
+      <!-- E-mail já cadastrado com senha — resposta explícita (decisão de
+           produto do espelho): oferece caminho de entrada e recuperação. -->
+      <div data-estado="existente" hidden>
+        <h1 class="auth-title">Este e-mail já tem conta</h1>
+        <div class="auth-result" tabindex="-1" role="status" aria-live="polite">
+          <div class="icon-box is-amb">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          </div>
+          <h2>Já existe uma conta</h2>
+          <p>Você já tem uma conta com <strong data-email>maria@exemplo.com</strong>.</p>
+          <a class="auth-btn auth-btn-pri" href="entrar.html">Entrar</a>
+          <small class="auth-result-note"><a class="auth-link" href="esqueci-senha.html">Esqueci minha senha</a></small>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="page-foot">
+    <span>© 2026 aprovado.xyz · independente · não afiliado à SBC</span>
+    <div>
+      <a href="../../aprovado_%20landing-page/pages/sobre.html">Sobre</a>
+      <a href="../../aprovado_%20landing-page/pages/contato.html">Contato</a>
+      <a href="../../aprovado_%20landing-page/pages/termos.html">Termos</a>
+      <a href="../../aprovado_%20landing-page/pages/privacidade.html">Privacidade</a>
+      <a href="../../aprovado_%20landing-page/pages/cookies.html">Cookies</a>
+    </div>
+  </footer>
+
+  <script>
+    // Simulação de estados — NENHUMA lógica de produção aqui.
+    (function () {
+      var estado = new URLSearchParams(location.search).get('estado') || 'form';
+
+      var form = document.querySelector('[data-estado="form"]');
+      var blocos = { sucesso: document.querySelector('[data-estado="sucesso"]'),
+                     existente: document.querySelector('[data-estado="existente"]') };
+
+      // Alerta de rate limit dentro do próprio form.
+      if (estado === 'limite') {
+        document.querySelector('[data-subestado="limite"]').hidden = false;
+      }
+
+      if (estado === 'carregando') {
+        var btn = document.getElementById('btn-cadastro');
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.querySelector('[data-btn-spin]').hidden = false;
+        btn.querySelector('[data-btn-text]').textContent = 'Criando conta…';
+        document.getElementById('cadastro-email').value = 'maria@exemplo.com';
+        var senha = document.getElementById('cadastro-senha');
+        senha.value = 'SenhaForte123';
+        atualizarRegras(senha.value);
+        var ts = document.querySelector('[data-t-spin]');
+        var tok = document.querySelector('[data-t-ok]');
+        var tt = document.querySelector('[data-t-text]');
+        if (ts && tok && tt) { ts.hidden = false; tok.hidden = true; tt.textContent = 'verificando…'; }
+      }
+
+      if (estado === 'erro-senha') {
+        var al = document.querySelector('[data-subestado="erro-senha"]');
+        if (al) al.hidden = false;
+      }
+
+      // Estados que substituem o formulário: foco vai para o card de
+      // resultado (leitor de tela anuncia; teclado segue dali).
+      if (blocos[estado]) {
+        form.hidden = true;
+        blocos[estado].hidden = false;
+        blocos[estado].querySelector('.auth-result').focus();
+      }
+
+      // Checklist vivo de requisitos da senha.
+      var input = document.getElementById('cadastro-senha');
+      input.addEventListener('input', function () { atualizarRegras(input.value); });
+
+      function atualizarRegras(v) {
+        var regras = {
+          len: v.length >= 8 && v.length <= 128,
+          upper: /[A-Z]/.test(v),
+          lower: /[a-z]/.test(v),
+          digit: /\d/.test(v)
+        };
+        document.querySelectorAll('.pwd-chip').forEach(function (chip) {
+          var ok = regras[chip.getAttribute('data-rule')];
+          chip.classList.toggle('ok', ok);
+        });
+      }
+
+      // Mostrar/ocultar senha.
+      var toggle = document.querySelector('.pwd-toggle');
+      toggle.addEventListener('click', function () {
+        var aberto = input.type === 'text';
+        input.type = aberto ? 'password' : 'text';
+        toggle.setAttribute('aria-pressed', String(!aberto));
+        toggle.setAttribute('aria-label', aberto ? 'Mostrar senha' : 'Ocultar senha');
+      });
+    })();
+  </script>
+</body>
+</html>

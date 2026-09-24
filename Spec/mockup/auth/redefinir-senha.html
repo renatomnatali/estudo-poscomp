@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Criar nova senha · aprovado.xyz</title>
+  <!--
+    MOCKUP — APR-3 · PR B — rota real: /redefinir-senha?token=…
+    Espelho funcional: sem-cilada /redefinir-senha (validação SSR do token:
+    inválido → aviso direto, sem form; válido → form com política visível).
+
+    ESTADOS SIMULADOS (via querystring ?estado=…):
+      (padrão)           token válido — formulário de nova senha
+      invalido           token ausente/inválido/expirado/usado (mensagem unificada)
+      sucesso            senha trocada — vai pro login
+      erro-politica      senha fora da política (mensagem unificada da API)
+      erro-coincidencia   confirmação diverge da nova senha
+      carregando         submit em andamento
+  -->
+  <link rel="stylesheet" href="_auth.css">
+</head>
+<body class="auth-page">
+
+  <nav class="page-nav" aria-label="Navegação principal">
+    <div class="page-nav-inner">
+      <a href="../../aprovado_%20landing-page/Landing.html" style="text-decoration:none" aria-label="aprovado — página inicial">
+        <span class="aprovado-lockup is-sm">
+          <span class="aprovado-ring">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span class="aprovado-word">aprov<span class="a">a</span>do</span>
+        </span>
+      </a>
+      <a class="back" href="../../aprovado_%20landing-page/Landing.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        voltar para a home
+      </a>
+    </div>
+  </nav>
+
+  <main class="auth-main">
+    <div class="auth-wrap">
+      <span class="eyebrow auth-eyebrow">Conta · Nova senha</span>
+
+      <!-- Token válido — formulário -->
+      <div data-estado="form">
+        <h1 class="auth-title">Criar nova senha</h1>
+
+        <form class="auth-card" novalidate>
+          <div class="auth-field">
+            <label for="nova-senha">Nova senha</label>
+            <div class="auth-input-wrap">
+              <input class="auth-input" id="nova-senha" name="password" type="password"
+                     autocomplete="new-password" minlength="8" required autofocus
+                     aria-describedby="redefinir-regras">
+              <button type="button" class="pwd-toggle" aria-label="Mostrar senha" aria-pressed="false">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+
+            <!-- Mesma política visível do cadastro -->
+            <ul class="pwd-rules" id="redefinir-regras" aria-label="Requisitos da senha">
+              <li class="pwd-chip" data-rule="len">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                8 a 128 caracteres
+              </li>
+              <li class="pwd-chip" data-rule="upper">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                1 maiúscula
+              </li>
+              <li class="pwd-chip" data-rule="lower">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                1 minúscula
+              </li>
+              <li class="pwd-chip" data-rule="digit">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                1 número
+              </li>
+            </ul>
+          </div>
+
+          <div class="auth-field">
+            <label for="confirmar-senha">Confirmar nova senha</label>
+            <div class="auth-input-wrap">
+              <input class="auth-input" id="confirmar-senha" name="confirm" type="password"
+                     autocomplete="new-password" minlength="8" required>
+              <button type="button" class="pwd-toggle" aria-label="Mostrar senha" aria-pressed="false">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- 400 — política (mensagem unificada da API) -->
+          <div class="auth-alert auth-alert-error" role="alert" data-subestado="erro-politica" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m12 8-4 4 4 4"/><path d="m16 8-4 4 4 4"/></svg>
+            <span>Senha deve ter entre 8 e 128 caracteres, com 1 maiúscula, 1 minúscula e 1 número.</span>
+          </div>
+
+          <!-- Validação local — confirmação diverge (checa ao digitar) -->
+          <div class="auth-alert auth-alert-error" role="alert" aria-live="polite" data-subestado="erro-coincidencia" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m12 8-4 4 4 4"/><path d="m16 8-4 4 4 4"/></svg>
+            <span>As senhas não coincidem.</span>
+          </div>
+
+          <!-- 400 — token inválido no submit (expirou durante a digitação) -->
+          <div class="auth-alert auth-alert-error" role="alert" data-subestado="erro-token" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+            <span>Este link de redefinição não é mais válido. Solicite um novo para continuar.</span>
+          </div>
+
+          <button type="submit" class="auth-btn auth-btn-pri" id="btn-redefinir">
+            <span class="spinner" hidden data-btn-spin aria-hidden="true"></span>
+            <span data-btn-text>Criar nova senha</span>
+          </button>
+
+          <!-- Gherkin: passwordChangedAt = agora → sessões antigas morrem. -->
+          <small class="auth-result-note" style="display:block;text-align:center;margin-top:14px">
+            Ao trocar a senha, suas outras sessões ativas são encerradas.
+          </small>
+        </form>
+
+        <p class="auth-alt"><a href="entrar.html">Voltar ao login</a></p>
+      </div>
+
+      <!-- Token inválido — mensagem unificada (fail-fast SSR, sem form) -->
+      <div data-estado="invalido" hidden>
+        <h1 class="auth-title">Criar nova senha</h1>
+        <div class="auth-result" tabindex="-1">
+          <div class="icon-box is-amb">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          </div>
+          <h2>Link inválido ou expirado</h2>
+          <p>Este link de redefinição de senha não é mais válido. Solicite um
+             novo para continuar.</p>
+          <a class="auth-btn auth-btn-pri" href="esqueci-senha.html">Solicitar novo link</a>
+        </div>
+      </div>
+
+      <!-- Sucesso — senha trocada em transação com o uso do token -->
+      <div data-estado="sucesso" hidden>
+        <h1 class="auth-title">Criar nova senha</h1>
+        <div class="auth-result" tabindex="-1" role="status" aria-live="polite">
+          <div class="icon-box is-em">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h2>Senha redefinida!</h2>
+          <p>Sua senha foi alterada com sucesso. Redirecionando para o login…</p>
+          <a class="auth-btn auth-btn-pri" href="entrar.html">Ir para o login</a>
+          <small class="auth-result-note">Suas outras sessões foram encerradas. Redirecionamento em 3 segundos (simulado).</small>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="page-foot">
+    <span>© 2026 aprovado.xyz · independente · não afiliado à SBC</span>
+    <div>
+      <a href="../../aprovado_%20landing-page/pages/sobre.html">Sobre</a>
+      <a href="../../aprovado_%20landing-page/pages/contato.html">Contato</a>
+      <a href="../../aprovado_%20landing-page/pages/termos.html">Termos</a>
+      <a href="../../aprovado_%20landing-page/pages/privacidade.html">Privacidade</a>
+      <a href="../../aprovado_%20landing-page/pages/cookies.html">Cookies</a>
+    </div>
+  </footer>
+
+  <script>
+    // Simulação de estados — NENHUMA lógica de produção aqui.
+    (function () {
+      var estado = new URLSearchParams(location.search).get('estado') || 'form';
+
+      var form = document.querySelector('[data-estado="form"]');
+      var trocaTela = { invalido: document.querySelector('[data-estado="invalido"]'),
+                        sucesso: document.querySelector('[data-estado="sucesso"]') };
+
+      if (trocaTela[estado]) {
+        form.hidden = true;
+        trocaTela[estado].hidden = false;
+        trocaTela[estado].querySelector('.auth-result').focus();
+        if (estado === 'sucesso') {
+          setTimeout(function () { location.href = 'entrar.html'; }, 3000);
+        }
+        return;
+      }
+
+      var nova = document.getElementById('nova-senha');
+      var confirmar = document.getElementById('confirmar-senha');
+
+      if (estado === 'erro-politica' || estado === 'erro-coincidencia' || estado === 'erro-token') {
+        var al = document.querySelector('[data-subestado="' + estado + '"]');
+        if (al) al.hidden = false;
+        nova.value = estado === 'erro-coincidencia' ? 'SenhaForte123' : 'senhafraca';
+        confirmar.value = estado === 'erro-coincidencia' ? 'SenhaForte12' : 'senhafraca';
+        atualizarRegras(nova.value);
+      }
+
+      if (estado === 'carregando') {
+        var btn = document.getElementById('btn-redefinir');
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.querySelector('[data-btn-spin]').hidden = false;
+        btn.querySelector('[data-btn-text]').textContent = 'Salvando…';
+        nova.value = 'SenhaForte123';
+        confirmar.value = 'SenhaForte123';
+        atualizarRegras(nova.value);
+      }
+
+      // Checklist vivo + checagem de coincidência ao digitar.
+      nova.addEventListener('input', function () {
+        atualizarRegras(nova.value);
+        checarCoincidencia();
+      });
+      confirmar.addEventListener('input', checarCoincidencia);
+
+      function checarCoincidencia() {
+        var aviso = document.querySelector('[data-subestado="erro-coincidencia"]');
+        if (!aviso) return;
+        aviso.hidden = !(confirmar.value.length > 0 && nova.value !== confirmar.value);
+      }
+
+      function atualizarRegras(v) {
+        var regras = {
+          len: v.length >= 8 && v.length <= 128,
+          upper: /[A-Z]/.test(v),
+          lower: /[a-z]/.test(v),
+          digit: /\d/.test(v)
+        };
+        document.querySelectorAll('.pwd-chip').forEach(function (chip) {
+          chip.classList.toggle('ok', regras[chip.getAttribute('data-rule')]);
+        });
+      }
+
+      // Mostrar/ocultar senha (independente por campo).
+      document.querySelectorAll('.pwd-toggle').forEach(function (toggle) {
+        toggle.addEventListener('click', function () {
+          var input = toggle.parentElement.querySelector('.auth-input');
+          var aberto = input.type === 'text';
+          input.type = aberto ? 'password' : 'text';
+          toggle.setAttribute('aria-pressed', String(!aberto));
+          toggle.setAttribute('aria-label', aberto ? 'Mostrar senha' : 'Ocultar senha');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

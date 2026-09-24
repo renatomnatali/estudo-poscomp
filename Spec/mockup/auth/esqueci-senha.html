@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Esqueci minha senha · aprovado.xyz</title>
+  <!--
+    MOCKUP — APR-3 · PR B — rota real: /esqueci-senha
+    Espelho funcional: sem-cilada /esqueci-senha.
+    Resposta SEMPRE genérica (anti-enumeração): mesma tela para
+    e-mail existente e inexistente.
+
+    ESTADOS SIMULADOS (via querystring ?estado=…):
+      (padrão)    formulário
+      enviado     resposta genérica "se o e-mail estiver cadastrado…"
+      limite      429 — muitas tentativas
+      carregando  submit em andamento
+  -->
+  <link rel="stylesheet" href="_auth.css">
+</head>
+<body class="auth-page">
+
+  <nav class="page-nav" aria-label="Navegação principal">
+    <div class="page-nav-inner">
+      <a href="../../aprovado_%20landing-page/Landing.html" style="text-decoration:none" aria-label="aprovado — página inicial">
+        <span class="aprovado-lockup is-sm">
+          <span class="aprovado-ring">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span class="aprovado-word">aprov<span class="a">a</span>do</span>
+        </span>
+      </a>
+      <a class="back" href="../../aprovado_%20landing-page/Landing.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        voltar para a home
+      </a>
+    </div>
+  </nav>
+
+  <main class="auth-main">
+    <div class="auth-wrap">
+      <span class="eyebrow auth-eyebrow">Conta · Recuperação</span>
+
+      <!-- Formulário (padrão) -->
+      <div data-estado="form">
+        <h1 class="auth-title">Esqueci minha senha</h1>
+        <p class="auth-intro">Informe o e-mail da sua conta e enviaremos um link
+           para redefinir sua senha.</p>
+
+        <form class="auth-card" novalidate>
+          <div class="auth-field">
+            <label for="esqueci-email">E-mail</label>
+            <input class="auth-input" id="esqueci-email" name="email" type="email"
+                   autocomplete="email" inputmode="email" placeholder="seu-email@exemplo.com" required>
+          </div>
+
+          <!-- 429 — rate limit (3 pedidos/min por IP) -->
+          <div class="auth-alert auth-alert-warn" role="alert" data-subestado="limite" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6"/><path d="M12 16h.01"/></svg>
+            <span>Muitas tentativas. Aguarde um momento.</span>
+          </div>
+
+          <!-- Desafio anti-bot (Turnstile) — placeholder discreto -->
+          <div class="auth-turnstile" role="group" aria-label="Verificação de segurança">
+            <svg class="t-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span class="t-label">Verificação de segurança</span>
+            <span class="t-state">
+              <span class="spinner" data-t-spin hidden aria-hidden="true"></span>
+              <svg class="is-ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-t-ok aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <span data-t-text>Cloudflare</span>
+            </span>
+          </div>
+
+          <button type="submit" class="auth-btn auth-btn-pri" id="btn-esqueci">
+            <span class="spinner" hidden data-btn-spin aria-hidden="true"></span>
+            <span data-btn-text>Enviar link de redefinição</span>
+          </button>
+        </form>
+
+        <p class="auth-alt">Lembrou a senha? <a href="entrar.html">Voltar ao login</a></p>
+      </div>
+
+      <!-- Enviado: resposta GENÉRICA — idêntica exista ou não a conta. -->
+      <div data-estado="enviado" hidden>
+        <h1 class="auth-title">Esqueci minha senha</h1>
+        <div class="auth-result" tabindex="-1" role="status" aria-live="polite">
+          <div class="icon-box is-em">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </div>
+          <h2>E-mail enviado</h2>
+          <p>Se <strong data-email>maria@exemplo.com</strong> estiver cadastrado, você receberá
+             um link para redefinir sua senha. Verifique também a caixa de spam.</p>
+          <a class="auth-btn auth-btn-sec" href="entrar.html">Voltar ao login</a>
+          <small class="auth-result-note">Não chegou? Confira o spam antes de pedir de novo.</small>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="page-foot">
+    <span>© 2026 aprovado.xyz · independente · não afiliado à SBC</span>
+    <div>
+      <a href="../../aprovado_%20landing-page/pages/sobre.html">Sobre</a>
+      <a href="../../aprovado_%20landing-page/pages/contato.html">Contato</a>
+      <a href="../../aprovado_%20landing-page/pages/termos.html">Termos</a>
+      <a href="../../aprovado_%20landing-page/pages/privacidade.html">Privacidade</a>
+      <a href="../../aprovado_%20landing-page/pages/cookies.html">Cookies</a>
+    </div>
+  </footer>
+
+  <script>
+    // Simulação de estados — NENHUMA lógica de produção aqui.
+    (function () {
+      var estado = new URLSearchParams(location.search).get('estado') || 'form';
+
+      var form = document.querySelector('[data-estado="form"]');
+      var enviado = document.querySelector('[data-estado="enviado"]');
+
+      if (estado === 'enviado') {
+        form.hidden = true;
+        enviado.hidden = false;
+        enviado.querySelector('.auth-result').focus();
+        return;
+      }
+
+      if (estado === 'limite') {
+        document.querySelector('[data-subestado="limite"]').hidden = false;
+      }
+
+      if (estado === 'carregando') {
+        var btn = document.getElementById('btn-esqueci');
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.querySelector('[data-btn-spin]').hidden = false;
+        btn.querySelector('[data-btn-text]').textContent = 'Enviando…';
+        document.getElementById('esqueci-email').value = 'maria@exemplo.com';
+        var ts = document.querySelector('[data-t-spin]');
+        var tok = document.querySelector('[data-t-ok]');
+        var tt = document.querySelector('[data-t-text]');
+        if (ts && tok && tt) { ts.hidden = false; tok.hidden = true; tt.textContent = 'verificando…'; }
+      }
+    })();
+  </script>
+</body>
+</html>

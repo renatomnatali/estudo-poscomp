@@ -65,6 +65,10 @@ function pseudonymizeEmail(email: string | undefined): string | undefined {
   return `<email:${hashWithSecret(email).slice(0, 12)}>`;
 }
 
+// Eventos de auth (APR-3, PR B): vocabulário espelhado do sem-cilada
+// (src/lib/security-logger.ts) para as rotas /api/auth/*. PASSWORD_SET_*
+// é novo daqui: o set-password de lá é fluxo de compra guest e loga
+// REGISTER_SUCCESS; aqui é consumo de PasswordResetToken, com nome próprio.
 type SecurityEvent =
   /** POST sem header Sec-Fetch-Site (client legacy/curl) — permitido, mas
    *  logado para medir o volume do fallback de compat do CSRF. */
@@ -73,7 +77,28 @@ type SecurityEvent =
   | "SYSTEM_RATE_LIMIT_DEGRADED"
   /** Redis do rate limiter respondeu com erro — política do limiter decidiu
    *  (fail-closed/fail-open/degradação para memória). */
-  | "RATE_LIMIT_BACKEND_ERROR";
+  | "RATE_LIMIT_BACKEND_ERROR"
+  | "LOGIN_SUCCESS"
+  | "LOGIN_FAILED"
+  | "LOGIN_RATE_LIMITED"
+  /** Lookup de usuário no login falhou por erro transitório de conexão. */
+  | "LOGIN_DB_ERROR"
+  | "REGISTER_SUCCESS"
+  | "REGISTER_DUPLICATE"
+  | "REGISTER_RATE_LIMITED"
+  /** Desafio anti-bot (Turnstile) reprovado — detail identifica a rota. */
+  | "TURNSTILE_FAILED"
+  | "VERIFY_EMAIL_SUCCESS"
+  | "VERIFY_EMAIL_FAILED"
+  | "RESEND_VERIFICATION_REQUESTED"
+  | "RESEND_VERIFICATION_RATE_LIMITED"
+  | "LOGOUT"
+  | "PASSWORD_RESET_REQUESTED"
+  | "PASSWORD_RESET_RATE_LIMITED"
+  | "PASSWORD_RESET_FAILED"
+  | "PASSWORD_RESET_SUCCESS"
+  | "PASSWORD_SET_FAILED"
+  | "PASSWORD_SET_SUCCESS";
 
 interface SecurityLogPayload {
   event: SecurityEvent;

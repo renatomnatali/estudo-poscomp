@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar · aprovado.xyz</title>
+  <!--
+    MOCKUP — APR-3 · PR B — rota real: /entrar
+    Espelho funcional: sem-cilada /login (campos, validações, mensagens).
+    Sistema visual: DS aprovado (Geist + tokens de colors_and_type.css).
+
+    ESTADOS SIMULADOS (via querystring ?estado=…):
+      (padrão)        formulário limpo
+      erro            401 — credencial inválida (genérica)
+      nao-verificado  403 — e-mail não verificado, com reenvio
+      reenviado       confirmação do reenvio da verificação
+      limite          429 — muitas tentativas
+      carregando      submit em andamento (botão + Turnstile em verificação)
+  -->
+  <link rel="stylesheet" href="_auth.css">
+</head>
+<body class="auth-page">
+
+  <!-- Chrome público — padrão page-nav das páginas internas da landing -->
+  <nav class="page-nav" aria-label="Navegação principal">
+    <div class="page-nav-inner">
+      <a href="../../aprovado_%20landing-page/Landing.html" style="text-decoration:none" aria-label="aprovado — página inicial">
+        <span class="aprovado-lockup is-sm">
+          <span class="aprovado-ring">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span class="aprovado-word">aprov<span class="a">a</span>do</span>
+        </span>
+      </a>
+      <a class="back" href="../../aprovado_%20landing-page/Landing.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        voltar para a home
+      </a>
+    </div>
+  </nav>
+
+  <main class="auth-main">
+    <div class="auth-wrap">
+      <span class="eyebrow auth-eyebrow">Conta · Acesso</span>
+      <h1 class="auth-title">Entrar na sua conta</h1>
+
+      <form class="auth-card" data-estado="form" novalidate>
+        <!-- E-mail: normalização ("  Fulano@Exemplo.COM  " → minúsculas sem
+             espaços) é responsabilidade da API; o campo não bloqueia digitação. -->
+        <div class="auth-field">
+          <label for="entrar-email">E-mail</label>
+          <input class="auth-input" id="entrar-email" name="email" type="email"
+                 autocomplete="email" inputmode="email" placeholder="seu-email@exemplo.com" required>
+        </div>
+
+        <div class="auth-field">
+          <div class="auth-field-head">
+            <label for="entrar-senha">Senha</label>
+            <a class="auth-link" href="esqueci-senha.html">Esqueci minha senha</a>
+          </div>
+          <div class="auth-input-wrap">
+            <input class="auth-input" id="entrar-senha" name="password" type="password"
+                   autocomplete="current-password" required>
+            <!-- Mostrar/ocultar senha (adição destes mockups; o sem-cilada não tem) -->
+            <button type="button" class="pwd-toggle" aria-label="Mostrar senha" aria-pressed="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 401 — resposta genérica idêntica para conta inexistente e senha
+             errada (anti-enumeração). Mesma mensagem, mesmo tempo de resposta. -->
+        <div class="auth-alert auth-alert-error" role="alert" data-subestado="erro" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m12 8-4 4 4 4"/><path d="m16 8-4 4 4 4"/></svg>
+          <span>Credenciais inválidas. Confira seu e-mail e senha e tente de novo.</span>
+        </div>
+
+        <!-- 403 — e-mail não verificado: instrução + ação de reenvio.
+             Após clicar em reenviar, o alerta dá lugar ao status de confirmação. -->
+        <div class="auth-alert auth-alert-error" role="alert" data-subestado="nao-verificado" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span>
+            Seu e-mail ainda não foi verificado. Verifique sua caixa de entrada (e spam)
+            ou reenvie o link de verificação.
+            <button type="button" class="auth-alert-action" id="btn-reenviar">
+              Reenviar e-mail de verificação
+            </button>
+          </span>
+        </div>
+
+        <!-- Confirmação do reenvio (resposta genérica; limite 2/min por IP) -->
+        <div class="auth-status" role="status" data-subestado="reenviado" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          <span>E-mail de verificação reenviado. Verifique sua caixa de entrada e spam.</span>
+        </div>
+
+        <!-- 429 — rate limit (10 tentativas/min por IP) -->
+        <div class="auth-alert auth-alert-warn" role="alert" data-subestado="limite" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6"/><path d="M12 16h.01"/></svg>
+          <span>Muitas tentativas. Aguarde um momento.</span>
+        </div>
+
+        <!-- Desafio anti-bot (Cloudflare Turnstile) — placeholder discreto.
+             Estado resolvido por padrão; em ?estado=carregando mostra verificação. -->
+        <div class="auth-turnstile" role="group" aria-label="Verificação de segurança">
+          <svg class="t-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="t-label">Verificação de segurança</span>
+          <span class="t-state">
+            <span class="spinner" data-t-spin hidden aria-hidden="true"></span>
+            <svg class="is-ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-t-ok aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            <span data-t-text>Cloudflare</span>
+          </span>
+        </div>
+
+        <button type="submit" class="auth-btn auth-btn-pri" id="btn-entrar">
+          <span class="spinner" hidden data-btn-spin aria-hidden="true"></span>
+          <span data-btn-text>Entrar</span>
+        </button>
+      </form>
+
+      <p class="auth-alt">Não tem conta? <a href="cadastro.html">Criar conta</a></p>
+    </div>
+  </main>
+
+  <!-- Chrome público — rodapé padrão -->
+  <footer class="page-foot">
+    <span>© 2026 aprovado.xyz · independente · não afiliado à SBC</span>
+    <div>
+      <a href="../../aprovado_%20landing-page/pages/sobre.html">Sobre</a>
+      <a href="../../aprovado_%20landing-page/pages/contato.html">Contato</a>
+      <a href="../../aprovado_%20landing-page/pages/termos.html">Termos</a>
+      <a href="../../aprovado_%20landing-page/pages/privacidade.html">Privacidade</a>
+      <a href="../../aprovado_%20landing-page/pages/cookies.html">Cookies</a>
+    </div>
+  </footer>
+
+  <script>
+    // Simulação de estados — NENHUMA lógica de produção aqui.
+    (function () {
+      var estado = new URLSearchParams(location.search).get('estado') || 'form';
+      var mapa = { 'erro': 'erro', 'nao-verificado': 'nao-verificado',
+                   'reenviado': 'reenviado', 'limite': 'limite',
+                   'carregando': 'carregando' };
+
+      if (mapa[estado]) {
+        var bloco = document.querySelector('[data-subestado="' + mapa[estado] + '"]');
+        if (bloco) bloco.hidden = false;
+      }
+
+      if (estado === 'carregando') {
+        var btn = document.getElementById('btn-entrar');
+        var spin = btn.querySelector('[data-btn-spin]');
+        var text = btn.querySelector('[data-btn-text]');
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        spin.hidden = false;
+        text.textContent = 'Entrando…';
+        document.getElementById('entrar-email').value = 'maria@exemplo.com';
+        document.getElementById('entrar-senha').value = 'SenhaForte123';
+        // Turnstile entra em "verificando…"
+        var ts = document.querySelector('[data-t-spin]');
+        var tok = document.querySelector('[data-t-ok]');
+        var tt = document.querySelector('[data-t-text]');
+        if (ts && tok && tt) { ts.hidden = false; tok.hidden = true; tt.textContent = 'verificando…'; }
+      }
+
+      // Reenvio da verificação (simulado): botão → enviando → confirmação.
+      var reenviar = document.getElementById('btn-reenviar');
+      if (reenviar) {
+        reenviar.addEventListener('click', function () {
+          reenviar.disabled = true;
+          reenviar.textContent = 'Enviando…';
+          setTimeout(function () {
+            var alerta = reenviar.closest('[data-subestado]');
+            alerta.hidden = true;
+            document.querySelector('[data-subestado="reenviado"]').hidden = false;
+          }, 800);
+        });
+      }
+
+      // Mostrar/ocultar senha.
+      var toggle = document.querySelector('.pwd-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', function () {
+          var input = document.getElementById('entrar-senha');
+          var aberto = input.type === 'text';
+          input.type = aberto ? 'password' : 'text';
+          toggle.setAttribute('aria-pressed', String(!aberto));
+          toggle.setAttribute('aria-label', aberto ? 'Mostrar senha' : 'Ocultar senha');
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
