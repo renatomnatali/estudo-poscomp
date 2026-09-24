@@ -157,6 +157,30 @@ describe('POST /api/auth/verify-email', () => {
       silence.restore();
     }
   });
+
+  it('responde 429 na 6ª tentativa do mesmo IP no minuto (5/min)', async () => {
+    dbMock.verificationToken.findUnique.mockResolvedValue(null);
+    const silence = silenceConsole('log');
+    try {
+      const ip = '192.0.2.13';
+      for (let i = 0; i < 5; i++) {
+        const response = await postVerifyEmail(
+          requisicao('/api/auth/verify-email', { token: TOKEN }, { ip })
+        );
+        // Token inválido (400), mas o contador do limiter já rodou — a rota
+        // conta a tentativa antes de validar o token.
+        expect(response.status).toBe(400);
+      }
+
+      const sexta = await postVerifyEmail(
+        requisicao('/api/auth/verify-email', { token: TOKEN }, { ip })
+      );
+
+      expect(sexta.status).toBe(429);
+    } finally {
+      silence.restore();
+    }
+  });
 });
 
 describe('POST /api/auth/resend-verification', () => {

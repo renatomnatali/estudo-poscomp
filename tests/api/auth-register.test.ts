@@ -151,6 +151,26 @@ describe('POST /api/auth/register', () => {
     }
   });
 
+  it('mantém o cadastro concluído quando o envio do e-mail de verificação falha', async () => {
+    // Fronteira de e-mail caída não bloqueia o registro: a conta existe, o
+    // token existe e o usuário pode pedir reenvio depois.
+    sdkSendMock.mockRejectedValue(new Error('resend down'));
+
+    const silence = silenceConsole('log', 'error');
+    try {
+      const response = await POST(
+        post({ email: 'sem-email@teste.com', password: 'SenhaForte123' }, { ip: '203.0.113.15' })
+      );
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ outcome: 'verify_email' });
+      expect(dbMock.user.create).toHaveBeenCalledTimes(1);
+      expect(dbMock.verificationToken.create).toHaveBeenCalledTimes(1);
+    } finally {
+      silence.restore();
+    }
+  });
+
   it('responde 429 na 6ª tentativa do mesmo IP no minuto (5/min)', async () => {
     const silence = silenceConsole('log');
     try {

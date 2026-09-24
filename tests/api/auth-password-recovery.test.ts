@@ -165,6 +165,28 @@ describe('POST /api/auth/forgot-password', () => {
       silence.restore();
     }
   });
+
+  it('responde 429 na 4ª tentativa do mesmo IP no minuto (3/min)', async () => {
+    dbMock.user.findUnique.mockResolvedValue(null);
+    const silence = silenceConsole('log');
+    try {
+      const ip = '198.51.100.33';
+      for (let i = 0; i < 3; i++) {
+        const response = await postForgot(
+          requisicao('/api/auth/forgot-password', { email: `alvo${i}@teste.com` }, { ip })
+        );
+        expect(response.status).toBe(200);
+      }
+
+      const quarta = await postForgot(
+        requisicao('/api/auth/forgot-password', { email: 'estoura@teste.com' }, { ip })
+      );
+
+      expect(quarta.status).toBe(429);
+    } finally {
+      silence.restore();
+    }
+  });
 });
 
 describe('POST /api/auth/reset-password', () => {
@@ -277,6 +299,29 @@ describe('POST /api/auth/reset-password', () => {
       silence.restore();
     }
   });
+
+  it('responde 429 na 6ª tentativa do mesmo IP no minuto (5/min)', async () => {
+    dbMock.passwordResetToken.findUnique.mockResolvedValue(null);
+    const silence = silenceConsole('log');
+    try {
+      const ip = '198.51.100.45';
+      for (let i = 0; i < 5; i++) {
+        const response = await postReset(
+          requisicao('/api/auth/reset-password', { token: TOKEN, password: NOVA_SENHA }, { ip })
+        );
+        // Token inválido (400), mas o contador do limiter já rodou.
+        expect(response.status).toBe(400);
+      }
+
+      const sexta = await postReset(
+        requisicao('/api/auth/reset-password', { token: TOKEN, password: NOVA_SENHA }, { ip })
+      );
+
+      expect(sexta.status).toBe(429);
+    } finally {
+      silence.restore();
+    }
+  });
 });
 
 describe('POST /api/auth/set-password', () => {
@@ -302,6 +347,29 @@ describe('POST /api/auth/set-password', () => {
         where: { token: TOKEN },
         data: { usedAt: expect.any(Date) },
       });
+    } finally {
+      silence.restore();
+    }
+  });
+
+  it('responde 429 na 6ª tentativa do mesmo IP no minuto (5/min)', async () => {
+    dbMock.passwordResetToken.findUnique.mockResolvedValue(null);
+    const silence = silenceConsole('log');
+    try {
+      const ip = '198.51.100.51';
+      for (let i = 0; i < 5; i++) {
+        const response = await postSet(
+          requisicao('/api/auth/set-password', { token: TOKEN, password: NOVA_SENHA }, { ip })
+        );
+        // Token inválido (400), mas o contador do limiter já rodou.
+        expect(response.status).toBe(400);
+      }
+
+      const sexta = await postSet(
+        requisicao('/api/auth/set-password', { token: TOKEN, password: NOVA_SENHA }, { ip })
+      );
+
+      expect(sexta.status).toBe(429);
     } finally {
       silence.restore();
     }

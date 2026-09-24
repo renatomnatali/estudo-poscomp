@@ -78,10 +78,28 @@ describe('GET /api/auth/me', () => {
         email: 'sessao@teste.com',
         role: 'USER',
       });
-      expect(corpo.emailVerified).toBeTruthy();
+      expect(corpo.emailVerified).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
     } finally {
       silence.restore();
     }
+  });
+
+  it('responde 404 quando a conta some entre a validação da sessão e o fetch dos dados', async () => {
+    // Janela real que o 404 cobre: a conta estava ativa na validação da
+    // sessão (1ª query) e foi deletada antes do fetch dos dados (2ª query).
+    const token = await signToken({
+      sub: 'user-9',
+      email: 'sessao@teste.com',
+      emailVerified: true,
+      role: 'USER',
+    });
+    cookiesMock.mockResolvedValue({ get: () => ({ value: token }) });
+    dbMock.user.findUnique.mockReset().mockResolvedValueOnce(usuarioAtivo).mockResolvedValueOnce(null);
+
+    const response = await getMe();
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({ error: expect.stringMatching(/não encontrado/i) });
   });
 
   it('responde 204 quando a sessão foi invalidada por troca de senha', async () => {

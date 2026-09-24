@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { hash } from 'bcryptjs';
+import { Prisma } from '@prisma/client';
 
 vi.hoisted(() => {
   delete process.env.KV_REST_API_URL;
@@ -148,13 +149,63 @@ describe('POST /api/auth/login', () => {
         email: 'usuario@teste.com',
         role: 'USER',
       });
-      expect(corpo.user.emailVerified).toBeTruthy();
+      expect(corpo.user.emailVerified).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
 
       const cookie = response.cookies.get('session');
       expect(cookie?.value.split('.')).toHaveLength(3);
       expect(cookie?.httpOnly).toBe(true);
       expect(cookie?.maxAge).toBe(3600);
       expect(cookie?.sameSite).toBe('lax');
+    } finally {
+      silence.restore();
+    }
+  });
+
+  it('devolve o MESMO 401 genérico para conta sem senha (dummy compare anti-timing)', async () => {
+    // Conta existe mas não tem passwordHash: mesmo 401 e mesmo corpo do ramo
+    // de conta inexistente — nenhum canal distingue os casos.
+    dbMock.user.findUnique
+      .mockResolvedValueOnce(usuario({ passwordHash: null, emailVerified: new Date() }))
+      .mockResolvedValueOnce(null);
+
+    const silence = silenceConsole('log');
+    try {
+      const semSenha = await POST(
+        post({ email: 'usuario@teste.com', password: SENHA }, { ip: '198.51.100.16' })
+      );
+      const inexistente = await POST(
+        post({ email: 'ghost@teste.com', password: SENHA }, { ip: '198.51.100.17' })
+      );
+
+      expect(semSenha.status).toBe(401);
+      expect(await semSenha.json()).toEqual(await inexistente.json());
+    } finally {
+      silence.restore();
+    }
+  });
+
+  it('responde 503 com corpo JSON quando o banco fica inacessível mesmo após o retry', async () => {
+    // O motivo de existir do withDbRetry na rota: conexão stale que não
+    // recupera no retry não pode virar 500 sem corpo — o cliente precisa de
+    // mensagem útil para tentar de novo.
+    const p1001 = new Prisma.PrismaClientKnownRequestError("can't reach database server", {
+      code: 'P1001',
+      clientVersion: '6.19.2',
+    });
+    dbMock.user.findUnique.mockRejectedValue(p1001);
+
+    const silence = silenceConsole('log');
+    try {
+      const response = await POST(
+        post({ email: 'usuario@teste.com', password: SENHA }, { ip: '198.51.100.18' })
+      );
+
+      expect(response.status).toBe(503);
+      expect(await response.json()).toMatchObject({
+        error: expect.stringMatching(/instabilidade/i),
+      });
+      // withDbRetry real: tentativa inicial + 1 retry antes de desistir.
+      expect(dbMock.user.findUnique).toHaveBeenCalledTimes(2);
     } finally {
       silence.restore();
     }
