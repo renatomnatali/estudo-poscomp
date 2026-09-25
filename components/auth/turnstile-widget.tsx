@@ -4,6 +4,13 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 
 interface Props {
   onToken: (token: string) => void;
+  /**
+   * Falha TERMINAL do desafio: budget de retries esgotado no error-callback
+   * ou script que não carregou. Distinto de onToken(""): a expiração do
+   * token (~300s) também entrega "", mas o widget se renova sozinho — não é
+   * terminal. Os forms usam este sinal para oferecer recuperação ao usuário.
+   */
+  onFailure?: () => void;
   className?: string;
 }
 
@@ -32,11 +39,19 @@ declare global {
 
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
 
-// Quantas vezes tentamos `turnstile.reset()` numa falha de challenge
-// (error/timeout) antes de desistir e sinalizar erro ao consumidor. Falhas
-// transitórias (rede instável no mobile, hiccup do CDN da Cloudflare) somem
-// no reset; falha estrutural (ITP do Safari, bloqueio de rede) esgota o
-// budget e cai no onToken("") — o watchdog do consumidor é a rede final.
+/**
+ * true quando a site key pública está configurada. Os forms importam este
+ * flag (fonte única) em vez de reler a env var em cada tela.
+ */
+export const siteKeyPresent = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+// Quantas vezes tentamos `turnstile.reset()` num ERRO de challenge
+// (error-callback) antes de desistir e sinalizar falha terminal ao
+// consumidor. Falhas transitórias (rede instável no mobile, hiccup do CDN
+// da Cloudflare) somem no reset; falha estrutural (ITP do Safari, bloqueio
+// de rede) esgota o budget e cai no onFailure — o watchdog do consumidor é
+// a rede final. Timeout NÃO consome este budget: o widget da Cloudflare se
+// auto-reseta no timeout do desafio (ver 'timeout-callback' abaixo).
 const MAX_TURNSTILE_RETRIES = 2;
 
 // Promessa única e compartilhada do carregamento do script. Garante que o
@@ -60,9 +75,14 @@ function loadTurnstileScript(): Promise<void> {
     const existing = document.querySelector<HTMLScriptElement>(
       `script[src^="${SCRIPT_SRC}"]`,
     );
+    const tag = existing ?? document.createElement('script');
     const onError = () => {
-      // Permite nova tentativa numa próxima montagem (rede recuperou, etc).
+      // Permite nova tentativa numa próxima montagem (rede recuperou, etc) e
+      // REMOVE a tag morta do DOM — sem isso a remontagem reencontra o
+      // <script> com falha, pendura listeners nele e espera um load que
+      // nunca vem. Com a tag fora, a próxima montagem injeta uma nova.
       scriptPromise = null;
+      tag.remove();
       reject(new Error('Turnstile script failed to load'));
     };
     if (existing) {
@@ -71,13 +91,12 @@ function loadTurnstileScript(): Promise<void> {
       existing.addEventListener('error', onError);
       return;
     }
-    const script = document.createElement('script');
-    script.src = SCRIPT_SRC;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = onError;
-    document.head.appendChild(script);
+    tag.src = SCRIPT_SRC;
+    tag.async = true;
+    tag.defer = true;
+    tag.onload = () => resolve();
+    tag.onerror = onError;
+    document.head.appendChild(tag);
   });
   return scriptPromise;
 }
@@ -85,18 +104,24 @@ function loadTurnstileScript(): Promise<void> {
 /**
  * Cloudflare Turnstile widget (espelho do sem-cilada).
  * Carrega o script (uma vez, idempotente) e renderiza o widget no container.
- * Chama onToken("<token>") quando o desafio resolve; onToken("") quando falha
- * de forma definitiva (após os retries) ou o script não carrega.
+ * Chama onToken("<token>") quando o desafio resolve; onToken("") quando o
+ * token é invalidado (expiração/renewal) e também na falha definitiva, que
+ * ainda aciona onFailure — o sinal que o form usa para a recuperação.
  *
  * Sem NEXT_PUBLIC_TURNSTILE_SITE_KEY renderiza null — dev/preview funcionam
  * sem desafio (o backend faz bypass em verifyTurnstile).
  */
 export const TurnstileWidget = forwardRef<TurnstileHandle, Props>(
-  function TurnstileWidget({ onToken, className }, ref) {
+  function TurnstileWidget({ onToken, onFailure, className }, ref) {
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetRef = useRef<string | null>(null);
     const retriesRef = useRef(0);
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    // Callback sempre-fresco sem entrar nas deps do efeito: parents passam
+    // arrow inline (identidade nova a cada render) e o efeito NÃO pode
+    // re-rodar por isso — o cleanup remove o widget e remontaria o desafio.
+    const onFailureRef = useRef(onFailure);
+    onFailureRef.current = onFailure;
 
     // Expõe reset() ao form. Após um submit que consumiu o token (single-use),
     // o form chama reset() para obter um token novo antes da próxima tentativa,
@@ -120,15 +145,16 @@ export const TurnstileWidget = forwardRef<TurnstileHandle, Props>(
       // carregamento do script é assíncrono e pode resolver depois do cleanup.
       let cancelled = false;
 
-      // Falha de challenge (error/timeout): tenta resetar e refazer o desafio
-      // até MAX_TURNSTILE_RETRIES antes de sinalizar falha.
-      function handleChallengeFailure() {
+      // Erro de challenge (error-callback): tenta resetar e refazer o
+      // desafio até MAX_TURNSTILE_RETRIES antes de declarar falha terminal.
+      function handleChallengeError() {
         if (retriesRef.current < MAX_TURNSTILE_RETRIES && widgetRef.current && window.turnstile) {
           retriesRef.current += 1;
           window.turnstile.reset(widgetRef.current);
           return;
         }
         onToken('');
+        onFailureRef.current?.();
       }
 
       function renderWidget() {
@@ -149,10 +175,12 @@ export const TurnstileWidget = forwardRef<TurnstileHandle, Props>(
             }
             onToken('');
           },
-          'error-callback': handleChallengeFailure,
-          // Challenge não resolveu no tempo do Cloudflare — sem isto, o widget
-          // pode ficar pendente sem nunca chamar nenhum callback.
-          'timeout-callback': handleChallengeFailure,
+          'error-callback': handleChallengeError,
+          // Timeout do desafio: apenas OBSERVA. O widget da Cloudflare se
+          // auto-reseta neste evento — um reset manual aqui seria um segundo
+          // mecanismo concorrente, e decrementar o budget de error aqui
+          // queimaria retries à toa (timeout é espera, não erro estrutural).
+          'timeout-callback': () => {},
           theme: 'light',
           size: 'flexible',
         });
@@ -166,9 +194,13 @@ export const TurnstileWidget = forwardRef<TurnstileHandle, Props>(
           if (!cancelled) renderWidget();
         })
         .catch(() => {
-          // Script não carregou (rede ruim, bloqueio, CDN fora). Sinaliza falha
-          // (token vazio) para o consumidor sair do estado de espera.
-          if (!cancelled) onToken('');
+          // Script não carregou (rede ruim, bloqueio, CDN fora). Sinaliza
+          // falha terminal: token vazio para o consumidor sair do estado de
+          // espera + onFailure para o form oferecer recuperação.
+          if (!cancelled) {
+            onToken('');
+            onFailureRef.current?.();
+          }
         });
 
       return () => {
