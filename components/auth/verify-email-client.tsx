@@ -8,7 +8,14 @@ import { api, ApiError } from '@/lib/api';
 
 import { IconAlertCircle, IconCheck, IconXCircle } from './icons';
 
-type VerifyStatus = 'verifying' | 'confirmed' | 'invalid';
+type VerifyStatus =
+  | 'verifying'
+  | 'confirmed'
+  | 'invalid'
+  /** 429 do consumo do token — limite de tentativas, o link não foi julgado. */
+  | 'rate'
+  /** Falha de rede/servidor — a verificação não aconteceu, link segue válido. */
+  | 'unavailable';
 
 type ResendState =
   | { phase: 'idle' }
@@ -17,11 +24,15 @@ type ResendState =
   | { phase: 'sent' }
   | { phase: 'error'; text: string };
 
+/** Fallback do texto 429 — o backend responde "Muitas tentativas…". */
+const RATE_LIMIT_MESSAGE = 'Muitas tentativas. Aguarde um momento.';
+
 /**
  * Estados do /verificar-email (régua: Spec/mockup/auth/verificar-email.html):
  * verificando (consumindo o token) · confirmado (redireciona pro login) ·
  * inválido/expirado/usado — mensagem UNIFICADA + reenvio direto na tela com
- * resposta genérica (anti-enumeração).
+ * resposta genérica (anti-enumeração) · rate (429: aguardar, reenvio
+ * disponível) · unavailable (rede: "não foi possível verificar agora").
  *
  * Diferença deliberada vs. sem-cilada: no falha, a ação é REENVIAR a
  * verificação aqui mesmo (o sem-cilada manda "tentar novamente" para o
@@ -32,13 +43,17 @@ export function VerifyEmailClient() {
   const router = useRouter();
   const token = searchParams.get('token');
   const [status, setStatus] = useState<VerifyStatus>(token ? 'verifying' : 'invalid');
+  const [rateText, setRateText] = useState(RATE_LIMIT_MESSAGE);
   const [resend, setResend] = useState<ResendState>({ phase: 'idle' });
   const [resendEmail, setResendEmail] = useState('');
   const confirmedCardRef = useRef<HTMLDivElement>(null);
   const invalidCardRef = useRef<HTMLDivElement>(null);
 
   // Consome o token na abertura. Sem token na URL já nasce no estado
-  // inválido — mensagem unificada, sem distinguir o motivo.
+  // inválido — mensagem unificada, sem distinguir o motivo. Falhas do
+  // consumo só são "link inválido" quando o backend JULGOU o token (400);
+  // 429 e falha de rede não dizem nada do link e não podem culpar o
+  // usuário de ter um link vencido.
   useEffect(() => {
     if (!token) return;
 
@@ -53,9 +68,15 @@ export function VerifyEmailClient() {
         if (!cancelled) {
           setStatus('confirmed');
         }
-      } catch {
-        if (!cancelled) {
+      } catch (err) {
+        if (cancelled) return;
+        if (err instanceof ApiError && err.status === 429) {
+          setRateText(err.message);
+          setStatus('rate');
+        } else if (err instanceof ApiError && err.status === 400) {
           setStatus('invalid');
+        } else {
+          setStatus('unavailable');
         }
       }
     }
@@ -77,7 +98,9 @@ export function VerifyEmailClient() {
   // anuncia; teclado segue dali.
   useEffect(() => {
     if (status === 'confirmed') confirmedCardRef.current?.focus();
-    if (status === 'invalid') invalidCardRef.current?.focus();
+    if (status === 'invalid' || status === 'rate' || status === 'unavailable') {
+      invalidCardRef.current?.focus();
+    }
   }, [status]);
 
   async function handleResend(event: React.FormEvent) {
@@ -138,17 +161,34 @@ export function VerifyEmailClient() {
         </div>
       )}
 
-      {status === 'invalid' && (
+      {(status === 'invalid' || status === 'rate' || status === 'unavailable') && (
         <>
           <div className="auth-result" tabIndex={-1} ref={invalidCardRef}>
             <div className="icon-box is-amb">
               <IconAlertCircle size={26} />
             </div>
-            <h2>Link inválido ou expirado</h2>
-            <p>
-              Este link de verificação não é mais válido — pode ter expirado
-              (vale por 24 horas) ou já ter sido usado.
-            </p>
+            {status === 'invalid' ? (
+              <>
+                <h2>Link inválido ou expirado</h2>
+                <p>
+                  Este link de verificação não é mais válido — pode ter expirado
+                  (vale por 24 horas) ou já ter sido usado.
+                </p>
+              </>
+            ) : status === 'rate' ? (
+              <>
+                <h2>Limite de tentativas</h2>
+                <p>{rateText} Você ainda pode pedir um novo link abaixo.</p>
+              </>
+            ) : (
+              <>
+                <h2>Não foi possível verificar agora</h2>
+                <p>
+                  A verificação falhou por um problema de conexão, não pelo link.
+                  Recarregue a página para tentar de novo — ou peça um novo link abaixo.
+                </p>
+              </>
+            )}
           </div>
 
           {/* Reenvio direto na tela: campo de e-mail + resposta genérica.
