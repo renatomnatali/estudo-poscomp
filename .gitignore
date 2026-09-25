@@ -41,3 +41,6 @@ docs/Provas/.tmp-*
 
 # Claude Code local context (worktrees, plans, agents, settings, transcripts)
 .claude/
+
+# Rascunhos locais de refinamento (/refinar) — contexto de sessão, não fonte
+.refinar/
