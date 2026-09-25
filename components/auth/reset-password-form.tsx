@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { api, ApiError } from '@/lib/api';
-import { isValidPassword, PASSWORD_REQUIREMENTS_MESSAGE } from '@/lib/password';
+import { isValidPassword, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENTS_MESSAGE } from '@/lib/password';
 
 import { IconAlertCircle, IconCheck, IconXCircle } from './icons';
 import { PasswordInput } from './password-input';
@@ -34,10 +34,20 @@ export function ResetPasswordForm({ token }: { token: string }) {
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<AlertState>(null);
   const [success, setSuccess] = useState(false);
+  // Submit com divergência força o alerta mesmo com confirmação vazia (o
+  // aviso vivo só acende quando há algo digitado no segundo campo).
+  const [mismatchSubmitted, setMismatchSubmitted] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  // Confirmação diverge — checa ao digitar (só quando algo foi digitado).
-  const mismatch = confirmPassword.length > 0 && password !== confirmPassword;
+  // Confirmação diverge — checa ao digitar (só quando algo foi digitado)
+  // ou quando um submit já flagrou a divergência.
+  const mismatch =
+    password !== confirmPassword && (confirmPassword.length > 0 || mismatchSubmitted);
+
+  // Voltou a coincidir: o alerta volta a ser só o vivo (ao digitar).
+  useEffect(() => {
+    if (password === confirmPassword) setMismatchSubmitted(false);
+  }, [password, confirmPassword]);
 
   // Sucesso: redireciona para o login em 3 segundos + foco no card.
   useEffect(() => {
@@ -52,7 +62,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
     setAlert(null);
 
     if (password !== confirmPassword) {
-      // O alerta vivo de coincidência já está na tela; nada a fazer aqui.
+      // Nunca um no-op silencioso: com a confirmação vazia (ou divergente)
+      // o alerta de coincidência precisa acender aqui — o aviso vivo só
+      // existe quando há texto no segundo campo.
+      setMismatchSubmitted(true);
       return;
     }
 
@@ -126,7 +139,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           value={password}
           onChange={setPassword}
           autoComplete="new-password"
-          minLength={8}
+          minLength={PASSWORD_MIN_LENGTH}
           describedBy="redefinir-regras"
           autoFocus
           disabled={loading}
@@ -141,7 +154,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           value={confirmPassword}
           onChange={setConfirmPassword}
           autoComplete="new-password"
-          minLength={8}
+          minLength={PASSWORD_MIN_LENGTH}
           disabled={loading}
         />
 
