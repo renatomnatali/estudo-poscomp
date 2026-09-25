@@ -1,0 +1,450 @@
+/* ============================================================
+   auth.css — Telas de conta do aprovado.xyz (APR-3 · PR B2)
+   Rotas: /entrar, /cadastro, /verificar-email, /esqueci-senha,
+   /redefinir-senha.
+
+   FONTE VISUAL (régua literal): Spec/mockup/auth/_auth.css.
+   Portado para o app com três adaptações:
+   - Sem @import: os tokens canônicos (--ink, --sap*, --n-*, --fg-*,
+     --bg-*, --r-*, --sh-*) vêm de components/marketing/
+     aprovado-tokens.css, importado globalmente em app/layout.tsx.
+   - Chrome público (.page-nav / .page-foot): reusado de
+     components/marketing/pages.css (a réplica do mockup tem valores
+     idênticos) — não duplicado aqui.
+   - Fontes: --fd/--fb/--fm mapeados para as variáveis do next/font
+     injetadas no <html> (Geist + Geist Mono), em escopo .auth-page.
+
+   As classes .auth-* / .pwd-* são o card "formulários de conta" do DS
+   (proposta destes mockups). Régua de botões: ação de formulário é
+   SEMI-RETANGULAR (raio --r-md 12) — nunca pill.
+   ============================================================ */
+
+/* ── Página ─────────────────────────────────────────────── */
+
+.auth-page {
+  /* Fontes do sistema aprovado (Geist), escopadas a estas telas: as vars
+     --fd/--fb/--fm não têm definição global no app hoje (o comentário de
+     aprovado-tokens.css as promete, mas ninguém as injeta). O next/font
+     injeta --font-geist / --font-geist-mono no <html>; a partir delas
+     resolvemos a tipografia sem tocar no escopo global. */
+  --fd: var(--font-geist, 'Geist'), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --fb: var(--font-geist, 'Geist'), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --fm: var(--font-geist-mono, 'Geist Mono'), ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+  font-family: var(--fb);
+  color: var(--fg-1);
+}
+
+.auth-main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 56px 20px 72px;
+}
+
+.auth-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ── Cabeçalho do bloco (eyebrow mono + título) ─────────── */
+
+.eyebrow {
+  font-family: var(--fm);
+  font-size: 0.66rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--fg-4);
+}
+
+.auth-eyebrow {
+  display: block;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.auth-title {
+  font-family: var(--fd);
+  font-weight: 800;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--fg-1);
+  text-align: center;
+  margin: 0 0 22px;
+}
+
+.auth-intro {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--fg-3);
+  margin: -10px 0 22px;
+}
+
+/* ── Card do formulário ─────────────────────────────────── */
+/* Cards de produto: r-lg 16 + border n-200 + white (DS).     */
+
+.auth-card {
+  background: var(--white);
+  border: 1px solid var(--n-200);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-sm);
+  padding: 26px 24px;
+}
+
+.auth-field { margin-bottom: 16px; }
+
+.auth-field label {
+  display: block;
+  font-family: var(--fb);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sap-d);
+  margin-bottom: 6px;
+}
+
+.auth-field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ── Inputs (padrão inputs.html do DS, escala de conta) ─── */
+
+.auth-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--n-200);
+  border-radius: 8px;
+  padding: 0.7rem 0.8rem;
+  font-family: var(--fb);
+  font-size: 0.95rem;
+  background: #F8FAFF;
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast),
+              background var(--transition-fast);
+}
+
+.auth-input::placeholder { color: var(--fg-4); }
+
+.auth-input:focus {
+  border: 1.5px solid var(--sap);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(27,63,216,.12);
+}
+
+.auth-input[disabled] { opacity: .6; cursor: not-allowed; }
+
+.auth-input-wrap { position: relative; }
+
+.auth-input-wrap .auth-input { padding-right: 46px; }
+
+/* Olho mostrar/ocultar senha — semântica de utilitário (caixa neutra) */
+.pwd-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  border: 1px solid var(--n-200);
+  border-radius: var(--r-sm);
+  color: var(--fg-3);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.pwd-toggle:hover { border-color: var(--n-300); color: var(--fg-1); }
+.pwd-toggle:focus-visible { outline: 2px solid var(--sap-l); outline-offset: 2px; }
+
+/* ── Botões ─────────────────────────────────────────────── */
+/* Ação de form = semi-retangular (r-md 12), nunca pill.      */
+/* Primário mantém o glow --sh-cta + elevação no hover (DS).  */
+
+.auth-btn {
+  width: 100%;
+  font-family: var(--fb);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background var(--transition-fast),
+              box-shadow var(--transition-fast),
+              transform var(--transition-fast);
+}
+
+.auth-btn-pri {
+  background: var(--sap);
+  color: #fff;
+  box-shadow: var(--sh-cta);
+}
+.auth-btn-pri:hover:not(:disabled) {
+  background: var(--sap-d);
+  transform: translateY(-1px);
+  box-shadow: var(--sh-cta-hover);
+}
+.auth-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Secundário (12px + border, padrão btn-sec do DS) */
+.auth-btn-sec {
+  background: var(--white);
+  color: var(--ink);
+  border: 1px solid var(--n-200);
+  box-shadow: none;
+}
+.auth-btn-sec:hover:not(:disabled) {
+  border-color: var(--n-300);
+  background: var(--n-50);
+}
+
+.auth-btn:focus-visible { outline: 2px solid var(--sap-l); outline-offset: 2px; }
+
+/* ── Links ──────────────────────────────────────────────── */
+
+.auth-link {
+  color: var(--sap);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.auth-link:hover { color: var(--sap-d); text-decoration: underline; }
+
+.auth-alt {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--fg-3);
+  margin: 18px 0 0;
+}
+.auth-alt a {
+  color: var(--sap);
+  font-weight: 600;
+  text-decoration: none;
+}
+.auth-alt a:hover { color: var(--sap-d); text-decoration: underline; }
+
+/* ── Alertas (erro coral / aviso âmbar) ─────────────────── */
+/* Pares solid+tint do ui-standards: coral-bg/#9F1F12 e       */
+/* amb-bg/#92400E (texto escuro = contraste AA).              */
+
+.auth-alert {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.auth-alert svg { flex-shrink: 0; margin-top: 1px; }
+
+.auth-alert-error {
+  background: var(--coral-bg);
+  border: 1px solid rgba(159,31,18,.18);
+  color: #9F1F12;
+}
+
+.auth-alert-warn {
+  background: var(--amb-bg);
+  border: 1px solid rgba(146,64,14,.18);
+  color: #92400E;
+}
+
+/* Ação embutida em alerta (ex.: reenviar verificação no /entrar) */
+.auth-alert-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--fb);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.auth-alert-action:disabled { opacity: .6; cursor: not-allowed; }
+.auth-alert-action:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+/* Mensagem aninhada dentro de um alerta (ex.: falha do reenvio dentro do
+   bloco de e-mail não verificado) — herda a cor do alerta. */
+.auth-alert-note { display: block; margin-top: 8px; }
+
+/* Status de sucesso inline — texto em ink (contraste AA sobre em-bg) */
+.auth-status {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--em-bg);
+  border: 1px solid rgba(0,153,104,.22);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+.auth-status svg { color: var(--em-d); flex-shrink: 0; margin-top: 1px; }
+
+/* ── Card de resultado (substitui o formulário) ─────────── */
+
+.auth-result {
+  background: var(--white);
+  border: 1px solid var(--n-200);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-sm);
+  padding: 32px 28px;
+  text-align: center;
+  outline: none;
+}
+
+.auth-result .icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.icon-box.is-em { background: var(--em-bg); color: var(--em-d); }
+.icon-box.is-amb { background: var(--amb-bg); color: #92400E; }
+.icon-box.is-coral { background: var(--coral-bg); color: #9F1F12; }
+
+.auth-result h2 {
+  font-family: var(--fd);
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  color: var(--fg-1);
+  margin: 0 0 8px;
+}
+
+.auth-result p {
+  font-size: 0.9rem;
+  color: var(--fg-2);
+  margin: 0 0 18px;
+}
+
+.auth-result .auth-btn { width: auto; min-width: 220px; }
+
+.auth-result-note {
+  display: block;
+  margin-top: 14px;
+  font-size: 0.78rem;
+  color: var(--fg-3);
+}
+
+/* ── Chips de requisitos de senha ───────────────────────── */
+/* Chips são pill + mono (regra DS) — semântica distinta de   */
+/* botão: menores, sem interação, check troca cinza → emerald. */
+
+.pwd-rules {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  margin: 10px 0 0;
+}
+
+.pwd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--fm);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: var(--fg-3);
+  background: var(--n-50);
+  border: 1px solid var(--n-200);
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast);
+}
+
+.pwd-chip svg { color: var(--n-400); }
+
+.pwd-chip.ok {
+  background: var(--em-bg);
+  border-color: rgba(0,153,104,.28);
+  color: var(--ink);
+}
+.pwd-chip.ok svg { color: var(--em-d); }
+
+/* ── Widget anti-bot (Turnstile) ────────────────────────── */
+/* Slot discreto: neutro, mono, 58px. O widget real da        */
+/* Cloudflare (size flexible) renderiza dentro desta caixa.   */
+
+.auth-turnstile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid var(--n-200);
+  border-radius: 8px;
+  background: var(--white);
+  padding: 10px 14px;
+  margin: 4px 0 16px;
+  min-height: 58px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ── Spinner ────────────────────────────────────────────── */
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--n-200);
+  border-top-color: var(--sap);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  flex-shrink: 0;
+}
+.spinner.is-lg { width: 34px; height: 34px; border-width: 3px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2.4s; }
+  .auth-btn-pri:hover:not(:disabled) { transform: none; }
+  .auth-page * { transition-duration: .01ms !important; }
+}
+
+/* ── Responsivo ─────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .auth-main { padding: 36px 16px 56px; }
+  .auth-card { padding: 22px 18px; }
+  .page-nav-inner { padding: 12px 18px; }
+}
