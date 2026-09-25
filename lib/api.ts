@@ -15,7 +15,15 @@ export class ApiError extends Error {
   }
 }
 
-export async function api(path: string, init?: RequestInit) {
+/**
+ * Cliente HTTP das rotas /api. `T` tipa o corpo de sucesso esperado pelo
+ * consumidor; respostas 204 (sem corpo) resolvem `null` — `res.json()`
+ * lançaria SyntaxError em corpo vazio.
+ */
+export async function api<T = unknown>(
+  path: string,
+  init?: RequestInit,
+): Promise<T | null> {
   const res = await fetch(`/api${path}`, {
     ...init,
     headers: {
@@ -34,5 +42,7 @@ export async function api(path: string, init?: RequestInit) {
     );
   }
 
-  return res.json();
+  if (res.status === 204) return null;
+
+  return res.json() as Promise<T | null>;
 }

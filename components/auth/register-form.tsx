@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 
 import { api, ApiError } from '@/lib/api';
-import { isValidPassword, PASSWORD_REQUIREMENTS_MESSAGE } from '@/lib/password';
+import { isValidPassword, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENTS_MESSAGE } from '@/lib/password';
 
 import { IconAlertCircle, IconMail, IconXCircle } from './icons';
 import { PasswordInput } from './password-input';
@@ -34,11 +34,24 @@ export function RegisterForm() {
   const [alert, setAlert] = useState<AlertState>(null);
   const [outcome, setOutcome] = useState<Outcome>(null);
   const [turnstileToken, setTurnstileToken] = useState('');
+  // Falha terminal do desafio (budget esgotado/script morto) e chave de
+  // remontagem do widget para a ação de recuperação "recarregar verificação".
+  const [turnstileFailed, setTurnstileFailed] = useState(false);
+  const [widgetKey, setWidgetKey] = useState(0);
   const turnstileRef = useRef<TurnstileHandle>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   // Em dev sem site key, o TurnstileWidget retorna null e o token nunca chega
   // — bloquear submit nesse caso travaria o form.
+  // (Não importar este flag do widget: os testes mockam o módulo sem o
+  // export e o vitest lança "No export is defined on the mock".)
   const siteKeyPresent = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  function retryTurnstile() {
+    setTurnstileFailed(false);
+    setTurnstileToken('');
+    // Remonta o widget: desafio novo (e script novo, se o anterior morreu).
+    setWidgetKey((k) => k + 1);
+  }
 
   // Ao substituir o formulário pela confirmação, o botão "Criar conta" some
   // do DOM e o foco cairia no ancestral. Move o foco para o card de
@@ -59,7 +72,7 @@ export function RegisterForm() {
     setAlert(null);
     setLoading(true);
     try {
-      const res = await api('/auth/register', {
+      const res = await api<{ outcome?: string }>('/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password, turnstileToken }),
       });
@@ -169,7 +182,7 @@ export function RegisterForm() {
           value={password}
           onChange={setPassword}
           autoComplete="new-password"
-          minLength={8}
+          minLength={PASSWORD_MIN_LENGTH}
           describedBy="cadastro-regras"
           disabled={loading}
         >
@@ -193,19 +206,35 @@ export function RegisterForm() {
 
         {/* Desafio anti-bot — sem site key o widget renderiza null. */}
         <TurnstileWidget
+          key={widgetKey}
           ref={turnstileRef}
           onToken={setTurnstileToken}
+          onFailure={() => setTurnstileFailed(true)}
           className="auth-turnstile"
         />
+
+        {/* Falha terminal do desafio: sem recuperação o form ficaria eternamente
+            travado (botão desabilitado esperando um token que não virá). */}
+        {turnstileFailed && (
+          <div className="auth-alert auth-alert-error" role="alert">
+            <IconXCircle />
+            <span>
+              Verificação de segurança falhou. Recarregue a página.
+              <button type="button" className="auth-alert-action" onClick={retryTurnstile}>
+                Recarregar verificação
+              </button>
+            </span>
+          </div>
+        )}
 
         <button
           type="submit"
           className="auth-btn auth-btn-pri"
           disabled={loading || (siteKeyPresent && !turnstileToken)}
-          aria-busy={loading || (siteKeyPresent && !turnstileToken)}
+          aria-busy={loading}
           aria-label={
             siteKeyPresent && !turnstileToken && !loading
-              ? 'Aguardando validação de segurança'
+              ? 'Criar conta — aguardando validação de segurança'
               : undefined
           }
         >
