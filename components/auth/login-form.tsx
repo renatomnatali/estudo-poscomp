@@ -34,15 +34,30 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<AlertState>({ kind: 'none' });
   const [resendLoading, setResendLoading] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState('');
+  // Falha terminal do desafio (budget esgotado/script morto) e chave de
+  // remontagem do widget para a ação de recuperação "recarregar verificação".
+  const [turnstileFailed, setTurnstileFailed] = useState(false);
+  const [widgetKey, setWidgetKey] = useState(0);
   const turnstileRef = useRef<TurnstileHandle>(null);
   // Em dev sem site key, o TurnstileWidget retorna null e o token nunca chega
   // — bloquear submit nesse caso travaria o form. Só exige token se a key
   // estiver configurada (produção). NEXT_PUBLIC_* é inlined em client builds.
+  // (Não importar este flag do widget: os testes mockam o módulo sem o
+  // export e o vitest lança "No export is defined on the mock".)
   const siteKeyPresent = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  function retryTurnstile() {
+    setTurnstileFailed(false);
+    setTurnstileToken('');
+    // Remonta o widget: desafio novo (e script novo, se o anterior morreu).
+    setWidgetKey((k) => k + 1);
+  }
 
   async function handleResendVerification() {
     setResendLoading(true);
+    setResendError(null);
     try {
       // Resposta genérica (anti-enumeração) — o backend não revela se o
       // e-mail existe; a confirmação é a mesma do mockup.
@@ -52,10 +67,13 @@ export function LoginForm() {
       });
       setAlert({ kind: 'resent' });
     } catch (err) {
-      setAlert(
+      // Falha do reenvio NÃO derruba o bloco de e-mail não verificado — o
+      // usuário continua vendo o contexto e a ação de tentar de novo; a
+      // mensagem de erro entra aninhada no próprio bloco.
+      setResendError(
         err instanceof ApiError && err.status === 429
-          ? { kind: 'rate', text: err.message }
-          : { kind: 'error', text: 'Falha ao reenviar e-mail de verificação. Tente novamente.' },
+          ? err.message
+          : 'Falha ao reenviar e-mail de verificação. Tente novamente.',
       );
     } finally {
       setResendLoading(false);
@@ -65,6 +83,7 @@ export function LoginForm() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setAlert({ kind: 'none' });
+    setResendError(null);
     setLoading(true);
     try {
       await api('/auth/login', {
@@ -157,6 +176,7 @@ export function LoginForm() {
               >
                 {resendLoading ? 'Enviando…' : 'Reenviar e-mail de verificação'}
               </button>
+              {resendError && <span className="auth-alert-note">{resendError}</span>}
             </span>
           </div>
         )}
@@ -178,19 +198,35 @@ export function LoginForm() {
         {/* Desafio anti-bot (Cloudflare Turnstile). Sem site key o widget
             renderiza null e o backend faz bypass — dev/preview funcionam. */}
         <TurnstileWidget
+          key={widgetKey}
           ref={turnstileRef}
           onToken={setTurnstileToken}
+          onFailure={() => setTurnstileFailed(true)}
           className="auth-turnstile"
         />
+
+        {/* Falha terminal do desafio: sem recuperação o form ficaria eternamente
+            travado (botão desabilitado esperando um token que não virá). */}
+        {turnstileFailed && (
+          <div className="auth-alert auth-alert-error" role="alert">
+            <IconXCircle />
+            <span>
+              Verificação de segurança falhou. Recarregue a página.
+              <button type="button" className="auth-alert-action" onClick={retryTurnstile}>
+                Recarregar verificação
+              </button>
+            </span>
+          </div>
+        )}
 
         <button
           type="submit"
           className="auth-btn auth-btn-pri"
           disabled={loading || (siteKeyPresent && !turnstileToken)}
-          aria-busy={loading || (siteKeyPresent && !turnstileToken)}
+          aria-busy={loading}
           aria-label={
             siteKeyPresent && !turnstileToken && !loading
-              ? 'Aguardando validação de segurança'
+              ? 'Entrar — aguardando validação de segurança'
               : undefined
           }
         >

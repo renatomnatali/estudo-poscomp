@@ -21,11 +21,24 @@ export function ForgotPasswordForm() {
   const [sent, setSent] = useState(false);
   const [alert, setAlert] = useState<AlertState>(null);
   const [turnstileToken, setTurnstileToken] = useState('');
+  // Falha terminal do desafio (budget esgotado/script morto) e chave de
+  // remontagem do widget para a ação de recuperação "recarregar verificação".
+  const [turnstileFailed, setTurnstileFailed] = useState(false);
+  const [widgetKey, setWidgetKey] = useState(0);
   const turnstileRef = useRef<TurnstileHandle>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   // Em dev sem site key, o TurnstileWidget retorna null e o token nunca chega
   // — bloquear submit nesse caso travaria o form.
+  // (Não importar este flag do widget: os testes mockam o módulo sem o
+  // export e o vitest lança "No export is defined on the mock".)
   const siteKeyPresent = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  function retryTurnstile() {
+    setTurnstileFailed(false);
+    setTurnstileToken('');
+    // Remonta o widget: desafio novo (e script novo, se o anterior morreu).
+    setWidgetKey((k) => k + 1);
+  }
 
   // Foco no card de resultado quando ele substitui o formulário.
   useEffect(() => {
@@ -136,19 +149,35 @@ export function ForgotPasswordForm() {
 
         {/* Desafio anti-bot — sem site key o widget renderiza null. */}
         <TurnstileWidget
+          key={widgetKey}
           ref={turnstileRef}
           onToken={setTurnstileToken}
+          onFailure={() => setTurnstileFailed(true)}
           className="auth-turnstile"
         />
+
+        {/* Falha terminal do desafio: sem recuperação o form ficaria eternamente
+            travado (botão desabilitado esperando um token que não virá). */}
+        {turnstileFailed && (
+          <div className="auth-alert auth-alert-error" role="alert">
+            <IconXCircle />
+            <span>
+              Verificação de segurança falhou. Recarregue a página.
+              <button type="button" className="auth-alert-action" onClick={retryTurnstile}>
+                Recarregar verificação
+              </button>
+            </span>
+          </div>
+        )}
 
         <button
           type="submit"
           className="auth-btn auth-btn-pri"
           disabled={loading || (siteKeyPresent && !turnstileToken)}
-          aria-busy={loading || (siteKeyPresent && !turnstileToken)}
+          aria-busy={loading}
           aria-label={
             siteKeyPresent && !turnstileToken && !loading
-              ? 'Aguardando validação de segurança'
+              ? 'Enviar link de redefinição — aguardando validação de segurança'
               : undefined
           }
         >

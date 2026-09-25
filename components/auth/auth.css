@@ -292,6 +292,10 @@
 .auth-alert-action:disabled { opacity: .6; cursor: not-allowed; }
 .auth-alert-action:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 
+/* Mensagem aninhada dentro de um alerta (ex.: falha do reenvio dentro do
+   bloco de e-mail não verificado) — herda a cor do alerta. */
+.auth-alert-note { display: block; margin-top: 8px; }
+
 /* Status de sucesso inline — texto em ink (contraste AA sobre em-bg) */
 .auth-status {
   display: flex;

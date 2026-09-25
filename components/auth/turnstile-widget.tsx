@@ -39,12 +39,6 @@ declare global {
 
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
 
-/**
- * true quando a site key pública está configurada. Os forms importam este
- * flag (fonte única) em vez de reler a env var em cada tela.
- */
-export const siteKeyPresent = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-
 // Quantas vezes tentamos `turnstile.reset()` num ERRO de challenge
 // (error-callback) antes de desistir e sinalizar falha terminal ao
 // consumidor. Falhas transitórias (rede instável no mobile, hiccup do CDN
