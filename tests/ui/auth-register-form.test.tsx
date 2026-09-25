@@ -27,6 +27,9 @@ vi.mock('@/components/auth/turnstile-widget', async () => {
       React.useImperativeHandle(ref, () => ({ reset: turnstileResetMock }), []);
       return null;
     }),
+    // Preparação para o import único do form (hoje ele lê process.env
+    // direto): o valor aqui não afeta os asserts.
+    siteKeyPresent: true,
   };
 });
 
